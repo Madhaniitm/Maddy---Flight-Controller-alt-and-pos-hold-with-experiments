@@ -1,0 +1,9 @@
+filter,ss_rmse_mm,noise_rejection_ratio,avg_time_us
+Raw ToF,5.0255,1.0,0.1383
+Moving Avg (N=10),1.4748,3.407,0.1787
+Low-pass IIR (α=0.85),1.4053,3.576,0.1271
+Complementary (α=0.98),1.6012,3.139,0.2505
+1D KF 1-state (z),3.1535,1.594,0.3885
+"1D KF 2-state (z, vz)",2.2202,2.264,5.6567
+"1D KF 3-state (z, vz, az)",2.0657,2.433,5.6001
+Kalman9D (firmware) ←,1.4435,3.481,40.1271

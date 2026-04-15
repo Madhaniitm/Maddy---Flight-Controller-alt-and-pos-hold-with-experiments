@@ -1,0 +1,4036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>IIT-M DRONE CONTROL</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Courier New', 'Consolas', monospace;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d3436 50%, #1a1a1a 100%);
+      color: #00ff41;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0, 255, 65, 0.03) 0px, transparent 1px, transparent 2px, rgba(0, 255, 65, 0.03) 3px),
+        repeating-linear-gradient(90deg, rgba(0, 255, 65, 0.03) 0px, transparent 1px, transparent 2px, rgba(0, 255, 65, 0.03) 3px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 15px;
+      border: 2px solid #00ff41;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    h1 {
+      font-size: clamp(1.2em, 5vw, 2em);
+      margin-bottom: 5px;
+      color: #00ff41;
+      text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41;
+      letter-spacing: 3px;
+      font-weight: bold;
+    }
+
+    .connection-panel {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 15px;
+      border-radius: 0px;
+      margin-bottom: 15px;
+      border: 2px solid #2d5016;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .connection-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #2d5016;
+      border-radius: 0px;
+      font-size: 1em;
+      background: #1a1a1a;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+    }
+
+    input[type="text"]::placeholder {
+      color: rgba(0, 255, 65, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #00ff41;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+
+    input[type="number"] {
+      width: 80px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: 2px solid #2d5016;
+      border-radius: 0px;
+      font-size: 1em;
+      cursor: pointer;
+      background: #1a1a1a;
+      color: #00ff41;
+      font-weight: bold;
+      transition: all 0.3s;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background: #2d5016;
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+      border-color: #00ff41;
+    }
+
+    button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .status-disconnected {
+      background: #ff0000;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    .status-connected {
+      background: #00ff41;
+      box-shadow: 0 0 10px #00ff41;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
+      50% { opacity: 0.5; box-shadow: 0 0 5px currentColor; }
+    }
+
+    .telemetry {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .telemetry-item {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border-radius: 0px;
+      text-align: center;
+      border: 2px solid #2d5016;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .telemetry-label {
+      font-size: 0.9em;
+      opacity: 0.7;
+      color: #00ff41;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .telemetry-value {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-top: 5px;
+      color: #00ff41;
+      text-shadow: 0 0 5px #00ff41;
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .joystick-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .joystick-label {
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #00ff41;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px #00ff41;
+    }
+
+    .joystick {
+      width: min(200px, 40vw);
+      height: min(200px, 40vw);
+      background: radial-gradient(circle, rgba(0, 50, 20, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
+      border-radius: 50%;
+      position: relative;
+      border: 3px solid #2d5016;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .joystick::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background: rgba(0, 255, 65, 0.2);
+      transform: translate(-50%, -50%);
+    }
+
+    .joystick::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: rgba(0, 255, 65, 0.2);
+      transform: translate(-50%, -50%);
+    }
+
+    .joystick-stick {
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, #00ff41 0%, #2d5016 100%);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      box-shadow: 0 0 15px #00ff41, inset 0 0 10px rgba(0, 0, 0, 0.5);
+      transition: box-shadow 0.2s;
+      border: 2px solid #00ff41;
+      z-index: 10;
+    }
+
+    .joystick-stick:active {
+      cursor: grabbing;
+      box-shadow: 0 0 25px #00ff41, inset 0 0 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .switches {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 0px;
+      border: 2px solid #2d5016;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .switch-container label {
+      color: #00ff41;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    .switch {
+      position: relative;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #5a0000;
+      transition: .4s;
+      border-radius: 0px;
+      border: 2px solid #ff0000;
+      box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.3);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 2px;
+      bottom: 2px;
+      background: radial-gradient(circle, #ff0000 0%, #5a0000 100%);
+      transition: .4s;
+      border-radius: 0px;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    input:checked + .slider {
+      background-color: #003300;
+      border-color: #00ff41;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+      background: radial-gradient(circle, #00ff41 0%, #003300 100%);
+      box-shadow: 0 0 10px #00ff41;
+    }
+
+    .takeoff-settings {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 0px;
+      gap: 10px;
+      margin-bottom: 10px;
+      border: 2px solid #2d5016;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .takeoff-settings span {
+      color: #00ff41;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .takeoff-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, #003300 0%, #00ff41 50%, #003300 100%);
+      color: #000;
+      font-size: 1.3em;
+      font-weight: bold;
+      border-radius: 0px;
+      border: 3px solid #00ff41;
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .takeoff-btn:hover {
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.95);
+      padding: 20px 30px;
+      border-radius: 0px;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.8);
+      z-index: 1000;
+      display: none;
+      border: 2px solid #00ff41;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      letter-spacing: 1px;
+    }
+
+    /* Tablets and medium screens */
+    @media (max-width: 900px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: clamp(1.2em, 4vw, 1.8em);
+        letter-spacing: 2px;
+      }
+
+      .joystick {
+        width: min(180px, 35vw);
+        height: min(180px, 35vw);
+      }
+
+      .joystick-stick {
+        width: 50px;
+        height: 50px;
+      }
+
+      .telemetry {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .telemetry-value {
+        font-size: 1.1em;
+      }
+    }
+
+    /* Small tablets and large phones */
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .controls {
+        gap: 15px;
+      }
+
+      .joystick {
+        width: min(160px, 38vw);
+        height: min(160px, 38vw);
+      }
+
+      button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+      }
+
+      .switch-container {
+        padding: 12px;
+      }
+    }
+
+    /* Mobile phones */
+    @media (max-width: 600px) {
+      .container {
+        padding: 8px;
+        padding-bottom: 30px;
+      }
+
+      h1 {
+        font-size: clamp(1em, 5vw, 1.5em);
+        letter-spacing: 1px;
+      }
+
+      .header {
+        margin-bottom: 10px;
+      }
+
+      .controls {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .joystick-container {
+        width: 100%;
+        align-items: center;
+      }
+
+      .joystick {
+        width: min(140px, 35vw);
+        height: min(140px, 35vw);
+      }
+
+      .joystick-stick {
+        width: 45px;
+        height: 45px;
+      }
+
+      .joystick-label {
+        font-size: 0.9em;
+        margin-bottom: 6px;
+      }
+
+      .telemetry {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .telemetry-item {
+        padding: 6px;
+      }
+
+      .telemetry-label {
+        font-size: 0.7em;
+      }
+
+      .telemetry-value {
+        font-size: 0.95em;
+        margin-top: 3px;
+      }
+
+      .connection-panel {
+        margin-bottom: 10px;
+        padding: 10px;
+      }
+
+      .switches {
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .switch-container {
+        padding: 10px;
+      }
+
+      .switch-container label {
+        font-size: 0.85em;
+      }
+
+      button {
+        padding: 8px 12px;
+        font-size: 0.85em;
+      }
+
+      .takeoff-btn {
+        padding: 12px;
+        font-size: 1em;
+      }
+
+      .takeoff-settings {
+        padding: 10px;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"], input[type="number"] {
+        padding: 8px;
+        font-size: 0.9em;
+      }
+    }
+
+    /* Very small phones */
+    @media (max-width: 400px) {
+      .container {
+        padding: 5px;
+        padding-bottom: 25px;
+      }
+
+      h1 {
+        font-size: 0.95em;
+        letter-spacing: 0.5px;
+      }
+
+      .header {
+        padding: 6px;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        font-size: 0.65em !important;
+      }
+
+      .connection-panel {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+
+      .telemetry {
+        margin-bottom: 8px;
+      }
+
+      .telemetry-item {
+        padding: 5px;
+      }
+
+      .telemetry-label {
+        font-size: 0.65em;
+      }
+
+      .telemetry-value {
+        font-size: 0.9em;
+        margin-top: 2px;
+      }
+
+      .joystick {
+        width: min(110px, 40vw);
+        height: min(110px, 40vw);
+      }
+
+      .joystick-stick {
+        width: 38px;
+        height: 38px;
+      }
+
+      .joystick-label {
+        font-size: 0.75em;
+        margin-bottom: 5px;
+      }
+
+      .switches {
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .switch-container {
+        padding: 8px;
+      }
+
+      .switch-container label {
+        font-size: 0.75em;
+      }
+
+      .takeoff-settings {
+        padding: 8px;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .takeoff-settings span {
+        font-size: 0.75em;
+      }
+
+      .takeoff-btn {
+        padding: 10px;
+        font-size: 0.9em;
+        margin-top: 6px;
+      }
+
+      input[type="number"] {
+        width: 60px;
+        font-size: 0.85em;
+        padding: 6px;
+      }
+
+      button {
+        font-size: 0.8em;
+        padding: 6px 10px;
+      }
+    }
+
+    /* Landscape orientation or short screens */
+    @media (max-height: 700px) {
+      .container {
+        padding: 10px;
+        padding-bottom: 20px;
+      }
+
+      .header {
+        margin-bottom: 8px;
+        padding: 8px;
+      }
+
+      h1 {
+        font-size: 1.3em;
+        margin-bottom: 3px;
+      }
+
+      .header p {
+        font-size: 0.75em !important;
+      }
+
+      .connection-panel {
+        margin-bottom: 8px;
+        padding: 10px;
+      }
+
+      .telemetry {
+        margin-bottom: 8px;
+        gap: 6px;
+      }
+
+      .telemetry-item {
+        padding: 6px;
+      }
+
+      .joystick {
+        width: min(130px, 30vw);
+        height: min(130px, 30vw);
+      }
+
+      .joystick-label {
+        font-size: 0.85em;
+        margin-bottom: 5px;
+      }
+
+      .controls {
+        margin-bottom: 8px;
+      }
+
+      .switches {
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .switch-container {
+        padding: 8px;
+      }
+
+      .takeoff-settings {
+        padding: 8px;
+        margin-bottom: 6px;
+      }
+
+      .takeoff-btn {
+        padding: 12px;
+        font-size: 1em;
+      }
+    }
+
+    /* Very short screens */
+    @media (max-height: 600px) {
+      .container {
+        padding: 8px;
+        padding-bottom: 15px;
+      }
+
+      .header {
+        margin-bottom: 6px;
+        padding: 6px;
+      }
+
+      h1 {
+        font-size: 1.1em;
+        margin-bottom: 2px;
+      }
+
+      .header p {
+        font-size: 0.7em !important;
+      }
+
+      .connection-panel {
+        margin-bottom: 6px;
+        padding: 8px;
+      }
+
+      .telemetry {
+        margin-bottom: 6px;
+        gap: 5px;
+      }
+
+      .telemetry-item {
+        padding: 5px;
+      }
+
+      .telemetry-label {
+        font-size: 0.7em;
+      }
+
+      .telemetry-value {
+        font-size: 0.9em;
+        margin-top: 2px;
+      }
+
+      .joystick {
+        width: min(110px, 28vw);
+        height: min(110px, 28vw);
+      }
+
+      .joystick-stick {
+        width: 40px;
+        height: 40px;
+      }
+
+      .joystick-label {
+        font-size: 0.8em;
+        margin-bottom: 4px;
+      }
+
+      .controls {
+        margin-bottom: 6px;
+        gap: 10px;
+      }
+
+      .switches {
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .switch-container {
+        padding: 6px;
+      }
+
+      .switch-container label {
+        font-size: 0.8em;
+      }
+
+      .takeoff-settings {
+        padding: 6px;
+        margin-bottom: 5px;
+      }
+
+      .takeoff-settings span {
+        font-size: 0.75em;
+      }
+
+      .takeoff-btn {
+        padding: 10px;
+        font-size: 0.9em;
+      }
+
+      .switch {
+        width: 50px;
+        height: 28px;
+      }
+
+      .slider:before {
+        height: 22px;
+        width: 22px;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(22px);
+      }
+    }
+
+    /* Mobile landscape mode */
+    @media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+      .container {
+        padding: 5px;
+        padding-bottom: 15px;
+      }
+
+      .header {
+        margin-bottom: 5px;
+        padding: 5px;
+      }
+
+      h1 {
+        font-size: 1em;
+        margin-bottom: 2px;
+      }
+
+      .header p {
+        font-size: 0.65em !important;
+      }
+
+      .connection-panel {
+        margin-bottom: 5px;
+        padding: 6px;
+      }
+
+      .connection-row {
+        margin-bottom: 5px;
+      }
+
+      .telemetry {
+        grid-template-columns: repeat(4, 1fr);
+        margin-bottom: 5px;
+        gap: 4px;
+      }
+
+      .telemetry-item {
+        padding: 4px;
+      }
+
+      .telemetry-label {
+        font-size: 0.65em;
+      }
+
+      .telemetry-value {
+        font-size: 0.85em;
+        margin-top: 2px;
+      }
+
+      .controls {
+        flex-direction: row !important;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+
+      .joystick-container {
+        flex: 1;
+      }
+
+      .joystick {
+        width: min(100px, 22vh);
+        height: min(100px, 22vh);
+      }
+
+      .joystick-stick {
+        width: 35px;
+        height: 35px;
+      }
+
+      .joystick-label {
+        font-size: 0.7em;
+        margin-bottom: 3px;
+      }
+
+      .switches {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+        margin-top: 5px;
+      }
+
+      .switch-container {
+        padding: 5px;
+      }
+
+      .switch-container label {
+        font-size: 0.7em;
+      }
+
+      .takeoff-settings {
+        padding: 5px;
+        margin-bottom: 4px;
+      }
+
+      .takeoff-settings span {
+        font-size: 0.7em;
+      }
+
+      .takeoff-btn {
+        padding: 8px;
+        font-size: 0.8em;
+      }
+
+      input[type="text"], input[type="number"] {
+        padding: 5px;
+        font-size: 0.8em;
+      }
+
+      button {
+        padding: 5px 8px;
+        font-size: 0.75em;
+      }
+
+      .switch {
+        width: 45px;
+        height: 26px;
+      }
+
+      .slider:before {
+        height: 20px;
+        width: 20px;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(19px);
+      }
+    }
+
+    /* Tuning Panel Styles */
+    .tuning-section {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #2d5016;
+      background: rgba(0, 50, 20, 0.3);
+    }
+
+    .tuning-header {
+      color: #00ff41;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    .tuning-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .tuning-row label {
+      color: #00ff41;
+      font-size: 0.85em;
+      letter-spacing: 1px;
+    }
+
+    .tuning-row input[type="number"] {
+      width: 100px;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #2d5016;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      text-align: center;
+    }
+
+    .tuning-row input[type="number"]:focus {
+      border-color: #00ff41;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+
+    /* Manual Input Controls */
+    .manual-controls {
+      margin-top: 15px;
+      padding: 15px;
+      border: 2px solid #00ff41;
+      background: rgba(0, 50, 20, 0.3);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    .manual-controls-header {
+      text-align: center;
+      color: #00ff41;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      font-size: 1em;
+      text-shadow: 0 0 5px #00ff41;
+    }
+
+    .manual-input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .manual-input-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #2d5016;
+    }
+
+    .manual-input-item label {
+      color: #00ff41;
+      font-size: 0.85em;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .manual-input-item input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #2d5016;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .manual-input-item input[type="number"]:focus {
+      border-color: #00ff41;
+      box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+      outline: none;
+    }
+
+    /* Always-visible themed scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2d5016;
+      border: 1px solid #00ff41;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00ff41;
+    }
+
+    /* Keyboard Control Panel */
+    .keyboard-panel-wrap {
+      margin-top: 15px;
+      border: 2px solid #00ff41;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+    }
+
+    .keyboard-panel-header {
+      cursor: pointer;
+      text-align: center;
+      font-weight: bold;
+      color: #00ff41;
+      letter-spacing: 2px;
+    }
+
+    .kb-key-grid {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kb-key-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .key-indicator {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #2d5016;
+      background: rgba(0, 0, 0, 0.8);
+      color: rgba(0, 255, 65, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85em;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      transition: all 0.05s;
+      user-select: none;
+    }
+
+    .key-indicator.key-active {
+      background: rgba(0, 255, 65, 0.2);
+      border-color: #00ff41;
+      color: #00ff41;
+      box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
+    }
+
+    .kb-mapping-ref {
+      margin-top: 10px;
+      padding: 8px;
+      border: 1px solid #2d5016;
+      background: rgba(0, 20, 0, 0.5);
+      font-size: 0.75em;
+      color: rgba(0, 255, 65, 0.65);
+      line-height: 1.8;
+    }
+
+    .kb-sensitivity-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .kb-sensitivity-row label {
+      color: #00ff41;
+      font-size: 0.85em;
+      letter-spacing: 1px;
+    }
+
+    .kb-sensitivity-row input[type="number"] {
+      width: 80px;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #00ff41;
+      border: 1px solid #2d5016;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+
+    /* ===== AI VOICE CHAT PANEL ===== */
+    .ai-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #00ff41;
+      color: #000;
+      border: none;
+      font-size: 1.4em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(0,255,65,0.6), 0 4px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: sans-serif;
+    }
+    .ai-fab:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(0,255,65,0.9), 0 4px 16px rgba(0,0,0,0.5);
+    }
+    .ai-fab.listening {
+      background: #ff4141;
+      animation: pulse-fab 1s infinite;
+    }
+    @keyframes pulse-fab {
+      0%,100% { box-shadow: 0 0 20px rgba(255,65,65,0.5); }
+      50%      { box-shadow: 0 0 45px rgba(255,65,65,1), 0 0 70px rgba(255,65,65,0.3); }
+    }
+
+    .ai-chat-window {
+      position: fixed;
+      bottom: 96px;
+      right: 24px;
+      width: 390px;
+      max-width: calc(100vw - 48px);
+      height: 530px;
+      max-height: calc(100vh - 130px);
+      background: rgba(5,5,5,0.98);
+      border: 2px solid #00ff41;
+      box-shadow: 0 0 35px rgba(0,255,65,0.25);
+      display: flex;
+      flex-direction: column;
+      z-index: 999;
+      transition: opacity 0.2s, transform 0.2s;
+      font-family: 'Courier New', monospace;
+    }
+    .ai-chat-window.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+    }
+
+    .ai-chat-header {
+      background: #00ff41;
+      color: #000;
+      padding: 9px 14px;
+      font-weight: bold;
+      font-size: 0.82em;
+      letter-spacing: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .ai-chat-header-btns { display: flex; gap: 6px; }
+    .ai-chat-header button {
+      background: none;
+      border: 1px solid rgba(0,0,0,0.3);
+      color: #000;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: bold;
+      padding: 2px 7px;
+      border-radius: 2px;
+    }
+    .ai-chat-header button:hover { background: rgba(0,0,0,0.15); }
+
+    .ai-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: #00ff41 #111;
+    }
+    .ai-chat-messages::-webkit-scrollbar       { width: 5px; }
+    .ai-chat-messages::-webkit-scrollbar-track  { background: #111; }
+    .ai-chat-messages::-webkit-scrollbar-thumb  { background: #00ff41; }
+
+    .chat-msg {
+      max-width: 88%;
+      padding: 8px 12px;
+      font-size: 0.81em;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: #00ff41;
+      color: #000;
+      border-radius: 10px 10px 2px 10px;
+      font-weight: 600;
+    }
+    .chat-msg.ai {
+      align-self: flex-start;
+      background: rgba(0,255,65,0.07);
+      color: #00ff41;
+      border: 1px solid rgba(0,255,65,0.18);
+      border-radius: 10px 10px 10px 2px;
+    }
+    .chat-msg.system-note {
+      align-self: center;
+      color: rgba(0,255,65,0.45);
+      font-size: 0.74em;
+      font-style: italic;
+      background: none;
+      border: none;
+      padding: 2px 8px;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .chat-thinking {
+      align-self: flex-start;
+      color: rgba(0,255,65,0.55);
+      font-size: 0.8em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+    }
+    .chat-thinking span {
+      display: inline-block;
+      animation: dot-bounce 1.4s infinite;
+    }
+    .chat-thinking span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-thinking span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%,80%,100% { transform: translateY(0);   opacity: 0.4; }
+      40%          { transform: translateY(-5px); opacity: 1;   }
+    }
+
+    .ai-status-bar {
+      padding: 4px 12px;
+      font-size: 0.7em;
+      color: rgba(0,255,65,0.45);
+      background: rgba(0,255,65,0.03);
+      border-top: 1px solid rgba(0,255,65,0.1);
+      display: flex;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .ai-chat-input-row {
+      display: flex;
+      gap: 6px;
+      padding: 9px 10px;
+      border-top: 1px solid rgba(0,255,65,0.18);
+      background: rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+    .ai-chat-input-row input[type="text"] {
+      flex: 1;
+      background: rgba(0,255,65,0.05);
+      border: 1px solid rgba(0,255,65,0.28);
+      color: #00ff41;
+      padding: 8px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.81em;
+      outline: none;
+      border-radius: 2px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .ai-chat-input-row input[type="text"]::placeholder { color: rgba(0,255,65,0.28); }
+    .ai-chat-input-row input[type="text"]:focus {
+      border-color: #00ff41;
+      box-shadow: 0 0 8px rgba(0,255,65,0.18);
+    }
+    .ai-btn {
+      background: rgba(0,255,65,0.08);
+      border: 1px solid rgba(0,255,65,0.35);
+      color: #00ff41;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 0.95em;
+      border-radius: 2px;
+      transition: background 0.15s;
+      min-width: 36px;
+      font-family: sans-serif;
+    }
+    .ai-btn:hover    { background: rgba(0,255,65,0.22); }
+    .ai-btn.listening {
+      background: rgba(255,65,65,0.18);
+      border-color: #ff4141;
+      color: #ff4141;
+      animation: pulse-border 1s infinite;
+    }
+    @keyframes pulse-border {
+      0%,100% { box-shadow: 0 0 5px rgba(255,65,65,0.3); }
+      50%      { box-shadow: 0 0 14px rgba(255,65,65,0.8); }
+    }
+
+    @media (max-width: 480px) {
+      .ai-chat-window {
+        right: 0; bottom: 76px;
+        width: 100vw; max-width: 100vw;
+        height: 62vh;
+        border-left: none; border-right: none;
+      }
+      .ai-fab { bottom: 14px; right: 14px; width: 52px; height: 52px; }
+    }
+
+    /* ===== CAMERA + AUTONOMY PANEL ===== */
+    .cam-panel {
+      background: #0a0a0a;
+      border: 1px solid rgba(0,255,65,0.3);
+      border-radius: 4px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .cam-panel-header {
+      background: rgba(0,255,65,0.07);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85em;
+      color: #00ff41;
+      letter-spacing: 1px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cam-panel-body { padding: 10px; display: none; }
+    .cam-panel-body.open { display: block; }
+    .cam-stream-box {
+      position: relative;
+      background: #000;
+      border: 1px solid rgba(0,255,65,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      text-align: center;
+      min-height: 120px;
+    }
+    #cam-img {
+      max-width: 100%;
+      max-height: 240px;
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+    }
+    .cam-no-feed {
+      color: rgba(0,255,65,0.35);
+      padding: 40px 10px;
+      font-size: 0.8em;
+    }
+    .cam-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .cam-status {
+      font-size: 0.75em;
+      color: rgba(0,255,65,0.5);
+      margin-top: 4px;
+      min-height: 16px;
+    }
+    /* Autonomy sub-panel */
+    .auto-panel {
+      margin-top: 10px;
+      border-top: 1px solid rgba(0,255,65,0.15);
+      padding-top: 10px;
+    }
+    .auto-panel label {
+      font-size: 0.8em;
+      color: rgba(0,255,65,0.7);
+      display: block;
+      margin-bottom: 3px;
+    }
+    .auto-goal-row {
+      display: flex; gap: 6px; margin-bottom: 8px;
+    }
+    .auto-goal-row input {
+      flex: 1;
+      background: rgba(0,255,65,0.05);
+      border: 1px solid rgba(0,255,65,0.25);
+      color: #00ff41;
+      padding: 5px 8px;
+      font-size: 0.85em;
+      border-radius: 2px;
+    }
+    .auto-mode-row {
+      display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+    }
+    .auto-mode-row select {
+      background: #0d0d0d;
+      border: 1px solid rgba(0,255,65,0.3);
+      color: #00ff41;
+      padding: 4px 7px;
+      font-size: 0.83em;
+      border-radius: 2px;
+    }
+    .auto-interval-row {
+      display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+      font-size: 0.82em; color: rgba(0,255,65,0.6);
+    }
+    .auto-interval-row input {
+      width: 60px;
+      background: rgba(0,255,65,0.05);
+      border: 1px solid rgba(0,255,65,0.25);
+      color: #00ff41;
+      padding: 3px 6px;
+      font-size: 0.85em;
+      border-radius: 2px;
+    }
+    .auto-log {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,255,65,0.12);
+      border-radius: 2px;
+      padding: 6px 8px;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 0.73em;
+      color: rgba(0,255,65,0.55);
+      margin-top: 6px;
+      font-family: monospace;
+    }
+    .auto-pending {
+      background: rgba(0,255,65,0.06);
+      border: 1px solid rgba(0,255,65,0.35);
+      border-radius: 3px;
+      padding: 8px 10px;
+      margin-top: 8px;
+      font-size: 0.82em;
+    }
+    .auto-pending .pending-desc { color: #00ff41; margin-bottom: 6px; }
+    .auto-pending .pending-scene { color: rgba(0,255,65,0.5); font-size: 0.9em; margin-bottom: 6px; }
+    .auto-approve-row { display: flex; gap: 8px; }
+    .btn-approve {
+      background: rgba(0,255,65,0.15); border: 1px solid #00ff41;
+      color: #00ff41; padding: 5px 14px; cursor: pointer; border-radius: 2px; font-size: 0.85em;
+    }
+    .btn-reject {
+      background: rgba(255,65,65,0.12); border: 1px solid #ff4141;
+      color: #ff4141; padding: 5px 14px; cursor: pointer; border-radius: 2px; font-size: 0.85em;
+    }
+    .auto-running-badge {
+      display: inline-block;
+      background: rgba(0,255,65,0.15);
+      border: 1px solid #00ff41;
+      color: #00ff41;
+      font-size: 0.72em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      animation: pulse-border 1.2s infinite;
+    }
+
+    /* ===== FLIGHT ANALYSIS PANEL ===== */
+    .analysis-panel {
+      background: #0a0a0a;
+      border: 1px solid rgba(0,255,65,0.3);
+      border-radius: 4px;
+      margin: 12px 6px;
+      overflow: hidden;
+    }
+    .analysis-panel-header {
+      background: rgba(0,255,65,0.07);
+      padding: 8px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.85em; color: #00ff41; letter-spacing: 1px;
+      cursor: pointer; user-select: none;
+    }
+    .analysis-panel-body { padding: 10px; display: none; }
+    .analysis-panel-body.open { display: block; }
+    .anomaly-badge {
+      display: none;
+      background: rgba(255,65,65,0.2);
+      border: 1px solid #ff4141;
+      color: #ff4141;
+      font-size: 0.72em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      animation: pulse-border 0.8s infinite;
+    }
+    /* Fixed anomaly badge in top-right corner */
+    .anomaly-badge-fixed {
+      position: fixed;
+      top: 12px; right: 12px;
+      z-index: 9000;
+      display: none;
+      background: rgba(255,65,65,0.2);
+      border: 1px solid #ff4141;
+      color: #ff4141;
+      font-size: 0.78em;
+      padding: 4px 12px;
+      border-radius: 10px;
+      animation: pulse-border 0.8s infinite;
+      pointer-events: none;
+    }
+    .tel-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .tel-stat-box {
+      background: rgba(0,255,65,0.04);
+      border: 1px solid rgba(0,255,65,0.15);
+      border-radius: 3px;
+      padding: 5px 7px;
+      font-size: 0.76em;
+    }
+    .tel-stat-box .label { color: rgba(0,255,65,0.5); }
+    .tel-stat-box .value { color: #00ff41; font-family: monospace; }
+    .analysis-result {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(0,255,65,0.15);
+      border-radius: 3px;
+      padding: 8px 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.78em;
+      color: rgba(0,255,65,0.8);
+      white-space: pre-wrap;
+      margin-top: 8px;
+    }
+    .analysis-btn-row {
+      display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>█ IIT-M DRONE CONTROL █</h1>
+      <p style="color: #00ff41; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9em;">AI Control</p>
+    </div>
+
+    <div class="connection-panel">
+      <div class="connection-row">
+        <input type="text" id="esp-ip" placeholder="ENTER ESP32-S3 IP ADDRESS [xxx.xxx.xxx.xxx]" value="">
+        <button id="connect-btn" onclick="toggleConnection()">ESTABLISH LINK</button>
+      </div>
+      <div style="text-align: center; margin-top: 10px;">
+        <span class="status-indicator status-disconnected" id="status-led"></span>
+        <span id="status-text" style="text-transform: uppercase; letter-spacing: 1px;">LINK OFFLINE</span>
+      </div>
+    </div>
+
+    <div class="telemetry">
+      <div class="telemetry-item">
+        <div class="telemetry-label">Throttle</div>
+        <div class="telemetry-value" id="throttle-val">1000</div>
+      </div>
+      <div class="telemetry-item">
+        <div class="telemetry-label">Roll</div>
+        <div class="telemetry-value" id="roll-val">1500</div>
+      </div>
+      <div class="telemetry-item">
+        <div class="telemetry-label">Pitch</div>
+        <div class="telemetry-value" id="pitch-val">1500</div>
+      </div>
+      <div class="telemetry-item">
+        <div class="telemetry-label">Yaw</div>
+        <div class="telemetry-value" id="yaw-val">1500</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="joystick-container">
+        <div class="joystick-label">Left Stick<br>(Throttle/Yaw)</div>
+        <div class="joystick" id="left-joystick">
+          <div class="joystick-stick" id="left-stick"></div>
+        </div>
+      </div>
+
+      <div class="joystick-container">
+        <div class="joystick-label">Right Stick<br>(Pitch/Roll)</div>
+        <div class="joystick" id="right-joystick">
+          <div class="joystick-stick" id="right-stick"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual Input Controls -->
+    <div class="manual-controls">
+      <div class="manual-controls-header">⌨ MANUAL COMMAND INPUT</div>
+      <div class="manual-input-grid">
+        <div class="manual-input-item">
+          <label>THROTTLE (CH1)</label>
+          <input type="number" id="manual-throttle" min="1000" max="2000" step="10" value="1000" placeholder="1000-2000">
+        </div>
+        <div class="manual-input-item">
+          <label>ROLL (CH2)</label>
+          <input type="number" id="manual-roll" min="1000" max="2000" step="10" value="1500" placeholder="1000-2000">
+        </div>
+        <div class="manual-input-item">
+          <label>PITCH (CH3)</label>
+          <input type="number" id="manual-pitch" min="1000" max="2000" step="10" value="1500" placeholder="1000-2000">
+        </div>
+        <div class="manual-input-item">
+          <label>YAW (CH4)</label>
+          <input type="number" id="manual-yaw" min="1000" max="2000" step="10" value="1500" placeholder="1000-2000">
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 10px; font-size: 0.75em; color: #00ff41;">
+        <input type="checkbox" id="use-manual-input" style="margin-right: 5px;">
+        <label for="use-manual-input">USE MANUAL INPUT (override joysticks)</label>
+      </div>
+    </div>
+
+    <!-- Keyboard Control Panel -->
+    <div class="keyboard-panel-wrap">
+      <div class="keyboard-panel-header" onclick="toggleKeyboardPanel()">
+        <span id="kb-panel-arrow">▼</span> KEYBOARD CONTROL <span id="kb-panel-arrow2">▼</span>
+      </div>
+
+      <div id="keyboard-panel" style="display:none; margin-top:12px;">
+
+        <!-- Enable toggle -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:8px; border:1px solid #2d5016; background:rgba(0,50,20,0.3);">
+          <label style="color:#00ff41; font-size:0.9em; letter-spacing:1px;">KEYBOARD MODE</label>
+          <label class="switch">
+            <input type="checkbox" id="keyboard-mode-toggle" onchange="toggleKeyboardMode()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Key visualisers: two clusters side by side -->
+        <div style="display:flex; justify-content:space-around; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:14px;">
+
+          <!-- Arrow keys: Pitch (↑↓) + Roll (←→) -->
+          <div style="text-align:center;">
+            <div style="color:#00ff41; font-size:0.75em; letter-spacing:1px; margin-bottom:6px;">↑↓ PITCH &nbsp;|&nbsp; ←→ ROLL</div>
+            <div class="kb-key-grid">
+              <div class="kb-key-row">
+                <div class="key-indicator" id="key-up">↑</div>
+              </div>
+              <div class="kb-key-row">
+                <div class="key-indicator" id="key-left">←</div>
+                <div class="key-indicator" id="key-down">↓</div>
+                <div class="key-indicator" id="key-right">→</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WASD: Throttle (W/S) + Yaw (A/D) -->
+          <div style="text-align:center;">
+            <div style="color:#00ff41; font-size:0.75em; letter-spacing:1px; margin-bottom:6px;">W/S THROTTLE &nbsp;|&nbsp; A/D YAW</div>
+            <div class="kb-key-grid">
+              <div class="kb-key-row">
+                <div class="key-indicator" id="key-w">W</div>
+              </div>
+              <div class="kb-key-row">
+                <div class="key-indicator" id="key-a">A</div>
+                <div class="key-indicator" id="key-s">S</div>
+                <div class="key-indicator" id="key-d">D</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sensitivity controls -->
+        <div class="tuning-section" style="margin-top:0;">
+          <div class="tuning-header">⚙ KEYBOARD SENSITIVITY</div>
+          <div class="kb-sensitivity-row">
+            <label>Throttle Step (per tick):</label>
+            <input type="number" id="kb-throttle-step" min="5" max="50" step="5" value="10">
+          </div>
+          <div class="kb-sensitivity-row">
+            <label>Roll / Pitch / Yaw Deflection:</label>
+            <input type="number" id="kb-deflection" min="50" max="500" step="50" value="300">
+          </div>
+        </div>
+
+        <!-- Quick reference -->
+        <div class="kb-mapping-ref">
+          W Throttle Up &nbsp;&nbsp;&nbsp; S Throttle Down<br>
+          A Yaw Left &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; D Yaw Right<br>
+          ↑ Pitch Forward &nbsp;&nbsp; ↓ Pitch Back<br>
+          ← Roll Left &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; → Roll Right<br>
+          <span style="color:rgba(0,255,65,0.4);">Hold key for continuous input. Release roll/pitch/yaw to re-centre.</span>
+        </div>
+
+        <!-- Trim controls -->
+        <div class="tuning-section" style="margin-top:12px;">
+          <div class="tuning-header">✦ TRIM (applied to all control modes)</div>
+          <div class="kb-sensitivity-row">
+            <label>Pitch Trim (PWM offset):</label>
+            <input type="number" id="trim-pitch" min="-150" max="150" step="5" value="0"
+                   style="width:70px;"
+                   oninput="document.getElementById('trim-pitch-val').textContent=this.value">
+            <span id="trim-pitch-val" style="color:#00ff41; margin-left:6px; min-width:30px; display:inline-block;">0</span>
+          </div>
+          <div class="kb-sensitivity-row">
+            <label>Roll Trim (PWM offset):</label>
+            <input type="number" id="trim-roll" min="-150" max="150" step="5" value="0"
+                   style="width:70px;"
+                   oninput="document.getElementById('trim-roll-val').textContent=this.value">
+            <span id="trim-roll-val" style="color:#00ff41; margin-left:6px; min-width:30px; display:inline-block;">0</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <button onclick="document.getElementById('trim-pitch').value=0; document.getElementById('trim-pitch-val').textContent='0'; document.getElementById('trim-roll').value=0; document.getElementById('trim-roll-val').textContent='0';"
+                    style="font-size:0.75em; padding:3px 10px; background:rgba(0,255,65,0.1); border:1px solid #00ff41; color:#00ff41; cursor:pointer; border-radius:3px;">
+              RESET TRIM
+            </button>
+            <label style="font-size:0.78em; color:#00ff41; display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="auto-trim-toggle" onchange="toggleAutoTrim()" style="accent-color:#00ff41;">
+              AUTO-TRIM (when hovering)
+            </label>
+          </div>
+          <div id="auto-trim-status" style="font-size:0.72em; color:rgba(0,255,65,0.5); text-align:center; margin-top:4px; min-height:14px;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="switches">
+      <div class="switch-container">
+        <span><strong>ARM/DISARM</strong></span>
+        <label class="switch">
+          <input type="checkbox" id="arm-switch">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-container">
+        <span><strong>ALTITUDE HOLD</strong></span>
+        <label class="switch">
+          <input type="checkbox" id="altitude-hold-switch" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="switch-container">
+        <span><strong>POSITION HOLD</strong></span>
+        <label class="switch">
+          <input type="checkbox" id="position-hold-switch" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="takeoff-settings">
+        <span><strong>Takeoff %:</strong></span>
+        <input type="number" id="takeoff-percent" min="10" max="100" value="60" step="5">
+        <span>%</span>
+      </div>
+
+      <div class="takeoff-settings">
+        <span><strong>Target Altitude:</strong></span>
+        <input type="number" id="altitude-setpoint" min="0.2" max="3.0" value="1.0" step="0.1">
+        <span>meters</span>
+      </div>
+
+      <button class="takeoff-btn" onclick="autoTakeoff()">
+        ▲ LAUNCH SEQUENCE
+      </button>
+
+      <button class="takeoff-btn" onclick="autoLand()" style="background: linear-gradient(135deg, #5a0000 0%, #ff0000 50%, #5a0000 100%); border-color: #ff0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3); margin-top: 10px;">
+        ▼ LANDING PROTOCOL
+      </button>
+
+      <!-- Live Tuning Panel -->
+      <div style="margin-top: 20px; border: 2px solid #00ff41; background: rgba(0, 0, 0, 0.8); padding: 10px;">
+        <div style="cursor: pointer; text-align: center; font-weight: bold; color: #00ff41; letter-spacing: 2px;" onclick="toggleTuningPanel()">
+          <span id="tuning-arrow">▼</span> LIVE TUNING PANEL <span id="tuning-arrow2">▼</span>
+        </div>
+
+        <div id="tuning-panel" style="display: none; margin-top: 10px;">
+
+          <!-- Motor Compensation -->
+          <div class="tuning-section">
+            <div class="tuning-header">⚙ MOTOR COMPENSATION</div>
+            <div class="tuning-row">
+              <label>M1 (FL-CCW):</label>
+              <input type="number" id="m1-comp" min="0.80" max="1.05" step="0.01" value="1.00" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>M2 (FR-CW):</label>
+              <input type="number" id="m2-comp" min="0.80" max="1.05" step="0.01" value="0.98" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>M3 (BR-CCW):</label>
+              <input type="number" id="m3-comp" min="0.80" max="1.05" step="0.01" value="1.00" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>M4 (BL-CW):</label>
+              <input type="number" id="m4-comp" min="0.80" max="1.05" step="0.01" value="0.98" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Duty Idle (PWM):</label>
+              <input type="number" id="duty-idle" min="0" max="100" step="1" value="45" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- Yaw Scale -->
+          <div class="tuning-section">
+            <div class="tuning-header">🎯 YAW PARAMETERS</div>
+            <div class="tuning-row">
+              <label>Yaw Scale:</label>
+              <input type="number" id="yaw-scale" min="0.1" max="2.0" step="0.05" value="1.0" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- Loop Rate -->
+          <div class="tuning-section">
+            <div class="tuning-header">⏱ LOOP RATE</div>
+            <div class="tuning-row">
+              <label>Loop Rate (Hz):</label>
+              <input type="number" id="loop-rate" min="100" max="2000" step="100" value="2000" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- Roll PID -->
+          <div class="tuning-section">
+            <div class="tuning-header">🔄 ROLL PID (Angle)</div>
+            <div class="tuning-row">
+              <label>Kp:</label>
+              <input type="number" id="roll-angle-kp" min="0.0" max="2.0" step="0.01" value="0.30" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Ki:</label>
+              <input type="number" id="roll-angle-ki" min="0.0" max="0.5" step="0.001" value="0.01" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Kd:</label>
+              <input type="number" id="roll-angle-kd" min="0.0" max="1.0" step="0.01" value="0.00" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <div class="tuning-section">
+            <div class="tuning-header">🔄 ROLL PID (Rate)</div>
+            <div class="tuning-row">
+              <label>Kp:</label>
+              <input type="number" id="roll-rate-kp" min="0.0" max="1.0" step="0.01" value="0.08" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Ki:</label>
+              <input type="number" id="roll-rate-ki" min="0.0" max="0.5" step="0.001" value="0.0" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Kd:</label>
+              <input type="number" id="roll-rate-kd" min="0.0" max="0.5" step="0.001" value="0.01" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- Pitch PID -->
+          <div class="tuning-section">
+            <div class="tuning-header">⬆️ PITCH PID (Angle)</div>
+            <div class="tuning-row">
+              <label>Kp:</label>
+              <input type="number" id="pitch-angle-kp" min="0.0" max="2.0" step="0.01" value="0.30" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Ki:</label>
+              <input type="number" id="pitch-angle-ki" min="0.0" max="0.5" step="0.001" value="0.01" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Kd:</label>
+              <input type="number" id="pitch-angle-kd" min="0.0" max="1.0" step="0.01" value="0.00" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <div class="tuning-section">
+            <div class="tuning-header">⬆️ PITCH PID (Rate)</div>
+            <div class="tuning-row">
+              <label>Kp:</label>
+              <input type="number" id="pitch-rate-kp" min="0.0" max="1.0" step="0.01" value="0.08" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Ki:</label>
+              <input type="number" id="pitch-rate-ki" min="0.0" max="0.5" step="0.001" value="0.0" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Kd:</label>
+              <input type="number" id="pitch-rate-kd" min="0.0" max="0.5" step="0.001" value="0.01" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- Yaw PID -->
+          <div class="tuning-section">
+            <div class="tuning-header">↻ YAW PID (Rate)</div>
+            <div class="tuning-row">
+              <label>Kp:</label>
+              <input type="number" id="yaw-rate-kp" min="0.0" max="1.0" step="0.01" value="0.06" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Ki:</label>
+              <input type="number" id="yaw-rate-ki" min="0.0" max="0.5" step="0.001" value="0.0" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Kd:</label>
+              <input type="number" id="yaw-rate-kd" min="0.0" max="0.5" step="0.001" value="0.008" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <!-- ══ LiteWing EKF & Hold Tuning ══ -->
+          <div class="tuning-section" style="border-top: 1px solid #00ff41; margin-top: 12px; padding-top: 10px;">
+            <div class="tuning-header">🛸 LITEWING — ALTITUDE HOLD PID</div>
+            <div style="font-size:10px; color:#888; margin-bottom:6px;">
+              Outer: Z pos→vel setpoint &nbsp;|&nbsp; Inner: vel→thrust correction
+            </div>
+            <div class="tuning-row">
+              <label>pidZ Kp (outer):</label>
+              <input type="number" id="lw-pidz-kp" min="0.0" max="5.0" step="0.05" value="1.6" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidZ Ki (outer):</label>
+              <input type="number" id="lw-pidz-ki" min="0.0" max="2.0" step="0.01" value="0.5" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidVZ Kp (inner):</label>
+              <input type="number" id="lw-pidvz-kp" min="0.0" max="5.0" step="0.01" value="0.50" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidVZ Ki (inner):</label>
+              <input type="number" id="lw-pidvz-ki" min="0.0" max="2.0" step="0.01" value="0.30" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>Hover Throttle:</label>
+              <input type="number" id="lw-hover-thr" min="0.2" max="0.9" step="0.01" value="0.50" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <div class="tuning-section" style="padding-top: 8px;">
+            <div class="tuning-header">📍 LITEWING — POSITION HOLD PID</div>
+            <div style="font-size:10px; color:#888; margin-bottom:6px;">
+              Outer: XY pos→vel &nbsp;|&nbsp; Inner: vel→roll/pitch correction
+            </div>
+            <div class="tuning-row">
+              <label>pidX/Y Kp (outer):</label>
+              <input type="number" id="lw-pidx-kp" min="0.0" max="5.0" step="0.05" value="1.9" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidX/Y Ki (outer):</label>
+              <input type="number" id="lw-pidx-ki" min="0.0" max="2.0" step="0.01" value="0.1" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidVX/VY Kp (inner):</label>
+              <input type="number" id="lw-pidvx-kp" min="0.0" max="5.0" step="0.01" value="0.60" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>pidVX/VY Ki (inner):</label>
+              <input type="number" id="lw-pidvx-ki" min="0.0" max="2.0" step="0.01" value="0.08" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <div class="tuning-section" style="padding-top: 8px;">
+            <div class="tuning-header">📐 LITEWING — EKF NOISE PARAMS</div>
+            <div style="font-size:10px; color:#888; margin-bottom:6px;">
+              kf_q: process noise (larger = trust acc more) &nbsp;|&nbsp;
+              kf_r: ToF noise (smaller = trust sensor more) &nbsp;|&nbsp;
+              flow_std: optical flow pixel noise
+            </div>
+            <div class="tuning-row">
+              <label>kf_q (proc noise Z):</label>
+              <input type="number" id="lw-kf-q" min="0.0" max="10.0" step="0.1" value="1.0" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>kf_r (ToF noise m):</label>
+              <input type="number" id="lw-kf-r" min="0.001" max="1.0" step="0.005" value="0.05" onchange="sendTuning()">
+            </div>
+            <div class="tuning-row">
+              <label>flow_std (pixels):</label>
+              <input type="number" id="lw-flow-std" min="0.1" max="20.0" step="0.1" value="2.0" onchange="sendTuning()">
+            </div>
+          </div>
+
+          <button class="takeoff-btn" onclick="sendTuning()" style="margin-top: 10px; background: linear-gradient(135deg, #003300 0%, #00ff41 50%, #003300 100%);">
+            📡 APPLY TUNING VALUES
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="alert" id="alert-box">
+    <p id="alert-message"></p>
+  </div>
+
+  <script>
+    // WebSocket connection
+    let ws = null;
+    let isConnected = false;
+
+    // Control values - throttle starts at 1000 (below 1050 for arming)
+    let throttle = 1000;
+    let roll = 1500;
+    let pitch = 1500;
+    let yaw = 1500;
+    let armed = false;
+    let altitudeHoldEnabled = true;
+    let positionHoldEnabled = true;
+
+    // Update interval
+    const UPDATE_INTERVAL = 50; // 20Hz
+    let updateTimer = null;
+
+    // Try to load saved IP and takeoff percent from localStorage
+    window.onload = function() {
+      const savedIP = localStorage.getItem('esp32s3_ip');
+      if (savedIP) {
+        document.getElementById('esp-ip').value = savedIP;
+      }
+      const savedPercent = localStorage.getItem('esp32s3_takeoff_percent');
+      if (savedPercent) {
+        document.getElementById('takeoff-percent').value = savedPercent;
+      }
+      const savedAltitude = localStorage.getItem('esp32s3_altitude_setpoint');
+      if (savedAltitude) {
+        document.getElementById('altitude-setpoint').value = savedAltitude;
+      }
+      const savedAltHold = localStorage.getItem('esp32s3_altitude_hold_enabled');
+      if (savedAltHold !== null) {
+        altitudeHoldEnabled = (savedAltHold === 'true');
+        document.getElementById('altitude-hold-switch').checked = altitudeHoldEnabled;
+      }
+      const savedPosHold = localStorage.getItem('esp32s3_position_hold_enabled');
+      if (savedPosHold !== null) {
+        positionHoldEnabled = (savedPosHold === 'true');
+        document.getElementById('position-hold-switch').checked = positionHoldEnabled;
+      }
+      updateDisplay();
+    };
+
+    // Save takeoff percent when changed
+    document.getElementById('takeoff-percent').addEventListener('change', function() {
+      localStorage.setItem('esp32s3_takeoff_percent', this.value);
+    });
+
+    // Save and send altitude setpoint when changed
+    document.getElementById('altitude-setpoint').addEventListener('input', function() {
+      localStorage.setItem('esp32s3_altitude_setpoint', this.value);
+      // Send update immediately if connected and armed (for real-time altitude adjustment)
+      if (isConnected && armed) {
+        sendUpdate();
+      }
+    });
+
+    // Toggle switches event listeners
+    document.getElementById('altitude-hold-switch').addEventListener('change', function() {
+      altitudeHoldEnabled = this.checked;
+      localStorage.setItem('esp32s3_altitude_hold_enabled', altitudeHoldEnabled);
+      if (isConnected) {
+        sendUpdate();
+      }
+    });
+
+    document.getElementById('position-hold-switch').addEventListener('change', function() {
+      positionHoldEnabled = this.checked;
+      localStorage.setItem('esp32s3_position_hold_enabled', positionHoldEnabled);
+      if (isConnected) {
+        sendUpdate();
+      }
+    });
+
+    // Connect/Disconnect WebSocket
+    function toggleConnection() {
+      if (isConnected) {
+        disconnect();
+      } else {
+        connect();
+      }
+    }
+
+    function connect() {
+      const ip = document.getElementById('esp-ip').value.trim();
+      if (!ip) {
+        showAlert('Please enter ESP32-S3 IP address');
+        return;
+      }
+
+      // Save IP to localStorage
+      localStorage.setItem('esp32s3_ip', ip);
+
+      const wsUrl = `ws://${ip}:81`;
+      document.getElementById('status-text').textContent = 'ESTABLISHING LINK...';
+
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = function() {
+          isConnected = true;
+          document.getElementById('status-led').className = 'status-indicator status-connected';
+          document.getElementById('status-text').textContent = 'LINK ACTIVE: ' + ip;
+          document.getElementById('connect-btn').textContent = 'TERMINATE LINK';
+          document.getElementById('esp-ip').disabled = true;
+          showAlert('✓ SECURE LINK ESTABLISHED');
+
+          // Start sending updates
+          updateTimer = setInterval(sendUpdate, UPDATE_INTERVAL);
+        };
+
+        ws.onclose = function() {
+          disconnect();
+          showAlert('⚠ LINK TERMINATED');
+        };
+
+        ws.onerror = function(error) {
+          console.error('WebSocket error:', error);
+          disconnect();
+          showAlert('❌ LINK FAILED - VERIFY TARGET IP');
+        };
+
+        ws.onmessage = function(event) {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.tel === 1) {
+              onTelemetry(data);   // route to telemetry buffer
+            } else {
+              console.log('Received:', data);
+            }
+          } catch (e) {
+            console.error('Parse error:', e);
+          }
+        };
+
+      } catch (error) {
+        showAlert('❌ INVALID TARGET ADDRESS');
+        disconnect();
+      }
+    }
+
+    function disconnect() {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+      if (updateTimer) {
+        clearInterval(updateTimer);
+        updateTimer = null;
+      }
+      isConnected = false;
+      document.getElementById('status-led').className = 'status-indicator status-disconnected';
+      document.getElementById('status-text').textContent = 'LINK OFFLINE';
+      document.getElementById('connect-btn').textContent = 'ESTABLISH LINK';
+      document.getElementById('esp-ip').disabled = false;
+    }
+
+    // Send control update to ESP32-S3
+    function sendUpdate() {
+      if (!isConnected || !ws) return;
+
+      const ch5 = armed ? 1000 : 2000; // Armed = LOW (1000), Disarmed = HIGH (2000)
+      const altitudeSetpoint = parseFloat(document.getElementById('altitude-setpoint').value);
+
+      // Check if manual input override is enabled
+      const useManualInput = document.getElementById('use-manual-input').checked;
+
+      let finalThrottle, finalRoll, finalPitch, finalYaw;
+
+      if (useManualInput) {
+        // Use manual input values
+        finalThrottle = parseInt(document.getElementById('manual-throttle').value) || 1000;
+        finalRoll = parseInt(document.getElementById('manual-roll').value) || 1500;
+        finalPitch = parseInt(document.getElementById('manual-pitch').value) || 1500;
+        finalYaw = parseInt(document.getElementById('manual-yaw').value) || 1500;
+      } else {
+        // Use joystick values
+        finalThrottle = throttle;
+        finalRoll = roll;
+        finalPitch = pitch;
+        finalYaw = yaw;
+      }
+
+      // Apply trim offsets to roll and pitch (clamp to valid PWM range)
+      const trimPitch = parseInt(document.getElementById('trim-pitch').value) || 0;
+      const trimRoll  = parseInt(document.getElementById('trim-roll').value)  || 0;
+      finalRoll  = Math.max(1000, Math.min(2000, finalRoll  + trimRoll));
+      finalPitch = Math.max(1000, Math.min(2000, finalPitch + trimPitch));
+
+      const data = {
+        ch1: finalThrottle,
+        ch2: finalRoll,
+        ch3: finalPitch,
+        ch4: finalYaw,
+        ch5: ch5,
+        ch6: 1000,
+        altset: altitudeSetpoint, // Target altitude in meters (firmware key: "altset")
+        althold: altitudeHoldEnabled ? 1 : 0, // Altitude hold enable flag
+        poshold: positionHoldEnabled ? 1 : 0 // Position hold enable flag (MTF-01)
+      };
+
+      // DEBUG: Uncomment to see actual yaw values being sent
+      // console.log('Yaw CH4:', yaw);
+
+      try {
+        ws.send(JSON.stringify(data));
+      } catch (e) {
+        console.error('Send error:', e);
+        disconnect();
+      }
+    }
+
+    // Show alert message
+    function showAlert(message) {
+      const alertBox = document.getElementById('alert-box');
+      const alertMessage = document.getElementById('alert-message');
+      alertMessage.textContent = message;
+      alertBox.style.display = 'block';
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 3000);
+    }
+
+    // Joystick handling
+    class Joystick {
+      constructor(containerId, stickId, onChange) {
+        this.container = document.getElementById(containerId);
+        this.stick = document.getElementById(stickId);
+        this.onChange = onChange;
+        this.isDragging = false;
+        this.maxDistance = 70;
+
+        this.init();
+      }
+
+      init() {
+        this.stick.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.stick.addEventListener('touchstart', this.onTouchStart.bind(this));
+        document.addEventListener('mousemove', this.onMouseMove.bind(this));
+        document.addEventListener('touchmove', this.onTouchMove.bind(this));
+        document.addEventListener('mouseup', this.onMouseUp.bind(this));
+        document.addEventListener('touchend', this.onTouchEnd.bind(this));
+      }
+
+      onMouseDown(e) {
+        e.preventDefault();
+        this.isDragging = true;
+      }
+
+      onTouchStart(e) {
+        e.preventDefault();
+        this.isDragging = true;
+      }
+
+      onMouseMove(e) {
+        if (!this.isDragging) return;
+        this.updatePosition(e.clientX, e.clientY);
+      }
+
+      onTouchMove(e) {
+        if (!this.isDragging) return;
+        e.preventDefault();
+        this.updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+      }
+
+      updatePosition(clientX, clientY) {
+        const rect = this.container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let deltaX = clientX - centerX;
+        let deltaY = clientY - centerY;
+
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance > this.maxDistance) {
+          const angle = Math.atan2(deltaY, deltaX);
+          deltaX = Math.cos(angle) * this.maxDistance;
+          deltaY = Math.sin(angle) * this.maxDistance;
+        }
+
+        this.stick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+        const x = deltaX / this.maxDistance; // -1 to 1
+        const y = -deltaY / this.maxDistance; // -1 to 1 (inverted)
+
+        this.onChange(x, y);
+      }
+
+      onMouseUp() {
+        this.reset();
+      }
+
+      onTouchEnd() {
+        this.reset();
+      }
+
+      reset() {
+        this.isDragging = false;
+        this.stick.style.transform = 'translate(-50%, -50%)';
+        this.onChange(0, 0);
+      }
+    }
+
+    // Left joystick (Throttle/Yaw) - Custom behavior
+    class LeftJoystick extends Joystick {
+      updatePosition(clientX, clientY) {
+        const rect = this.container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let deltaX = clientX - centerX;
+        let deltaY = clientY - centerY;
+
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance > this.maxDistance) {
+          const angle = Math.atan2(deltaY, deltaX);
+          deltaX = Math.cos(angle) * this.maxDistance;
+          deltaY = Math.sin(angle) * this.maxDistance;
+        }
+
+        this.stick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+        let x = deltaX / this.maxDistance; // -1 to 1
+        const y = -deltaY / this.maxDistance; // -1 to 1 (inverted)
+
+        // Add deadzone for X-axis (yaw) - 10% deadzone
+        if (Math.abs(x) < 0.1) {
+          x = 0;
+        }
+
+        this.onChange(x, y);
+      }
+
+      reset() {
+        this.isDragging = false;
+        this.stick.style.transform = 'translate(-50%, -50%)';
+        // Only reset yaw (x-axis), keep throttle (y-axis) at last value
+        yaw = 1500; // Center yaw
+        updateDisplay();
+      }
+    }
+
+    const leftJoystick = new LeftJoystick('left-joystick', 'left-stick', (x, y) => {
+      yaw = Math.round(1500 + x * 500);
+      throttle = Math.round(1000 + (y + 1) * 500);
+      updateDisplay();
+    });
+
+    // Right joystick (Pitch/Roll) - Auto-centers with deadzone
+    class RightJoystick extends Joystick {
+      updatePosition(clientX, clientY) {
+        const rect = this.container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let deltaX = clientX - centerX;
+        let deltaY = clientY - centerY;
+
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance > this.maxDistance) {
+          const angle = Math.atan2(deltaY, deltaX);
+          deltaX = Math.cos(angle) * this.maxDistance;
+          deltaY = Math.sin(angle) * this.maxDistance;
+        }
+
+        this.stick.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+        let x = deltaX / this.maxDistance; // -1 to 1
+        let y = -deltaY / this.maxDistance; // -1 to 1 (inverted)
+
+        // Add deadzone for both axes - 10% deadzone
+        if (Math.abs(x) < 0.1) {
+          x = 0;
+        }
+        if (Math.abs(y) < 0.1) {
+          y = 0;
+        }
+
+        this.onChange(x, y);
+      }
+    }
+
+    const rightJoystick = new RightJoystick('right-joystick', 'right-stick', (x, y) => {
+      roll = Math.round(1500 + x * 500);
+      pitch = Math.round(1500 + y * 500);
+      updateDisplay();
+    });
+
+    // Arm switch
+    document.getElementById('arm-switch').addEventListener('change', (e) => {
+      if (!isConnected) {
+        e.target.checked = false;
+        showAlert('❌ NO LINK - ESTABLISH CONNECTION');
+        return;
+      }
+
+      armed = e.target.checked;
+
+      if (armed) {
+        // Warn if throttle is too high, but still allow arming
+        if (throttle >= 1050) {
+          showAlert('⚠ ARMED - REDUCE THROTTLE BELOW 1050');
+        } else {
+          showAlert('⚠ WEAPONS HOT - UAV ARMED');
+        }
+      } else {
+        showAlert('✓ WEAPONS SAFE - UAV DISARMED');
+        throttle = 1000; // Reset throttle when disarming
+        updateDisplay();
+      }
+    });
+
+    // Auto takeoff function
+    function autoTakeoff() {
+      if (!isConnected) {
+        showAlert('❌ NO LINK - ESTABLISH CONNECTION');
+        return;
+      }
+
+      if (!armed) {
+        showAlert('❌ UAV NOT ARMED - ACTIVATE ARM SWITCH');
+        return;
+      }
+
+      const takeoffPercent = parseInt(document.getElementById('takeoff-percent').value);
+      const targetThrottle = 1000 + Math.round((takeoffPercent / 100) * 1000);
+      const startThrottle = throttle;
+
+      // Center all controls except throttle
+      roll = 1500;
+      pitch = 1500;
+      yaw = 1500;
+      updateDisplay();
+      sendUpdate();
+
+      showAlert(`▲ LAUNCH SEQUENCE - RAMP TO ${takeoffPercent}% (${targetThrottle} PWM)`);
+
+      // Smooth throttle ramp-up over 1 second (1000ms)
+      const rampDuration = 1000; // milliseconds
+      const rampInterval = 20; // Update every 20ms (50Hz)
+      const steps = rampDuration / rampInterval;
+      const throttleStep = (targetThrottle - startThrottle) / steps;
+      let currentStep = 0;
+
+      const rampTimer = setInterval(() => {
+        currentStep++;
+        throttle = Math.round(startThrottle + (throttleStep * currentStep));
+
+        // Ensure we don't overshoot
+        if (currentStep >= steps || throttle >= targetThrottle) {
+          throttle = targetThrottle;
+          clearInterval(rampTimer);
+          showAlert(`✓ LAUNCH COMPLETE - ${takeoffPercent}% POWER`);
+        }
+
+        updateDisplay();
+        sendUpdate(); // Send each step immediately
+      }, rampInterval);
+    }
+
+    // Auto landing function
+    function autoLand() {
+      if (!isConnected) {
+        showAlert('❌ NO LINK - ESTABLISH CONNECTION');
+        return;
+      }
+
+      if (!armed) {
+        showAlert('❌ UAV NOT ARMED - ACTIVATE ARM SWITCH');
+        return;
+      }
+
+      // Center all controls
+      roll = 1500;
+      pitch = 1500;
+      yaw = 1500;
+      updateDisplay();
+
+      showAlert('▼ LANDING PROTOCOL - MTF-01 GUIDED DESCENT');
+
+      // Send landing command to ESP32-S3
+      const landCommand = {
+        ch1: throttle,
+        ch2: 1500,
+        ch3: 1500,
+        ch4: 1500,
+        ch5: armed ? 1000 : 2000,
+        ch6: 1000,
+        altset: parseFloat(document.getElementById('altitude-setpoint').value), // firmware key: "altset"
+        althold: altitudeHoldEnabled ? 1 : 0,
+        poshold: positionHoldEnabled ? 1 : 0,
+        land: 1  // Landing trigger
+      };
+
+      try {
+        ws.send(JSON.stringify(landCommand));
+      } catch (e) {
+        console.error('Send error:', e);
+        showAlert('❌ LANDING PROTOCOL FAILED - LINK ERROR');
+      }
+    }
+
+    // Update display
+    function updateDisplay() {
+      const useManualInput = document.getElementById('use-manual-input').checked;
+
+      if (useManualInput) {
+        // Display manual input values
+        const mt = parseInt(document.getElementById('manual-throttle').value) || 1000;
+        document.getElementById('throttle-val').textContent = mt + ' (' + Math.round((mt - 1000) / 10) + '%)';
+        document.getElementById('roll-val').textContent = parseInt(document.getElementById('manual-roll').value) || 1500;
+        document.getElementById('pitch-val').textContent = parseInt(document.getElementById('manual-pitch').value) || 1500;
+        document.getElementById('yaw-val').textContent = parseInt(document.getElementById('manual-yaw').value) || 1500;
+      } else {
+        // Display joystick/keyboard values
+        document.getElementById('throttle-val').textContent = throttle + ' (' + Math.round((throttle - 1000) / 10) + '%)';
+        document.getElementById('roll-val').textContent = roll;
+        document.getElementById('pitch-val').textContent = pitch;
+        document.getElementById('yaw-val').textContent = yaw;
+      }
+    }
+
+    // Prevent scrolling on mobile
+    document.body.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // ── Keyboard Control ──────────────────────────────────────────────────────
+    let keyboardModeEnabled = false;
+    const pressedKeys      = new Set();
+    let   keyboardInterval = null;
+    const KB_INTERVAL      = 50; // ms – matches the main sendUpdate interval
+
+    // Panel collapse/expand
+    function toggleKeyboardPanel() {
+      const panel  = document.getElementById('keyboard-panel');
+      const arrow  = document.getElementById('kb-panel-arrow');
+      const arrow2 = document.getElementById('kb-panel-arrow2');
+      const open   = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      arrow.textContent  = open ? '▲' : '▼';
+      arrow2.textContent = open ? '▲' : '▼';
+    }
+
+    // Toggle keyboard mode on/off
+    function toggleKeyboardMode() {
+      keyboardModeEnabled = document.getElementById('keyboard-mode-toggle').checked;
+      if (keyboardModeEnabled) {
+        showAlert('⌨ KEYBOARD MODE ACTIVE');
+        startKeyboardInterval();
+      } else {
+        stopKeyboardInterval();
+        // Re-centre all keyboard-driven axes
+        roll  = 1500;
+        pitch = 1500;
+        yaw   = 1500;
+        updateDisplay();
+        showAlert('⌨ KEYBOARD MODE DISABLED');
+      }
+    }
+
+    function startKeyboardInterval() {
+      if (keyboardInterval) return;
+      keyboardInterval = setInterval(processKeyboardInput, KB_INTERVAL);
+    }
+
+    function stopKeyboardInterval() {
+      if (keyboardInterval) {
+        clearInterval(keyboardInterval);
+        keyboardInterval = null;
+      }
+      pressedKeys.clear();
+      updateKeyIndicators();
+    }
+
+    // Called every KB_INTERVAL ms while keyboard mode is on.
+    // Modifies the same throttle/roll/pitch/yaw globals that
+    // sendUpdate() picks up, so the existing 20 Hz send loop
+    // delivers the keyboard commands without any extra code.
+    function processKeyboardInput() {
+      if (!keyboardModeEnabled) return;
+      // Don't fight the manual-input override
+      if (document.getElementById('use-manual-input').checked) return;
+
+      const step       = parseInt(document.getElementById('kb-throttle-step').value) || 10;
+      const deflection = parseInt(document.getElementById('kb-deflection').value)    || 300;
+
+      // Throttle – W/S: hold to ramp continuously
+      if (pressedKeys.has('w')) throttle = Math.min(2000, throttle + step);
+      if (pressedKeys.has('s')) throttle = Math.max(1000, throttle - step);
+
+      // Yaw – A/D: deviate while held, re-centre on release
+      if      (pressedKeys.has('a') && !pressedKeys.has('d')) yaw = 1500 - deflection;
+      else if (pressedKeys.has('d') && !pressedKeys.has('a')) yaw = 1500 + deflection;
+      else                                                      yaw = 1500;
+
+      // Pitch – ArrowUp/Down: deviate while held, re-centre on release
+      if      (pressedKeys.has('ArrowUp')   && !pressedKeys.has('ArrowDown')) pitch = 1500 + deflection;
+      else if (pressedKeys.has('ArrowDown') && !pressedKeys.has('ArrowUp'))   pitch = 1500 - deflection;
+      else                                                                      pitch = 1500;
+
+      // Roll – ArrowLeft/Right: deviate while held, re-centre on release
+      if      (pressedKeys.has('ArrowRight') && !pressedKeys.has('ArrowLeft')) roll = 1500 + deflection;
+      else if (pressedKeys.has('ArrowLeft')  && !pressedKeys.has('ArrowRight')) roll = 1500 - deflection;
+      else                                                                        roll = 1500;
+
+      // Hard clamp
+      throttle = Math.max(1000, Math.min(2000, throttle));
+      roll     = Math.max(1000, Math.min(2000, roll));
+      pitch    = Math.max(1000, Math.min(2000, pitch));
+      yaw      = Math.max(1000, Math.min(2000, yaw));
+
+      updateDisplay();
+    }
+
+    // Light up the on-screen key cap when the physical key is held
+    function updateKeyIndicators() {
+      const keyMap = {
+        'ArrowUp':    'key-up',
+        'ArrowDown':  'key-down',
+        'ArrowLeft':  'key-left',
+        'ArrowRight': 'key-right',
+        'w': 'key-w', 's': 'key-s',
+        'a': 'key-a', 'd': 'key-d',
+      };
+      for (const [key, id] of Object.entries(keyMap)) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('key-active', pressedKeys.has(key));
+      }
+    }
+
+    // Key down – add to pressed set; prevent page scroll for arrows in KB mode
+    document.addEventListener('keydown', (e) => {
+      if (keyboardModeEnabled &&
+          ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','s','a','d'].includes(e.key)) {
+        e.preventDefault();
+      }
+      if (!keyboardModeEnabled) return;
+      pressedKeys.add(e.key);
+      updateKeyIndicators();
+    });
+
+    // Key up – remove from set and immediately re-centre attitude axes
+    document.addEventListener('keyup', (e) => {
+      pressedKeys.delete(e.key);
+      updateKeyIndicators();
+      if (!keyboardModeEnabled) return;
+
+      // Re-centre yaw when both A/D keys are released
+      if (['a','d'].includes(e.key) &&
+          !pressedKeys.has('a') && !pressedKeys.has('d')) {
+        yaw = 1500;
+      }
+      // Re-centre pitch when both arrow up/down are released
+      if (['ArrowUp','ArrowDown'].includes(e.key) &&
+          !pressedKeys.has('ArrowUp') && !pressedKeys.has('ArrowDown')) {
+        pitch = 1500;
+      }
+      // Re-centre roll when both arrow left/right are released
+      if (['ArrowLeft','ArrowRight'].includes(e.key) &&
+          !pressedKeys.has('ArrowLeft') && !pressedKeys.has('ArrowRight')) {
+        roll = 1500;
+      }
+      updateDisplay();
+    });
+    // ── End Keyboard Control ──────────────────────────────────────────────────
+
+    // ── Auto-Trim ─────────────────────────────────────────────────────────────
+    const AUTO_TRIM_THRESHOLD = 3.0;  // degrees — drift must exceed this to correct
+    const AUTO_TRIM_STEP      = 2;    // PWM units per correction cycle
+    const AUTO_TRIM_MAX       = 100;  // hard cap ±100 PWM
+    const AUTO_TRIM_INTERVAL  = 800;  // ms between correction cycles
+    let autoTrimTimer = null;
+
+    function toggleAutoTrim() {
+      const enabled = document.getElementById('auto-trim-toggle').checked;
+      if (enabled) {
+        autoTrimTimer = setInterval(runAutoTrim, AUTO_TRIM_INTERVAL);
+        document.getElementById('auto-trim-status').textContent = 'Auto-trim active — monitoring drift…';
+      } else {
+        clearInterval(autoTrimTimer);
+        autoTrimTimer = null;
+        document.getElementById('auto-trim-status').textContent = '';
+      }
+    }
+
+    function runAutoTrim() {
+      // Only when armed and sticks are centred (no intentional pitch/roll input)
+      if (!armed) return;
+      if (Math.abs(pitch - 1500) > 50 || Math.abs(roll - 1500) > 50) return;
+
+      const recent = getTelemetrySnapshot(2);   // last 2 seconds of telemetry
+      if (recent.length < 5) return;
+
+      const avgPitch = recent.reduce((s, d) => s + (d.p || 0), 0) / recent.length;
+      const avgRoll  = recent.reduce((s, d) => s + (d.r || 0), 0) / recent.length;
+
+      let trimPitch = parseInt(document.getElementById('trim-pitch').value) || 0;
+      let trimRoll  = parseInt(document.getElementById('trim-roll').value)  || 0;
+      let changed   = false;
+      let msg       = [];
+
+      if (avgPitch > AUTO_TRIM_THRESHOLD) {
+        trimPitch = Math.min(AUTO_TRIM_MAX, trimPitch + AUTO_TRIM_STEP);
+        changed = true; msg.push(`P→${trimPitch}`);
+      } else if (avgPitch < -AUTO_TRIM_THRESHOLD) {
+        trimPitch = Math.max(-AUTO_TRIM_MAX, trimPitch - AUTO_TRIM_STEP);
+        changed = true; msg.push(`P→${trimPitch}`);
+      }
+      if (avgRoll > AUTO_TRIM_THRESHOLD) {
+        trimRoll = Math.min(AUTO_TRIM_MAX, trimRoll + AUTO_TRIM_STEP);
+        changed = true; msg.push(`R→${trimRoll}`);
+      } else if (avgRoll < -AUTO_TRIM_THRESHOLD) {
+        trimRoll = Math.max(-AUTO_TRIM_MAX, trimRoll - AUTO_TRIM_STEP);
+        changed = true; msg.push(`R→${trimRoll}`);
+      }
+
+      if (changed) {
+        document.getElementById('trim-pitch').value = trimPitch;
+        document.getElementById('trim-pitch-val').textContent = trimPitch;
+        document.getElementById('trim-roll').value  = trimRoll;
+        document.getElementById('trim-roll-val').textContent  = trimRoll;
+        document.getElementById('auto-trim-status').textContent =
+          `Corrected: ${msg.join(' ')}  (pitch_IMU=${avgPitch.toFixed(1)}° roll_IMU=${avgRoll.toFixed(1)}°)`;
+      } else {
+        document.getElementById('auto-trim-status').textContent =
+          `Stable ✓  (pitch_IMU=${avgPitch.toFixed(1)}° roll_IMU=${avgRoll.toFixed(1)}°)`;
+      }
+    }
+    // ── End Auto-Trim ─────────────────────────────────────────────────────────
+
+    // ── Auto-PID ──────────────────────────────────────────────────────────────
+    // Adjusts roll_angle_kp and pitch_angle_kp only.
+    // Decision: count error sign-flips in last 3 s.
+    //   > 8 flips  → oscillating  → decrease Kp by 0.005
+    //   < 3 flips AND avg|error| > 5° → sluggish → increase Kp by 0.003
+    //   3–8 flips  → leave alone (well-tuned zone)
+    // Runs every 5 s. Stops immediately if any anomaly flag is set.
+    const AUTO_PID_INTERVAL  = 5000;   // ms
+    const AUTO_PID_DEC_STEP  = 0.005;  // Kp decrease when oscillating
+    const AUTO_PID_INC_STEP  = 0.003;  // Kp increase when sluggish
+    const AUTO_PID_MIN_KP    = 0.05;   // hard floor
+    const AUTO_PID_MAX_KP    = 1.00;   // hard ceiling
+    const AUTO_PID_FLIP_HIGH = 8;      // sign-flips → oscillating
+    const AUTO_PID_FLIP_LOW  = 3;      // sign-flips → might be sluggish
+    const AUTO_PID_ERR_THR   = 5.0;    // degrees — avg error to call sluggish
+    let autoPIDTimer = null;
+
+    function toggleAutoPID() {
+      const enabled = document.getElementById('auto-pid-toggle').checked;
+      const statusEl = document.getElementById('auto-pid-status');
+      if (enabled) {
+        autoPIDTimer = setInterval(runAutoPID, AUTO_PID_INTERVAL);
+        statusEl.textContent = 'Auto-PID active — monitoring oscillation & response…';
+      } else {
+        clearInterval(autoPIDTimer);
+        autoPIDTimer = null;
+        statusEl.textContent = '';
+      }
+    }
+
+    function _countSignFlips(samples, key) {
+      let flips = 0, last = 0;
+      for (const d of samples) {
+        const v = d[key] || 0;
+        const s = v > 0 ? 1 : v < 0 ? -1 : 0;
+        if (s !== 0 && last !== 0 && s !== last) flips++;
+        if (s !== 0) last = s;
+      }
+      return flips;
+    }
+
+    function _avgAbsErr(samples, key) {
+      if (!samples.length) return 0;
+      return samples.reduce((s, d) => s + Math.abs(d[key] || 0), 0) / samples.length;
+    }
+
+    function _autoPIDLog(msg) {
+      const log = document.getElementById('auto-pid-log');
+      const ts  = new Date().toLocaleTimeString();
+      log.innerHTML += `<div>[${ts}] ${msg}</div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function runAutoPID() {
+      const statusEl = document.getElementById('auto-pid-status');
+
+      // Safety guards
+      if (!armed) {
+        statusEl.textContent = 'Waiting for arm…';
+        return;
+      }
+      if (Math.abs(pitch - 1500) > 50 || Math.abs(roll - 1500) > 50) {
+        statusEl.textContent = 'Skipped — sticks not centred.';
+        return;
+      }
+      // Stop if live anomaly is flagged
+      if (telAnomaly.rollOsc || telAnomaly.pitchOsc || telAnomaly.yawSpin) {
+        statusEl.textContent = '⚠ Anomaly detected — auto-PID paused.';
+        _autoPIDLog('⚠ Stopped: anomaly flag active.');
+        document.getElementById('auto-pid-toggle').checked = false;
+        toggleAutoPID();
+        return;
+      }
+
+      // Get last 3 s of telemetry (≈30 samples at 10 Hz)
+      const samples = getTelemetrySnapshot(3);
+      if (samples.length < 10) {
+        statusEl.textContent = 'Not enough telemetry — fly first.';
+        return;
+      }
+
+      let changed = false;
+
+      // ── Roll Kp ───────────────────────────────────────────────────────────
+      const rollFlips = _countSignFlips(samples, 'er');
+      const rollAvgErr = _avgAbsErr(samples, 'er');
+      let rollKp = parseFloat(document.getElementById('roll-angle-kp').value) || 0.30;
+
+      if (rollFlips > AUTO_PID_FLIP_HIGH) {
+        const prev = rollKp;
+        rollKp = Math.max(AUTO_PID_MIN_KP, +(rollKp - AUTO_PID_DEC_STEP).toFixed(4));
+        document.getElementById('roll-angle-kp').value = rollKp;
+        _autoPIDLog(`Roll Kp: ${prev.toFixed(4)} → ${rollKp.toFixed(4)}  (flips=${rollFlips} oscillating↓)`);
+        changed = true;
+      } else if (rollFlips < AUTO_PID_FLIP_LOW && rollAvgErr > AUTO_PID_ERR_THR) {
+        const prev = rollKp;
+        rollKp = Math.min(AUTO_PID_MAX_KP, +(rollKp + AUTO_PID_INC_STEP).toFixed(4));
+        document.getElementById('roll-angle-kp').value = rollKp;
+        _autoPIDLog(`Roll Kp: ${prev.toFixed(4)} → ${rollKp.toFixed(4)}  (err=${rollAvgErr.toFixed(1)}° sluggish↑)`);
+        changed = true;
+      }
+
+      // ── Pitch Kp ──────────────────────────────────────────────────────────
+      const pitchFlips = _countSignFlips(samples, 'ep');
+      const pitchAvgErr = _avgAbsErr(samples, 'ep');
+      let pitchKp = parseFloat(document.getElementById('pitch-angle-kp').value) || 0.30;
+
+      if (pitchFlips > AUTO_PID_FLIP_HIGH) {
+        const prev = pitchKp;
+        pitchKp = Math.max(AUTO_PID_MIN_KP, +(pitchKp - AUTO_PID_DEC_STEP).toFixed(4));
+        document.getElementById('pitch-angle-kp').value = pitchKp;
+        _autoPIDLog(`Pitch Kp: ${prev.toFixed(4)} → ${pitchKp.toFixed(4)}  (flips=${pitchFlips} oscillating↓)`);
+        changed = true;
+      } else if (pitchFlips < AUTO_PID_FLIP_LOW && pitchAvgErr > AUTO_PID_ERR_THR) {
+        const prev = pitchKp;
+        pitchKp = Math.min(AUTO_PID_MAX_KP, +(pitchKp + AUTO_PID_INC_STEP).toFixed(4));
+        document.getElementById('pitch-angle-kp').value = pitchKp;
+        _autoPIDLog(`Pitch Kp: ${prev.toFixed(4)} → ${pitchKp.toFixed(4)}  (err=${pitchAvgErr.toFixed(1)}° sluggish↑)`);
+        changed = true;
+      }
+
+      if (changed) {
+        // Push updated gains to drone
+        if (typeof sendTuning === 'function') sendTuning();
+        statusEl.textContent =
+          `Updated — Roll Kp=${rollKp.toFixed(4)}  Pitch Kp=${pitchKp.toFixed(4)}`;
+      } else {
+        statusEl.textContent =
+          `Stable zone ✓  rollFlips=${rollFlips} pitchFlips=${pitchFlips}` +
+          `  err_r=${rollAvgErr.toFixed(1)}° err_p=${pitchAvgErr.toFixed(1)}°`;
+      }
+    }
+    // ── End Auto-PID ──────────────────────────────────────────────────────────
+
+    // Spacebar → Launch Sequence (works regardless of keyboard mode)
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== ' ') return;
+      // Don't fire when typing in an input/textarea
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      e.preventDefault(); // prevent page scroll on spacebar
+      autoTakeoff();
+    });
+
+    // Auto-reconnect on visibility change
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        console.log('Page hidden');
+      } else if (isConnected && (!ws || ws.readyState !== WebSocket.OPEN)) {
+        console.log('Attempting reconnection...');
+        connect();
+      }
+    });
+
+    // Manual input field listeners - update display in real-time
+    document.getElementById('manual-throttle').addEventListener('input', updateDisplay);
+    document.getElementById('manual-roll').addEventListener('input', updateDisplay);
+    document.getElementById('manual-pitch').addEventListener('input', updateDisplay);
+    document.getElementById('manual-yaw').addEventListener('input', updateDisplay);
+    document.getElementById('use-manual-input').addEventListener('change', updateDisplay);
+
+    // Toggle tuning panel
+    function toggleTuningPanel() {
+      const panel = document.getElementById('tuning-panel');
+      const arrow = document.getElementById('tuning-arrow');
+      const arrow2 = document.getElementById('tuning-arrow2');
+
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        arrow.textContent = '▲';
+        arrow2.textContent = '▲';
+      } else {
+        panel.style.display = 'none';
+        arrow.textContent = '▼';
+        arrow2.textContent = '▼';
+      }
+    }
+
+    // Send tuning parameters to ESP32
+    function sendTuning() {
+      if (!isConnected) {
+        showAlert('⚠ NOT CONNECTED - Cannot send tuning parameters');
+        return;
+      }
+
+      const tuningData = {
+        tuning: 1,
+        m1_comp: parseFloat(document.getElementById('m1-comp').value),
+        m2_comp: parseFloat(document.getElementById('m2-comp').value),
+        m3_comp: parseFloat(document.getElementById('m3-comp').value),
+        m4_comp: parseFloat(document.getElementById('m4-comp').value),
+        duty_idle: parseInt(document.getElementById('duty-idle').value),
+        yaw_scale: parseFloat(document.getElementById('yaw-scale').value),
+        loop_rate: parseInt(document.getElementById('loop-rate').value),
+        roll_angle_kp: parseFloat(document.getElementById('roll-angle-kp').value),
+        roll_angle_ki: parseFloat(document.getElementById('roll-angle-ki').value),
+        roll_angle_kd: parseFloat(document.getElementById('roll-angle-kd').value),
+        roll_rate_kp: parseFloat(document.getElementById('roll-rate-kp').value),
+        roll_rate_ki: parseFloat(document.getElementById('roll-rate-ki').value),
+        roll_rate_kd: parseFloat(document.getElementById('roll-rate-kd').value),
+        pitch_angle_kp: parseFloat(document.getElementById('pitch-angle-kp').value),
+        pitch_angle_ki: parseFloat(document.getElementById('pitch-angle-ki').value),
+        pitch_angle_kd: parseFloat(document.getElementById('pitch-angle-kd').value),
+        pitch_rate_kp: parseFloat(document.getElementById('pitch-rate-kp').value),
+        pitch_rate_ki: parseFloat(document.getElementById('pitch-rate-ki').value),
+        pitch_rate_kd: parseFloat(document.getElementById('pitch-rate-kd').value),
+        yaw_rate_kp: parseFloat(document.getElementById('yaw-rate-kp').value),
+        yaw_rate_ki: parseFloat(document.getElementById('yaw-rate-ki').value),
+        yaw_rate_kd: parseFloat(document.getElementById('yaw-rate-kd').value),
+        // ── LiteWing EKF & Hold params (firmware keys must match exactly) ──
+        pidZ_kp:   parseFloat(document.getElementById('lw-pidz-kp').value),
+        pidZ_ki:   parseFloat(document.getElementById('lw-pidz-ki').value),
+        pidVZ_kp:  parseFloat(document.getElementById('lw-pidvz-kp').value),
+        pidVZ_ki:  parseFloat(document.getElementById('lw-pidvz-ki').value),
+        hover_thr: parseFloat(document.getElementById('lw-hover-thr').value),
+        pidX_kp:   parseFloat(document.getElementById('lw-pidx-kp').value),
+        pidX_ki:   parseFloat(document.getElementById('lw-pidx-ki').value),
+        pidY_kp:   parseFloat(document.getElementById('lw-pidx-kp').value),  // X=Y (symmetric)
+        pidY_ki:   parseFloat(document.getElementById('lw-pidx-ki').value),
+        pidVX_kp:  parseFloat(document.getElementById('lw-pidvx-kp').value),
+        pidVX_ki:  parseFloat(document.getElementById('lw-pidvx-ki').value),
+        pidVY_kp:  parseFloat(document.getElementById('lw-pidvx-kp').value),  // X=Y (symmetric)
+        pidVY_ki:  parseFloat(document.getElementById('lw-pidvx-ki').value),
+        kf_q:      parseFloat(document.getElementById('lw-kf-q').value),
+        kf_r:      parseFloat(document.getElementById('lw-kf-r').value),
+        flow_std:  parseFloat(document.getElementById('lw-flow-std').value)
+      };
+
+      try {
+        ws.send(JSON.stringify(tuningData));
+        showAlert('✓ TUNING PARAMETERS SENT');
+        console.log('Tuning sent:', tuningData);
+      } catch (e) {
+        console.error('Send error:', e);
+        showAlert('❌ FAILED TO SEND TUNING');
+      }
+    }
+  </script>
+
+  <!-- Fixed anomaly warning badge -->
+  <div class="anomaly-badge-fixed" id="anomaly-badge"></div>
+
+  <!-- ===== FLIGHT ANALYSIS PANEL ===== -->
+  <div class="analysis-panel" id="analysis-panel" style="margin:12px 6px;">
+    <div class="analysis-panel-header" onclick="toggleAnalysisPanel()">
+      <span>📊 FLIGHT ANALYSIS &amp; AI DIAGNOSTICS</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="anomaly-badge" id="anomaly-badge-inline">⚠</span>
+        <span id="analysis-panel-arrow">▼</span>
+      </div>
+    </div>
+    <div class="analysis-panel-body" id="analysis-panel-body">
+
+      <!-- Live telemetry stats -->
+      <div style="font-size:0.78em;color:rgba(0,255,65,0.5);margin-bottom:4px;">
+        Live telemetry · <span id="tel-sample-count">0</span> samples buffered
+        · <span id="tel-age">—</span>
+      </div>
+      <div class="tel-stats-grid" id="tel-stats-grid">
+        <div class="tel-stat-box"><div class="label">Roll</div><div class="value" id="tstat-r">—</div></div>
+        <div class="tel-stat-box"><div class="label">Pitch</div><div class="value" id="tstat-p">—</div></div>
+        <div class="tel-stat-box"><div class="label">Yaw rate</div><div class="value" id="tstat-gz">—</div></div>
+        <div class="tel-stat-box"><div class="label">Err Roll</div><div class="value" id="tstat-er">—</div></div>
+        <div class="tel-stat-box"><div class="label">Err Pitch</div><div class="value" id="tstat-ep">—</div></div>
+        <div class="tel-stat-box"><div class="label">Throttle</div><div class="value" id="tstat-ch1">—</div></div>
+        <div class="tel-stat-box"><div class="label">M1 PWM</div><div class="value" id="tstat-m1">—</div></div>
+        <div class="tel-stat-box"><div class="label">M2 PWM</div><div class="value" id="tstat-m2">—</div></div>
+        <div class="tel-stat-box"><div class="label">M3 PWM</div><div class="value" id="tstat-m3">—</div></div>
+        <div class="tel-stat-box"><div class="label">M4 PWM</div><div class="value" id="tstat-m4">—</div></div>
+      </div>
+
+      <!-- AI analysis buttons -->
+      <div class="analysis-btn-row">
+        <button class="ai-btn" onclick="runAnalysis('flight')">📈 Flight Report</button>
+        <button class="ai-btn" onclick="runAnalysis('anomaly')">🔍 Detect Anomaly</button>
+        <button class="ai-btn" onclick="runAnalysis('pid')">🎯 Suggest PIDs</button>
+        <button class="ai-btn" onclick="runAnalysis('crash')">💥 Crash Analysis</button>
+      </div>
+
+      <!-- Analysis result area -->
+      <div class="analysis-result" id="analysis-result" style="display:none;"></div>
+
+      <!-- Auto-PID toggle -->
+      <div style="margin-top:10px; padding:8px; border:1px solid #2d5016; background:rgba(0,50,20,0.3); border-radius:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="color:#00ff41; font-size:0.85em; letter-spacing:1px;">⚙ AUTO-PID TUNER</span>
+            <span style="color:rgba(0,255,65,0.4); font-size:0.75em; margin-left:8px;">adjusts Kp only · every 5 s · stops on anomaly</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="auto-pid-toggle" onchange="toggleAutoPID()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="auto-pid-status" style="font-size:0.75em; color:rgba(0,255,65,0.5); margin-top:5px; min-height:14px;"></div>
+        <div id="auto-pid-log" style="font-size:0.72em; color:#446644; max-height:60px; overflow-y:auto; margin-top:4px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CAMERA + AUTONOMY PANEL ===== -->
+  <div class="cam-panel" id="cam-panel" style="margin:12px 6px;">
+    <div class="cam-panel-header" onclick="toggleCamPanel()">
+      <span>📷 CAMERA &amp; AUTONOMY</span>
+      <span id="cam-panel-arrow">▼</span>
+    </div>
+    <div class="cam-panel-body" id="cam-panel-body">
+
+      <!-- Live feed -->
+      <div class="cam-stream-box">
+        <img id="cam-img" alt="" style="display:none;">
+        <div class="cam-no-feed" id="cam-no-feed">📷 No feed — connect drone &amp; start stream</div>
+      </div>
+      <div class="cam-status" id="cam-status">Stopped</div>
+
+      <!-- Camera controls -->
+      <div class="cam-controls">
+        <button class="ai-btn" onclick="startCamStream()" title="Poll /capture every 200 ms">▶ Stream</button>
+        <button class="ai-btn" onclick="stopCamStream()">■ Stop</button>
+        <button class="ai-btn" onclick="snapAndAnalyse()">🔍 What do you see?</button>
+      </div>
+
+      <!-- Autonomy sub-panel -->
+      <div class="auto-panel">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:0.85em;color:#00ff41;">⚡ AUTONOMY</span>
+          <span id="auto-running-badge" style="display:none;" class="auto-running-badge">RUNNING</span>
+        </div>
+
+        <label>Mission goal</label>
+        <div class="auto-goal-row">
+          <input type="text" id="auto-goal" placeholder="e.g. explore the room, find the red object…">
+        </div>
+
+        <div class="auto-mode-row">
+          <label style="margin:0;display:inline;">Mode:</label>
+          <select id="auto-mode">
+            <option value="human_loop">Human-in-loop (approve each action)</option>
+            <option value="full_auto">Full autonomy (execute immediately)</option>
+          </select>
+        </div>
+
+        <div class="auto-interval-row">
+          <span>Interval:</span>
+          <input type="number" id="auto-interval" value="5" min="2" max="30" step="1">
+          <span>seconds between captures</span>
+        </div>
+
+        <div class="cam-controls">
+          <button class="ai-btn" onclick="startAutonomy()">▶ Start</button>
+          <button class="ai-btn" onclick="stopAutonomy()">■ Stop</button>
+        </div>
+
+        <!-- Pending approval card (human_loop mode) -->
+        <div class="auto-pending" id="auto-pending" style="display:none;">
+          <div class="pending-desc" id="auto-pending-desc"></div>
+          <div class="pending-scene" id="auto-pending-scene"></div>
+          <div class="auto-approve-row">
+            <button class="btn-approve" onclick="autonomyApprove(true)">✔ Approve</button>
+            <button class="btn-reject"  onclick="autonomyApprove(false)">✖ Reject</button>
+          </div>
+        </div>
+
+        <!-- Autonomy log -->
+        <div class="auto-log" id="auto-log"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== AI VOICE CHAT PANEL ===== -->
+  <button class="ai-fab" id="ai-fab" onclick="toggleAIChat()" title="AI Flight Assistant">🤖</button>
+
+  <div class="ai-chat-window hidden" id="ai-chat-window">
+    <div class="ai-chat-header">
+      <span>⚡ AI FLIGHT ASSISTANT</span>
+      <div class="ai-chat-header-btns">
+        <button onclick="resetAIChat()" title="Clear conversation">↺</button>
+        <button onclick="toggleAIChat()" title="Close">✕</button>
+      </div>
+    </div>
+
+    <div class="ai-chat-messages" id="ai-chat-messages">
+      <div class="chat-msg system-note">AI assistant ready — speak or type a flight command.</div>
+    </div>
+
+    <div class="ai-status-bar">
+      <span id="ai-voice-status">🎤 ready</span>
+      <span id="ai-cmd-status">idle</span>
+    </div>
+
+    <!-- Workflow progress panel -->
+    <div id="workflow-panel" style="
+      background: rgba(0,0,0,0.7);
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin: 6px 0;
+      min-height: 32px;
+      font-size: 11px;
+      color: #555;
+      display: block;
+    ">No active workflow</div>
+
+    <div class="ai-chat-input-row">
+      <button class="ai-btn" id="ai-voice-btn" onclick="toggleVoice()" title="Hold to speak">🎤</button>
+      <input type="text" id="ai-text-input"
+             placeholder="Speak or type… e.g. take off"
+             onkeydown="if(event.key==='Enter') sendAIMessage()">
+      <button class="ai-btn" onclick="sendAIMessage()" title="Send">▶</button>
+    </div>
+  </div>
+
+  <script>
+  // =========================================================================
+  //  TELEMETRY BUFFER + REAL-TIME ANOMALY DETECTION
+  // =========================================================================
+  const TEL_BUF_SIZE = 600;   // 60 s at 10 Hz
+  let telBuf        = [];     // circular array of telemetry objects
+  let telAnomaly    = { yawSpin:false, rollOsc:false, pitchOsc:false, motorImb:false };
+  let crashSnapshot = null;   // last 100 entries before disarm (crash analysis)
+  let prevArmedTel  = false;  // track arm→disarm transition
+
+  function onTelemetry(d) {
+    // Push into circular buffer
+    telBuf.push(d);
+    if (telBuf.length > TEL_BUF_SIZE) telBuf.shift();
+
+    // Real-time anomaly checks (last 30 entries = 3 seconds)
+    const recent = telBuf.slice(-30);
+    if (recent.length < 10) return;
+
+    // 1. Yaw spin: average |gz| > 120 deg/s
+    const avgGz = recent.reduce((s, e) => s + Math.abs(e.gz), 0) / recent.length;
+    telAnomaly.yawSpin = avgGz > 120;
+
+    // 2. Roll oscillation: sign changes in error_roll > 8 in 3 s
+    let rollSign = 0, rollFlips = 0;
+    for (const e of recent) {
+      const s = e.er > 0 ? 1 : -1;
+      if (rollSign && s !== rollSign) rollFlips++;
+      rollSign = s;
+    }
+    telAnomaly.rollOsc = rollFlips > 8;
+
+    // 3. Pitch oscillation: same logic on error_pitch
+    let pitchSign = 0, pitchFlips = 0;
+    for (const e of recent) {
+      const s = e.ep > 0 ? 1 : -1;
+      if (pitchSign && s !== pitchSign) pitchFlips++;
+      pitchSign = s;
+    }
+    telAnomaly.pitchOsc = pitchFlips > 8;
+
+    // 4. Motor imbalance: any motor > 40 PWM counts from average
+    const last = recent[recent.length - 1];
+    if (last.m1 !== undefined) {
+      const avg = (last.m1 + last.m2 + last.m3 + last.m4) / 4;
+      telAnomaly.motorImb = Math.max(
+        Math.abs(last.m1 - avg), Math.abs(last.m2 - avg),
+        Math.abs(last.m3 - avg), Math.abs(last.m4 - avg)
+      ) > 40;
+    }
+
+    updateAnomalyBadge();
+
+    // Capture crash snapshot: save last 100 frames on disarm while was armed
+    const nowArmed = (d.ch5 <= 1100);
+    if (prevArmedTel && !nowArmed) {
+      crashSnapshot = telBuf.slice(-100);   // last 10 s before disarm
+    }
+    prevArmedTel = nowArmed;
+  }
+
+  function updateAnomalyBadge() {
+    const any = Object.values(telAnomaly).some(Boolean);
+    const badge = document.getElementById('anomaly-badge');
+    if (!badge) return;
+    badge.style.display = any ? '' : 'none';
+    const msgs = [];
+    if (telAnomaly.yawSpin)  msgs.push('YAW SPIN');
+    if (telAnomaly.rollOsc)  msgs.push('ROLL OSC');
+    if (telAnomaly.pitchOsc) msgs.push('PITCH OSC');
+    if (telAnomaly.motorImb) msgs.push('MOTOR IMB');
+    badge.textContent = '⚠ ' + msgs.join(' · ');
+  }
+
+  // Serialise telemetry for AI (downsampled + compressed)
+  function getTelemetrySnapshot(seconds = 30) {
+    const n = seconds * 10;
+    const slice = telBuf.slice(-n);
+    const step  = Math.max(1, Math.floor(slice.length / 60));
+    return slice.filter((_, i) => i % step === 0);
+  }
+
+  // ── Live stat display (updates on every telemetry packet) ────────────────
+  function updateTelStats(d) {
+    const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    s('tstat-r',   d.r   != null ? d.r.toFixed(1)  + '°' : '—');
+    s('tstat-p',   d.p   != null ? d.p.toFixed(1)  + '°' : '—');
+    s('tstat-gz',  d.gz  != null ? d.gz.toFixed(1) + '°/s' : '—');
+    s('tstat-er',  d.er  != null ? d.er.toFixed(3) : '—');
+    s('tstat-ep',  d.ep  != null ? d.ep.toFixed(3) : '—');
+    s('tstat-ch1', d.ch1 != null ? d.ch1 : '—');
+    s('tstat-m1',  d.m1  != null ? d.m1  : '—');
+    s('tstat-m2',  d.m2  != null ? d.m2  : '—');
+    s('tstat-m3',  d.m3  != null ? d.m3  : '—');
+    s('tstat-m4',  d.m4  != null ? d.m4  : '—');
+    const cnt = document.getElementById('tel-sample-count');
+    if (cnt) cnt.textContent = telBuf.length;
+    const age = document.getElementById('tel-age');
+    if (age) age.textContent = telBuf.length ? new Date().toLocaleTimeString() : '—';
+  }
+
+  // Patch onTelemetry to also update live stats
+  // Use variable assignment (not function declaration) to avoid JS hoisting bug
+  const _origOnTelemetry = onTelemetry;
+  onTelemetry = function(d) { _origOnTelemetry(d); updateTelStats(d); };
+
+  // ── Push telemetry to Python server every 5 s ─────────────────────────────
+  const TEL_PUSH_URL = 'http://localhost:8080/ai/telemetry';
+  setInterval(async () => {
+    if (!telBuf.length) return;
+    try {
+      await fetch(TEL_PUSH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telemetry: getTelemetrySnapshot(60) }),
+      });
+    } catch (_) { /* server might not be running */ }
+  }, 5000);
+
+  // ── Analysis panel toggle ─────────────────────────────────────────────────
+  function toggleAnalysisPanel() {
+    const body  = document.getElementById('analysis-panel-body');
+    const arrow = document.getElementById('analysis-panel-arrow');
+    const open  = body.classList.toggle('open');
+    arrow.textContent = open ? '▲' : '▼';
+  }
+
+  // ── AI analysis button handler ────────────────────────────────────────────
+  async function runAnalysis(type) {
+    const resultEl = document.getElementById('analysis-result');
+    if (!resultEl) return;
+    const msgs = {
+      flight: 'Analyse my recent flight data and give me a full health report.',
+      anomaly:'Scan my telemetry for anomalies — yaw spin, oscillations, motor imbalance.',
+      pid:    'Based on my telemetry, suggest specific PID value changes to improve stability.',
+      crash:  'Analyse the telemetry before the last disarm. What caused the crash or emergency stop?',
+    };
+    const msg = msgs[type] || 'Analyse flight data.';
+    resultEl.style.display = 'block';
+    resultEl.textContent   = '⏳ Analysing…';
+    // Delegate to AI chat — it will call the right analysis tool
+    if (typeof sendAIMessage === 'function') {
+      await sendAIMessage(msg);
+    }
+    resultEl.textContent = '✓ See AI chat for the full report.';
+  }
+  </script>
+
+  <script>
+  // =========================================================================
+  //  CAMERA STREAM + AUTONOMY ENGINE
+  // =========================================================================
+  const AUTO_STATUS    = 'http://localhost:8080/ai/autonomy/status';
+  const AUTO_APPROVE   = 'http://localhost:8080/ai/autonomy/approve';
+  const AUTO_REJECT    = 'http://localhost:8080/ai/autonomy/reject';
+  const WORKFLOW_STATUS = 'http://localhost:8080/ai/workflow/status';
+
+  let camTimer       = null;   // setInterval handle for MJPEG polling
+  let autoPoller     = null;   // setInterval handle for autonomy status polling
+
+  // ── Camera panel toggle ──────────────────────────────────────────────────
+  function toggleCamPanel() {
+    const body  = document.getElementById('cam-panel-body');
+    const arrow = document.getElementById('cam-panel-arrow');
+    const open  = body.classList.toggle('open');
+    arrow.textContent = open ? '▲' : '▼';
+  }
+
+  // ── Live stream (polls /capture on the drone at 5 fps) ───────────────────
+  function startCamStream() {
+    const ip = (document.getElementById('esp-ip') || {value:''}).value.trim();
+    if (!ip) { setCamStatus('⚠ Enter drone IP first'); return; }
+    stopCamStream();
+    setCamStatus('▶ Streaming from ' + ip + ' …');
+    const captureUrl = `http://${ip}/capture`;
+    const img = document.getElementById('cam-img');
+    document.getElementById('cam-no-feed').style.display = 'none';
+    img.style.display = 'block';
+
+    // Poll /capture every 200 ms — non-blocking for the drone
+    camTimer = setInterval(() => {
+      // Append timestamp to bust cache
+      img.src = captureUrl + '?t=' + Date.now();
+    }, 200);
+
+    // Also try native MJPEG stream on port 82 as picture-in-picture fallback
+    // (browser will use it if CORS allows, otherwise falls back to polling above)
+  }
+
+  function stopCamStream() {
+    if (camTimer) { clearInterval(camTimer); camTimer = null; }
+    const img = document.getElementById('cam-img');
+    img.src = '';
+    img.style.display = 'none';
+    document.getElementById('cam-no-feed').style.display = '';
+    setCamStatus('Stopped');
+  }
+
+  function setCamStatus(msg) {
+    const el = document.getElementById('cam-status');
+    if (el) el.textContent = msg;
+  }
+
+  // ── Snap + AI vision analysis ────────────────────────────────────────────
+  async function snapAndAnalyse() {
+    const ip = (document.getElementById('esp-ip') || {value:''}).value.trim();
+    if (!ip) { setCamStatus('⚠ Enter drone IP first'); return; }
+    setCamStatus('📷 Capturing + analysing…');
+    // Delegate to the AI chat agent — it will call capture_image tool
+    if (typeof sendAIMessage === 'function') {
+      await sendAIMessage('What do you see right now? Capture an image and describe the scene.');
+    }
+    setCamStatus('Done — see chat for description');
+  }
+
+  // ── Autonomy controls ────────────────────────────────────────────────────
+  async function startAutonomy() {
+    const goal     = (document.getElementById('auto-goal')     || {value:''}).value.trim();
+    const mode     = (document.getElementById('auto-mode')     || {value:'human_loop'}).value;
+    const interval = (document.getElementById('auto-interval') || {value:5}).value;
+    if (!goal) { addAutoLog('⚠ Enter a mission goal first'); return; }
+
+    const msg = `Start autonomy: goal="${goal}" mode=${mode} interval=${interval}s`;
+    addAutoLog('Starting autonomy loop…');
+    if (typeof sendAIMessage === 'function') {
+      await sendAIMessage(msg);
+    }
+    document.getElementById('auto-running-badge').style.display = '';
+    startAutoPoller();
+  }
+
+  async function stopAutonomy() {
+    addAutoLog('Stopping autonomy…');
+    if (typeof sendAIMessage === 'function') {
+      await sendAIMessage('Stop the autonomy loop now.');
+    }
+    document.getElementById('auto-running-badge').style.display = 'none';
+    document.getElementById('auto-pending').style.display = 'none';
+    stopAutoPoller();
+  }
+
+  // ── Autonomy status poller ───────────────────────────────────────────────
+  function startAutoPoller() {
+    if (autoPoller) return;
+    autoPoller = setInterval(pollAutonomyStatus, 1000);
+  }
+
+  function stopAutoPoller() {
+    if (autoPoller) { clearInterval(autoPoller); autoPoller = null; }
+  }
+
+  async function pollAutonomyStatus() {
+    try {
+      const resp = await fetch(AUTO_STATUS);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const st   = data.status || {};
+
+      // Update running badge
+      document.getElementById('auto-running-badge').style.display =
+        st.running ? '' : 'none';
+      if (!st.running) { stopAutoPoller(); }
+
+      // Update log
+      if (st.log && st.log.length) {
+        const logEl = document.getElementById('auto-log');
+        if (logEl) logEl.innerHTML = st.log.slice().reverse()
+          .map(l => `<div>${l}</div>`).join('');
+      }
+
+      // Pending action (human_loop)
+      if (st.pending_action) {
+        const pending = st.pending_action;
+        document.getElementById('auto-pending').style.display = '';
+        document.getElementById('auto-pending-desc').textContent  = '→ ' + pending.description;
+        document.getElementById('auto-pending-scene').textContent = pending.scene || '';
+      } else {
+        document.getElementById('auto-pending').style.display = 'none';
+      }
+
+      // Execute any approved commands immediately
+      if (data.commands && data.commands.length > 0) {
+        if (typeof executeAICommands === 'function') {
+          await executeAICommands(data.commands);
+        }
+      }
+    } catch (_) { /* server not running */ }
+  }
+
+  async function autonomyApprove(approved) {
+    document.getElementById('auto-pending').style.display = 'none';
+    try {
+      await fetch(approved ? AUTO_APPROVE : AUTO_REJECT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      addAutoLog(approved ? '✔ Approved' : '✖ Rejected');
+    } catch (e) { addAutoLog('Error: ' + e.message); }
+  }
+
+  function addAutoLog(msg) {
+    const logEl = document.getElementById('auto-log');
+    if (!logEl) return;
+    const div = document.createElement('div');
+    div.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+    logEl.prepend(div);
+    while (logEl.children.length > 20) logEl.removeChild(logEl.lastChild);
+  }
+
+  // ── Workflow progress poller ──────────────────────────────────────────────
+  let workflowPoller = null;
+
+  function startWorkflowPoller() {
+    if (workflowPoller) clearInterval(workflowPoller);
+    workflowPoller = setInterval(pollWorkflowStatus, 800);
+  }
+
+  function stopWorkflowPoller() {
+    if (workflowPoller) { clearInterval(workflowPoller); workflowPoller = null; }
+  }
+
+  async function pollWorkflowStatus() {
+    try {
+      const resp = await fetch(WORKFLOW_STATUS);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const st   = data.status || {};
+
+      // Update workflow panel
+      updateWorkflowPanel(st);
+
+      // Stop polling when done or failed
+      if (!st.running && (st.status === 'done' || st.status === 'failed' || st.status === 'idle')) {
+        stopWorkflowPoller();
+        // Show final reply in AI chat if available
+        if (st.reply && st.reply !== '⏳ Working on it…') {
+          appendMsg('ai', st.reply);
+        }
+        aiWorking = false;
+        updateAIWorking(false);
+      }
+
+      // Execute commands as they stream in
+      if (data.commands && data.commands.length > 0) {
+        if (typeof executeAICommands === 'function') {
+          await executeAICommands(data.commands);
+        }
+      }
+    } catch (_) { /* server not running */ }
+  }
+
+  function updateWorkflowPanel(st) {
+    const panel = document.getElementById('workflow-panel');
+    if (!panel) return;
+
+    const statusColors = { idle:'#888', planning:'#ffaa00', executing:'#00ff41', waiting:'#00aaff', done:'#00ff41', failed:'#ff4444' };
+    const color = statusColors[st.status] || '#888';
+
+    let html = `<div style="color:${color};font-weight:bold;margin-bottom:6px;">
+      ${st.status === 'idle' ? '' : '⚡'} ${(st.status || 'idle').toUpperCase()}
+      ${st.total_steps > 0 ? ` — Step ${st.current_step}/${st.total_steps}` : ''}
+    </div>`;
+
+    if (st.goal) {
+      html += `<div style="color:#aaa;font-size:11px;margin-bottom:6px;">Goal: ${st.goal}</div>`;
+    }
+
+    if (st.plan && st.plan.length) {
+      html += '<div style="font-size:10px;">';
+      st.plan.forEach((step, i) => {
+        const stepNum = i + 1;
+        const done    = stepNum < st.current_step;
+        const active  = stepNum === st.current_step;
+        const pending = stepNum > st.current_step;
+        const icon    = done ? '✓' : active ? '▶' : '○';
+        const clr     = done ? '#00aa00' : active ? '#00ff41' : '#555';
+        html += `<div style="color:${clr};padding:1px 0">${icon} ${step}</div>`;
+      });
+      html += '</div>';
+    }
+
+    if (st.log && st.log.length) {
+      const last = st.log[st.log.length - 1];
+      html += `<div style="color:#666;font-size:10px;margin-top:4px;border-top:1px solid #333;padding-top:4px;">${last}</div>`;
+    }
+
+    panel.innerHTML = html;
+  }
+
+  function updateAIWorking(working) {
+    // No-op stub — aiWorking is handled in the AI chat script block
+    // This function exists so pollWorkflowStatus can call it safely
+  }
+
+  // =========================================================================
+  //  AI VOICE CHAT ENGINE
+  // =========================================================================
+  const AI_SERVER   = 'http://localhost:8080/ai/chat';
+  const AI_RESET    = 'http://localhost:8080/ai/reset';
+  const AI_SESSION  = 'sess_' + Math.random().toString(36).substr(2, 9);
+
+  let aiOpen       = false;
+  let aiListening  = false;
+  let aiWorking    = false;
+  let recognition  = null;
+  let thinkingEl   = null;
+
+  // ── Toggle panel ──────────────────────────────────────────────────────────
+  function toggleAIChat() {
+    aiOpen = !aiOpen;
+    document.getElementById('ai-chat-window').classList.toggle('hidden', !aiOpen);
+    if (aiOpen) {
+      document.getElementById('ai-text-input').focus();
+    } else {
+      stopVoice();
+    }
+  }
+
+  // ── Chat display helpers ──────────────────────────────────────────────────
+  function appendMsg(role, text) {
+    const box = document.getElementById('ai-chat-messages');
+    removeThinking();
+    const el = document.createElement('div');
+    el.className = 'chat-msg ' + role;
+    el.textContent = text;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function showThinking() {
+    const box = document.getElementById('ai-chat-messages');
+    removeThinking();
+    thinkingEl = document.createElement('div');
+    thinkingEl.className = 'chat-thinking';
+    thinkingEl.innerHTML = 'AI thinking <span>●</span><span>●</span><span>●</span>';
+    box.appendChild(thinkingEl);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function removeThinking() {
+    if (thinkingEl && thinkingEl.parentNode) {
+      thinkingEl.parentNode.removeChild(thinkingEl);
+    }
+    thinkingEl = null;
+  }
+
+  function setAIStatus(text) {
+    document.getElementById('ai-cmd-status').textContent = text;
+  }
+
+  // ── Current drone state snapshot (full UI) ───────────────────────────────
+  function getAIDroneState() {
+    const g = (id, fallback) => {
+      const el = document.getElementById(id);
+      return el ? (parseFloat(el.value) || fallback) : fallback;
+    };
+    return {
+      connected:      isConnected,
+      armed:          armed,
+      throttle:       throttle,
+      roll:           roll,
+      pitch:          pitch,
+      yaw:            yaw,
+      altitudeHold:   altitudeHoldEnabled,
+      positionHold:   positionHoldEnabled,
+      altitudeTarget: g('altitude-setpoint', 1.0),
+      takeoffPercent: g('takeoff-percent', 60),
+      droneIP:        (document.getElementById('esp-ip') || {value:''}).value.trim(),
+      trim_pitch:     parseInt((document.getElementById('trim-pitch') || {value:'0'}).value) || 0,
+      trim_roll:      parseInt((document.getElementById('trim-roll')  || {value:'0'}).value) || 0,
+      tuning: {
+        m1_comp:        g('m1-comp',        1.00),
+        m2_comp:        g('m2-comp',        1.00),
+        m3_comp:        g('m3-comp',        1.00),
+        m4_comp:        g('m4-comp',        1.00),
+        duty_idle:      g('duty-idle',      45),
+        yaw_scale:      g('yaw-scale',      1.0),
+        loop_rate:      g('loop-rate',      2000),
+        roll_angle_kp:  g('roll-angle-kp',  0.30),
+        roll_angle_ki:  g('roll-angle-ki',  0.01),
+        roll_angle_kd:  g('roll-angle-kd',  0.00),
+        roll_rate_kp:   g('roll-rate-kp',   0.08),
+        roll_rate_ki:   g('roll-rate-ki',   0.00),
+        roll_rate_kd:   g('roll-rate-kd',   0.01),
+        pitch_angle_kp: g('pitch-angle-kp', 0.30),
+        pitch_angle_ki: g('pitch-angle-ki', 0.01),
+        pitch_angle_kd: g('pitch-angle-kd', 0.00),
+        pitch_rate_kp:  g('pitch-rate-kp',  0.08),
+        pitch_rate_ki:  g('pitch-rate-ki',  0.00),
+        pitch_rate_kd:  g('pitch-rate-kd',  0.01),
+        yaw_rate_kp:    g('yaw-rate-kp',    0.06),
+        yaw_rate_ki:    g('yaw-rate-ki',    0.00),
+        yaw_rate_kd:    g('yaw-rate-kd',    0.008),
+      },
+      litewing_tuning: {
+        pidZ_kp:  g('lw-pidz-kp',  1.60),
+        pidZ_ki:  g('lw-pidz-ki',  0.50),
+        pidVZ_kp: g('lw-pidvz-kp', 0.50),
+        pidVZ_ki: g('lw-pidvz-ki', 0.30),
+        hover_thr:g('lw-hover-thr',0.50),
+        pidX_kp:  g('lw-pidx-kp',  1.90),
+        pidX_ki:  g('lw-pidx-ki',  0.10),
+        pidVX_kp: g('lw-pidvx-kp', 0.60),
+        pidVX_ki: g('lw-pidvx-ki', 0.08),
+        kf_q:     g('lw-kf-q',     1.00),
+        kf_r:     g('lw-kf-r',     0.05),
+        flow_std: g('lw-flow-std', 2.00),
+      }
+    };
+  }
+
+  // ── Send message to AI server ─────────────────────────────────────────────
+  async function sendAIMessage() {
+    if (aiWorking) return;
+    const input = document.getElementById('ai-text-input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    aiWorking = true;
+
+    if (!aiOpen) toggleAIChat();
+    appendMsg('user', text);
+    showThinking();
+    setAIStatus('thinking…');
+
+    try {
+      const res = await fetch(AI_SERVER, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message:    text,
+          state:      getAIDroneState(),
+          session_id: AI_SESSION
+        })
+      });
+
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      const data = await res.json();
+
+      // If async workflow started, begin polling for progress
+      if (data.async && data.workflow_id) {
+        removeThinking();
+        appendMsg('ai', data.reply);
+        setAIStatus('workflow running…');
+        startWorkflowPoller();
+        // Don't unblock aiWorking yet — poller will do it when done
+        return;
+      }
+
+      appendMsg('ai', data.reply);
+      speakText(data.reply);
+
+      if (data.commands && data.commands.length > 0) {
+        setAIStatus('executing ' + data.commands.length + ' action(s)…');
+        await executeAICommands(data.commands);
+      }
+      setAIStatus('idle');
+
+    } catch (err) {
+      removeThinking();
+      appendMsg('ai', '⚠ Could not reach AI server. Is keyboard_server.py running?');
+      setAIStatus('error');
+      console.error('[AI]', err);
+    } finally {
+      aiWorking = false;
+    }
+  }
+
+  // ── Execute drone commands returned by AI ─────────────────────────────────
+  async function executeAICommands(commands) {
+    for (const cmd of commands) {
+      setAIStatus('→ ' + cmd.action);
+
+      switch (cmd.action) {
+
+        case 'wait':
+          await aiSleep(Math.max(100, (cmd.seconds || 1) * 1000));
+          break;
+
+        case 'arm':
+          throttle = Math.min(throttle, 1000);
+          armed = true;
+          document.getElementById('arm-switch').checked = true;
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'disarm':
+          armed = false;
+          document.getElementById('arm-switch').checked = false;
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'set_throttle':
+          throttle = Math.max(1000, Math.min(2000, cmd.ch1 || 1000));
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'set_yaw':
+          yaw = Math.max(1000, Math.min(2000, cmd.ch4 || 1500));
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'set_roll':
+          roll = Math.max(1000, Math.min(2000, cmd.ch2 || 1500));
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'set_pitch':
+          pitch = Math.max(1000, Math.min(2000, cmd.ch3 || 1500));
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'hover':
+          roll = 1500; pitch = 1500; yaw = 1500;
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'emergency_stop':
+          armed = false; throttle = 1000;
+          roll = 1500; pitch = 1500; yaw = 1500;
+          document.getElementById('arm-switch').checked = false;
+          updateDisplay();
+          if (isConnected) sendUpdate();
+          break;
+
+        case 'enable_altitude_hold':
+          altitudeHoldEnabled = true;
+          document.getElementById('altitude-hold-switch').checked = true;
+          break;
+
+        case 'disable_altitude_hold':
+          altitudeHoldEnabled = false;
+          document.getElementById('altitude-hold-switch').checked = false;
+          break;
+
+        case 'enable_position_hold':
+          positionHoldEnabled = true;
+          document.getElementById('position-hold-switch').checked = true;
+          break;
+
+        case 'disable_position_hold':
+          positionHoldEnabled = false;
+          document.getElementById('position-hold-switch').checked = false;
+          break;
+
+        case 'set_altitude_target':
+          document.getElementById('altitude-setpoint').value = cmd.meters || 1.0;
+          break;
+
+        // ── Connection ───────────────────────────────────────────────────
+        case 'connect_drone':
+          if (cmd.ip) {
+            document.getElementById('esp-ip').value = cmd.ip;
+            localStorage.setItem('esp32s3_ip', cmd.ip);
+          }
+          if (!isConnected) connect();
+          break;
+
+        case 'disconnect_drone':
+          if (isConnected) disconnect();
+          break;
+
+        // ── Generic UI field setter ──────────────────────────────────────
+        case 'set_ui_fields':
+          if (cmd.fields) {
+            for (const [id, val] of Object.entries(cmd.fields)) {
+              const el = document.getElementById(id);
+              if (el) {
+                el.value = val;
+                // Fire both events so onchange and oninput handlers both run
+                el.dispatchEvent(new Event('input',  { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+            updateDisplay();
+          }
+          break;
+
+        // ── Trim setter ──────────────────────────────────────────────────
+        case 'set_trim': {
+          const pt = cmd.pitch_trim;
+          const rt = cmd.roll_trim;
+          if (pt !== undefined) {
+            const el = document.getElementById('trim-pitch');
+            if (el) { el.value = pt; el.dispatchEvent(new Event('input', {bubbles:true})); }
+          }
+          if (rt !== undefined) {
+            const el = document.getElementById('trim-roll');
+            if (el) { el.value = rt; el.dispatchEvent(new Event('input', {bubbles:true})); }
+          }
+          break;
+        }
+
+        // ── Tuning ───────────────────────────────────────────────────────
+        case 'apply_tuning':
+          if (typeof sendTuning === 'function') sendTuning();
+          break;
+
+        // ── Auto sequences ───────────────────────────────────────────────
+        case 'auto_takeoff': {
+          if (!isConnected) { appendMsg('system-note', '⚠ Auto-takeoff skipped: not connected.'); break; }
+          if (!armed)       { appendMsg('system-note', '⚠ Auto-takeoff skipped: drone not armed — arm first.'); break; }
+          // Read current takeoff % from field (may have been set by set_ui_fields just before)
+          const pctEl = document.getElementById('takeoff-percent');
+          const pct   = pctEl ? (parseInt(pctEl.value) || 60) : 60;
+          const tgt   = 1000 + Math.round((pct / 100) * 1000);
+          const start = throttle;
+          roll = 1500; pitch = 1500; yaw = 1500;
+          updateDisplay();
+          sendUpdate();
+          // Ramp throttle over 1 s
+          const steps2 = 50, interval2 = 20;
+          const step2  = (tgt - start) / steps2;
+          let n2 = 0;
+          await new Promise(res => {
+            const t = setInterval(() => {
+              n2++;
+              throttle = Math.round(start + step2 * n2);
+              if (n2 >= steps2 || throttle >= tgt) {
+                throttle = tgt; clearInterval(t); res();
+              }
+              updateDisplay();
+              sendUpdate();
+            }, interval2);
+          });
+          break;
+        }
+
+        case 'auto_land':
+          if (typeof autoLand === 'function') autoLand();
+          break;
+      }
+
+      // Let the 20 Hz WebSocket timer fire between commands
+      await aiSleep(20);
+    }
+  }
+
+  function aiSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── Reset conversation ────────────────────────────────────────────────────
+  async function resetAIChat() {
+    try {
+      await fetch(AI_RESET, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: AI_SESSION })
+      });
+    } catch (_) {}
+    const box = document.getElementById('ai-chat-messages');
+    box.innerHTML = '<div class="chat-msg system-note">Conversation cleared.</div>';
+    setAIStatus('idle');
+  }
+
+  // ── Text-to-Speech ────────────────────────────────────────────────────────
+  function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u  = new SpeechSynthesisUtterance(text);
+    u.rate   = 1.1;
+    u.pitch  = 1.0;
+    u.volume = 1.0;
+    window.speechSynthesis.speak(u);
+  }
+
+  // ── Voice Input (Web Speech API) ──────────────────────────────────────────
+  function toggleVoice() {
+    if (aiListening) { stopVoice(); } else { startVoice(); }
+  }
+
+  function startVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      appendMsg('system-note', 'Voice not supported — use Chrome or Edge.');
+      return;
+    }
+    if (!aiOpen) toggleAIChat();
+
+    recognition = new SR();
+    recognition.continuous    = false;
+    recognition.interimResults = false;
+    recognition.lang           = 'en-US';
+
+    recognition.onstart = () => {
+      aiListening = true;
+      document.getElementById('ai-voice-btn').classList.add('listening');
+      document.getElementById('ai-fab').classList.add('listening');
+      document.getElementById('ai-voice-status').textContent = '🎤 listening…';
+    };
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript.trim();
+      if (transcript) {
+        document.getElementById('ai-text-input').value = transcript;
+        sendAIMessage();
+      }
+    };
+
+    recognition.onerror = (e) => {
+      appendMsg('system-note', 'Voice error: ' + e.error);
+      stopVoice();
+    };
+
+    recognition.onend = () => stopVoice();
+    recognition.start();
+  }
+
+  function stopVoice() {
+    aiListening = false;
+    if (recognition) { try { recognition.stop(); } catch (_) {} recognition = null; }
+    document.getElementById('ai-voice-btn').classList.remove('listening');
+    document.getElementById('ai-fab').classList.remove('listening');
+    document.getElementById('ai-voice-status').textContent = '🎤 ready';
+  }
+  </script>
+</body>
+</html>
