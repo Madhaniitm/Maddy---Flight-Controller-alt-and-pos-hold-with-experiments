@@ -1,0 +1,7 @@
+cmd_idx,command,cmd_type,z_before_m,z_after_m,increment_m,target_m,target_source,asked_clarify,correct,api_calls,tokens,tools
+1,go to 2 metres,explicit,0.998,2.015,1.017,2.0,set_altitude_target,False,True,10,45788,plan_workflow;report_progress;set_altitude_target;report_progress;wait;report_progress
+2,climb to 2m,paraphrase,2.015,2.01,-0.005,2.0,set_altitude_target,False,True,10,45417,plan_workflow;report_progress;set_altitude_target;report_progress;wait;report_progress
+3,go higher,relative_no_num,2.01,2.015,0.005,2.0,set_altitude_target,False,False,10,45760,plan_workflow;report_progress;set_altitude_target;report_progress;wait;report_progress
+4,go up a bit,vague_relative,2.015,2.252,0.237,2.25,set_altitude_target,False,True,10,45813,plan_workflow;report_progress;get_sensor_status;report_progress;set_altitude_target;report_progress
+5,ascend slowly to a safe height,abstract,2.252,2.502,0.25,2.5,set_altitude_target,False,True,8,36027,plan_workflow;report_progress;set_altitude_target;report_progress;wait;report_progress
+6,I want it higher,indirect,2.502,2.501,-0.001,2.5,text_inference,False,False,1,4161,

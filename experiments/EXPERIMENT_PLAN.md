@@ -451,14 +451,14 @@ Multi-LLM experiments: D6, D7, E5, F1, F2, F3 (Claude + GPT-4o + Gemini + LLaMA-
 | exp_B4_combined_hold_wind.py | B4 | ✓ DONE |
 | exp_B5_hover_soc.py | B5 | ✓ DONE |
 | exp_B1_hw_althold_step.py | B1-HW | TODO (hardware) |
-| exp_C1_nl_to_toolchain.py | C1 | TODO |
-| exp_C2_ambiguity.py | C2 | TODO |
-| exp_C3_multiturn.py | C3 | TODO |
-| exp_C4_mid_mission_correction.py | C4 | TODO |
-| exp_C5_human_describes_problem.py | C5 | TODO |
-| exp_C6_mission_planning.py | C6 | TODO |
-| exp_C7_safety_override.py | C7 | TODO |
-| exp_C8_three_mode_comparison.py | C8 | TODO |
+| exp_C1_nl_to_toolchain.py | C1 | ✓ DONE |
+| exp_C2_ambiguity.py | C2 | ✓ DONE |
+| exp_C3_multiturn.py | C3 | ✓ DONE |
+| exp_C4_mid_mission_correction.py | C4 | ✓ DONE |
+| exp_C5_human_describes_problem.py | C5 | ✓ DONE |
+| exp_C6_mission_planning.py | C6 | ✓ DONE |
+| exp_C7_safety_override.py | C7 | ✓ DONE |
+| exp_C8_three_mode_comparison.py | C8 | ✓ DONE |
 | exp_D1_vision_classification.py | D1 | TODO |
 | exp_D2_full_auto_navigation.py | D2 | TODO |
 | exp_D3_human_loop_navigation.py | D3 | TODO |

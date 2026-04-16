@@ -783,9 +783,10 @@ class PhysicsLoop:
 
         # ── Altitude hold PIDs ─────────────────────────────────────────────────
         # Limits match firmware exactly:
-        #   outer: vel_sp  constrained to ±0.4 m/s,  integral to ±0.5
-        #   inner: thr_corr constrained to ±0.30,     integral to ±0.5
-        self.pid_alt_pos = PID(lw_pidZ_kp,  lw_pidZ_ki,  0, limit=0.4,  ilimit=0.5)  # pos→vel
+        #   outer: vel_sp  constrained to ±0.2 m/s (firmware line 2208),  integral to ±0.5
+        #   inner: thr_corr constrained to ±0.30,                          integral to ±0.5
+        # Note: firmware also has an anti-windup check at ±0.4 (line 2206) — that is NOT the output limit
+        self.pid_alt_pos = PID(lw_pidZ_kp,  lw_pidZ_ki,  0, limit=0.2,  ilimit=0.5)  # pos→vel
         self.pid_alt_vel = PID(lw_pidVZ_kp, lw_pidVZ_ki, 0, limit=0.30, ilimit=0.5)  # vel→thrust
 
         # ── Position hold PIDs ─────────────────────────────────────────────────

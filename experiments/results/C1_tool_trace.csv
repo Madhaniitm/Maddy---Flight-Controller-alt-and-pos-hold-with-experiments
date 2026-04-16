@@ -1,0 +1,20 @@
+turn,tool_name,args_json,sim_time_s,result_preview
+1,plan_workflow,"{""goal"": ""Take off and hover stably at 1.0 metre altitude"", ""steps"": [""Arm the motors"", ""Find hover throttle (auto-ramp to vz\u22480)"", ""Check drone is stable post-takeoff"", ""Enable altitude hold"", ""Wait for hold to stabilise"", ""Set altitude target to 1.0 m"", ""Wait for drone to reach target"", ""Confirm altitude reached at 1.0 m""]}",0.0,Plan recorded (8 steps): Take off and hover stably at 1.0 metre altitude
+2,report_progress,"{""step"": 1, ""total_steps"": 8, ""description"": ""Arming motors""}",0.0,Progress: step 1/8 — Arming motors
+3,arm,{},0.5,"Armed. ch5=1000, motors spinning at idle."
+4,report_progress,"{""step"": 2, ""total_steps"": 8, ""description"": ""Finding hover throttle \u2014 ramping from 1200 PWM until vz\u22480""}",0.5,Progress: step 2/8 — Finding hover throttle — ramping from 1200 PWM until vz≈0
+5,find_hover_throttle,{},9.4,"Hover throttle found: PWM=1518, thr=0.518, z=0.068 m."
+6,report_progress,"{""step"": 3, ""total_steps"": 8, ""description"": ""Checking drone stability (roll/pitch within \u00b15\u00b0)""}",9.4,Progress: step 3/8 — Checking drone stability (roll/pitch within ±5°)
+7,check_drone_stable,{},9.4,"✓ Stable: roll=0.0°, pitch=0.1° (max 5.0°)"
+8,report_progress,"{""step"": 4, ""total_steps"": 8, ""description"": ""Enabling altitude hold""}",9.4,Progress: step 4/8 — Enabling altitude hold
+9,enable_altitude_hold,{},9.4,"Altitude hold enabled at 0.068 m, hover_thr=0.518."
+10,report_progress,"{""step"": 5, ""total_steps"": 8, ""description"": ""Waiting 2 seconds for altitude hold to stabilise""}",9.4,Progress: step 5/8 — Waiting 2 seconds for altitude hold to stabilise
+11,wait,"{""seconds"": 2.0}",11.4,Waited 2.0 s. Current EKF altitude: 0.066 m.
+12,report_progress,"{""step"": 6, ""total_steps"": 8, ""description"": ""Setting altitude target to 1.0 m""}",11.4,Progress: step 6/8 — Setting altitude target to 1.0 m
+13,set_altitude_target,"{""meters"": 1.0}",11.4,Altitude target set to 1.00 m.
+14,report_progress,"{""step"": 7, ""total_steps"": 7, ""description"": ""Waiting 4 seconds for drone to climb to 1.0 m""}",11.4,Progress: step 7/7 — Waiting 4 seconds for drone to climb to 1.0 m
+15,wait,"{""seconds"": 4.0}",15.4,Waited 4.0 s. Current EKF altitude: 1.023 m.
+16,report_progress,"{""step"": 8, ""total_steps"": 8, ""description"": ""Confirming altitude reached at 1.0 m \u00b10.10 m""}",15.4,Progress: step 8/8 — Confirming altitude reached at 1.0 m ±0.10 m
+17,check_altitude_reached,"{""target_m"": 1.0, ""tolerance_m"": 0.1}",15.4,"✓ Altitude reached: 1.023 m (target 1.0 m, err 2.3 cm)"
+17,check_drone_stable,{},15.4,"✓ Stable: roll=0.0°, pitch=0.0° (max 5.0°)"
+18,report_progress,"{""step"": 8, ""total_steps"": 8, ""description"": ""Complete \u2014 hovering stably at 1.0 m""}",15.4,Progress: step 8/8 — Complete — hovering stably at 1.0 m

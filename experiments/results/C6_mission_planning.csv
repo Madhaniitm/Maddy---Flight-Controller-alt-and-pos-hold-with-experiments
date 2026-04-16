@@ -1,0 +1,20 @@
+metric,value
+command,do a square pattern at 1 metre height
+n_plan_steps,33
+plan_steps,Arm the drone;Find hover throttle;Check drone is stable;Enable altitude hold;Wait for stabilisation;Set altitude target to 1.0 m;Wait to reach altitude;Check altitude reached
+alt_targets,1.0
+n_alt_target_ok,1
+x_range_m,0.279
+y_range_m,0.156
+squareness_ratio,0.559
+total_path_m,0.497
+direction_changes,9
+tool_sequence,plan_workflow;report_progress;arm;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress;wait;report_progress;set_altitude_target;report_progress;wait
+api_calls,30
+input_tokens,166349
+output_tokens,2494
+cost_usd,0.536457
+plan_ok,True
+alt_ok,True
+trajectory_ok,True
+passed,True
