@@ -418,20 +418,165 @@ Measure performance gap vs Claude on same tasks.
 
 ---
 
+## SECTION G — Three-Tier Perception Hierarchy (5 experiments)
+Purpose: Validate the extended three-tier architecture — PID (4kHz) + YOLO (30fps) +
+Claude Vision (0.1Hz). Prove each layer is necessary and operates at the correct timescale.
+YOLO runs YOLOv8n locally; Claude Vision API processes YOLO-annotated frames.
+Camera: laptop webcam (simulation) / ESP32-S3 OV2640 (hardware) via CameraSource abstraction.
+
+---
+
+### EXP-G1: YOLO Emergency Stop Latency vs Claude Response Latency ★ KEY
+**What:** Inject a wall_close event (obstacle < 20 cm). Measure:
+  (a) YOLO-only path: time from frame capture to stop_movement WebSocket command
+  (b) Claude-only path: time from frame capture to Claude deciding stop
+  50 trials each path.
+**Measure:** YOLO latency (ms), Claude latency (ms/s), gap ratio (Claude/YOLO).
+**Expected result:** YOLO < 20ms. Claude > 1000ms. Gap > 50×. Proves fast layer necessary.
+**Output:** Side-by-side latency histogram. Gap ratio annotation.
+          Extends E1 with a third data point (YOLO layer).
+**Script:** exp_G1_yolo_vs_claude_latency.py
+
+### EXP-G2: Event-Triggered vs Periodic Claude Activation
+**What:** Run 3-minute hover mission under two Claude wake strategies:
+  (a) Periodic: Claude activates every 10 seconds regardless of scene
+  (b) Event-triggered: Claude activates only when YOLO raises a flag
+      (new object class, proximity threshold crossed, confidence drop)
+  N=5 runs per strategy.
+**Measure:** Total API calls, missed critical events, false activations,
+            total cost USD, coverage (fraction of critical moments with Claude active).
+**Expected result:** Event-triggered uses 40–60% fewer API calls with similar or better
+                    critical event coverage.
+**Output:** API calls vs time plot. Miss/false-alarm table. Cost comparison.
+**Script:** exp_G2_event_vs_periodic_claude.py
+
+### EXP-G3: Monocular Depth Estimation Accuracy
+**What:** Position webcam at 5 known distances from a flat wall:
+  0.20m, 0.50m, 1.00m, 1.50m, 2.00m. 10 measurements per distance.
+  Compare 3 depth estimation methods:
+    Method A — Bounding box + known object height (YOLO person/wall)
+    Method B — MiDaS small monocular depth network
+    Method C — Depth Anything V2 ViT-S (2024 SOTA)
+**Measure:** MAE (cm), RMSE (cm) per method per distance. Inference time per frame.
+**Expected result:** Depth Anything V2 best accuracy. Bounding box best for known objects.
+                    MiDaS fastest. All within ±15% at 0.3–2m.
+**Output:** MAE vs distance per method (3 curves). Inference time bar chart.
+**Script:** exp_G3_monocular_depth_accuracy.py
+
+### EXP-G4: Three-Tier Timescale Validation (Extends E1) ★ KEY
+**What:** Simultaneously measure all three perception layers during a 2-minute hover:
+  Tier 1 — PID period (from ESP32-S3 firmware log or sim physics step rate)
+  Tier 2 — YOLO inference time (local, per frame)
+  Tier 3 — Claude Vision API latency (per call)
+  50 samples per tier.
+**Measure:** Mean, median, P95, max latency per tier. Gap ratios: T2/T1, T3/T2, T3/T1.
+**Expected result:** T1≈250µs, T2≈10ms, T3≈1500ms.
+                    T3/T1 ≈ 6000× — three orders of magnitude separation.
+**Output:** Three-panel latency distribution. Log-scale comparison bar.
+           Table: tier, mean, P95, gap×. This is the definitive architecture figure.
+**Script:** exp_G4_three_tier_timescale.py
+
+### EXP-G5: Real Vision Pipeline — Webcam + YOLO + Claude Vision (Replaces Text Sim)
+**What:** Repeat D1 scene classification using REAL webcam frames instead of
+  SceneSimulator text descriptions. Physically position webcam in front of each
+  of 10 scenes. YOLO pre-processes frame. Claude Vision API classifies.
+  N=5 runs per scene (move webcam, re-capture).
+**Measure:** Per-scene classification accuracy (Wilson CI). Latency per scene.
+            Direct comparison table: G5 (real vision) vs D1 (text simulation).
+**Expected result:** Real vision accuracy ≥ text simulation accuracy on clear scenes.
+                    Validates that text simulation was a conservative proxy.
+**Output:** Accuracy comparison bar chart (D1 text vs G5 real). Confusion matrix.
+           Sample webcam frames shown in paper.
+**Script:** exp_G5_real_vision_pipeline.py
+
+---
+
+## SECTION H — Advanced Supervision Features (4 experiments)
+Purpose: Validate operational features beyond basic supervision — runtime mode switching,
+face-based authorisation, immutable audit trail, and decision verbalization quality.
+These experiments target Paper 2 (blockchain/security) and Paper 3 (RA-L hardware).
+
+---
+
+### EXP-H1: Runtime Autonomy Mode Switch Mid-Mission
+**What:** Start mission in human_loop mode. At iteration 5, switch to full_auto.
+  At iteration 10, switch back to human_loop. Measure decision continuity across switches.
+  N=5 runs.
+**Measure:**
+  - Command drop rate during switch (should be 0)
+  - Latency of mode switch (ms)
+  - Mission continuity: did LLM maintain context across switch?
+  - Altitude RMSE before/during/after switch
+**Expected result:** Zero command drops. LLM continues mission without re-planning from scratch.
+**Output:** Altitude timeline with mode-switch annotations. Drop rate table.
+**Script:** exp_H1_runtime_mode_switch.py
+
+### EXP-H2: Face Recognition — Authorised vs Unknown Person Response ★
+**What:** Present two scenarios to the drone camera:
+  (a) Authorised face (pilot, registered in system)
+  (b) Unknown face (unregistered person)
+  Use face_recognition library. LLM decides action based on face identity.
+  10 trials per scenario, N=5 runs.
+**Measure:**
+  - True positive rate: correctly identifies authorised person
+  - True negative rate: correctly flags unknown person
+  - LLM response: appropriate action (continue vs hold vs alert)
+  - False accept rate / false reject rate
+**Expected result:** TPR > 90%, TNR > 90% in controlled indoor lighting.
+**Output:** Confusion matrix. Example frames. LLM response per identity type.
+**Note:** Privacy disclaimer required in paper. No real personal data stored.
+**Script:** exp_H2_face_recognition_auth.py
+
+### EXP-H3: Blockchain Audit Trail — Integrity and Tamper Detection
+**What:** Log a complete 5-minute simulated flight session to the hash-chain blockchain.
+  Then: (a) verify untampered chain integrity, (b) tamper one record, (c) re-verify.
+  Measure tamper detection rate and verification time.
+  N=10 tamper attempts at random block positions.
+**Measure:**
+  - Tamper detection rate (should be 100%)
+  - Chain verification time vs chain length
+  - Block write latency (ms per event)
+  - Storage size per flight hour
+**Expected result:** 100% tamper detection. Verification O(n) in chain length.
+                    Write latency < 5ms per block.
+**Output:** Detection rate bar. Verification time vs chain length plot.
+           Sample chain printout with tampered block highlighted.
+**Script:** exp_H3_blockchain_integrity.py
+
+### EXP-H4: Decision Verbalization Quality — Claude Speech vs Action Consistency
+**What:** Run 20 Claude supervisor decisions. For each decision, compare:
+  - What Claude said in natural language (verbalized intention)
+  - What tool calls Claude actually executed (action)
+  Score semantic consistency between stated intention and executed action.
+  N=5 runs, 20 decisions per run = 100 total decisions.
+**Measure:**
+  - Consistency rate: stated intention matches executed action (Wilson CI)
+  - Cases where Claude said X but did Y (hallucination-action gap)
+  - Verbalization latency (extra tokens for explanation vs action-only)
+**Expected result:** >85% consistency. Identified gap cases provide failure analysis.
+**Output:** Consistency rate with CI. Example inconsistent decisions (qualitative).
+           Token overhead of verbalization vs silent execution.
+**Script:** exp_H4_decision_verbalization.py
+
+---
+
 ## SUMMARY TABLE
 
 | Section | Count | Needs API | Needs Hardware | Core Question |
 |---------|-------|-----------|----------------|---------------|
-| A — Sim Validation        | 6  | No  | No  | Is the simulator physics-accurate? |
-| B — Controller Baseline   | 5+2| No  | 2 exp| How well does the PID work? Sim-to-real gap? |
-| C — Human Commands        | 8  | Yes | No  | Can LLM interpret and execute human NL commands? |
-| D — LLM Autonomous        | 9+1| Yes | 1 exp| Can LLM see, decide, act without human? |
-| E — Architecture Analysis | 5  | Partial | No | Why hierarchical? LLM vs rule-based? |
-| F — Multi-LLM Benchmark   | 3  | Partial | No | Which LLM is best for UAV supervision? |
-| **TOTAL**                 | **38** | **26 API** | **3 HW** | |
+| A — Sim Validation        | 6   | No       | No    | Is the simulator physics-accurate? |
+| B — Controller Baseline   | 5+2 | No       | 2 exp | How well does the PID work? Sim-to-real gap? |
+| C — Human Commands        | 8   | Yes      | No    | Can LLM interpret and execute human NL commands? |
+| D — LLM Autonomous        | 9+1 | Yes      | 1 exp | Can LLM see, decide, act without human? |
+| E — Architecture Analysis | 5   | Partial  | No    | Why hierarchical? LLM vs rule-based? |
+| F — Multi-LLM Benchmark   | 3   | Partial  | No    | Which LLM is best for UAV supervision? |
+| G — Three-Tier Hierarchy  | 5   | Partial  | No    | Is YOLO+Claude+PID hierarchy necessary? |
+| H — Advanced Features     | 4   | Yes      | No    | Face auth, blockchain, mode switch, verbalization? |
+| **TOTAL**                 | **47** | **35 API** | **3 HW** | |
 
-Hardware experiments: B1-HW, D9-HW (both on ESP32-S3 drone with OV2640 camera)
-Multi-LLM experiments: D6, D7, E5, F1, F2, F3 (Claude + GPT-4o + Gemini + LLaMA-3)
+Hardware experiments: B1-HW, D9-HW (ESP32-S3 drone with OV2640 camera)
+Multi-LLM experiments: D6, D7, E5, F1, F2, F3
+Real camera experiments: G3, G5 (laptop webcam), H2 (face recognition via webcam)
 
 ---
 
@@ -459,24 +604,33 @@ Multi-LLM experiments: D6, D7, E5, F1, F2, F3 (Claude + GPT-4o + Gemini + LLaMA-
 | exp_C6_mission_planning.py | C6 | ✓ DONE |
 | exp_C7_safety_override.py | C7 | ✓ DONE |
 | exp_C8_three_mode_comparison.py | C8 | ✓ DONE |
-| exp_D1_vision_classification.py | D1 | TODO |
-| exp_D2_full_auto_navigation.py | D2 | TODO |
-| exp_D3_human_loop_navigation.py | D3 | TODO |
-| exp_D4_obstacle_avoidance.py | D4 | TODO |
-| exp_D5_autonomous_waypoint.py | D5 | TODO |
-| exp_D6_anomaly_detection.py | D6 | TODO (multi-LLM) |
-| exp_D7_pid_adaptation.py | D7 | TODO (multi-LLM) |
-| exp_D8_sensor_dropout.py | D8 | TODO |
-| exp_D9_end_to_end.py | D9 | TODO |
+| exp_D1_vision_classification.py | D1 | ✓ DONE |
+| exp_D2_full_auto_navigation.py | D2 | ✓ DONE |
+| exp_D3_human_loop_navigation.py | D3 | ✓ DONE |
+| exp_D4_obstacle_avoidance.py | D4 | ✓ DONE |
+| exp_D5_autonomous_waypoint.py | D5 | ✓ DONE |
+| exp_D6_anomaly_detection.py | D6 | ✓ DONE (multi-LLM) |
+| exp_D7_pid_adaptation.py | D7 | ✓ DONE (multi-LLM) |
+| exp_D8_sensor_dropout.py | D8 | ✓ DONE |
+| exp_D9_end_to_end.py | D9 | ✓ DONE |
 | exp_D9_hw_end_to_end.py | D9-HW | TODO (hardware) |
-| exp_E1_api_latency.py | E1 | TODO (multi-model) |
-| exp_E2_human_vs_auto_time.py | E2 | TODO |
-| exp_E3_memory_retention.py | E3 | TODO |
-| exp_E4_token_scaling.py | E4 | TODO (cost extended) |
-| exp_E5_llm_vs_rules.py | E5 | TODO (multi-LLM) |
-| exp_F1_benchmark_summary.py | F1 | TODO (analysis) |
-| exp_F2_latency_vs_capability.py | F2 | TODO (analysis) |
-| exp_F3_opensource_reproducibility.py | F3 | TODO (LLaMA-3) |
+| exp_E1_api_latency.py | E1 | ✓ DONE (multi-model) |
+| exp_E2_human_vs_auto_time.py | E2 | ✓ DONE |
+| exp_E3_memory_retention.py | E3 | ✓ DONE |
+| exp_E4_token_scaling.py | E4 | ✓ DONE |
+| exp_E5_llm_vs_rules.py | E5 | ✓ DONE (multi-LLM) |
+| exp_F1_benchmark_summary.py | F1 | ✓ DONE (analysis) |
+| exp_F2_latency_vs_capability.py | F2 | ✓ DONE (analysis) |
+| exp_F3_opensource_reproducibility.py | F3 | ✓ DONE (LLaMA-3) |
+| exp_G1_yolo_vs_claude_latency.py | G1 | TODO |
+| exp_G2_event_vs_periodic_claude.py | G2 | TODO |
+| exp_G3_monocular_depth_accuracy.py | G3 | TODO (webcam) |
+| exp_G4_three_tier_timescale.py | G4 | TODO |
+| exp_G5_real_vision_pipeline.py | G5 | TODO (webcam) |
+| exp_H1_runtime_mode_switch.py | H1 | TODO |
+| exp_H2_face_recognition_auth.py | H2 | TODO (webcam+face_recognition) |
+| exp_H3_blockchain_integrity.py | H3 | TODO |
+| exp_H4_decision_verbalization.py | H4 | TODO |
 
 ---
 
@@ -489,17 +643,24 @@ Multi-LLM experiments: D6, D7, E5, F1, F2, F3 (Claude + GPT-4o + Gemini + LLaMA-
 6. LLM handles faults and novel situations that rule-based systems cannot (D6, D8, E5)
 7. Performance generalises across LLM model families — not a single-model demo (D6, D7, E5, F1–F3)
 8. The system works on real hardware with a real camera — not simulation-only (B1-HW, D9-HW)
+9. Three-tier hierarchy (PID+YOLO+Claude) is necessary — each tier proven by G1, G4
+10. Real camera vision (webcam/OV2640) validates text-simulation proxy (G5 vs D1)
+11. Blockchain provides immutable tamper-proof audit trail for UAV decisions (H3)
+12. Face recognition enables identity-aware authorisation without cloud dependency (H2)
 
 ---
 
 ## NOTES FOR PAPER WRITING
 - Always describe LLM as "supervisor" or "autonomous companion", never "flight controller"
 - Inner loop = Madgwick (200Hz) + EKF (250Hz) + cascaded PID (4kHz) — untouched by LLM
-- Outer loop = LLM (0.5–2Hz) decides setpoints, mode switches, gain changes, mission steps
-- Timescale separation is the KEY design principle — quantified in E1
+- Middle loop = YOLO (30fps) — reactive obstacle detection, emergency bypass
+- Outer loop = LLM (0.1Hz) decides setpoints, mode switches, gain changes, mission steps
+- THREE timescale separations: 4kHz / 30fps / 0.1Hz — quantified in G4
 - find_hover_throttle() is novel: LLM-initiated adaptive calibration using live telemetry
 - suggest_pid_tuning() is novel: LLM closes the loop on gain selection (D7)
-- autonomy_loop with human-in-loop vs full_auto: two deployment modes in one system
+- autonomy_loop with human-in-loop vs full_auto: two deployment modes, runtime switchable (H1)
 - Multi-LLM benchmark (F series) makes this a reference paper, not just a single-system demo
 - B1-HW + D9-HW with real ESP32-S3 Sense camera removes simulation-only limitation
 - LLaMA-3 baseline (F3) addresses reproducibility — anyone can replicate without API access
+- Blockchain audit trail (H3) addresses safety and accountability for autonomous UAV decisions
+- CameraSource abstraction: same code runs on laptop webcam (sim) and OV2640 (hardware)

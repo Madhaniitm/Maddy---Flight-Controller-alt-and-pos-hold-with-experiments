@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maddy Vision — Image Verbalization</title>
+<style>
+  /* ── Reset & base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2128;
+    --border:    #30363d;
+    --accent:    #238636;
+    --accent2:   #1f6feb;
+    --danger:    #da3633;
+    --warn:      #e3b341;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --radius:    10px;
+    --font:      'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ──────────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .badge.online  { background: rgba(35,134,54,.25); color: #3fb950; border: 1px solid #3fb950; }
+  .badge.offline { background: rgba(218,54,51,.2);  color: #f85149; border: 1px solid #f85149; }
+  .badge.warn    { background: rgba(227,179,65,.2); color: var(--warn); border: 1px solid var(--warn); }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .dot.pulse { animation: pulse 1.4s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: .3; }
+  }
+
+  .model-select {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .model-select label { color: var(--muted); font-size: 12px; }
+  select {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; font-size: 13px; cursor: pointer;
+  }
+  select:focus { outline: 2px solid var(--accent2); }
+
+  /* ── Main grid ───────────────────────────────────────────── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr;
+    gap: 12px;
+    padding: 12px;
+    min-height: 0;
+  }
+
+  /* ── Card ────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .card-header .icon { font-size: 16px; }
+  .card-body { padding: 12px; flex: 1; overflow: auto; }
+
+  /* ── Stream panel (col-1 row-1) ──────────────────────────── */
+  #stream-card {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  #stream-wrap {
+    position: relative;
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+    line-height: 0;
+  }
+  #stream-img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    display: block;
+  }
+  #stream-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  #stream-overlay canvas {
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+  }
+  #stream-error {
+    display: none;
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.7);
+    color: var(--muted);
+    align-items: center; justify-content: center;
+    font-size: 13px; text-align: center;
+  }
+  #stream-error.show { display: flex; }
+
+  /* ── Verbalization panel (col-1 row-2) ───────────────────── */
+  #verb-card {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 180px;
+  }
+  #verb-image {
+    max-width: 180px;
+    max-height: 135px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    display: none;
+    border: 1px solid var(--border);
+  }
+  #verb-image.show { display: block; }
+  #verb-body {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  #verb-text {
+    flex: 1;
+    line-height: 1.6;
+    color: var(--text);
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  #verb-meta {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 6px;
+  }
+  .trigger-badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    margin-right: 6px;
+  }
+  .trigger-badge.anomaly  { background: rgba(218,54,51,.3); color: #f85149; }
+  .trigger-badge.scheduled{ background: rgba(31,111,235,.3); color: #58a6ff; }
+  .trigger-badge.manual   { background: rgba(35,134,54,.3); color: #3fb950; }
+  .trigger-badge.chat     { background: rgba(227,179,65,.3); color: var(--warn); }
+
+  /* ── Right column ────────────────────────────────────────── */
+  #right-col {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* ── YOLO panel ──────────────────────────────────────────── */
+  #yolo-detections {
+    max-height: 140px;
+    overflow-y: auto;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .det-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: var(--surface2);
+  }
+  .det-row.hazard { background: rgba(218,54,51,.15); border-left: 3px solid var(--danger); }
+  .det-label { font-weight: 600; }
+  .det-conf  { color: var(--muted); }
+
+  #anomaly-banner {
+    display: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(218,54,51,.2);
+    border: 1px solid var(--danger);
+    color: #f85149;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  #anomaly-banner.show { display: block; }
+
+  /* ── Controls ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px;
+    border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.green  { background: var(--accent);  color: #fff; }
+  .btn.blue   { background: var(--accent2); color: #fff; }
+  .btn.red    { background: var(--danger);  color: #fff; }
+  .btn.grey   { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn.full   { width: 100%; justify-content: center; }
+
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .label { color: var(--muted); font-size: 12px; min-width: 80px; }
+
+  input[type=number], input[type=text] {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 10px; font-size: 13px; width: 80px;
+  }
+  input[type=number]:focus, input[type=text]:focus {
+    outline: 2px solid var(--accent2);
+  }
+
+  /* ── Schedule panel ──────────────────────────────────────── */
+  #sched-status {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+  }
+
+  /* ── Chat panel ──────────────────────────────────────────── */
+  #chat-log {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 120px;
+    max-height: 220px;
+    padding-right: 4px;
+  }
+  .chat-msg {
+    padding: 7px 10px;
+    border-radius: 8px;
+    line-height: 1.5;
+    font-size: 13px;
+    max-width: 95%;
+  }
+  .chat-msg.user {
+    background: rgba(31,111,235,.25);
+    border: 1px solid rgba(31,111,235,.4);
+    align-self: flex-end;
+  }
+  .chat-msg.ai {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    align-self: flex-start;
+  }
+  .chat-msg.ai.typing::after {
+    content: "●●●";
+    animation: typing 1s infinite;
+    color: var(--muted); font-size: 11px;
+  }
+  @keyframes typing { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+  #chat-input-row {
+    display: flex; gap: 6px; margin-top: 8px;
+  }
+  #chat-input {
+    flex: 1;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 10px; font-size: 13px;
+    resize: none; height: 38px; overflow: hidden;
+  }
+  #chat-input:focus { outline: 2px solid var(--accent2); }
+
+  /* ── Log panel (bottom of right col) ─────────────────────── */
+  #event-log {
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+  }
+  .log-entry {
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--muted);
+  }
+  .log-entry.anomaly { color: #f85149; }
+  .log-entry.verb    { color: #3fb950; }
+  .log-entry.yolo    { color: var(--warn); }
+  .log-entry.chat    { color: #58a6ff; }
+
+  /* ── Scrollbar ───────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 860px) {
+    main {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+    #right-col { grid-column: 1; grid-row: 3; flex-direction: row; flex-wrap: wrap; }
+    #right-col .card { flex: 1 1 280px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header>
+  <h1>🎥 Maddy <span>Vision</span></h1>
+  <span id="esp32-badge" class="badge offline"><span class="dot"></span>ESP32 offline</span>
+  <span id="yolo-badge"  class="badge offline"><span class="dot"></span>YOLO off</span>
+  <span id="sched-badge" class="badge offline"><span class="dot"></span>Schedule off</span>
+
+  <div class="model-select">
+    <label>LLM:</label>
+    <select id="model-sel" onchange="setModel(this.value)">
+      <option value="claude"  {{ 'selected' if llm_model=='claude'  }}>Claude (claude-opus-4-5)</option>
+      <option value="gpt4o"   {{ 'selected' if llm_model=='gpt4o'   }}>GPT-4o</option>
+      <option value="gemini"  {{ 'selected' if llm_model=='gemini'  }}>Gemini Flash</option>
+    </select>
+  </div>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<main>
+
+  <!-- Stream card -->
+  <div class="card" id="stream-card">
+    <div class="card-header">
+      <span class="icon">📷</span> Live Camera Feed
+      <span style="margin-left:auto; color:var(--muted); font-size:11px;" id="esp32-ip">
+        ESP32: {{ esp32_ip }}
+      </span>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <div id="stream-wrap">
+        <img id="stream-img" src="{{ stream_url }}" alt="Live stream"
+             onerror="streamError()" onload="streamLoaded()">
+        <div id="stream-overlay"><canvas id="yolo-canvas"></canvas></div>
+        <div id="stream-error">
+          📡 Stream unavailable<br>
+          <small>Check ESP32 IP and WiFi connection</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verbalization result card -->
+  <div class="card" id="verb-card">
+    <div class="card-header">
+      <span class="icon">🗣️</span> LLM Verbalization
+      <button class="btn blue" style="margin-left:auto; padding:4px 10px; font-size:12px;"
+              onclick="captureAndDescribe()">📸 Capture &amp; Describe</button>
+    </div>
+    <div class="card-body">
+      <div id="verb-body">
+        <img id="verb-image" src="" alt="Captured frame">
+        <div style="flex:1;">
+          <div id="verb-text" style="color:var(--muted);">
+            Click "Capture &amp; Describe" or wait for anomaly / scheduled capture…
+          </div>
+          <div id="verb-meta"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div id="right-col">
+
+    <!-- YOLO monitoring -->
+    <div class="card">
+      <div class="card-header"><span class="icon">🔍</span> YOLO Monitoring</div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:8px;">
+        <div class="row">
+          <button class="btn green" id="yolo-start-btn" onclick="yoloStart()">▶ Start</button>
+          <button class="btn red"   id="yolo-stop-btn"  onclick="yoloStop()" disabled>⏹ Stop</button>
+          <span id="yolo-fps" style="color:var(--muted);font-size:11px;"></span>
+        </div>
+        <div id="anomaly-banner">⚠️ <span id="anomaly-text">Anomaly detected!</span></div>
+        <div id="yolo-detections">
+          <div style="color:var(--muted); font-size:12px;">No detections yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="card">
+      <div class="card-header"><span class="icon">⏰</span> Scheduled Capture</div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="row">
+          <span class="label">Interval (s):</span>
+          <input type="number" id="sched-interval" value="30" min="5" max="3600" step="5">
+          <button class="btn grey" onclick="setSchedule()">Set</button>
+        </div>
+        <div class="row">
+          <button class="btn green" id="sched-start-btn" onclick="schedStart()">▶ Start</button>
+          <button class="btn red"   id="sched-stop-btn"  onclick="schedStop()" disabled>⏹ Stop</button>
+        </div>
+        <div id="sched-status">Not running.</div>
+        <div id="sched-countdown" style="font-size:11px; color:var(--muted);"></div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="card" style="flex:1;">
+      <div class="card-header"><span class="icon">💬</span> Chat with Vision</div>
+      <div class="card-body" style="display:flex; flex-direction:column; padding:10px;">
+        <div id="chat-log"></div>
+        <div id="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Ask about the scene…"
+                 onkeydown="if(event.key==='Enter') sendChat()">
+          <button class="btn blue" onclick="sendChat()">Send</button>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">
+          LLM clicks a photo and answers based on what it sees.
+        </div>
+      </div>
+    </div>
+
+    <!-- Event log -->
+    <div class="card">
+      <div class="card-header"><span class="icon">📋</span> Event Log</div>
+      <div class="card-body" style="padding:8px;">
+        <div id="event-log"><div class="log-entry">Waiting for events…</div></div>
+      </div>
+    </div>
+
+  </div><!-- end right-col -->
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const S = {
+  yoloRunning:    false,
+  schedRunning:   false,
+  schedInterval:  30,
+  schedNextIn:    0,
+  schedTimer:     null,
+  esp32Online:    false,
+};
+
+// ── SSE connection ─────────────────────────────────────────────────────────
+let es;
+function connectSSE() {
+  es = new EventSource("/api/events");
+  es.onmessage = (e) => handleEvent(JSON.parse(e.data));
+  es.onerror = () => {
+    setTimeout(connectSSE, 3000);
+    logEntry("SSE reconnecting…", "");
+  };
+}
+
+function handleEvent(ev) {
+  switch (ev.type) {
+    case "init":            applyInitState(ev.state);   break;
+    case "yolo_update":     updateDetections(ev);       break;
+    case "anomaly_detected":showAnomaly(ev.description);break;
+    case "verbalization":   showVerbalization(ev);      break;
+    case "yolo_status":     setYoloUI(ev.running);      break;
+    case "schedule_status": setSchedUI(ev.running, ev.interval_s); break;
+    case "schedule_config": document.getElementById("sched-interval").value = ev.interval_s; break;
+    case "model_changed":   document.getElementById("model-sel").value = ev.model; break;
+  }
+}
+
+function applyInitState(s) {
+  setYoloUI(s.yolo_running);
+  setSchedUI(s.schedule_running, s.schedule_interval_s);
+}
+
+// ── Stream error handling ──────────────────────────────────────────────────
+function streamError() {
+  document.getElementById("stream-error").classList.add("show");
+  document.getElementById("stream-img").style.opacity = "0.1";
+  S.esp32Online = false;
+  updateEsp32Badge(false);
+  setTimeout(() => {
+    const img = document.getElementById("stream-img");
+    img.src = img.src.split("?")[0] + "?t=" + Date.now();
+  }, 5000);
+}
+function streamLoaded() {
+  document.getElementById("stream-error").classList.remove("show");
+  document.getElementById("stream-img").style.opacity = "1";
+  S.esp32Online = true;
+  updateEsp32Badge(true);
+}
+function updateEsp32Badge(online) {
+  const b = document.getElementById("esp32-badge");
+  b.className = "badge " + (online ? "online" : "offline");
+  b.innerHTML = `<span class="dot ${online ? 'pulse':''}"></span>ESP32 ${online ? 'online':'offline'}`;
+}
+
+// ── YOLO ──────────────────────────────────────────────────────────────────
+const HAZARD_LABELS = new Set([
+  "person","fire","smoke","knife","gun","scissors","cell phone","laptop","backpack","suitcase"
+]);
+
+function updateDetections(ev) {
+  const box = document.getElementById("yolo-detections");
+  if (!ev.detections || ev.detections.length === 0) {
+    box.innerHTML = '<div style="color:var(--muted); font-size:12px;">No detections.</div>';
+    return;
+  }
+  box.innerHTML = ev.detections.map(d => {
+    const haz = HAZARD_LABELS.has(d.label);
+    return `<div class="det-row ${haz ? 'hazard':''}">
+      <span class="det-label">${d.label}</span>
+      <span class="det-conf">${(d.conf*100).toFixed(0)}% · ${d.area_pct}%</span>
+    </div>`;
+  }).join("");
+  logEntry(`YOLO: ${ev.n} obj${ev.n>1?'s':''} ${ev.anomaly?'⚠️ ANOMALY':''}`, "yolo");
+}
+
+function showAnomaly(desc) {
+  const b = document.getElementById("anomaly-banner");
+  document.getElementById("anomaly-text").textContent = desc;
+  b.classList.add("show");
+  logEntry("⚠️ Anomaly: " + desc, "anomaly");
+  setTimeout(() => b.classList.remove("show"), 8000);
+}
+
+function yoloStart() {
+  fetch("/api/yolo/start", {method:"POST"})
+    .then(() => setYoloUI(true));
+}
+function yoloStop() {
+  fetch("/api/yolo/stop", {method:"POST"})
+    .then(() => setYoloUI(false));
+}
+function setYoloUI(running) {
+  S.yoloRunning = running;
+  document.getElementById("yolo-start-btn").disabled = running;
+  document.getElementById("yolo-stop-btn").disabled  = !running;
+  const b = document.getElementById("yolo-badge");
+  b.className = "badge " + (running ? "online" : "offline");
+  b.innerHTML = `<span class="dot ${running?'pulse':''}"></span>YOLO ${running?'on':'off'}`;
+}
+
+// ── Verbalization ─────────────────────────────────────────────────────────
+function showVerbalization(ev) {
+  const textEl  = document.getElementById("verb-text");
+  const metaEl  = document.getElementById("verb-meta");
+  const imgEl   = document.getElementById("verb-image");
+
+  textEl.style.color = "var(--text)";
+  textEl.textContent = ev.text || "";
+
+  const triggerClass = ev.trigger || "manual";
+  const ts = new Date().toLocaleTimeString();
+  metaEl.innerHTML = `<span class="trigger-badge ${triggerClass}">${triggerClass}</span>
+    <span style="color:var(--muted);">${ts}</span>`;
+
+  if (ev.image_b64) {
+    imgEl.src = "data:image/jpeg;base64," + ev.image_b64;
+    imgEl.classList.add("show");
+  }
+  logEntry(`Verbalization (${triggerClass}): ${(ev.text||"").substring(0,60)}…`, "verb");
+}
+
+async function captureAndDescribe() {
+  const btn = document.querySelector('[onclick="captureAndDescribe()"]');
+  btn.disabled = true;
+  btn.textContent = "⏳ Thinking…";
+  const textEl = document.getElementById("verb-text");
+  textEl.style.color = "var(--muted)";
+  textEl.textContent = "Capturing and sending to LLM…";
+  try {
+    const r = await fetch("/api/capture_and_describe", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({prompt: "Describe this scene in detail. What do you observe? Any safety concerns?"})
+    });
+    const data = await r.json();
+    if (!data.ok) textEl.textContent = "Error: " + data.error;
+    // showVerbalization will be called via SSE
+  } catch(e) {
+    textEl.textContent = "Request failed: " + e;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "📸 Capture & Describe";
+  }
+}
+
+// ── Scheduler ─────────────────────────────────────────────────────────────
+function setSchedule() {
+  const v = parseInt(document.getElementById("sched-interval").value);
+  fetch("/api/schedule/set", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({interval_s: v})
+  });
+  S.schedInterval = v;
+  logEntry(`Schedule interval set to ${v}s`, "");
+}
+
+function schedStart() {
+  setSchedule();
+  fetch("/api/schedule/start", {method:"POST"})
+    .then(() => setSchedUI(true, S.schedInterval));
+}
+function schedStop() {
+  fetch("/api/schedule/stop", {method:"POST"})
+    .then(() => setSchedUI(false));
+}
+function setSchedUI(running, intervalS) {
+  S.schedRunning  = running;
+  if (intervalS !== undefined) S.schedInterval = intervalS;
+  document.getElementById("sched-start-btn").disabled = running;
+  document.getElementById("sched-stop-btn").disabled  = !running;
+  document.getElementById("sched-status").textContent =
+    running ? `Running — captures every ${S.schedInterval}s` : "Not running.";
+  const b = document.getElementById("sched-badge");
+  b.className = "badge " + (running ? "online" : "offline");
+  b.innerHTML = `<span class="dot ${running?'pulse':''}"></span>Schedule ${running?'on':'off'}`;
+
+  // Countdown timer
+  if (S.schedTimer) clearInterval(S.schedTimer);
+  if (running) {
+    let remaining = S.schedInterval;
+    const el = document.getElementById("sched-countdown");
+    S.schedTimer = setInterval(() => {
+      el.textContent = `Next capture in ${remaining}s`;
+      remaining--;
+      if (remaining < 0) remaining = S.schedInterval;
+    }, 1000);
+  } else {
+    document.getElementById("sched-countdown").textContent = "";
+  }
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+const chatLog = document.getElementById("chat-log");
+
+function appendChatMsg(text, role) {
+  const el = document.createElement("div");
+  el.className = "chat-msg " + role;
+  el.textContent = text;
+  chatLog.appendChild(el);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return el;
+}
+
+async function sendChat() {
+  const inp = document.getElementById("chat-input");
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = "";
+  inp.disabled = true;
+
+  appendChatMsg(msg, "user");
+  const aiEl = appendChatMsg("", "ai typing");
+  logEntry("Chat: " + msg, "chat");
+
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({message: msg})
+    });
+    const data = await r.json();
+    aiEl.classList.remove("typing");
+    aiEl.textContent = data.reply || data.error || "No reply.";
+  } catch(e) {
+    aiEl.classList.remove("typing");
+    aiEl.textContent = "Error: " + e;
+  } finally {
+    inp.disabled = false;
+    inp.focus();
+  }
+}
+
+// ── Model selector ─────────────────────────────────────────────────────────
+function setModel(m) {
+  fetch("/api/set_model", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({model: m})
+  });
+  logEntry("Model changed to " + m, "");
+}
+
+// ── Event log ──────────────────────────────────────────────────────────────
+const MAX_LOG = 80;
+function logEntry(text, cls) {
+  const el = document.getElementById("event-log");
+  const div = document.createElement("div");
+  div.className = "log-entry " + (cls || "");
+  const ts = new Date().toLocaleTimeString();
+  div.textContent = `[${ts}] ${text}`;
+  // column-reverse means prepend = visually newest on top
+  el.insertBefore(div, el.firstChild);
+  // Trim
+  while (el.children.length > MAX_LOG) el.removeChild(el.lastChild);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+connectSSE();
+
+// Poll ESP32 status every 8s
+setInterval(async () => {
+  try {
+    const r = await fetch("/api/status");
+    const d = await r.json();
+    updateEsp32Badge(d.esp32_reachable);
+  } catch(_) {}
+}, 8000);
+
+// Chat input: Enter to send
+document.getElementById("chat-input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+</script>
+</body>
+</html>

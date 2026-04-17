@@ -1,24 +1,15 @@
 """
-EXP-C5: Human Describes Problem → LLM Diagnoses and Fixes
-===========================================================
-Setup: Inject high roll_angle_kp (×3 the default) → drone oscillates on roll.
-Human says: "the drone is oscillating badly on roll"
-LLM must: analyze_flight() → suggest_pid_tuning() → set_tuning_params() → apply_tuning()
+EXP-C5: Human Describes Problem → LLM Diagnoses and Fixes  (N=5 runs)
+=======================================================================
+Inject roll_angle_kp × 5. Human reports oscillation.
+LLM must: analyze_flight → suggest_pid_tuning → set_tuning_params → apply_tuning.
 
-Measures:
-  - Roll RMSE before the fix
-  - Roll RMSE after the fix
-  - RMSE reduction (expected >50%)
-  - Correct tool sequence (analyze → suggest → set → apply)
-  - LLM-suggested Kp vs correct reduction
-
-Expected:
-  RMSE reduces >50%. LLM identifies roll_angle_kp as the problem.
-  Tool sequence contains: analyze_flight, suggest_pid_tuning, set_tuning_params, apply_tuning
+N=5 runs. Reports RMSE reduction mean±std and diagnostic success rate.
 
 Outputs:
-  results/C5_human_describes_problem.csv
-  results/C5_human_describes_problem.png — roll error before/after
+  results/C5_runs.csv
+  results/C5_summary.csv
+  results/C5_human_describes_problem.png — RMSE before/after per run + aggregate
 """
 
 import sys, os, csv, math, time
@@ -30,246 +21,307 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from c_series_agent import SimAgent
-from drone_sim import Kp_roll_angle   # default gain
+from drone_sim import Kp_roll_angle
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_CSV = os.path.join(os.path.dirname(__file__), "results", "C5_human_describes_problem.csv")
-OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "C5_human_describes_problem.png")
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C5_runs.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C5_summary.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C5_human_describes_problem.png")
 
-KP_INJECT_MULT = 5.0   # × default → forces strong oscillation
-KP_DEFAULT     = Kp_roll_angle
-KP_INJECTED    = KP_DEFAULT * KP_INJECT_MULT
+KP_DEFAULT      = Kp_roll_angle
+KP_INJECT_MULT  = 5.0
+KP_INJECTED     = KP_DEFAULT * KP_INJECT_MULT
+N_RUNS          = 5
+
+PAPER_REFS = {
+    "ReAct": (
+        "Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). "
+        "ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. "
+        "Diagnostic cycle (analyze→suggest→apply) is a ReAct loop: reason from telemetry, act on gains."
+    ),
+    "InnerMonologue": (
+        "Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning "
+        "with Language Models. arXiv:2207.05608. "
+        "analyze_flight() result embedded in context triggers LLM to self-diagnose and select fix."
+    ),
+    "Vemprala2023": (
+        "Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). "
+        "ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. "
+        "Establishes LLM-based gain tuning as a novel capability beyond prior UAV LLM work."
+    ),
+}
 
 HUMAN_PROBLEM_MSG = (
     "The drone is oscillating badly on roll — it keeps swinging left and right "
     "rapidly and cannot stabilise. Please diagnose the problem and fix it."
 )
 
-print(f"[C5] Default roll_angle_kp = {KP_DEFAULT:.4f}")
-print(f"[C5] Injecting roll_angle_kp = {KP_INJECTED:.4f} (×{KP_INJECT_MULT})")
+EXPECTED_SEQUENCE = ["analyze_flight", "suggest_pid_tuning", "set_tuning_params", "apply_tuning"]
 
-# ── Setup: arm, hover at 1.0 m, inject bad gain ───────────────────────────────
-agent = SimAgent(session_id="C5")
+# ── Statistics helpers ─────────────────────────────────────────────────────────
 
-# Inject bad kp before arming
-agent.physics.pid_roll_angle.kp = KP_INJECTED
-print(f"[C5] Injected roll_angle_kp = {agent.physics.pid_roll_angle.kp:.4f}")
+def wilson_ci(k, n, z=1.96):
+    if n == 0:
+        return 0.0, 1.0
+    p = k / n
+    denom = 1 + z**2 / n
+    centre = (p + z**2 / (2 * n)) / denom
+    margin = z * math.sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / denom
+    return max(0.0, centre - margin), min(1.0, centre + margin)
 
-# Arm and hover using direct sim
-print("[C5] Arming and hovering (with bad gain) …")
-with agent.state.lock:
-    agent.state.armed = True
-    agent.state.ch5   = 1000
+def bootstrap_ci(values, n_boot=2000, alpha=0.05):
+    if len(values) < 2:
+        return float("nan"), float("nan")
+    arr = np.array(values, dtype=float)
+    boots = [np.mean(np.random.choice(arr, len(arr))) for _ in range(n_boot)]
+    return float(np.percentile(boots, 100 * alpha / 2)), float(np.percentile(boots, 100 * (1 - alpha / 2)))
 
-hover_pwm = agent._find_hover()
-hover_thr  = (hover_pwm - 1000) / 1000.0
-with agent.state.lock:
-    s = agent.state
-    s.hover_thr_locked = hover_thr
-    s.althold  = True
-    s.alt_sp   = s.z
-    s.alt_sp_mm = s.z * 1000
-agent.physics.pid_alt_pos.reset()
-agent.physics.pid_alt_vel.reset()
-with agent.state.lock:
-    agent.state.alt_sp    = 1.0
-    agent.state.alt_sp_mm = 1000.0
+# ── Single-run function ────────────────────────────────────────────────────────
 
-# Fly for 20 s with bad gain — generates oscillation telemetry
-print("[C5] Flying 20 s with bad roll_angle_kp to generate oscillation telemetry …")
-agent.wait_sim(20.0)
+def run_once(run_idx):
+    print(f"\n[C5] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
+    agent = SimAgent(session_id=f"C5_run{run_idx}")
 
-# Record roll RMSE BEFORE fix
-tel_before = agent.tel_buf.copy()
-if tel_before:
-    roll_errs_before = [s["er"] for s in tel_before]
-    roll_rmse_before = math.sqrt(sum(e**2 for e in roll_errs_before) / len(roll_errs_before))
-    roll_flips_before = SimAgent._sign_flips(roll_errs_before)
-else:
-    roll_rmse_before = float("nan")
-    roll_flips_before = 0
+    # Inject bad kp
+    agent.physics.pid_roll_angle.kp = KP_INJECTED
 
-print(f"[C5] Before fix: roll error RMSE = {roll_rmse_before:.4f} deg, "
-      f"flips = {roll_flips_before}")
-print(f"[C5] Sending problem description to LLM …")
+    # Arm and hover at 1.0 m (direct sim)
+    with agent.state.lock:
+        agent.state.armed = True
+        agent.state.ch5   = 1000
+    hover_pwm = agent._find_hover()
+    hover_thr  = (hover_pwm - 1000) / 1000.0
+    with agent.state.lock:
+        s = agent.state
+        s.hover_thr_locked = hover_thr
+        s.althold  = True
+        s.alt_sp   = s.z
+        s.alt_sp_mm = s.z * 1000
+    agent.physics.pid_alt_pos.reset()
+    agent.physics.pid_alt_vel.reset()
+    with agent.state.lock:
+        agent.state.alt_sp    = 1.0
+        agent.state.alt_sp_mm = 1000.0
 
-# Mark the split point
-t_before_end = agent.sim_time
-n_tel_before = len(tel_before)
+    # Fly 20 s with bad gain
+    agent.wait_sim(20.0)
 
-# ── LLM diagnoses and fixes ───────────────────────────────────────────────────
-# Context: drone is hovering but oscillating
-history = [
-    {
-        "role": "user",
-        "content": (
-            "The drone is currently armed and hovering at 1.0 m with altitude hold active. "
-            "I need you to diagnose and fix a flight problem."
-        ),
-    },
-    {
-        "role": "assistant",
-        "content": [{
-            "type": "text",
-            "text": "Understood. Drone is at 1.0 m with altitude hold. Ready to diagnose any issues.",
-        }],
-    },
+    # RMSE before
+    tel_before = agent.tel_buf.copy()
+    roll_errs_before = [s["er"] for s in tel_before] if tel_before else []
+    rmse_before = math.sqrt(sum(e**2 for e in roll_errs_before) / len(roll_errs_before)) \
+        if roll_errs_before else float("nan")
+    n_tel_before = len(tel_before)
+    t_before_end = agent.sim_time
+
+    # LLM diagnosis
+    history = [
+        {"role": "user",
+         "content": "The drone is currently armed and hovering at 1.0 m with altitude hold active. "
+                    "I need you to diagnose and fix a flight problem."},
+        {"role": "assistant",
+         "content": [{"type": "text",
+                      "text": "Understood. Drone is at 1.0 m with altitude hold. Ready to diagnose."}]},
+    ]
+    text, api_stats, tool_trace = agent.run_agent_loop(
+        HUMAN_PROBLEM_MSG, history=list(history), max_turns=15,
+    )
+
+    # Fly 20 s after fix
+    t_after_start = agent.sim_time
+    agent.wait_sim(20.0)
+
+    tel_after = agent.tel_buf[n_tel_before:]
+    roll_errs_after = [s["er"] for s in tel_after] if tel_after else []
+    rmse_after = math.sqrt(sum(e**2 for e in roll_errs_after) / len(roll_errs_after)) \
+        if roll_errs_after else float("nan")
+
+    # Metrics
+    tools_used    = [t["name"] for t in tool_trace]
+    tools_set     = set(tools_used)
+    found_sequence= [t for t in EXPECTED_SEQUENCE if t in tools_set]
+    kp_final      = agent.physics.pid_roll_angle.kp
+    kp_reduced    = kp_final < KP_INJECTED
+    kp_reduction  = (KP_INJECTED - kp_final) / KP_INJECTED * 100 if kp_reduced else 0
+    rmse_reduction= ((rmse_before - rmse_after) / rmse_before * 100
+                     if rmse_before > 0 and not math.isnan(rmse_after) else 0)
+    roll_identified = any(
+        "roll_angle_kp" in str(t.get("args", {})) or
+        "roll" in str(t.get("result", "")).lower()
+        for t in tool_trace if t["name"] in ("set_tuning_params", "suggest_pid_tuning")
+    )
+    sequence_ok = len(found_sequence) >= 3
+    passed      = sequence_ok and kp_reduced and roll_identified
+
+    n_api  = len(api_stats)
+    in_tok = sum(s["input_tokens"]  for s in api_stats)
+    out_tok= sum(s["output_tokens"] for s in api_stats)
+    cost   = sum(s["cost_usd"]      for s in api_stats)
+
+    print(f"  RMSE: {rmse_before:.4f}→{rmse_after:.4f}  "
+          f"reduction={rmse_reduction:.0f}%  kp: {KP_INJECTED:.4f}→{kp_final:.4f}  pass={passed}")
+
+    return {
+        "run":                run_idx + 1,
+        "kp_injected":        round(KP_INJECTED, 5),
+        "kp_after_fix":       round(kp_final, 5),
+        "kp_reduced":         int(kp_reduced),
+        "kp_reduction_pct":   round(kp_reduction, 1),
+        "rmse_before_deg":    round(rmse_before, 5),
+        "rmse_after_deg":     round(rmse_after, 5),
+        "rmse_reduction_pct": round(rmse_reduction, 1),
+        "roll_identified":    int(roll_identified),
+        "sequence_ok":        int(sequence_ok),
+        "found_sequence":     ";".join(found_sequence),
+        "passed":             int(passed),
+        "api_calls":          n_api,
+        "input_tokens":       in_tok,
+        "output_tokens":      out_tok,
+        "cost_usd":           round(cost, 6),
+    }
+
+# ── Run N times ────────────────────────────────────────────────────────────────
+
+all_results = [run_once(i) for i in range(N_RUNS)]
+
+# ── Aggregate ─────────────────────────────────────────────────────────────────
+
+def col(key):
+    return [r[key] for r in all_results]
+
+n_pass       = sum(col("passed"))
+n_seq_ok     = sum(col("sequence_ok"))
+n_kp_reduced = sum(col("kp_reduced"))
+n_roll_id    = sum(col("roll_identified"))
+
+pass_lo, pass_hi  = wilson_ci(n_pass,       N_RUNS)
+seq_lo,  seq_hi   = wilson_ci(n_seq_ok,     N_RUNS)
+kp_lo,   kp_hi    = wilson_ci(n_kp_reduced, N_RUNS)
+
+rmse_bf  = col("rmse_before_deg")
+rmse_af  = col("rmse_after_deg")
+rmse_red = col("rmse_reduction_pct")
+kp_red   = col("kp_reduction_pct")
+
+rmse_bf_ci  = bootstrap_ci(rmse_bf)
+rmse_af_ci  = bootstrap_ci(rmse_af)
+rmse_red_ci = bootstrap_ci(rmse_red)
+
+print(f"\n[C5] ── AGGREGATE ({N_RUNS} runs) ───────────────────────────────")
+print(f"  Success rate:       {n_pass}/{N_RUNS}  CI=[{pass_lo:.2f},{pass_hi:.2f}]")
+print(f"  Correct sequence:   {n_seq_ok}/{N_RUNS}  CI=[{seq_lo:.2f},{seq_hi:.2f}]")
+print(f"  kp reduced:         {n_kp_reduced}/{N_RUNS}")
+print(f"  RMSE before (deg):  {np.mean(rmse_bf):.4f}±{np.std(rmse_bf):.4f}  "
+      f"CI=[{rmse_bf_ci[0]:.4f},{rmse_bf_ci[1]:.4f}]")
+print(f"  RMSE after  (deg):  {np.mean(rmse_af):.4f}±{np.std(rmse_af):.4f}  "
+      f"CI=[{rmse_af_ci[0]:.4f},{rmse_af_ci[1]:.4f}]")
+print(f"  RMSE reduction (%): {np.mean(rmse_red):.1f}±{np.std(rmse_red):.1f}  "
+      f"CI=[{rmse_red_ci[0]:.1f},{rmse_red_ci[1]:.1f}]")
+print(f"  kp reduction (%):   {np.mean(kp_red):.1f}±{np.std(kp_red):.1f}")
+
+# ── Save CSVs ──────────────────────────────────────────────────────────────────
+with open(OUT_RUNS, "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=all_results[0].keys())
+    w.writeheader()
+    w.writerows(all_results)
+print(f"[C5] Per-run CSV: {OUT_RUNS}")
+
+summary_rows = [
+    ("n_runs",                  N_RUNS),
+    ("kp_default",              round(KP_DEFAULT, 5)),
+    ("kp_injected",             round(KP_INJECTED, 5)),
+    ("n_pass",                  n_pass),
+    ("success_rate",            round(n_pass / N_RUNS, 3)),
+    ("success_rate_ci_lo",      round(pass_lo, 3)),
+    ("success_rate_ci_hi",      round(pass_hi, 3)),
+    ("sequence_ok_rate",        round(n_seq_ok / N_RUNS, 3)),
+    ("kp_reduced_rate",         round(n_kp_reduced / N_RUNS, 3)),
+    ("roll_identified_rate",    round(n_roll_id / N_RUNS, 3)),
+    ("rmse_before_mean_deg",    round(float(np.mean(rmse_bf)), 5)),
+    ("rmse_before_std_deg",     round(float(np.std(rmse_bf)), 5)),
+    ("rmse_before_ci_lo",       round(rmse_bf_ci[0], 5)),
+    ("rmse_before_ci_hi",       round(rmse_bf_ci[1], 5)),
+    ("rmse_after_mean_deg",     round(float(np.mean(rmse_af)), 5)),
+    ("rmse_after_std_deg",      round(float(np.std(rmse_af)), 5)),
+    ("rmse_after_ci_lo",        round(rmse_af_ci[0], 5)),
+    ("rmse_after_ci_hi",        round(rmse_af_ci[1], 5)),
+    ("rmse_reduction_mean_pct", round(float(np.mean(rmse_red)), 1)),
+    ("rmse_reduction_std_pct",  round(float(np.std(rmse_red)), 1)),
+    ("rmse_reduction_ci_lo",    round(rmse_red_ci[0], 1)),
+    ("rmse_reduction_ci_hi",    round(rmse_red_ci[1], 1)),
+    ("kp_reduction_mean_pct",   round(float(np.mean(kp_red)), 1)),
+    ("kp_reduction_std_pct",    round(float(np.std(kp_red)), 1)),
 ]
-
-text, api_stats, tool_trace = agent.run_agent_loop(
-    HUMAN_PROBLEM_MSG,
-    history=list(history),
-    max_turns=15,
-)
-
-print(f"\n[C5] LLM response: {text[:200]}")
-
-# ── Fly 20 more seconds AFTER fix to measure improvement ─────────────────────
-print("[C5] Flying 20 s after fix to measure improvement …")
-t_after_start = agent.sim_time
-agent.wait_sim(20.0)
-
-# Record roll RMSE AFTER fix
-tel_after = agent.tel_buf[n_tel_before:]
-if tel_after:
-    roll_errs_after = [s["er"] for s in tel_after]
-    roll_rmse_after = math.sqrt(sum(e**2 for e in roll_errs_after) / len(roll_errs_after))
-    roll_flips_after = SimAgent._sign_flips(roll_errs_after)
-else:
-    roll_rmse_after = float("nan")
-    roll_flips_after = 0
-
-print(f"[C5] After fix:  roll error RMSE = {roll_rmse_after:.4f} deg, "
-      f"flips = {roll_flips_after}")
-
-# ── Metrics ───────────────────────────────────────────────────────────────────
-tools_used = [t["name"] for t in tool_trace]
-tools_set  = set(tools_used)
-
-expected_sequence = ["analyze_flight", "suggest_pid_tuning", "set_tuning_params", "apply_tuning"]
-found_sequence    = [t for t in expected_sequence if t in tools_set]
-
-# Did LLM reduce roll_angle_kp?
-kp_final = agent.physics.pid_roll_angle.kp
-kp_reduced = kp_final < KP_INJECTED
-kp_reduction_pct = (KP_INJECTED - kp_final) / KP_INJECTED * 100 if kp_final < KP_INJECTED else 0
-
-rmse_reduction_pct = ((roll_rmse_before - roll_rmse_after) / roll_rmse_before * 100
-                      if roll_rmse_before > 0 else 0)
-
-roll_identified = any(
-    "roll_angle_kp" in str(t.get("args", {})) or "roll" in str(t.get("result", "")).lower()
-    for t in tool_trace if t["name"] in ("set_tuning_params", "suggest_pid_tuning")
-)
-
-sequence_ok = len(found_sequence) >= 3
-rmse_ok     = rmse_reduction_pct >= 40   # measured but not gating (sim noise floor ~0.03°)
-passed      = sequence_ok and kp_reduced and roll_identified
-
-n_api  = len(api_stats)
-in_tok = sum(s["input_tokens"]  for s in api_stats)
-out_tok= sum(s["output_tokens"] for s in api_stats)
-cost   = sum(s["cost_usd"]      for s in api_stats)
-
-print(f"\n[C5] ── METRICS ──────────────────────────────────────────────")
-print(f"  roll_angle_kp:  {KP_DEFAULT:.4f} (default) → {KP_INJECTED:.4f} (injected) → {kp_final:.4f} (after fix)")
-print(f"  Kp reduced:     {kp_reduced}  (reduction: {kp_reduction_pct:.0f}%)")
-print(f"  Roll RMSE:      {roll_rmse_before:.4f} → {roll_rmse_after:.4f} deg")
-print(f"  RMSE reduction: {rmse_reduction_pct:.0f}%  (target ≥50%)")
-print(f"  Roll flips/s:   {roll_flips_before/20:.1f} → {roll_flips_after/20:.1f} Hz")
-print(f"  Roll identified:{roll_identified}")
-print(f"  Sequence:       {tools_used}")
-print(f"  Found expected: {found_sequence}")
-print(f"  API calls:      {n_api}")
-print(f"  Tokens in/out:  {in_tok}/{out_tok}")
-print(f"  Est. cost:      ${cost:.4f}")
-print(f"  PASS:           {passed}")
-
-# ── Save CSV ──────────────────────────────────────────────────────────────────
-with open(OUT_CSV, "w", newline="") as f:
+with open(OUT_SUMMARY, "w", newline="") as f:
     w = csv.writer(f)
     w.writerow(["metric", "value"])
-    rows = [
-        ("kp_default",         KP_DEFAULT),
-        ("kp_injected",        KP_INJECTED),
-        ("kp_after_llm_fix",   kp_final),
-        ("kp_reduced",         kp_reduced),
-        ("kp_reduction_pct",   round(kp_reduction_pct, 1)),
-        ("roll_rmse_before",   round(roll_rmse_before, 5)),
-        ("roll_rmse_after",    round(roll_rmse_after,  5)),
-        ("rmse_reduction_pct", round(rmse_reduction_pct, 1)),
-        ("roll_flips_before",  roll_flips_before),
-        ("roll_flips_after",   roll_flips_after),
-        ("roll_identified",    roll_identified),
-        ("tool_sequence",      ";".join(tools_used)),
-        ("expected_found",     ";".join(found_sequence)),
-        ("api_calls",          n_api),
-        ("input_tokens",       in_tok),
-        ("output_tokens",      out_tok),
-        ("cost_usd",           round(cost, 6)),
-        ("passed",             passed),
-    ]
-    w.writerows(rows)
-print(f"[C5] CSV: {OUT_CSV}")
+    w.writerows(summary_rows)
+    for ref_key, ref_val in PAPER_REFS.items():
+        w.writerow([f"ref_{ref_key}", ref_val])
+print(f"[C5] Summary CSV: {OUT_SUMMARY}")
 
-# ── Plot ──────────────────────────────────────────────────────────────────────
-tel_all = agent.tel_buf
-t_all  = np.array([s["t"] / 1000.0 for s in tel_all])
-er_all = np.array([s["er"]         for s in tel_all])
+# ── Plot ───────────────────────────────────────────────────────────────────────
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 7), sharex=True)
+run_idx  = np.arange(1, N_RUNS + 1)
+bar_cols = ["green" if r["passed"] else "red" for r in all_results]
 
-# Roll error time series
-ax1.plot(t_all, er_all, color="red", lw=0.8, alpha=0.8, label="Roll error (deg)")
-ax1.axvline(t_before_end, color="black", ls="--", lw=1.5, label=f"LLM fix applied @ {t_before_end:.1f}s")
-ax1.axvline(t_after_start, color="blue", ls=":", lw=1, label=f"Post-fix measurement @ {t_after_start:.1f}s")
-
-# Annotate RMSE
-if len(t_all[t_all <= t_before_end]) > 0:
-    t_mid_before = t_all[t_all <= t_before_end].mean()
-    ax1.text(t_mid_before, max(er_all)*0.8,
-             f"RMSE={roll_rmse_before:.3f}°\nflips/s={roll_flips_before/20:.1f}",
-             fontsize=9, ha="center", color="darkred",
-             bbox=dict(boxstyle="round,pad=0.2", facecolor="lightyellow"))
-if len(t_all[t_all >= t_after_start]) > 0:
-    t_mid_after = t_all[t_all >= t_after_start].mean()
-    ax1.text(t_mid_after, max(er_all)*0.8,
-             f"RMSE={roll_rmse_after:.3f}°\nreduction={rmse_reduction_pct:.0f}%",
-             fontsize=9, ha="center", color="darkgreen",
-             bbox=dict(boxstyle="round,pad=0.2", facecolor="lightcyan"))
-
-ax1.set_ylabel("Roll angle error (deg)")
-ax1.set_title(
-    f"EXP-C5: Human Describes Problem → LLM Diagnoses and Fixes\n"
-    f"Injected kp={KP_INJECTED:.4f} (×{KP_INJECT_MULT} default). "
-    f"LLM fixed to {kp_final:.4f} ({kp_reduction_pct:.0f}% reduction)\n"
-    f"RMSE: {roll_rmse_before:.3f} → {roll_rmse_after:.3f} deg "
-    f"({rmse_reduction_pct:.0f}% improvement)"
-)
+# Left: RMSE before vs after per run
+ax1 = axes[0]
+w   = 0.35
+ax1.bar(run_idx - w/2, rmse_bf, w, label="Before fix", color="tomato", alpha=0.75, edgecolor="black")
+ax1.bar(run_idx + w/2, rmse_af, w, label="After fix",  color="mediumseagreen", alpha=0.75, edgecolor="black")
+ax1.set_xticks(run_idx)
+ax1.set_xticklabels([f"R{i}\n({'✓' if r['passed'] else '✗'})"
+                     for i, r in enumerate(all_results, 1)], fontsize=8)
+ax1.set_ylabel("Roll error RMSE (deg)")
+ax1.set_title("RMSE before vs after LLM fix\n(per run)")
 ax1.legend(fontsize=8)
-ax1.grid(True, alpha=0.3)
+ax1.grid(True, alpha=0.3, axis="y")
 
-# Tool call timeline
-if tool_trace:
-    ytick_labels = [t["name"] for t in tool_trace]
-    yticks       = list(range(len(tool_trace)))
-    x_vals       = [t.get("sim_time_s", 0) for t in tool_trace]
-    highlight    = {n: "#e74c3c" for n in expected_sequence}
-    colors       = [highlight.get(t["name"], "#95a5a6") for t in tool_trace]
-    ax2.barh(yticks, [0.5]*len(yticks), left=x_vals, height=0.7, color=colors, alpha=0.8)
-    ax2.set_yticks(yticks)
-    ax2.set_yticklabels(ytick_labels, fontsize=8)
-    ax2.axvline(t_before_end, color="black", ls="--", lw=1.5)
-    ax2.set_xlabel("Simulated time (s)")
-    ax2.set_ylabel("Tool call")
-    ax2.set_title("Tool sequence (red = expected diagnostic tools)")
-    ax2.grid(True, alpha=0.2, axis="x")
+# Middle: RMSE reduction % with CI
+ax2 = axes[1]
+ax2.bar(run_idx, rmse_red, color=bar_cols, alpha=0.75, edgecolor="black")
+ax2.axhline(np.mean(rmse_red), color="navy", ls="--", lw=1.5,
+            label=f"Mean={np.mean(rmse_red):.1f}%")
+ax2.fill_between([0.5, N_RUNS + 0.5],
+                 rmse_red_ci[0], rmse_red_ci[1],
+                 alpha=0.12, color="navy", label=f"95% CI [{rmse_red_ci[0]:.1f},{rmse_red_ci[1]:.1f}]%")
+ax2.axhline(40, color="red", ls=":", lw=1, label="40% threshold")
+ax2.set_xticks(run_idx)
+ax2.set_xticklabels([f"Run {i}" for i in run_idx])
+ax2.set_ylabel("RMSE reduction (%)")
+ax2.set_title(f"RMSE reduction per run\n(green=pass, red=fail)")
+ax2.legend(fontsize=7)
+ax2.grid(True, alpha=0.3, axis="y")
 
+# Right: aggregate mean ± CI (before vs after)
+ax3 = axes[2]
+categories = ["Before fix", "After fix"]
+means  = [float(np.mean(rmse_bf)), float(np.mean(rmse_af))]
+stds   = [float(np.std(rmse_bf)),  float(np.std(rmse_af))]
+colors = ["tomato", "mediumseagreen"]
+bars   = ax3.bar(categories, means, color=colors, alpha=0.75, edgecolor="black")
+ax3.errorbar(categories, means, yerr=stds, fmt="none", ecolor="black", capsize=8, lw=2)
+for bar, m, s in zip(bars, means, stds):
+    ax3.text(bar.get_x() + bar.get_width()/2, m + s + 0.001,
+             f"{m:.4f}±{s:.4f}", ha="center", fontsize=9)
+ax3.set_ylabel("Roll error RMSE (deg)")
+ax3.set_title(f"Aggregate RMSE (mean±std, N={N_RUNS})\n"
+              f"Reduction: {np.mean(rmse_red):.1f}±{np.std(rmse_red):.1f}%  "
+              f"CI=[{rmse_red_ci[0]:.1f},{rmse_red_ci[1]:.1f}%]")
+ax3.grid(True, alpha=0.3, axis="y")
+
+fig.suptitle(
+    f"EXP-C5: LLM Fault Diagnosis  (N={N_RUNS} runs, temperature=0.2)\n"
+    f"Success: {n_pass}/{N_RUNS}  (95% CI: {pass_lo:.2f}–{pass_hi:.2f})  |  "
+    f"kp_inject={KP_INJECTED:.4f} ({KP_INJECT_MULT}×default)",
+    fontsize=11
+)
 plt.tight_layout()
 plt.savefig(OUT_PNG, dpi=150)
 plt.close()
 print(f"[C5] Plot: {OUT_PNG}")
 
-print(f"\n[C5] RESULT: {'PASS' if passed else 'FAIL'}")
-print(f"  RMSE reduction: {rmse_reduction_pct:.0f}% (threshold ≥40%)")
-print(f"  Sequence found: {found_sequence}")
+print(f"\n[C5] RESULT: {n_pass}/{N_RUNS} passed  (95% CI: {pass_lo:.2f}–{pass_hi:.2f})")
+print(f"       RMSE reduction: {np.mean(rmse_red):.1f}±{np.std(rmse_red):.1f}%")

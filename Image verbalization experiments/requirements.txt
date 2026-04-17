@@ -1,0 +1,21 @@
+# Image Verbalization Server — Python dependencies
+# Install with: pip install -r requirements.txt
+
+flask>=3.0.0
+requests>=2.31.0
+
+# Vision LLM backends (install only what you use)
+anthropic>=0.34.0          # Claude (recommended)
+openai>=1.40.0             # GPT-4o (optional)
+google-generativeai>=0.8.0 # Gemini (optional)
+
+# YOLO object detection
+ultralytics>=8.2.0         # YOLOv8 — installs torch automatically
+
+# Image handling
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# TTS (optional — falls back gracefully if missing)
+pyttsx3>=2.90              # offline TTS
+gTTS>=2.5.0                # Google TTS (needs internet)
