@@ -1,0 +1,24 @@
+metric,value
+experiment,C4.1
+n_runs,5
+n_pass,5
+success_rate,1.0
+success_rate_ci_lo,0.566
+success_rate_ci_hi,1.0
+vs_c4_baseline_rate,0.4
+delta_percentage_points,60.0
+correct_target_rate,1.0
+correct_target_ci_lo,0.566
+correct_target_ci_hi,1.0
+no_rearm_rate,1.0
+no_rearm_ci_lo,0.566
+no_rearm_ci_hi,1.0
+alt_reached_rate,1.0
+n_freeze_failures,0
+n_wrong_target_failures,0
+alt_error_mean_cm,0.32
+alt_error_std_cm,0.19
+alt_error_ci_lo_cm,0.14
+alt_error_ci_hi_cm,0.48
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Correction is processed as a new observation in the running ReAct loop."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. LLM infers current drone state from conversation history to avoid re-arm."

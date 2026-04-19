@@ -10,7 +10,7 @@ Outputs:
   results/C4_mid_mission_correction.png
 """
 
-import sys, os, csv, math, time
+import sys, os, csv, math, time, json
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import numpy as np
@@ -21,9 +21,17 @@ import matplotlib.pyplot as plt
 from c_series_agent import SimAgent
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C4_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C4_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C4_mid_mission_correction.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C4_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C4_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C4_mid_mission_correction_{GUARDRAIL_SUFFIX}.png")
 
 INITIAL_CMD    = "hover at 0.5 metres"
 CORRECTION_CMD = "actually go to 1.2 metres instead"
@@ -67,11 +75,11 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05):
 
 def run_once(run_idx):
     print(f"\n[C4] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent   = SimAgent(session_id=f"C4_run{run_idx}")
+    agent   = SimAgent(session_id=f"C4_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
     history = []
 
     # Phase 1: initial command
-    text1, stats1, trace1 = agent.run_agent_loop(
+    text1, stats1, trace1, conv1 = agent.run_agent_loop(
         INITIAL_CMD, history=list(history), max_turns=15,
     )
     history.append({"role": "user",      "content": INITIAL_CMD})
@@ -84,7 +92,7 @@ def run_once(run_idx):
         althold_ph1= agent.state.althold
 
     # Phase 2: mid-mission correction
-    text2, stats2, trace2 = agent.run_agent_loop(
+    text2, stats2, trace2, conv2 = agent.run_agent_loop(
         CORRECTION_CMD, history=list(history), max_turns=8,
     )
     agent.wait_sim(6.0)
@@ -115,6 +123,19 @@ def run_once(run_idx):
 
     print(f"  z_phase1={z_phase1:.3f}m  z_final={z_final:.3f}m  "
           f"correct_target={correct_target_set}  re_armed={re_armed}  pass={passed}")
+
+    # Save full conversation log (commands + LLM text + tool args + tool results)
+    conv_log_path = os.path.join(
+        os.path.dirname(__file__), "results",
+        f"C4_run{run_idx+1}_conv_{GUARDRAIL_SUFFIX}.json"
+    )
+    with open(conv_log_path, "w") as f:
+        json.dump({
+            "run": run_idx + 1,
+            "phase1": {"command": INITIAL_CMD,    "log": conv1, "z_achieved": z_phase1},
+            "phase2": {"command": CORRECTION_CMD, "log": conv2, "z_achieved": z_final},
+            "passed": int(passed),
+        }, f, indent=2)
 
     return {
         "run":                run_idx + 1,

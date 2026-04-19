@@ -21,9 +21,17 @@ import matplotlib.pyplot as plt
 from c_series_agent import SimAgent
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C3_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C3_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C3_multiturn.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C3_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C3_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C3_multiturn_{GUARDRAIL_SUFFIX}.png")
 
 N_RUNS = 5
 
@@ -85,7 +93,7 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05):
 
 def run_once(run_idx):
     print(f"\n[C3] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent   = SimAgent(session_id=f"C3_run{run_idx}")
+    agent   = SimAgent(session_id=f"C3_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
     history = []
     turn_rows = []
 
@@ -107,7 +115,7 @@ def run_once(run_idx):
         )
         user_msg_with_ctx = state_ctx + user_msg
 
-        text, api_stats, tool_trace = agent.run_agent_loop(
+        text, api_stats, tool_trace, _ = agent.run_agent_loop(
             user_msg_with_ctx, history=list(history), max_turns=20,
         )
 

@@ -1,0 +1,29 @@
+metric,value
+n_runs,5
+mode_A_rmse_cm,181.934
+mode_A_note,deterministic reference (1 run)
+mode_B_rmse_mean,6.805
+mode_B_rmse_std,0.089
+mode_B_rmse_ci_lo,6.733
+mode_B_rmse_ci_hi,6.892
+mode_B_pass_rate,1.0
+mode_B_pass_ci_lo,0.566
+mode_B_pass_ci_hi,1.0
+mode_B_time_mean,29.9
+mode_B_time_std,0.0
+mode_B_api_mean,34.6
+mode_B_api_std,0.5
+mode_C_rmse_mean,6.99
+mode_C_rmse_std,0.171
+mode_C_rmse_ci_lo,6.828
+mode_C_rmse_ci_hi,7.129
+mode_C_pass_rate,1.0
+mode_C_pass_ci_lo,0.566
+mode_C_pass_ci_hi,1.0
+mode_C_time_mean,29.9
+mode_C_time_std,0.0
+mode_C_api_mean,35.0
+mode_C_api_std,0.0
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Modes B and C both use the ReAct loop; Mode A (scripted) is the non-LLM baseline."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Three-mode comparison design directly follows Vemprala's manual vs LLM evaluation protocol."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Full-auto Mode C relies on tool-result inner monologue with no human in the loop."

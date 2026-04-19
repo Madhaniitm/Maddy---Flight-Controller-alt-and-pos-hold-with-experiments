@@ -21,9 +21,17 @@ import matplotlib.pyplot as plt
 from c_series_agent import SimAgent
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C6_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C6_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C6_mission_planning.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C6_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C6_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C6_mission_planning_{GUARDRAIL_SUFFIX}.png")
 
 COMMAND    = "do a square pattern at 1 metre height"
 TARGET_ALT = 1.0
@@ -79,8 +87,8 @@ def count_direction_changes(kx_arr, ky_arr):
 
 def run_once(run_idx):
     print(f"\n[C6] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent = SimAgent(session_id=f"C6_run{run_idx}")
-    text, api_stats, tool_trace = agent.run_agent_loop(COMMAND, max_turns=30)
+    agent = SimAgent(session_id=f"C6_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    text, api_stats, tool_trace, _ = agent.run_agent_loop(COMMAND, max_turns=30)
 
     # Extract plan steps
     plan_steps = []

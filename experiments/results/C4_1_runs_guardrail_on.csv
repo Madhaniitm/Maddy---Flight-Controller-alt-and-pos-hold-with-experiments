@@ -1,0 +1,6 @@
+run,z_phase1_m,z_final_m,alt_error_cm,correct_target_set,re_armed,re_took_off,alt_reached,tools_before_set,passed,failure_mode,api_calls_ph1,api_calls_ph2,input_tokens,output_tokens,cost_usd,tools_ph2
+1,0.504,1.206,0.6,1,0,0,1,0,1,none,15,4,89730,1379,0.289875,set_altitude_target;wait;check_altitude_reached
+2,0.506,1.204,0.4,1,0,0,1,0,1,none,15,4,89730,1387,0.289995,set_altitude_target;wait;check_altitude_reached
+3,0.503,1.203,0.3,1,0,0,1,0,1,none,15,4,89716,1378,0.289818,set_altitude_target;wait;check_altitude_reached
+4,0.507,1.203,0.3,1,0,0,1,0,1,none,15,4,89817,1373,0.290046,set_altitude_target;wait;check_altitude_reached
+5,0.51,1.2,0.0,1,0,0,1,0,1,none,15,4,89730,1379,0.289875,set_altitude_target;wait;check_altitude_reached

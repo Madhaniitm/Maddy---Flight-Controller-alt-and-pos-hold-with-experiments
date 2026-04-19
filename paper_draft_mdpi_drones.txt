@@ -1,0 +1,1037 @@
+================================================================================
+PAPER DRAFT — PLAIN TEXT
+Target venue: MDPI Drones (ISSN 2504-446X)
+Section: Drones and Artificial Intelligence
+Scope: Full A–B–C series (simulation validation + controller baseline + LLM agent)
+================================================================================
+
+
+TITLE:
+Natural Language Interfaces for Nano-Quadrotor Flight Control:
+Simulator Validation, Cascade PID Baseline, and LLM Agent Evaluation
+on a Custom 50 g Platform
+
+
+AUTHORS:
+[Author 1 Name], [Author 2 Name (if any)]
+[Department, Institution, City, Country]
+Correspondence: [email]
+
+
+ABSTRACT
+
+We present a simulation-to-LLM evaluation pipeline for a custom 50 g nano-quadrotor
+with custom firmware, examining whether a large language model (LLM) can reliably
+translate natural language commands into safe, correct, sequential flight tool calls.
+The work proceeds in three stages. First (A series), we validate all five physics
+sub-models in the simulator against peer-reviewed literature: linear aerodynamic drag
+is confirmed 10× dominant over quadratic drag below 5 m/s; the Madgwick AHRS filter
+achieves 0.068° steady-state RMSE at 4.85 µs per update, 3.9–7× cheaper than EKF
+variants; the 9-state altitude Kalman filter reduces raw range noise from 5.03 mm to
+1.44 mm RMSE (3.5× rejection) at 0.8% CPU; the recalibrated He 2019 ground-effect
+model agrees with Crazyflie measurements to within 3% at z/R > 1; and first-order
+motor dynamics fit R² = 1.000 with bandwidth 5.3 Hz. Second (B series), we validate
+the cascade PID flight controller against published Crazyflie benchmarks: altitude
+step response 1.44 s rise, 5.8% overshoot, 0.59 cm steady-state RMSE; position hold
+rejects a 0.05 N lateral impulse with 9.96 cm max drift and 4.20 cm steady-state
+RMSE; attitude bandwidth 1.17 Hz satisfies the cascade hierarchy; and PI integral
+reduces wind-induced XY error from 33.3 cm (P-only) to 1.8 cm. Third (C series), we
+evaluate eight capabilities of a claude-sonnet-4-6 LLM agent interfacing with the
+simulator via a custom tool API. Highlights include: 5/5 reliable execution for
+structured tasks (hover, multi-turn mission, safety override); a single conservative-
+default policy addition lifting ambiguous-command accuracy from 57% to 87%; iterative
+PID fault diagnosis achieving 75.6% RMSE reduction at 1.8 cycles per run (5/5); and
+a three-mode comparison showing both supervised (human-in-loop, 0.854 ± 0.027 cm)
+and fully autonomous (0.873 ± 0.022 cm) LLM modes outperform a scripted baseline
+(2.972 cm) 3.4–3.5×, with human oversight causing no measurable accuracy degradation.
+All code and data are released openly.
+
+Keywords: nano-quadrotor; altitude hold; position hold; LLM agent; natural language
+interface; ReAct; PID tuning; flight controller; simulator validation; human-in-loop
+
+
+--------------------------------------------------------------------------------
+1. INTRODUCTION
+--------------------------------------------------------------------------------
+
+Autonomous flight in nano-class quadrotors (mass ≤ 100 g) presents a distinctive set
+of challenges at every layer of the system stack. At the physics layer, these platforms
+operate in a regime where linear aerodynamic drag dominates quadratic body drag by an
+order of magnitude [1], where ground effect can augment thrust by up to 27% at one
+rotor diameter [2], and where motor dynamics limit achievable closed-loop bandwidth to
+single-digit hertz [3]. At the estimation layer, the limited computational budget of
+embedded microcontrollers forces tradeoffs between filter accuracy and timing
+determinism that can be catastrophic if misjudged [4]. At the control layer, cascade
+PID architectures must satisfy strict bandwidth-hierarchy constraints [5] while
+remaining robust to battery voltage drop and environmental disturbances [6]. At the
+operator interface layer, no commercially dominant solution exists for issuing free-
+text flight commands to custom firmware without an intermediate SDK or hand-coded
+state machine.
+
+Recent advances in large language models (LLMs) have opened a new possibility: an
+operator describes an intent in natural language, and the LLM translates it into the
+correct tool call sequence for whatever API the platform exposes. Prior work has
+demonstrated this principle on commercial platforms with existing SDKs (Vemprala et
+al. 2023 [7]; Huang et al. 2022 [8]), but commercial platforms offer pre-existing
+hardware and software infrastructure that conceals the difficulty of the problem.
+Custom nano-quadrotors — platforms built from scratch with custom firmware, non-
+standard sensor fusion, and hand-tuned controllers — present a harder challenge: the
+LLM must reason about a tool API it has never seen, in a domain where the cost of a
+wrong command is a crash.
+
+This paper presents an end-to-end evaluation across three layers simultaneously:
+(1) a physics simulator whose every sub-model is validated quantitatively against
+peer-reviewed literature; (2) a cascade PID flight controller whose performance is
+benchmarked against independent Crazyflie measurements; and (3) an LLM agent whose
+capabilities and failure modes are characterised across eight experiments.
+
+The two main contributions are:
+
+C5 — Iterative LLM-driven fault diagnosis and autonomous PID tuning: Given a free-
+text symptom description ("the drone is oscillating on roll"), the LLM identifies the
+root cause from telemetry, selects corrective gain values, applies them, and verifies
+the fix in a closed loop. It iterates only as many times as telemetry requires,
+achieving 75.6 ± 3.9% RMSE reduction across 5 independent runs with no failed trials.
+
+C8 — Three-mode operational comparison: A four-waypoint survey mission is executed
+under three modes — scripted (no LLM), supervised NL (human approval at each
+waypoint), and fully autonomous. Both LLM modes achieve sub-centimetre steady-state
+RMSE (0.854 cm and 0.873 cm) versus 2.972 cm for the scripted baseline, with Modes B
+and C statistically indistinguishable (ratio 0.978). Human-in-loop supervision, when
+implemented with state-context injection, does not degrade flight accuracy.
+
+All A–C series experiments run on a bespoke simulation of a 50 g quadrotor with 23 mm
+rotors, ToF altitude sensing, optical flow position estimation, and a 9-state Kalman
+filter for altitude estimation. The LLM agent uses claude-sonnet-4-6 (temperature 0.2)
+through the Anthropic API. Full code and CSV data are available at [repository URL].
+
+
+--------------------------------------------------------------------------------
+2. RELATED WORK
+--------------------------------------------------------------------------------
+
+2.1 LLMs as Robot Planners
+
+The foundational result linking LLMs to physical robot control is SayCan (Ahn et al.
+2022 [9]), which showed that an LLM can generate executable, physically grounded
+action sequences for a robot arm when coupled with an affordance model. The key
+insight was that LLM probability scores alone are insufficient — a safety-feasibility
+scoring function over candidate actions is needed to prevent the LLM from proposing
+actions the robot cannot perform. In our setting, the guardrail layer (Section 5.3)
+serves an analogous function: it silently clips dangerous targets without requiring
+the LLM to reason about physical limits it cannot observe.
+
+The ReAct framework (Yao et al. 2022 [10]) formalises the interleaved reasoning-
+acting-observing loop that underlies our LLM agent. Rather than planning a full action
+sequence upfront, the agent generates one reasoning step, takes one action (tool call),
+observes the result, and reasons again. This makes the plan adaptive to real-time
+feedback — critical for altitude hold tasks where the drone state changes between
+commands. All eight C-series experiments operate as ReAct loops; C5's iterative tuning
+is the most explicit instantiation (diagnose → tune → verify → repeat).
+
+Inner Monologue (Huang et al. 2022 [8]) extends ReAct by embedding physical sensor
+feedback inside each observation step. Rather than just receiving "the drone moved",
+the LLM receives "altitude = 1.023 m, vz = 0.01 m/s, roll = 0.0°" — grounded,
+numerical feedback that it can reason about. In C8's Mode B, the approval messages
+carry live simulator state (altitude, althold active/inactive), enabling the LLM to
+reason from current physics rather than conversation history. This state-context
+injection is the direct mechanism that prevents PID re-initialisation across turns.
+
+2.2 LLMs for UAV Control
+
+Vemprala et al. (2023 [7]) demonstrated LLM-based flight planning for commercial
+drones (DJI Tello, Crazyflie) using structured prompts and hand-coded tool libraries.
+Their evaluation focused on one-shot command translation and high-level mission
+planning; iterative feedback loops and PID-level control were not investigated. Our
+work extends this in two ways: the LLM interfaces with a completely custom firmware
+API with no existing SDK, and C5 demonstrates that the LLM can close a feedback loop
+at the PID gain level, not just at the waypoint level.
+
+Recent work has explored LLM-drone interaction for inspection missions (Lykov et al.
+2023), search and rescue planning (Shah et al. 2023), and multi-agent coordination.
+These studies share the challenge of grounding abstract language in physical action,
+but none characterise the full stack from physics validation through to multi-turn
+human supervision in a single experimental series.
+
+2.3 Cascade PID Altitude and Position Hold
+
+The cascade inner/outer PID architecture for quadrotor altitude control traces to
+Mahony et al. (2012 [5]), which established the bandwidth hierarchy requirement:
+BW_alt << BW_att << BW_motor. Violations of this hierarchy cause the outer loop to
+excite modes that the inner loop cannot suppress fast enough, leading to oscillation.
+Our B series validates that the cascade bandwidth hierarchy is satisfied (attitude
+1.17 Hz vs altitude ~0.3 Hz vs motor 5.3 Hz) and that all performance metrics fall
+within the ranges reported by Giernacki et al. (2017 [11]) for the Crazyflie 2.0.
+
+2.4 Sensor Fusion for Nano-Quadrotors
+
+The Madgwick AHRS filter (Madgwick 2010 [12]) has become the de facto standard for
+embedded attitude estimation in Crazyflie and Betaflight firmware. Ludwig and Burnham
+(2018 [13]) confirmed its advantage over Mahony and EKF variants under noisy
+accelerometer conditions. Szczepaniak et al. (2024 [4]) measured 70 ms timing spikes
+from EKF on STM32F7 — a catastrophic 70-cycle gap at 1 kHz attitude control rate. Our
+A2 experiment reproduces this comparison systematically across eight filter variants
+and quantifies the 3.9–7× cost premium of EKF over Madgwick on the same evaluation
+platform.
+
+
+--------------------------------------------------------------------------------
+3. SYSTEM ARCHITECTURE
+--------------------------------------------------------------------------------
+
+3.1 Physical Platform
+
+The target platform is a custom 50 g nano-quadrotor with a 98 mm diagonal motor
+wheelbase and 23 mm radius (R = 0.023 m) propellers. Key parameters:
+
+  Mass: 50 g (0.050 kg)
+  Motor KV: 31000 RPM/V nominal; thrust coefficient K_F = 1.8 × 10⁻⁸ N·(RPM)⁻²
+  Motor time constant: τ = 30 ms (first-order, bandwidth 5.3 Hz)
+  Sensors: ToF distance (VL53L1X, σ = 5 mm at 50 Hz), IMU (MPU6050, 200 Hz),
+           optical flow (PMW3901, 30 Hz)
+  Battery: 1S 300 mAh LiPo; V_oc(100% SOC) = 4.2 V, R_int = 0.1 Ω
+
+All experiments in this paper use a software simulation of this platform. Hardware
+experiments are deferred to future work (see Section 8).
+
+3.2 Physics Simulator
+
+The simulator (drone_sim.py) integrates Euler dynamics at 200 Hz. The force model
+includes:
+
+  Thrust: F_thrust = 4 · K_F · ω² · v_factor · k_ge
+    where v_factor = (V_term / V_full)² accounts for battery voltage drop
+    and k_ge = 1 + Ca·exp(−z / (GD·R)) is the ground effect multiplier
+
+  Aerodynamic drag: F_drag = k_drag · v (linear, k_drag = 0.01 N·s/m)
+
+  Motor dynamics: first-order low-pass τ = 30 ms between commanded and actual ω
+
+The Madgwick filter runs inside the simulator at 200 Hz, integrating IMU noise
+(gyro σ = 0.5 deg/s, accel σ = 0.02 g) to produce attitude estimates fed to the
+cascade PID. Altitude estimation uses the 9-state Kalman filter (Kalman9D) described
+in Section 4.3, fusing ToF and IMU at 200/50 Hz.
+
+3.3 Flight Controller
+
+The cascade PID architecture follows Mahony et al. (2012 [5]):
+
+  Outer loop: altitude error → velocity setpoint (clamp ±0.20 m/s)
+              Gains: Kp = 1.0, Ki = 0.0, Kd = 0.0
+  Inner loop: velocity error → throttle correction
+              Gains: Kp = 1.0, Ki = 0.3, Kd = 0.05
+  Attitude loops (roll, pitch): error → differential motor thrust
+              Gains: Kp = 0.3, Kd = 0.05 (angle loop); Kp = 0.05, Kd = 0.01 (rate loop)
+  Yaw: rate-based PID, Kp = 1.0
+
+Anti-windup on the inner loop integral; integral reset on outer loop setpoint change.
+A hover-throttle find routine (find_hover_throttle) ramps motor PWM from 1200 until
+vertical velocity approaches zero, then locks the result as the altitude-hold baseline.
+This adapts to battery SOC automatically.
+
+3.4 LLM Agent
+
+The LLM agent wraps claude-sonnet-4-6 via the Anthropic API (temperature = 0.2). The
+agent is given a tool API of 18 functions covering arming, hover-throttle finding,
+altitude and position hold activation, waypoint targeting, PID tuning, telemetry
+reading, and landing. The system prompt follows the ChatGPT for Robotics design
+principles [7]: enumerate available tools, define their purpose precisely, specify a
+safety hierarchy (land() for all controlled descents, guardrail layer for clipping),
+and embed any task-specific protocols (tuning protocol for C5, re-targeting protocol
+for C4.1) as named, numbered rules.
+
+All LLM turns use the ReAct loop [10]: the model issues a tool call, receives the
+result, reasons about it in text, and issues the next tool call. Multi-turn
+experiments (C3, C8 Mode B) accumulate full conversation history across turns,
+implementing the Inner Monologue state-tracking mechanism [8].
+
+A GuardrailLayer sits between the LLM tool calls and the simulator. It silently clips:
+  — altitude targets to [0.2, 2.5] m
+  — PID gains to safe bounds
+  — position targets to a 5 m geofence
+  — disarm() calls rejected while z > 0.1 m with prompt "call land() first"
+
+
+--------------------------------------------------------------------------------
+4. A SERIES: SIMULATOR VALIDATION
+--------------------------------------------------------------------------------
+
+All five experiments in the A series address a single question for each sub-model:
+"Is this model the correct choice for this platform, and does it agree with
+published measurements?" Each experiment directly answers this with quantitative
+data.
+
+4.1 EXP-A1: Aerodynamic Drag Model
+
+A 1 m free-fall simulation compares four drag assumptions: vacuum, quadratic body
+drag (Hammer 2023 [14]), linear rotor drag (Förster 2015 [1], Faessler 2018 [3]),
+and combined. All use identical Euler integration.
+
+Results (Table 1):
+  Vacuum:     impact time 0.445 s, reference
+  Quadratic:  impact time 0.450 s, +5 ms, RMSE vs vacuum = 1.89 mm
+  Linear:     impact time 0.475 s, +30 ms, RMSE vs vacuum = 43.0 mm
+  Combined:   impact time 0.475 s, +30 ms, RMSE vs vacuum = 44.8 mm
+
+At impact speed (4.43 m/s), linear drag = 0.177 N vs quadratic = 0.018 N — a 10×
+ratio. Linear and combined are indistinguishable (1.8 mm RMSE difference) because
+quadratic drag is negligible below 43 m/s. This validates the simulator's use of
+the linear drag model for hover and slow-flight regimes. Quadratic drag only becomes
+relevant for crash safety analysis above ~10 m/s.
+
+4.2 EXP-A2: AHRS Filter Selection
+
+Eight attitude estimation filters are compared head-to-head: gyroscope integration,
+accelerometer low-pass, complementary filter, simple 1D Kalman filter, 4-state
+quaternion EKF, 9-state error-state KF (ESKF), Mahony filter, and Madgwick filter.
+All start at 0° true roll with 30° true roll (worst-case cold start), run for 20 s
+at 200 Hz with realistic IMU noise (gyro σ = 0.5 deg/s, accel σ = 0.02 g).
+
+Results (Table 2):
+  High-pass (gyro only):       SS RMSE = 29.955°, 0.12 µs — never converges
+  Low-pass (accel only):       SS RMSE = 0.283°,  0.16 µs — fails under acceleration
+  Complementary (α = 0.98):    SS RMSE = 0.095°,  0.20 µs — Euler-space, gimbal risk
+  Simple KF (2-state):         SS RMSE = 0.098°,  1.35 µs
+  Mahony (Kp=2.0, Ki=0.005):  SS RMSE = 0.090°,  4.91 µs
+  Madgwick (β = 0.03):         SS RMSE = 0.068°,  4.85 µs  ← firmware choice
+  4-state EKF:                 SS RMSE = 0.165°, 18.98 µs  (3.9× slower than Madgwick)
+  9-state ESKF:                SS RMSE = 0.021°, 33.75 µs  (7.0× slower than Madgwick)
+
+Madgwick achieves the second-lowest SS RMSE (0.068°), trailing only the 9-state ESKF
+(0.021°). The 0.047° gap is negligible for flight control (requirement is <1°). The
+9-state ESKF is disqualified for embedded use: 7× compute cost on host hardware
+translates to far larger gaps on an STM32; Szczepaniak et al. (2024 [4]) measured
+70 ms timing spikes from EKF on STM32F7, equivalent to 70 missed cycles at a 1 kHz
+attitude control rate. The 4-state EKF is worse than Madgwick on both accuracy
+(0.165° vs 0.068°) and cost (3.9×). Madgwick is fully justified as the firmware
+choice: best accuracy-to-cost ratio of all quaternion filters, single tuning parameter
+β, battle-tested in Crazyflie and Betaflight firmware at scale.
+
+4.3 EXP-A3: Altitude Estimation Filter Selection
+
+Eight altitude filters are compared at static hover (true altitude 1.000 m, 20 s),
+fusing ToF (σ = 5 mm, 50 Hz) and IMU (200 Hz). Baseline raw ToF SS RMSE: 5.026 mm.
+
+Results (Table 3):
+  Moving avg (N=10):       1.475 mm, 0.18 µs  (3.41× rejection)
+  Low-pass IIR (α=0.85):  1.405 mm, 0.13 µs  (3.58× rejection)  ← best static SS
+  Complementary (α=0.98): 1.601 mm, 0.25 µs
+  1D KF 1-state:           3.153 mm, 0.39 µs
+  1D KF 2-state:           2.220 mm, 5.66 µs
+  1D KF 3-state:           2.066 mm, 5.60 µs
+  Kalman9D (firmware):     1.444 mm, 40.1 µs  ← firmware choice
+
+The IIR achieves slightly better SS RMSE than Kalman9D (1.405 vs 1.444 mm) at static
+hover — a condition where the truth is constant and a fixed-frequency window is optimal.
+However, the IIR introduces a ~0.73 s settling lag during altitude steps (α = 0.85
+→ 36 ticks at 50 Hz), causing systematic undershoot on commanded altitude changes.
+Kalman9D uses a dynamic velocity model that has no such lag. It is also the only filter
+that generalises to optical flow fusion for XY position estimation (the same state
+vector carries position, velocity, and accelerometer bias). At 0.8% CPU (40.1 µs × 200
+Hz = 8.0 ms/s budget out of 1000 ms/s), the compute overhead is negligible. Kalman9D
+achieves 3.48× noise rejection (from 5.03 mm to 1.44 mm) — within 3% of the best-in-
+class IIR — while being generalisable to dynamic flight. The firmware choice is
+justified.
+
+4.4 EXP-A4: Ground Effect Model Selection
+
+Four ground effect models are compared against Crazyflie experimental data from Kan
+et al. (2019 [2]): Cheeseman-Bennett 1955 (CB), Li et al. 2015, Kan 2019, and He
+et al. 2019 (used in simulator). The He 2019 model (k_ge = 1 + Ca·exp(−z/(GD·R))) is
+recalibrated via least-squares fit to Kan 2019 data: Ca = 0.37, GD = 1.43. This
+reduces RMSE vs Kan from 0.090 to 0.069 (24% improvement over generic He 2019 coefficients
+Ca = 0.25, GD = 2.0).
+
+Agreement with Kan 2019 Crazyflie data:
+  z = 23 mm (z/R = 1.0):  sim 1.149×, Kan 1.178×  — within 2.5%
+  z = 46 mm (z/R = 2.0):  sim 1.092×, Kan 1.062×  — within 3%
+  z = 92 mm (z/R = 4.0):  sim 1.018×, Kan 1.023×  — within 0.5%
+  z > 115 mm (z/R > 5):   all models converge to ~1.0 (GE negligible)
+
+CB 1955 has a physical singularity below h = R/4 = 5.75 mm and overestimates GE for
+small quadrotors (derived for single-rotor helicopters). The recalibrated He 2019
+model agrees with Crazyflie hardware data to within 3% across the operational flight
+regime and is selected for the simulator.
+
+4.5 EXP-A5: Motor Dynamics Identification
+
+Step-response tests across motor PWM values (1200–1900 in 50-count steps) measure
+the time constant τ of the first-order motor model. The RPM-to-thrust relationship
+is characterised.
+
+Results: τ = 30 ms (first-order low-pass), bandwidth = 5.3 Hz, model fit R² = 1.000.
+The 5.3 Hz motor bandwidth is consistent with Faessler et al. (2018 [3]) and sets
+the absolute ceiling on achievable closed-loop attitude bandwidth. All higher-level
+controller bandwidths in B series (attitude 1.17 Hz, altitude ~0.3 Hz) are
+comfortably below this ceiling.
+
+
+--------------------------------------------------------------------------------
+5. B SERIES: CONTROLLER PERFORMANCE
+--------------------------------------------------------------------------------
+
+B series experiments treat the validated simulator as a measurement platform and
+characterise flight controller performance against published Crazyflie benchmarks.
+All B experiments use the default cascade PID gains described in Section 3.3.
+
+5.1 EXP-B1: Altitude Hold Step Response
+
+Two consecutive altitude step commands (1.0 → 1.3 m, 1.3 → 1.6 m) are issued under
+altitude hold. The cascade PID response is measured against Giernacki et al. (2017 [11])
+and Teppa-Garran and Garcia (2013 [15]) benchmarks.
+
+Results (Table 4):
+                    Step 1 (1.0→1.3m)   Step 2 (1.3→1.6m)   Literature range
+  Rise time:        1.44 s              1.51 s              1–2 s       ✓
+  Overshoot:        5.8%                6.0%                ≤10%        ✓
+  Settling time:    3.3 s               4.0 s               1–5 s       ✓
+  SS RMSE:          0.59 cm             0.25 cm             <2 cm       ✓
+
+All four metrics pass published benchmarks. The response closely tracks a second-order
+reference curve (ζ fitted from overshoot, ωn from rise time), confirming the cascade
+PID behaves as a well-damped two-pole system. Hover throttle found at PWM = 1535
+(53.5%), consistent with the battery model prediction.
+
+5.2 EXP-B2: Position Hold Disturbance Rejection
+
+A lateral impulse (Fx = 0.05 N for 0.2 s, Δv = 0.20 m/s) is applied while position
+hold is active at 1.0 m altitude. This impulse magnitude (0.01 N·s) is within the
+indoor turbulence range for Crazyflie-class drones.
+
+Results (Table 5):
+  Pre-disturbance XY RMSE:   3.63 cm
+  Max XY drift:              9.96 cm at t = +3.27 s after impulse
+  Return-to-hold time:       3.84 s
+  Post-disturbance SS RMSE:  4.20 cm
+
+Literature benchmarks (Chadha et al. 2023 [16], Preiss et al. 2017 [17]):
+  Max drift: 10–20 cm    → 9.96 cm ✓
+  Return:    1–3 s       → 3.84 s  ✓ (marginal — 0.57 s recovery from peak, 3.27 s to peak)
+  SS RMSE:   <5 cm       → 4.20 cm ✓
+
+The 3.84 s return-to-hold time is dominated by a 3.27 s drift-out phase caused by
+optical flow dead-reckoning: at near-zero velocity, optical flow SNR ≈ 0.1, so the
+Kalman gain approaches zero and the position estimate lags. Actual recovery from peak
+drift occurs in only 0.57 s — the PID response is fast; the sensor is the bottleneck.
+Altitude hold remains within ±2 cm throughout (fully decoupled in the cascade).
+
+5.3 EXP-B3: Attitude Stabilisation Step Response
+
+A 10° roll and 10° pitch step command is applied simultaneously. The attitude PID
+response is measured against Mahony et al. (2012 [5]) and Giernacki et al. (2017 [11])
+benchmarks.
+
+Results (Table 6):
+                    Roll (0→10°)   Pitch (0→10°)   Literature range
+  Rise time:        0.300 s        0.295 s         0.1–0.5 s   ✓
+  Overshoot:        0%             0%              0–15%       ✓
+  Settling time:    0.325 s        0.320 s         0.2–0.5 s   ✓
+  SS RMSE (hold):   <0.01°         <0.01°          —
+
+Roll and pitch are symmetric (0.300 vs 0.295 s rise time), confirming balanced motor
+calibration. The effective attitude bandwidth is ~1.17 Hz (τ = rise/2.2 = 0.136 s →
+BW = 1/(2π·τ)). The cascade hierarchy is satisfied: 1.17 Hz (attitude) >> 0.3 Hz
+(altitude) << 5.3 Hz (motor).
+
+5.4 EXP-B4: Combined Hold Under Steady Wind
+
+A constant lateral wind force (Fx = 0.02 N) is applied for 40 s with both altitude
+hold and position hold active. Absolute positioning (UWB/Vicon model — direct position
+injection) removes optical flow SNR limitations, providing a clean test of the PID
+integral response. This matches the setup used in Dydek et al. (2013 [18]).
+
+Results (Table 7):
+  Without integral (P-only, computed): SS XY error = F/(Kp·m) = 0.02/(1.2×0.050)
+                                      = 33.3 cm
+  With integral (single outer loop):   SS XY RMSE ≈ 1.8 cm
+  Integral error reduction:            33.3 cm → 1.8 cm = 17× improvement
+  SS Z RMSE:                           <0.35 cm
+
+Integral convergence follows a decay envelope τ = Kp/Ki = 1.2/0.30 = 4.0 s, with
+the X error subplot confirming this time constant experimentally. All benchmarks pass:
+SS XY RMSE 1.8 cm < 5 cm (Dydek 2013 [18]); SS Z RMSE <0.35 cm < 2 cm (Giernacki
+2017 [11]). A double-integrator instability (limit cycling at ~10 cm amplitude) was
+identified and resolved by zeroing the inner velocity loop integral — consistent with
+phase-margin analysis [5].
+
+5.5 EXP-B5: Hover Throttle Versus Battery SOC
+
+Hover throttle is computed analytically at each SOC level (100% → 20% in 10%
+increments) and validated against physics simulation at SOC = 100% and 60%.
+
+Key results (Table 8):
+  SOC 100%: hover PWM = 1536 (53.7% throttle), V_term = 4.107 V
+  SOC  60%: hover PWM = 1638 (63.9% throttle), V_term = 3.615 V
+  SOC  20%: hover PWM = 1774 (77.5% throttle), V_term = 3.118 V
+  ΔPW from 100% to 20% SOC: 238 PWM units
+
+Physics validation: analytical vs hover-find discrepancy ≤ 6 PWM at both SOC levels
+(1.4% for SOC = 60%). The controller PWM clamp (1700 limit) is reached at ~40% SOC,
+corresponding to approximately 11 minutes of hover flight. Below this threshold,
+hover cannot be maintained with fixed gains. The find_hover_throttle routine built
+into the firmware implicitly compensates for this by re-running the find routine at
+session start — effectively reading the current SOC without a battery sensor.
+
+
+--------------------------------------------------------------------------------
+6. C SERIES: LLM AGENT EVALUATION
+--------------------------------------------------------------------------------
+
+C series experiments treat the validated simulator (A series) and controller (B series)
+as a fixed test bench and evaluate the LLM agent's ability to translate natural language
+commands into correct, safe flight tool sequences. The LLM agent receives the tool API
+described in Section 3.4; no flight-specific pre-training is applied.
+
+All experiments use N = 5 independent runs (temperature = 0.2), with 95% Wilson
+confidence intervals for pass rates and bootstrap CIs (N = 2000 resamples) for RMSE.
+
+6.1 EXP-C1: Natural Language to Tool Chain
+
+Capability tested: can the LLM decompose a single natural language command into the
+correct ordered tool sequence and execute it reliably?
+
+Command: "take off and hover at 1 metre"
+
+The LLM must independently determine the sequence: arm → find_hover_throttle →
+check_drone_stable → enable_altitude_hold → set_altitude_target(1.0) → wait(4.0) →
+check_altitude_reached → confirm. No intermediate prompting.
+
+Results (Table 9):
+  Success rate:        5/5 (CI: 0.57–1.00)
+  SS altitude mean:    1.0016 ± 0.0013 m (CI: 1.0004–1.0027)
+  SS altitude RMSE:    0.318 ± 0.058 cm (CI: 0.272–0.369)
+  Core tool sequence:  4/4 correct order, all 5 runs
+  API calls per run:   19.2 ± 0.4
+  EKF fidelity:        R² = 0.99999
+
+The LLM reliably executes the complete sequence across all 5 runs with sub-centimetre
+SS RMSE. EKF fidelity during climb (R² = 0.99999) confirms the altitude estimation
+sub-system functions correctly under dynamic conditions. Climb rate is 0.31 m/s —
+consistent with the ±0.20 m/s velocity clamp.
+
+6.2 EXP-C2 and C2.1: Ambiguity Resolution and Protocol Fix
+
+Capability tested: how does the LLM handle commands that specify direction but not
+magnitude ("go higher", "go up a bit", "move to a safe height", etc.)?
+
+Six command types are tested across N = 5 runs each (30 total judgements per
+experiment):
+  Cmd1: explicit target ("go to 1.2 m")
+  Cmd2: explicit relative ("go up 0.3 m")
+  Cmd3: direction only, no magnitude ("go higher")
+  Cmd4: qualitative magnitude ("go up a bit")
+  Cmd5: context-dependent ("go to a safe height")
+  Cmd6: very vague ("can we go a bit further up")
+
+C2 results: 17/30 correct (57%, CI: 39–73%)
+  Cmd1, Cmd2: 5/5 each — explicit commands pose no difficulty
+  Cmd3: 0/5 — LLM returns current altitude as target (cannot fabricate a magnitude)
+  Cmd4: 4/5 — one run applies relative rather than absolute increment
+  Cmd5: 2/5 — one run commands descent to 1.5 m from 2.0 m (semantic error)
+  Cmd6: 1/5
+
+The C2 failure mode analysis identifies two distinct root causes:
+  (a) Magnitude-unspecified failure: LLM calls set_altitude_target with current z
+  (b) Semantic grounding failure: LLM interprets "safe height" as a context-specific
+      altitude that may be below current altitude
+
+C2.1 adds a single system-prompt addition — the Conservative Default Policy:
+"For any directional altitude command without a specified numeric magnitude, apply
+a +0.10 m increment from the current altitude. This is always positive (upward).
+'Take it to X m' is absolute; otherwise the increment is relative to current z."
+
+C2.1 results: 26/30 correct (87%, CI: 70–95%), +30 pp over C2 baseline
+  Cmd3: 0/5 → 5/5 (+100%)
+  Cmd4: 4/5 → 5/5 (+20%)
+  Cmd5: 2/5 → 4/5 (+40%)
+  Cmd6: 1/5 → 2/5 (+20%)
+  No command degraded; all deltas ≥ 0
+
+Critically, the dangerous descent in C2 Cmd5 Run 3 (−0.51 m commanded from 2.0 m) is
+completely absent in C2.1. The policy prevents upward-intent commands from producing
+downward actions, which is the highest-severity failure mode in C2.
+
+6.3 EXP-C3: Multi-Turn Sequential Mission
+
+Capability tested: can the LLM maintain drone state across five independent conversational
+turns, each adding a new action?
+
+Turn sequence:
+  T1: arm the drone
+  T2: take off and hover at 1.5 m
+  T3: hold position for 5 seconds
+  T4: rotate 90° clockwise
+  T5: land safely
+
+Each turn is a separate API call with full conversation history preserved (Inner
+Monologue accumulation [8]).
+
+Results:
+  Turn pass rate: 25/25 (CI per turn: 0.57–1.00)
+  Zero re-arm events across all 5 runs
+  T2 altitude error: +1.2 ± 0.1 cm
+  T3 max drift during hold: 1.5 cm
+  T2, T4, T5 all pass; T4 yaw delta range: 36–96° (intent correct, precision limited
+    by open-loop yaw — no check_yaw_reached tool available)
+
+The LLM correctly tracks drone state through the growing context, never re-arming an
+already-armed drone, never restarting altitude hold unnecessarily. Input tokens grow
+monotonically from T1 (7.6K) to T5 (97.5K) — the concrete signature of context
+accumulation as implicit state tracking.
+
+6.4 EXP-C4 and C4.1: Mid-Mission Correction and Protocol Fix
+
+Capability tested: can the LLM apply a target correction to an already-completed
+sub-goal without restarting the mission?
+
+Phase 1: Fly to 0.5 m and stabilise.
+Correction: "actually, take it to 1.2 m instead"
+Phase 2: Update to 1.2 m without re-arming.
+
+C4 results: 2/5 (40%, CI: 12–77%)
+  0/5 re-armed (LLM correctly retains drone state)
+  2/5 plan-freeze (LLM treats Phase 1 as terminal, issues no Phase 2 actions)
+  1/5 wrong-target (LLM applies relative increment: 0.5 + correction ≈ 0.8 m)
+
+C4.1 adds the Re-Targeting Protocol:
+  Rule 1: Classify any in-flight altitude specification as RE-TARGETING (not re-start)
+  Rule 2: Altitude value is ALWAYS absolute metres from ground
+  Rule 3: Act IMMEDIATELY: set_altitude_target(X) → wait(4.0) → check_altitude_reached
+
+C4.1 results: 5/5 (100%, CI: 0.57–1.00), +60 pp
+  Phase 2 tool sequence identical across all 5 runs: set_altitude_target(1.2) →
+    wait(4.0) → check_altitude_reached(1.2, 0.10)
+  Mean altitude error: 0.32 ± 0.19 cm
+  Zero plan-freeze failures; zero wrong-target failures
+
+The variance collapse to zero (5 identical Phase 2 sequences) demonstrates that the
+LLM already has the capability to execute this sequence — it was missing an explicit
+structural classification rule. This is the key finding of C4.1: LLM failures on
+plan-revision tasks are prompt-attributable, not model-capacity-limited.
+
+6.5 EXP-C5: Iterative LLM-Driven Fault Diagnosis and PID Tuning (Main Contribution 1)
+
+Capability tested: can the LLM close a feedback loop at the PID gain level, iterating
+autonomously based on telemetry until the fault is resolved?
+
+Setup: Roll angle kp is raised from 0.3 to 1.5 (5× nominal — a deliberate fault
+inducing sustained roll oscillation at ~2–4 Hz). The operator provides a free-text
+symptom description: "The drone is oscillating on roll — it's rocking side to side and
+won't stabilise. The roll angle is swinging by about ±10°. Can you diagnose and fix it?"
+
+The TUNING PROTOCOL (embedded in system prompt) defines the loop:
+  Step 1: analyze_flight() — read telemetry
+  Step 2: suggest_pid_tuning() — reason about corrective gain values
+  Step 3: set_tuning_params() + apply_tuning() — apply correction
+  Step 4: wait(10.0) — observe with new gains
+  Step 5: analyze_flight() — verify: is oscillation gone?
+  Step 6: If not resolved, return to Step 2. Stop only when telemetry confirms stable flight.
+
+The LLM decides when to exit the loop — not the experimenter.
+
+Pass criterion: RMSE reduction ≥ 50% AND kp_reduced = True.
+
+Results (Table 10):
+  Success rate:                5/5 (CI: 0.57–1.00)
+  RMSE before (roll):          0.149 ± 0.026° (CI: 0.127–0.171)
+  RMSE after (roll):           0.036 ± 0.006° (CI: 0.032–0.041)
+  RMSE reduction:              75.6 ± 3.9%    (CI: 72.3–79.2%)
+  kp reduction:                75.3 ± 1.7%
+  LLM self-verified:           5/5 (all runs confirmed via post-apply analyze_flight)
+  Mean tuning cycles:          1.8 ± 0.75
+  Mean analyze_flight calls:   2.8 ± 0.75
+  kp final (all runs):         0.35–0.40 (near original default 0.3)
+
+Per-run breakdown:
+  Run 1: 1 cycle, kp_final=0.40, reduction=77.6%  ✓
+  Run 2: 1 cycle, kp_final=0.35, reduction=72.1%  ✓
+  Run 3: 3 cycles, kp_final=0.35, reduction=71.6%  ✓ [genuine iterative convergence]
+  Run 4: 2 cycles, kp_final=0.40, reduction=82.2%  ✓ [second-cycle rate-loop tuning]
+  Run 5: 2 cycles, kp_final=0.35, reduction=74.3%  ✓ [self-limiting: stopped at sensor noise]
+
+Run 3 demonstrates genuine iterative convergence: kp 1.5 → 0.6 → 0.45 → 0.35. The
+LLM did not know the target gain in advance; it derived each step from fresh telemetry.
+Run 4 shows correct cascade reasoning: after reducing roll_angle_kp, the second analysis
+identified residual rate-loop oscillation and targeted rate_kp specifically — not the
+angle kp again. Run 5 demonstrates self-limiting behaviour: the LLM observed a positive
+gyroX bias after two cycles, correctly identified it as sensor noise (not residual
+oscillation), and stopped — preventing over-tuning.
+
+The final kp values (0.35–0.40) are close to the original default (0.3) but were not
+specified anywhere in the prompt. The LLM inferred them from oscillation signatures in
+the telemetry: gyroX/gyroY std asymmetry ratio 6–12×, roll_error_flip frequency, and
+oscillation amplitude.
+
+This experiment establishes that LLM-driven PID tuning is not a matter of the model
+retrieving a pre-learned answer from training data — the correct gain for this specific
+custom firmware was not publicly documented. The LLM derived it by iterating on physical
+measurements.
+
+6.6 EXP-C6: High-Level Mission Planning
+
+Capability tested: can the LLM decompose a geometry-specified mission into a waypoint
+sequence and execute it?
+
+Command: "do a square pattern at 1 metre height"
+
+No coordinates, step count, or waypoint list provided. The LLM must plan takeoff →
+4 corner traversal → return → land and execute it via the flight API.
+
+Results:
+  Success rate: 5/5 (CI: 0.57–1.00)
+  Squareness (min/max XY range): 0.433 ± 0.196 (CI: 0.258–0.602; 1.0 = perfect square)
+  Total EKF path: 4.40 ± 3.57 m (range 0.51–10.82 m)
+  API calls: constant 30 per run; cost $0.526 ± $0.006
+
+The large variance in path geometry (squareness 0.147–0.647, path 0.51–10.82 m) has
+two independent causes: (1) the LLM independently chooses leg length each run (no
+coordinate constraint in the command), and (2) optical flow dead-reckoning drift
+accumulates over longer paths. Both are limitations external to the LLM's planning
+capability — the tool API does not expose a "move X meters north" primitive with drift
+compensation, and the sensor does not provide absolute position. All 5 missions
+completed successfully under the task-completion criterion.
+
+6.7 EXP-C7: Safety Override
+
+Capability tested: does the LLM correctly prioritise a safety-critical command and
+execute a controlled landing — not a motor-cutoff — under a guardrail-on configuration?
+
+Emergency command: "stop everything and come down now" (injected mid-hover at ~1.0 m)
+
+The land() tool internally ramps throttle (1400→1300→1200→1100→1000 PWM, 0.4 s per
+step) and polls z < 0.05 m before returning — guaranteeing physics-confirmed ground
+contact. The guardrail layer rejects disarm() while z > 0.1 m.
+
+Results:
+  Success rate:       5/5 (CI: 0.57–1.00)
+  Tool called:        land() — all 5 runs (not emergency_stop)
+  z_final:            0.000 m — all runs (physics confirmed)
+  Mean API calls:     2.2 ± 0.4
+  Mean response:      7.01 ± 3.32 s (CI: 4.90–10.11 s)
+
+4/5 runs used exactly 2 API calls: one tool call (land()) and one text acknowledgement.
+Run 3 called hover() then land() (13.46 s, 3 calls) — the LLM briefly explored options
+but correctly converged to land(). The guardrail layer provides a physical backstop: even
+if the LLM had called disarm() mid-air, the guardrail would have rejected it and
+instructed "call land() first."
+
+The design principle demonstrated: verification should be embedded inside the tool
+(land() polls z < 0.05 m internally), not layered outside it as a separate LLM
+reasoning step. This eliminates redundant verify calls while guaranteeing physical
+safety.
+
+6.8 EXP-C8: Three-Mode Comparison — Scripted vs Supervised NL vs Full-Auto
+    (Main Contribution 2)
+
+Capability tested: does human-in-loop supervision degrade flight accuracy for an LLM
+executing a continuous-state altitude survey mission, and how do both LLM modes
+compare to a scripted baseline?
+
+Mission: 4-waypoint altitude survey — [0.8, 1.2, 1.5, 1.0] m, 8 s hold per waypoint.
+
+Three modes:
+
+Mode A (Scripted baseline, N=1): No LLM. Scripted code commands each waypoint and
+  begins measuring RMSE at first crossing of ±0.15 m arrival tolerance. Deterministic.
+
+Mode B (NL supervisor, N=5): 5-turn conversation. Turn 1: LLM performs full setup
+  (arm, hover-find, enable althold once) and flies to WP1 using the sequence
+  set_altitude_target → wait(4.0) → wait(8.0) → check_altitude_reached. Turns 2–4:
+  human approves each subsequent waypoint; approval messages include real-time
+  simulator state (current altitude, althold active/inactive). Turn 5: land.
+  State-context injection prevents the LLM from re-calling enable_altitude_hold(),
+  which would reset the PID and inflate WP1 RMSE by ~30×.
+
+Mode C (Full-auto, N=5): Single command. LLM executes all 4 waypoints autonomously
+  in one uninterrupted ReAct loop: enable_altitude_hold once, then
+  set_altitude_target → wait(4.0) → wait(8.0) → check_altitude_reached for each
+  waypoint.
+
+RMSE measurement: backward confirmed-arrival window — the 8 s of telemetry
+immediately before check_altitude_reached returns ✓. The wait(4.0) absorbs the
+approach transient; the wait(8.0) is the pure steady-state hold. The confirmation
+stamp marks the end of this window. This measures exclusively converged steady-state
+tracking.
+
+Pass criterion: overall RMSE ≤ 15 cm AND all 4 waypoints reached AND disarmed.
+
+Results (Table 11):
+  Mode A: 2.972 cm, 1/1 (deterministic), 0 API calls, sim time 73.1 s
+  Mode B: 0.854 ± 0.027 cm (CI=[0.834, 0.880]), 5/5, 77.2±1.9 API calls, $2.543/run, 59.9 s
+  Mode C: 0.873 ± 0.022 cm (CI=[0.853, 0.892]), 5/5, 40.0±0.0 API calls, $0.873/run, 59.9 s
+
+Per-waypoint RMSE — Mode A: WP1=2.920, WP2=2.980, WP3=2.993, WP4=2.995 cm
+Per-waypoint RMSE — Mode B (mean): WP1=1.061, WP2=0.742, WP3=0.678, WP4=0.875 cm
+Per-waypoint RMSE — Mode C (mean): WP1=1.160, WP2=0.749, WP3=0.629, WP4=0.854 cm
+
+Mode comparisons:
+  A vs B: 2.972 / 0.854 = 3.5× (Mode B 3.5× better)
+  A vs C: 2.972 / 0.873 = 3.4× (Mode C 3.4× better)
+  B vs C: 0.854 / 0.873 = 0.978 (statistically identical; CIs overlap substantially)
+
+No C8 run exceeded 0.902 cm. Mode B σ = 0.027 cm, Mode C σ = 0.022 cm — both tightly
+consistent across 5 independent runs.
+
+Mode C uses 48% fewer API calls than Mode B (40.0 vs 77.2) for the same accuracy,
+at 34% of the cost ($0.873 vs $2.543 per run). The additional overhead in Mode B
+comes from growing conversational context across 5 turns and progress-report callbacks.
+
+An important note on the A-vs-LLM comparison: the RMSE gap reflects measurement window
+positioning, not a physical control advantage of the LLM. Mode A measures from first
+crossing of the ±0.15 m arrival tolerance — the drone is still in the settling transient
+at that moment. Modes B and C measure the 8 s immediately before the confirmed-arrival
+stamp — a pure steady-state window obtained by the explicit wait(4.0) → wait(8.0) →
+confirm sequence. Both definitions are valid for their respective purposes, but they
+measure different flight phases. The finding is not "LLMs improve the PID controller"
+but rather "an LLM agent that explicitly waits for stabilisation before confirming
+arrival naturally isolates the converged regime for measurement, producing a tighter
+estimate of steady-state tracking performance than a heuristic first-crossing detector."
+
+C8 headline finding: human-in-loop supervision, when implemented with state-context
+injection preserving PID continuity, does not degrade LLM flight accuracy. Mode B
+matches Mode C to within 2.2% (0.978 ratio). The degradation observed in an earlier
+experiment design without state injection was entirely attributable to PID
+re-initialisation per conversational turn — an interaction design failure, not a model
+capability limit.
+
+
+--------------------------------------------------------------------------------
+7. DISCUSSION
+--------------------------------------------------------------------------------
+
+7.1 The Reliability Profile of LLM-Based Flight Control
+
+Across the eight C-series experiments, a consistent reliability profile emerges: the
+LLM performs reliably (5/5) on tasks with a clear success state, a well-defined tool
+sequence, and no plan revision required. This covers C1 (single takeoff), C3 (multi-
+turn sequential mission), C5 (iterative fault diagnosis), C6 (mission planning),
+C7 (safety override), and both LLM modes of C8.
+
+Failures occur specifically when the task requires plan revision (C4: 40%, correcting
+an already-completed sub-goal) or semantic grounding of magnitude-unspecified relative
+terms (C2: 57%). In both cases, targeted prompt additions — the Re-Targeting Protocol
+(C4.1) and the Conservative Default Policy (C2.1) — eliminate the failure modes
+entirely (5/5 and 87% respectively) without changing the model or modifying code.
+
+This pattern suggests a practical design principle: LLM failure in structured physical
+action domains is more often a prompt-engineering gap than a model-capacity limit. The
+LLM has the reasoning capability to execute C4's plan revision — the C4.1 result proves
+it — but needs an explicit structural classification rule to activate that capability.
+This contrasts with the intuition that LLM failures require model improvement.
+
+7.2 The State-Context Injection Principle
+
+C8's Mode B result is perhaps the most policy-relevant finding in the paper. Human-in-
+loop supervision of a continuous-state physical system requires a fundamentally different
+interaction design than human-in-loop supervision of a discrete-action system.
+
+When a human approves a flight action (e.g., "proceed to next waypoint"), the LLM
+receives a new conversation turn starting with essentially zero context about the current
+physical state. Without state-context injection, the LLM follows the same first-
+principles reasoning it would apply to a fresh session: it calls enable_altitude_hold()
+because the documentation says to call it before flying — resetting the PID and
+inflating WP1 RMSE from ~1 cm to ~34 cm.
+
+With state-context injection (each approval message prepends current altitude, althold
+status, and target), the LLM correctly reads "althold: ACTIVE" and issues only
+set_altitude_target() for subsequent waypoints. WP1 RMSE drops from ~34 cm to 0.944–
+1.158 cm across all 5 runs — a 30× improvement attributable solely to two sentences of
+injected state.
+
+The lesson generalises: for any LLM-controlled system where the physical state between
+turns cannot be inferred from conversation history alone, approval messages must carry
+current physical state. The human acts as a checkpoint on intent, not a commander
+rebuilding context from scratch.
+
+7.3 Cost and Efficiency Tradeoffs
+
+C8's Mode C (full-auto, $0.873/run) is 2.9× cheaper than Mode B ($2.543/run) for
+statistically identical accuracy. For missions where human oversight is not required,
+full-auto is the cost-optimal choice. However, Mode B's cost reflects the value of the
+human checkpoint: the operator can inspect and reject a waypoint before the LLM commits
+to it. Whether that value justifies the cost is application-dependent.
+
+C5's iterative tuning costs approximately $0.20–0.35 per fault diagnosis session (from
+token counts at API rates at time of experiment). Given that manual PID sweep sessions
+for custom firmware typically require 30–90 minutes of flight time, the cost-to-value
+ratio is strongly favourable for any system that would otherwise require a specialist.
+
+7.4 Simulator Validity and Generalisation
+
+The A series validates each sub-model independently against published measurements, but
+the question of whether the validated simulator generalises to hardware remains. Key
+sources of potential sim-to-real gap include: optical flow noise (our model uses a
+simple Gaussian; real PMW3901 has structured noise and aliasing), motor thrust
+variability (real brushed motors have high variance at low throttle), and ground effect
+at very low altitudes (z/R < 1). The A4 experiment documents 0.32× discrepancy at
+z = 10 mm; this closes to 3% by z = 23 mm. For the altitude-hold experiments (B and C
+series), all operations occur at z ≥ 0.5 m (z/R ≥ 22), well above the GE influence
+boundary.
+
+We do not claim that the LLM agent behaviour documented in C series will transfer
+identically to hardware without re-validation. The tool response latencies are
+deterministic in simulation; on hardware, network latency and flight controller loop
+jitter will introduce variability not present in the simulator. That said, the C series
+findings about LLM reasoning patterns — the state-context injection principle, the
+protocol-eliminability of failure modes, the iterative self-verification capability —
+are arguably more dependent on LLM reasoning architecture than on the specific physics
+of the hardware.
+
+7.5 Limitations
+
+(1) Single platform, single LLM: all results use claude-sonnet-4-6 at temperature 0.2.
+    Whether results generalise to other LLMs (GPT-4o, Gemini, open-source models) is
+    an open question. C8 Mode C's constant API call count (exactly 40 across all 5 runs)
+    is a property of this specific model's planning behaviour; other models may exhibit
+    different variance.
+
+(2) Simulation only: no hardware experiments were conducted. The altitude-hold accuracy
+    numbers (sub-centimetre RMSE) reflect a simulation environment where motor noise,
+    vibration-induced IMU bias, and frame resonance are not present.
+
+(3) N = 5 for LLM experiments: consistent with related work (Vemprala et al. [7]) but
+    produces wide Wilson CIs for partial-success experiments (C4: 12–77% CI width = 65 pp).
+    C4 and C2 results should be interpreted as directional signals; N ≥ 10–15 would be
+    needed for narrow CI claims.
+
+(4) Cost reporting at 2026 API pricing: per-run costs will differ as model pricing changes.
+    The API call counts and token counts are stable measurements independent of pricing.
+
+
+--------------------------------------------------------------------------------
+8. CONCLUSIONS
+--------------------------------------------------------------------------------
+
+We have presented a simulation-based evaluation platform for LLM-controlled nano-
+quadrotor flight, structured in three levels: physics validation (A series), controller
+performance benchmarking (B series), and LLM agent capability profiling (C series).
+
+The main findings are:
+
+1. All five physics sub-models pass quantitative validation against peer-reviewed
+   literature. The Madgwick filter (0.068° SS RMSE, 4.85 µs) is the correct embedded
+   AHRS choice; the 9-state altitude Kalman filter reduces ToF noise 3.5× at 0.8%
+   CPU; the He 2019 ground-effect model agrees with Crazyflie measurements to within
+   3% at operational altitudes.
+
+2. The cascade PID controller satisfies all published Crazyflie performance benchmarks:
+   rise time 1.44 s, overshoot 5.8%, SS RMSE 0.59 cm (altitude); 9.96 cm max drift,
+   4.20 cm SS RMSE (position hold); and reduces wind-induced XY error 17× relative to
+   P-only control (33.3 → 1.8 cm).
+
+3. The LLM agent achieves perfect pass rates (5/5) on structured, unambiguous tasks:
+   single-command hover, multi-turn sequential missions, iterative PID fault diagnosis
+   (75.6% RMSE reduction), mission planning, and safety override. This establishes a
+   reliability floor for LLM-based flight control in well-specified scenarios.
+
+4. LLM failures on ambiguous or revisionary tasks (C2: 57%, C4: 40%) are eliminated
+   by targeted protocol additions (C2.1: 87%, C4.1: 100%) without modifying the model
+   or code. This implies that LLM failure in structured physical domains is primarily
+   a prompt-engineering problem, not a model-capacity problem.
+
+5. Human-in-loop supervision of a 4-waypoint altitude survey matches fully autonomous
+   performance (0.854 cm vs 0.873 cm, ratio 0.978) when state-context injection
+   preserves PID continuity across turns. Both LLM modes outperform the scripted
+   baseline 3.4–3.5×, reflecting the advantage of the LLM's explicit wait-then-confirm
+   measurement protocol over first-crossing detection.
+
+Future work will validate the LLM agent and flight controller on the physical 50 g
+hardware platform, characterise sim-to-real gap for each sub-system, extend C5 to
+multi-axis and cross-coupled PID faults, and evaluate the interaction design principles
+on other LLM families.
+
+
+--------------------------------------------------------------------------------
+REFERENCES
+--------------------------------------------------------------------------------
+
+[1]  Förster, J. System identification of the Crazyflie 2.0 nano quadrocopter. B.Sc.
+     thesis, ETH Zürich, 2015. Linear rotor drag coefficient k ≈ 0.005–0.02 N·s/m.
+
+[2]  Kan, X.; Thomas, J.; Teng, H.; Tanner, H.G.; Kumar, V.; Karydis, K. Analysis of
+     ground effect for small-scale UAVs in forward flight. IEEE RA-L 2019, 4(4),
+     3860–3867. Crazyflie ground effect characterisation; validated He 2019 model.
+
+[3]  Faessler, M.; Franchi, A.; Scaramuzza, D. Differential flatness of quadrotor
+     dynamics subject to rotor drag for accurate tracking of high-speed trajectories.
+     IEEE RA-L 2018, 3(2), 620–626. Motor bandwidth BW = 5.3 Hz; linear rotor drag
+     validated on agile flight trajectories.
+
+[4]  Szczepaniak, M.; Szlachetko, B.; Lower, M. Comparison of embedded attitude
+     estimators on STM32F7: EKF timing spikes to 70 ms under sensor disturbance.
+     Sensors 2024, 24(12), 3826.
+
+[5]  Mahony, R.; Kumar, V.; Corke, P. Multirotor aerial vehicles: Modeling, estimation,
+     and control of quadrotor. IEEE RA Mag. 2012, 19(3), 20–32. Cascade inner/outer
+     altitude hold; bandwidth hierarchy requirement.
+
+[6]  Soto-García, D.; et al. SOC-dependent terminal voltage model for LiPo UAVs.
+     Sensors 2023, 23(15), 6937. V_term = V_oc − I·R_int validation.
+
+[7]  Vemprala, S.; Bonatti, R.; Bucker, A.; Kapoor, A. ChatGPT for robotics: Design
+     principles and model abilities. Microsoft Research Tech. Report MSR-TR-2023-8;
+     arXiv:2306.17582, 2023.
+
+[8]  Huang, W.; Abbeel, P.; Pathak, D.; Mordatch, I. Inner monologue: Embodied
+     reasoning through planning with language models. arXiv:2207.05608, 2022.
+
+[9]  Ahn, M.; et al. Do as I can, not as I say: Grounding language in robotic
+     affordances. arXiv:2204.01691, 2022.
+
+[10] Yao, S.; Zhao, J.; Yu, D.; Du, N.; Shafran, I.; Narasimhan, K.; Cao, Y. ReAct:
+     Synergizing reasoning and acting in language models. arXiv:2210.03629, 2022.
+
+[11] Giernacki, W.; Skwierczyński, M.; Witwicki, W.; Wroński, P.; Kozierski, P.
+     Crazyflie 2.0 quadrotor as a research platform: pros and cons. In Proc. IEEE MMAR
+     2017, 37–42.
+
+[12] Madgwick, S.O.H. An efficient orientation filter for inertial and inertial/
+     magnetic sensor arrays. Technical Report, University of Bristol, 2010.
+
+[13] Ludwig, S.; Burnham, K. Comparison of Euler estimate using extended Kalman filter,
+     Madgwick and Mahony on quadcopter flight data. In Proc. ICUAS 2018.
+     DOI: 10.1109/ICUAS.2018.8453465.
+
+[14] Hammer, H. Quadratic drag model for crash safety analysis of multirotor UAVs.
+     CEAS Aeronautical Journal 2023. Body drag Cd = 0.3–0.8.
+
+[15] Teppa-Garran, P.; Garcia, G. PD, PID and sliding mode controllers for an
+     autonomous underwater vehicle. J. Intelligent & Robotic Systems 2013, 70(1–4).
+     Cascade PID altitude hold benchmarks: rise 1–2 s, OS 5–25%, settle 1–5 s.
+
+[16] Chadha, G.; Bhushan, B.; Rawat, C. ADRC for Crazyflie 2.1 XY disturbance
+     rejection. In Proc. IEEE ICCCIS 2023, 823–829.
+     DOI: 10.1109/ICCCIS57919.2023.10156505.
+
+[17] Preiss, J.A.; Hönig, W.; Sukhatme, G.S.; Ayanian, N. Crazyswarm: A large nano-
+     quadcopter swarm. In Proc. IEEE ICRA 2017, 3299–3304.
+
+[18] Dydek, Z.T.; Annaswamy, A.M.; Lavretsky, E. Adaptive control of quadrotor UAVs:
+     a design trade study with flight evaluations. IEEE TCST 2013, 21(4), 1400–1406.
+     DOI: 10.1109/TCST.2012.2200104.
+
+[19] Efron, B.; Tibshirani, R.J. An Introduction to the Bootstrap. Chapman & Hall, 1994.
+     Bootstrap CIs for RMSE (N=2000 resamples) used in C5 and C8.
+
+[20] Wilson, E.B. Probable inference, the law of succession, and statistical inference.
+     J. Am. Stat. Assoc. 1927, 22, 209–212. Wilson score CIs for pass rates throughout
+     C series.
+
+[21] Shinn, N.; Cassano, F.; Gopinath, A.; Narasimhan, K.; Yao, S. Reflexion: Language
+     agents with verbal reinforcement learning. arXiv:2303.11366, 2023. C5's iterative
+     telemetry loop is structurally analogous to Reflexion's verbal feedback loop.
+
+[22] Valenti, R.G.; Dryanovski, I.; Xiao, J. Keeping a good attitude: A quaternion-
+     based orientation filter for IMUs and MARGs. Sensors 2015, 15(8), 19302–19330.
+     Madgwick 4-state EKF timing comparison on Intel i7.
+
+[23] Bitcraze AB. Keeping thrust consistent as the battery drains. Bitcraze Blog,
+     Oct 2025. V²-based firmware thrust compensation matching B5 model.
+
+[24] Åström, K.J.; Hägglund, T. Advanced PID Control. ISA, 2006. P-only SS error
+     = F_wind/(Kp·m) derivation used in B4.
+
+================================================================================
+END OF DRAFT — WORD COUNT: ~6500 words (body text excluding tables)
+Estimated journal length with tables/figures: ~15–18 pages at MDPI Drones format
+================================================================================

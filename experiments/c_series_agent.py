@@ -106,6 +106,16 @@ For EVERY multi-step request, follow this exact sequence:
   suggest_pid_tuning(axis="all")    — targeted gain recommendations
   detect_anomaly()                  — scan for yaw spin, oscillation, etc.
 
+  TUNING PROTOCOL — follow this for every tuning task:
+    1. analyze_flight()              — read telemetry, identify the problem
+    2. suggest_pid_tuning()          — get recommended values
+    3. set_tuning_params() + apply_tuning()  — apply the fix
+    4. wait(10.0)                    — let the drone fly with new gains
+    5. analyze_flight()              — verify: is the problem gone?
+    6. If oscillation persists → repeat from step 2 with further adjustment.
+    7. Only stop when analyze_flight() confirms stable flight (no oscillation).
+  You MUST verify with telemetry after every fix. Never declare success without confirming.
+
 ━━ MISSION TOOLS ━━
   plan_workflow(goal, steps)
   report_progress(step, total_steps, description)
@@ -115,6 +125,9 @@ For EVERY multi-step request, follow this exact sequence:
   Max safe throttle: 1800 PWM.
   Always check_drone_stable after takeoff before enabling holds.
   If check_drone_stable fails 3× → land immediately.
+  For ANY landing scenario — normal end of mission, emergency, unsafe conditions,
+  operator override, or anything going wrong — always call land(). It handles all cases.
+  emergency_stop() is a last-resort kill switch only (prop entanglement, flip) — never use it for a landing.
 
 Respond concisely. Chain tools without waiting for user confirmation.
 """
@@ -138,7 +151,7 @@ SIM_TOOLS = [
          "required": []}},
 
     {"name": "land",
-     "description": "Full safe landing: centre controls, ramp throttle down, disarm.",
+     "description": "Land the drone safely: centre controls, ramp throttle down to zero, disarm on ground. Use for ALL landing scenarios — normal mission end, emergency, unsafe conditions, or operator stop command.",
      "input_schema": {"type": "object", "properties": {}, "required": []}},
 
     {"name": "hover",
@@ -318,9 +331,153 @@ SIM_TOOLS = [
      "input_schema": {"type": "object", "properties": {}, "required": []}},
 
     {"name": "emergency_stop",
-     "description": "EMERGENCY: immediately disarm all motors. Drone drops.",
+     "description": "KILL SWITCH ONLY: instantly cuts all motors — drone free-falls. Use ONLY for prop entanglement or flip prevention. For any landing use land() instead.",
      "input_schema": {"type": "object", "properties": {}, "required": []}},
 ]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  GuardrailLayer — code-level safety interceptor (independent of LLM prompt)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class GuardrailLayer:
+    """
+    Hard safety layer that sits between LLM tool calls and drone execution.
+    Operates independently of the system prompt — fires regardless of LLM
+    reasoning. Toggle with enabled=True/False for controlled experiments.
+
+    Three guard categories:
+      1. Flight safety  — altitude bounds, disarm-while-airborne rejection
+      2. Tuning safety  — PID gain bounds (clips out-of-range values)
+      3. Mission safety — waypoint/position bounds (geofence)
+    """
+
+    # ── Operational flight envelope ────────────────────────────────────────
+    ALT_CEILING = 2.4    # operational ceiling (m) — 0.1 m below sim hard limit
+    ALT_FLOOR   = 0.3    # minimum safe altitude (m)
+    AIRBORNE_THRESHOLD = 0.10  # z > this → drone is considered airborne
+
+    # ── Safe PID gain bounds ───────────────────────────────────────────────
+    GAIN_BOUNDS = {
+        "roll_angle_kp":  (0.01, 2.0),
+        "roll_angle_ki":  (0.0,  0.5),
+        "roll_angle_kd":  (0.0,  0.3),
+        "pitch_angle_kp": (0.01, 2.0),
+        "pitch_angle_ki": (0.0,  0.5),
+        "pitch_angle_kd": (0.0,  0.3),
+        "roll_rate_kp":   (0.01, 3.0),
+        "pitch_rate_kp":  (0.01, 3.0),
+        "lw_pidZ_kp":     (0.01, 5.0),
+        "lw_pidVZ_kp":    (0.01, 5.0),
+    }
+
+    # ── Geofence (XY) ──────────────────────────────────────────────────────
+    MAX_X = 5.0   # m from origin
+    MAX_Y = 5.0
+
+    def __init__(self, enabled: bool = True):
+        self.enabled = enabled
+        self.intercepts: list = []   # full audit log of every intercept
+
+    # ──────────────────────────────────────────────────────────────────────
+    def check(self, tool_name: str, tool_args: dict, drone_state) -> tuple:
+        """
+        Evaluate a pending tool call against all guardrails.
+
+        Returns:
+            (allowed, final_args, feedback_msg)
+            • allowed      — True: execute; False: reject entirely
+            • final_args   — original args or clipped version
+            • feedback_msg — None if clean, str if intercepted (returned to LLM)
+        """
+        if not self.enabled:
+            return True, tool_args, None
+
+        # ── 1. Altitude target bounds ──────────────────────────────────────
+        if tool_name == "set_altitude_target":
+            m = float(tool_args.get("meters", 0))
+            if m > self.ALT_CEILING:
+                self._log(tool_name, {"meters": m}, {"meters": self.ALT_CEILING},
+                          "ceiling_clip")
+                new_args = {**tool_args, "meters": self.ALT_CEILING}
+                msg = (f"[GUARDRAIL] Altitude target {m:.3f} m clipped to "
+                       f"{self.ALT_CEILING} m (operational ceiling).")
+                return True, new_args, msg
+            if m < self.ALT_FLOOR:
+                self._log(tool_name, {"meters": m}, {"meters": self.ALT_FLOOR},
+                          "floor_clip")
+                new_args = {**tool_args, "meters": self.ALT_FLOOR}
+                msg = (f"[GUARDRAIL] Altitude target {m:.3f} m clipped to "
+                       f"{self.ALT_FLOOR} m (minimum safe altitude).")
+                return True, new_args, msg
+
+        # ── 2. Disarm while airborne ───────────────────────────────────────
+        if tool_name == "disarm":
+            z = getattr(drone_state, "z", 0.0)
+            if z > self.AIRBORNE_THRESHOLD:
+                self._log(tool_name, {"z": round(z, 3)}, None,
+                          "disarm_airborne_reject")
+                msg = (f"[GUARDRAIL] Disarm rejected: drone airborne at "
+                       f"{z:.3f} m. Call land() first.")
+                return False, tool_args, msg
+
+        # ── 3. PID gain bounds ─────────────────────────────────────────────
+        if tool_name == "set_tuning_params":
+            clipped, msgs = {}, []
+            for gain, (lo, hi) in self.GAIN_BOUNDS.items():
+                if gain in tool_args:
+                    v = float(tool_args[gain])
+                    if not (lo <= v <= hi):
+                        c = max(lo, min(hi, v))
+                        clipped[gain] = c
+                        msgs.append(f"{gain}: {v:.4f} → {c:.4f}")
+            if clipped:
+                self._log(tool_name, tool_args,
+                          {**tool_args, **clipped}, "gain_clip")
+                new_args = {**tool_args, **clipped}
+                msg = ("[GUARDRAIL] Gain(s) out of safe range — clipped: "
+                       + ", ".join(msgs) + ".")
+                return True, new_args, msg
+
+        # ── 4. Geofence: set_position_target ──────────────────────────────
+        if tool_name == "set_position_target":
+            x = float(tool_args.get("x", 0.0))
+            y = float(tool_args.get("y", 0.0))
+            cx = max(-self.MAX_X, min(self.MAX_X, x))
+            cy = max(-self.MAX_Y, min(self.MAX_Y, y))
+            if cx != x or cy != y:
+                self._log(tool_name, {"x": x, "y": y},
+                          {"x": cx, "y": cy}, "geofence_clip")
+                new_args = {**tool_args, "x": cx, "y": cy}
+                msg = (f"[GUARDRAIL] Position target ({x:.2f}, {y:.2f}) m "
+                       f"clipped to ({cx:.2f}, {cy:.2f}) m (geofence ±{self.MAX_X} m).")
+                return True, new_args, msg
+
+        return True, tool_args, None
+
+    # ──────────────────────────────────────────────────────────────────────
+    def _log(self, tool: str, original, clipped, reason: str):
+        self.intercepts.append({
+            "tool":     tool,
+            "original": original,
+            "clipped":  clipped,
+            "reason":   reason,
+        })
+
+    @property
+    def intercept_count(self) -> int:
+        return len(self.intercepts)
+
+    def summary(self) -> dict:
+        return {
+            "enabled":          self.enabled,
+            "total_intercepts": self.intercept_count,
+            "intercepts":       self.intercepts,
+        }
+
+    def reset(self):
+        """Clear intercept log (call between runs if reusing agent)."""
+        self.intercepts = []
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -335,14 +492,19 @@ class SimAgent:
     synchronously against the sim (no WebSocket, no threading during tools).
     """
 
-    def __init__(self, session_id: str = "default"):
+    def __init__(self, session_id: str = "default", guardrail_enabled: bool = True):
         self.session_id = session_id
+        self.guardrail  = GuardrailLayer(enabled=guardrail_enabled)
         self.state   = DroneState()
         self.physics = PhysicsLoop(self.state)
 
         self.sim_time  = 0.0    # simulated seconds elapsed
         self.tel_buf   = []     # telemetry ring buffer (10 Hz)
         self._tel_ctr  = 0      # tick counter for decimation
+        # Records len(tel_buf) at the moment each check_altitude_reached() returns ✓.
+        # Used by exp_C8 to start RMSE measurement from the LLM's own confirmation,
+        # not from a heuristic scan of raw telemetry.
+        self.wp_confirmed_tel_idx = []
         self._trim_pitch = 0    # PWM offset applied to ch3
         self._trim_roll  = 0    # PWM offset applied to ch2
 
@@ -468,6 +630,110 @@ class SimAgent:
                 "avg": round(avg,3), "std": round(std,3)}
 
     # ─────────────────────────────────────────────────────────────────────────
+    #  LLM telemetry analysis helper (mirrors keyboard_server.analyze_telemetry)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _llm_analyze(self, tel: list, task: str, max_tokens: int = 600) -> str:
+        """
+        Send raw telemetry statistics + current PID values to the LLM
+        (no tool definitions, no system prompt — pure engineering analysis call).
+        Returns the LLM's free-text response.
+        Mirrors keyboard_server.analyze_telemetry exactly.
+        """
+        if not tel:
+            return "No telemetry available."
+
+        def col(key):
+            return [s.get(key, 0) for s in tel if key in s]
+
+        def stats(vals):
+            if not vals: return {}
+            mn, mx = min(vals), max(vals)
+            avg = sum(vals) / len(vals)
+            std = math.sqrt(sum((v - avg)**2 for v in vals) / len(vals))
+            return {"min": round(mn, 3), "max": round(mx, 3),
+                    "avg": round(avg, 3), "std": round(std, 3)}
+
+        def count_flips(vals):
+            flips, prev = 0, 0
+            for v in vals:
+                s = 1 if v > 0 else -1
+                if prev and s != prev: flips += 1
+                prev = s
+            return flips
+
+        n   = len(tel)
+        dur = n / 10.0   # 10 Hz telemetry
+        summary = {
+            "roll_deg":         stats(col("r")),
+            "pitch_deg":        stats(col("p")),
+            "error_roll_deg":   stats(col("er")),
+            "error_pitch_deg":  stats(col("ep")),
+            "gyroX_dps":        stats(col("gx")),
+            "gyroY_dps":        stats(col("gy")),
+            "motor1_pwm":       stats(col("m1")),
+            "motor2_pwm":       stats(col("m2")),
+            "motor3_pwm":       stats(col("m3")),
+            "motor4_pwm":       stats(col("m4")),
+            "roll_error_flips":  count_flips(col("er")),
+            "pitch_error_flips": count_flips(col("ep")),
+        }
+
+        p = self.physics
+        current_pids = {
+            "roll_angle_kp":  p.pid_roll_angle.kp,
+            "roll_angle_ki":  p.pid_roll_angle.ki,
+            "roll_angle_kd":  p.pid_roll_angle.kd,
+            "roll_rate_kp":   p.pid_roll_rate.kp,
+            "pitch_angle_kp": p.pid_pitch_angle.kp,
+            "pitch_angle_ki": p.pid_pitch_angle.ki,
+            "pitch_angle_kd": p.pid_pitch_angle.kd,
+            "pitch_rate_kp":  p.pid_pitch_rate.kp,
+            "yaw_rate_kp":    p.pid_yaw_rate.kp,
+        }
+
+        prompt = (
+            f"Task: {task}\n\n"
+            f"Flight telemetry ({n} samples, {dur:.1f} s):\n"
+            f"{json.dumps(summary, indent=2)}\n\n"
+            f"Current PID values: {json.dumps(current_pids, indent=2)}\n\n"
+            "Known drone: 7×7 cm, 50 g micro quad, brushed motors, cascade PID "
+            "(angle outer loop → rate inner loop for roll/pitch, rate-only for yaw). "
+            "Provide a concise expert analysis. Be specific with numbers."
+        )
+
+        payload = {
+            "model":      _MODEL,
+            "max_tokens": max_tokens,
+            "temperature": 0.2,
+            "system": (
+                "You are an expert quadrotor flight dynamics and PID tuning engineer. "
+                "Analyse telemetry data and give actionable, specific advice. "
+                "When recommending PID changes, state exact new values."
+            ),
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        req = urllib.request.Request(
+            _ENDPOINT,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Content-Type":      "application/json",
+                "Authorization":     f"Bearer {_API_KEY}",
+                "anthropic-version": _VERSION,
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+            for block in result.get("content", []):
+                if block.get("type") == "text":
+                    return block["text"]
+            return "No analysis returned."
+        except Exception as e:
+            return f"LLM analysis failed: {e}"
+
+    # ─────────────────────────────────────────────────────────────────────────
     #  Claude API
     # ─────────────────────────────────────────────────────────────────────────
 
@@ -582,6 +848,8 @@ class SimAgent:
                 z_ekf = s.ekf_z
             err = abs(z_ekf - target)
             if err <= tol:
+                # Record telemetry index at confirmation — used as RMSE window start
+                self.wp_confirmed_tel_idx.append(len(self.tel_buf))
                 return f"✓ Altitude reached: {z_ekf:.3f} m (target {target} m, err {err*100:.1f} cm)"
             return f"✗ Not reached: {z_ekf:.3f} m (target {target} m, err {err*100:.1f} cm)"
 
@@ -612,6 +880,29 @@ class SimAgent:
                 s.althold  = False
                 s.poshold  = False
             return "Disarmed. Motors stopped."
+
+        if name == "emergency_land":
+            # Level attitude, switch to althold with target z=0 → controlled descent
+            with s.lock:
+                s.poshold  = False
+                s.ch2 = 1500; s.ch3 = 1500; s.ch4 = 1500  # centre roll/pitch/yaw
+                s.althold  = True
+                s.alt_sp   = 0.0
+                s.alt_sp_mm = 0
+            # Wait until drone reaches ground (max 10 sim-seconds)
+            for _ in range(100):
+                self.wait_sim(0.1)
+                with s.lock:
+                    z_now = s.z
+                if z_now < 0.05:
+                    break
+            with s.lock:
+                s.ch5    = 2000
+                s.armed  = False
+                s.althold = False
+                z_land   = round(s.z, 3)
+            return (f"Emergency landing complete. Controlled descent to ground. "
+                    f"Drone disarmed. Final z={z_land:.3f} m.")
 
         if name == "emergency_stop":
             with s.lock:
@@ -645,19 +936,51 @@ class SimAgent:
                     f"throttle={hover_pwr}.")
 
         if name == "land":
+            # Step 1: disable holds, centre controls
             with s.lock:
                 s.althold = False
                 s.poshold = False
                 s.ch2 = 1500; s.ch3 = 1500; s.ch4 = 1500
+            self.wait_sim(0.3)
+
+            # Step 2: ramp throttle down step by step
             for pwm in [1400, 1300, 1200, 1100, 1000]:
                 with s.lock:
                     s.ch1 = pwm
-                self.wait_sim(1.0)
+                self.wait_sim(0.4)
+
+            # Step 3: poll sim state until z < 0.05 m (ground) or 8 s timeout
+            landed = False
+            for _ in range(16):   # 16 × 0.5 s = 8 s max
+                self.wait_sim(0.5)
+                with s.lock:
+                    z_now = s.z
+                if z_now < 0.05:
+                    landed = True
+                    break
+
+            # Step 4: disarm and read final state
             with s.lock:
                 s.ch5   = 2000
                 s.armed = False
-                z = round(s.z, 3)
-            return f"Landed and disarmed. Final z={z:.3f} m."
+                z_final   = round(s.z, 3)
+                roll_deg  = round(math.degrees(s.roll),  1)
+                pitch_deg = round(math.degrees(s.pitch), 1)
+                vz        = round(s.vz, 3)
+
+            if landed:
+                return (
+                    f"✓ Landed and disarmed. "
+                    f"Final altitude={z_final:.3f}m, vz={vz:+.3f}m/s, "
+                    f"roll={roll_deg:.1f}°, pitch={pitch_deg:.1f}°. "
+                    f"Motors disarmed — drone is on the ground."
+                )
+            else:
+                return (
+                    f"✗ Landing timeout — disarmed at altitude={z_final:.3f}m. "
+                    f"vz={vz:+.3f}m/s, roll={roll_deg:.1f}°, pitch={pitch_deg:.1f}°. "
+                    f"Verify drone is on ground before handling."
+                )
 
         # ── Manual control channels ────────────────────────────────────────
         if name == "hover":
@@ -863,107 +1186,38 @@ class SimAgent:
             if len(recent) < 5:
                 return "Insufficient telemetry data. Fly the drone first."
 
-            roll_errs  = [s["er"] for s in recent]
-            pitch_errs = [s["ep"] for s in recent]
-            z_vals     = [s["lw_z"] / 1000.0 for s in recent]
-            z_sp_vals  = [s["altsp"] / 1000.0 for s in recent]
-            alt_errs   = [abs(z - sp) for z, sp in zip(z_vals, z_sp_vals)]
-            m1_vals    = [s["m1"] for s in recent]
-            m3_vals    = [s["m3"] for s in recent]
+            # Compute altitude RMSE to include in the LLM prompt
+            z_vals   = [s["lw_z"] / 1000.0 for s in recent]
+            z_sp     = [s["altsp"] / 1000.0 for s in recent]
+            alt_errs = [abs(z - sp) for z, sp in zip(z_vals, z_sp)]
+            z_rmse   = math.sqrt(sum(e**2 for e in alt_errs) / len(alt_errs))
+            n_sec    = len(recent) / 10.0
 
-            r_flips = self._sign_flips(roll_errs)
-            p_flips = self._sign_flips(pitch_errs)
-            r_stats = self._stats(roll_errs)
-            p_stats = self._stats(pitch_errs)
-            z_rmse  = math.sqrt(sum(e**2 for e in alt_errs) / len(alt_errs))
-
-            n_sec   = len(recent) / 10.0  # 10 Hz telemetry
-            r_hz    = r_flips / n_sec if n_sec > 0 else 0
-            p_hz    = p_flips / n_sec if n_sec > 0 else 0
-
-            diagnosis = []
-            if r_hz > 4:
-                diagnosis.append(
-                    f"OSCILLATION: roll error sign-flipping at {r_hz:.1f} Hz "
-                    f"(>{4} Hz threshold). Likely cause: roll_angle_kp too high "
-                    f"(current={p.pid_roll_angle.kp:.4f}). Reduce by 50–70%.")
-            if p_hz > 4:
-                diagnosis.append(
-                    f"OSCILLATION: pitch error sign-flipping at {p_hz:.1f} Hz. "
-                    f"Likely cause: pitch_angle_kp too high "
-                    f"(current={p.pid_pitch_angle.kp:.4f}). Reduce by 50–70%.")
-            if not diagnosis:
-                diagnosis.append("No oscillation detected. Flight appears stable.")
-                if max(alt_errs) > 0.10:
-                    diagnosis.append(
-                        f"Altitude error up to {max(alt_errs)*100:.1f} cm — "
-                        "consider reducing lw_pidZ_kp if overshooting.")
-
-            return json.dumps({
-                "duration_sec":     round(n_sec, 1),
-                "samples":          len(recent),
-                "roll_error_stats": r_stats,
-                "pitch_error_stats":p_stats,
-                "roll_flips_per_s": round(r_hz, 2),
-                "pitch_flips_per_s":round(p_hz, 2),
-                "alt_rmse_cm":      round(z_rmse * 100, 2),
-                "diagnosis":        diagnosis,
-            })
+            task = (
+                f"Analyse this flight data for stability and fault diagnosis. "
+                f"Duration: {n_sec:.1f} s. Altitude RMSE: {z_rmse*100:.2f} cm. "
+                "Identify any oscillation, overshoot, or instability. "
+                "State the probable root cause and which PID parameter is responsible. "
+                "Do NOT prescribe a fix yet — just diagnose."
+            )
+            return self._llm_analyze(recent, task)
 
         if name == "suggest_pid_tuning":
             axis    = args.get("axis", "all")
-            seconds = 30.0
-            recent  = self._recent_tel(seconds)
+            recent  = self._recent_tel(30.0)
             if len(recent) < 5:
                 return "Insufficient telemetry. Fly more before requesting tuning."
 
-            suggestions = []
-            n_sec = len(recent) / 10.0
-
-            if axis in ("roll", "all"):
-                roll_errs = [s["er"] for s in recent]
-                r_flips   = self._sign_flips(roll_errs)
-                r_hz      = r_flips / n_sec if n_sec > 0 else 0
-                cur_kp    = p.pid_roll_angle.kp
-                if r_hz > 4:
-                    new_kp = round(cur_kp * 0.40, 5)
-                    suggestions.append({
-                        "param": "roll_angle_kp",
-                        "current": cur_kp,
-                        "recommended": new_kp,
-                        "reason": (f"Roll error oscillating at {r_hz:.1f} Hz. "
-                                   f"Reduce kp from {cur_kp:.4f} to {new_kp:.4f} "
-                                   f"(−60%).")
-                    })
-                elif r_hz > 2:
-                    new_kp = round(cur_kp * 0.70, 5)
-                    suggestions.append({
-                        "param": "roll_angle_kp",
-                        "current": cur_kp,
-                        "recommended": new_kp,
-                        "reason": (f"Mild roll oscillation at {r_hz:.1f} Hz. "
-                                   f"Reduce kp from {cur_kp:.4f} to {new_kp:.4f} "
-                                   f"(−30%).")
-                    })
-
-            if axis in ("pitch", "all"):
-                pitch_errs = [s["ep"] for s in recent]
-                p_flips    = self._sign_flips(pitch_errs)
-                p_hz       = p_flips / n_sec if n_sec > 0 else 0
-                cur_kp     = p.pid_pitch_angle.kp
-                if p_hz > 4:
-                    new_kp = round(cur_kp * 0.40, 5)
-                    suggestions.append({
-                        "param": "pitch_angle_kp",
-                        "current": cur_kp,
-                        "recommended": new_kp,
-                        "reason": f"Pitch oscillation at {p_hz:.1f} Hz. Reduce kp by 60%."
-                    })
-
-            if not suggestions:
-                return "No significant oscillation detected. PID gains appear well-tuned."
-
-            return json.dumps({"suggestions": suggestions})
+            task = (
+                f"Suggest specific PID gain changes for axis='{axis}'. "
+                "Based on the telemetry and current PID values shown, "
+                "determine the exact new value for each parameter that needs changing. "
+                "Format each recommendation as: "
+                "  param_name: current_value → new_value  (reason)\n"
+                "Consider both reducing kp for oscillation AND adding kd for damping if appropriate. "
+                "Give exact numbers — do not say 'reduce by X%', state the actual target value."
+            )
+            return self._llm_analyze(recent, task)
 
         if name == "detect_anomaly":
             recent = self._recent_tel(10.0)
@@ -1041,6 +1295,9 @@ class SimAgent:
         api_stats  = []
         tool_trace = []
         final_text = ""
+        # conv_log: full human-readable record of each LLM turn
+        # [{turn, llm_text, tool_calls:[{name,args,result}]}]
+        conv_log   = [{"role": "user", "content": user_prompt}]
 
         for turn in range(1, max_turns + 1):
             t0 = time.time()
@@ -1068,12 +1325,15 @@ class SimAgent:
             stop_reason = resp.get("stop_reason", "end_turn")
 
             # Extract assistant text
+            turn_text = ""
             for block in content:
                 if block.get("type") == "text":
                     final_text = block["text"]
+                    turn_text  = block["text"]
 
             # Append assistant turn
             messages.append({"role": "assistant", "content": content})
+            turn_log = {"turn": turn, "llm_text": turn_text, "tool_calls": []}
 
             # Done?
             tool_uses = [b for b in content if b.get("type") == "tool_use"]
@@ -1087,13 +1347,35 @@ class SimAgent:
                 t_args = tu.get("input", {})
                 t_id   = tu["id"]
                 print(f"  [TOOL t{turn}] {t_name}({json.dumps(t_args)[:80]})")
-                result = self.execute_tool(t_name, t_args)
+
+                # ── Guardrail intercept ────────────────────────────────────
+                allowed, t_args, feedback = self.guardrail.check(
+                    t_name, t_args, self.state)
+                if not allowed:
+                    # Rejected — return guardrail message to LLM, skip execution
+                    result = feedback
+                    print(f"  [GUARDRAIL BLOCK] {feedback}")
+                else:
+                    result = self.execute_tool(t_name, t_args)
+                    if feedback:
+                        # Clipped but executed — prepend guardrail note
+                        print(f"  [GUARDRAIL CLIP] {feedback}")
+                        result = feedback + " " + result
+                # ─────────────────────────────────────────────────────────
+
                 tool_trace.append({
-                    "turn":       turn,
-                    "name":       t_name,
-                    "args":       t_args,
-                    "result":     result[:300],
-                    "sim_time_s": round(self.sim_time, 2),
+                    "turn":              turn,
+                    "name":              t_name,
+                    "args":              t_args,
+                    "result":            result[:600],
+                    "sim_time_s":        round(self.sim_time, 2),
+                    "guardrail_fired":   feedback is not None,
+                    "guardrail_allowed": allowed,
+                })
+                turn_log["tool_calls"].append({
+                    "name":   t_name,
+                    "args":   t_args,
+                    "result": result[:600],
                 })
                 results.append({
                     "type":        "tool_result",
@@ -1102,8 +1384,9 @@ class SimAgent:
                 })
 
             messages.append({"role": "user", "content": results})
+            conv_log.append(turn_log)
 
-        return final_text, api_stats, tool_trace
+        return final_text, api_stats, tool_trace, messages
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Convenience: telemetry arrays for plotting

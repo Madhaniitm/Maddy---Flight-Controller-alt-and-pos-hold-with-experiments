@@ -1,0 +1,12 @@
+cmd_idx,command,cmd_type,n_correct,n_runs,success_rate,wilson_ci_lo,wilson_ci_hi,increment_mean_m,increment_std_m
+1,go to 2 metres,explicit,5,5,1.0,0.566,1.0,1.007,0.004
+2,climb to 2m,paraphrase,5,5,1.0,0.566,1.0,-0.004,0.005
+3,go higher,relative_no_num,5,5,1.0,0.566,1.0,0.1,0.004
+4,go up a bit,vague_relative,5,5,1.0,0.566,1.0,0.1,0.002
+5,ascend slowly to a safe height,abstract,4,5,0.8,0.376,0.964,0.141,0.05
+6,I want it higher,indirect,2,5,0.4,0.118,0.769,0.037,0.049
+REF_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629.",,,,,,,,
+REF_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. arXiv:2306.17582.",,,,,,,,
+REF_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608.",,,,,,,,
+REF_PromptEngineering,"White, J., et al. (2023). A Prompt Pattern Catalog to Enhance Prompt Engineering with ChatGPT. arXiv:2302.11382. Conservative default-action policy for handling magnitude-unspecified directional commands in LLM-robot interfaces.",,,,,,,,
+OVERALL,all commands,,26,30,0.867,0.703,0.947,0.23,0.352

@@ -1,0 +1,6 @@
+run,z_phase1_m,z_final_m,alt_error_cm,correct_target_set,re_armed,re_took_off,alt_reached,tools_before_set,passed,api_calls_ph1,api_calls_ph2,input_tokens,output_tokens,cost_usd,tools_ph2
+1,0.51,0.497,70.3,0,0,0,0,0,0,15,0,68140,1161,0.221835,
+2,0.505,0.497,70.3,0,0,0,0,0,0,15,0,68238,1168,0.222234,
+3,0.505,1.205,0.5,1,0,0,1,0,1,15,8,102025,1902,0.334605,plan_workflow;report_progress;report_progress;set_altitude_target;report_progress;wait;report_progress;check_altitude_reached
+4,0.506,0.803,39.7,0,0,0,0,0,0,15,8,102005,1967,0.33552,plan_workflow;report_progress;set_altitude_target;report_progress;wait;report_progress;check_altitude_reached;report_progress
+5,0.508,1.207,0.7,1,0,0,1,0,1,15,8,102177,1908,0.335151,plan_workflow;report_progress;set_altitude_target;report_progress;wait;check_altitude_reached;report_progress;set_altitude_target

@@ -24,9 +24,17 @@ from c_series_agent import SimAgent
 from drone_sim import Kp_roll_angle
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C5_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C5_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C5_human_describes_problem.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C5_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C5_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C5_human_describes_problem_{GUARDRAIL_SUFFIX}.png")
 
 KP_DEFAULT      = Kp_roll_angle
 KP_INJECT_MULT  = 5.0
@@ -57,6 +65,7 @@ HUMAN_PROBLEM_MSG = (
 )
 
 EXPECTED_SEQUENCE = ["analyze_flight", "suggest_pid_tuning", "set_tuning_params", "apply_tuning"]
+MAX_TUNING_TURNS  = 40   # enough turns for multiple analyze→tune→verify cycles
 
 # ── Statistics helpers ─────────────────────────────────────────────────────────
 
@@ -80,7 +89,7 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05):
 
 def run_once(run_idx):
     print(f"\n[C5] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent = SimAgent(session_id=f"C5_run{run_idx}")
+    agent = SimAgent(session_id=f"C5_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
 
     # Inject bad kp
     agent.physics.pid_roll_angle.kp = KP_INJECTED
@@ -114,7 +123,12 @@ def run_once(run_idx):
     n_tel_before = len(tel_before)
     t_before_end = agent.sim_time
 
-    # LLM diagnosis
+    # ── Iterative LLM tuning loop ──────────────────────────────────────────────
+    # The LLM is given a single long agent loop with max_turns=MAX_TUNING_TURNS.
+    # Within that loop it can: analyze → suggest → set → apply → wait → analyze
+    # again → adjust further → repeat until it confirms stability itself.
+    # The simulator keeps running between tool calls, so each wait() call gives
+    # the LLM real updated telemetry to re-analyse.
     history = [
         {"role": "user",
          "content": "The drone is currently armed and hovering at 1.0 m with altitude hold active. "
@@ -123,12 +137,11 @@ def run_once(run_idx):
          "content": [{"type": "text",
                       "text": "Understood. Drone is at 1.0 m with altitude hold. Ready to diagnose."}]},
     ]
-    text, api_stats, tool_trace = agent.run_agent_loop(
-        HUMAN_PROBLEM_MSG, history=list(history), max_turns=15,
+    text, api_stats, tool_trace, conv_log = agent.run_agent_loop(
+        HUMAN_PROBLEM_MSG, history=list(history), max_turns=MAX_TUNING_TURNS,
     )
 
-    # Fly 20 s after fix
-    t_after_start = agent.sim_time
+    # Fly 20 s after the LLM confirms it is done
     agent.wait_sim(20.0)
 
     tel_after = agent.tel_buf[n_tel_before:]
@@ -136,15 +149,17 @@ def run_once(run_idx):
     rmse_after = math.sqrt(sum(e**2 for e in roll_errs_after) / len(roll_errs_after)) \
         if roll_errs_after else float("nan")
 
-    # Metrics
+    # ── Metrics ────────────────────────────────────────────────────────────────
     tools_used    = [t["name"] for t in tool_trace]
     tools_set     = set(tools_used)
     found_sequence= [t for t in EXPECTED_SEQUENCE if t in tools_set]
+
     kp_final      = agent.physics.pid_roll_angle.kp
     kp_reduced    = kp_final < KP_INJECTED
     kp_reduction  = (KP_INJECTED - kp_final) / KP_INJECTED * 100 if kp_reduced else 0
     rmse_reduction= ((rmse_before - rmse_after) / rmse_before * 100
                      if rmse_before > 0 and not math.isnan(rmse_after) else 0)
+
     roll_identified = any(
         "roll_angle_kp" in str(t.get("args", {})) or
         "roll" in str(t.get("result", "")).lower()
@@ -153,13 +168,43 @@ def run_once(run_idx):
     sequence_ok = len(found_sequence) >= 3
     passed      = sequence_ok and kp_reduced and roll_identified
 
+    # Count tuning cycles: how many times the LLM applied a fix and re-analysed
+    n_apply_calls   = tools_used.count("apply_tuning")
+    n_analyze_calls = tools_used.count("analyze_flight")
+    n_suggest_calls = tools_used.count("suggest_pid_tuning")
+
+    # Capture all set_tuning_params calls (intermediate + final) to show iteration
+    all_set_calls = [
+        str(t.get("args", {}))
+        for t in tool_trace if t["name"] == "set_tuning_params"
+    ]
+    # Last suggestion from LLM (final tuning cycle)
+    all_suggestions = [
+        t.get("result", "")
+        for t in tool_trace if t["name"] == "suggest_pid_tuning"
+    ]
+    llm_suggestion = all_suggestions[-1][:400] if all_suggestions else "(not called)"
+    llm_set_args   = all_set_calls[-1] if all_set_calls else "(not called)"
+
+    # Did the LLM explicitly verify stability at the end? (re-analyzed after final apply)
+    apply_positions  = [i for i, t in enumerate(tools_used) if t == "apply_tuning"]
+    analyze_positions= [i for i, t in enumerate(tools_used) if t == "analyze_flight"]
+    llm_verified = any(
+        a_pos > ap_pos
+        for ap_pos in apply_positions
+        for a_pos in analyze_positions
+    ) if apply_positions else False
+
     n_api  = len(api_stats)
     in_tok = sum(s["input_tokens"]  for s in api_stats)
     out_tok= sum(s["output_tokens"] for s in api_stats)
     cost   = sum(s["cost_usd"]      for s in api_stats)
 
-    print(f"  RMSE: {rmse_before:.4f}→{rmse_after:.4f}  "
-          f"reduction={rmse_reduction:.0f}%  kp: {KP_INJECTED:.4f}→{kp_final:.4f}  pass={passed}")
+    print(f"  RMSE: {rmse_before:.4f}→{rmse_after:.4f}  reduction={rmse_reduction:.0f}%")
+    print(f"  kp: {KP_INJECTED:.4f}→{kp_final:.4f}  pass={passed}")
+    print(f"  Tuning cycles: {n_apply_calls} apply / {n_analyze_calls} analyze / {n_suggest_calls} suggest")
+    print(f"  LLM verified after fix: {llm_verified}")
+    print(f"  All set_tuning calls: {all_set_calls}")
 
     return {
         "run":                run_idx + 1,
@@ -174,10 +219,17 @@ def run_once(run_idx):
         "sequence_ok":        int(sequence_ok),
         "found_sequence":     ";".join(found_sequence),
         "passed":             int(passed),
+        "n_tuning_cycles":    n_apply_calls,
+        "n_analyze_calls":    n_analyze_calls,
+        "n_suggest_calls":    n_suggest_calls,
+        "llm_verified":       int(llm_verified),
         "api_calls":          n_api,
         "input_tokens":       in_tok,
         "output_tokens":      out_tok,
         "cost_usd":           round(cost, 6),
+        "llm_suggestion":     llm_suggestion.replace("\n", " "),
+        "llm_set_args":       llm_set_args,
+        "all_set_calls":      " | ".join(all_set_calls),
     }
 
 # ── Run N times ────────────────────────────────────────────────────────────────
@@ -207,17 +259,24 @@ rmse_bf_ci  = bootstrap_ci(rmse_bf)
 rmse_af_ci  = bootstrap_ci(rmse_af)
 rmse_red_ci = bootstrap_ci(rmse_red)
 
+n_verified = sum(col("llm_verified"))
+n_cycles   = col("n_tuning_cycles")
+n_analyze  = col("n_analyze_calls")
+
 print(f"\n[C5] ── AGGREGATE ({N_RUNS} runs) ───────────────────────────────")
-print(f"  Success rate:       {n_pass}/{N_RUNS}  CI=[{pass_lo:.2f},{pass_hi:.2f}]")
-print(f"  Correct sequence:   {n_seq_ok}/{N_RUNS}  CI=[{seq_lo:.2f},{seq_hi:.2f}]")
-print(f"  kp reduced:         {n_kp_reduced}/{N_RUNS}")
-print(f"  RMSE before (deg):  {np.mean(rmse_bf):.4f}±{np.std(rmse_bf):.4f}  "
+print(f"  Success rate:         {n_pass}/{N_RUNS}  CI=[{pass_lo:.2f},{pass_hi:.2f}]")
+print(f"  Correct sequence:     {n_seq_ok}/{N_RUNS}  CI=[{seq_lo:.2f},{seq_hi:.2f}]")
+print(f"  kp reduced:           {n_kp_reduced}/{N_RUNS}")
+print(f"  LLM self-verified:    {n_verified}/{N_RUNS}")
+print(f"  Tuning cycles (mean): {np.mean(n_cycles):.1f}±{np.std(n_cycles):.1f}")
+print(f"  Analyze calls (mean): {np.mean(n_analyze):.1f}±{np.std(n_analyze):.1f}")
+print(f"  RMSE before (deg):    {np.mean(rmse_bf):.4f}±{np.std(rmse_bf):.4f}  "
       f"CI=[{rmse_bf_ci[0]:.4f},{rmse_bf_ci[1]:.4f}]")
-print(f"  RMSE after  (deg):  {np.mean(rmse_af):.4f}±{np.std(rmse_af):.4f}  "
+print(f"  RMSE after  (deg):    {np.mean(rmse_af):.4f}±{np.std(rmse_af):.4f}  "
       f"CI=[{rmse_af_ci[0]:.4f},{rmse_af_ci[1]:.4f}]")
-print(f"  RMSE reduction (%): {np.mean(rmse_red):.1f}±{np.std(rmse_red):.1f}  "
+print(f"  RMSE reduction (%):   {np.mean(rmse_red):.1f}±{np.std(rmse_red):.1f}  "
       f"CI=[{rmse_red_ci[0]:.1f},{rmse_red_ci[1]:.1f}]")
-print(f"  kp reduction (%):   {np.mean(kp_red):.1f}±{np.std(kp_red):.1f}")
+print(f"  kp reduction (%):     {np.mean(kp_red):.1f}±{np.std(kp_red):.1f}")
 
 # ── Save CSVs ──────────────────────────────────────────────────────────────────
 with open(OUT_RUNS, "w", newline="") as f:
@@ -249,8 +308,13 @@ summary_rows = [
     ("rmse_reduction_std_pct",  round(float(np.std(rmse_red)), 1)),
     ("rmse_reduction_ci_lo",    round(rmse_red_ci[0], 1)),
     ("rmse_reduction_ci_hi",    round(rmse_red_ci[1], 1)),
-    ("kp_reduction_mean_pct",   round(float(np.mean(kp_red)), 1)),
-    ("kp_reduction_std_pct",    round(float(np.std(kp_red)), 1)),
+    ("kp_reduction_mean_pct",      round(float(np.mean(kp_red)), 1)),
+    ("kp_reduction_std_pct",       round(float(np.std(kp_red)), 1)),
+    ("llm_verified_rate",          round(n_verified / N_RUNS, 3)),
+    ("tuning_cycles_mean",         round(float(np.mean(n_cycles)), 2)),
+    ("tuning_cycles_std",          round(float(np.std(n_cycles)), 2)),
+    ("analyze_calls_mean",         round(float(np.mean(n_analyze)), 2)),
+    ("analyze_calls_std",          round(float(np.std(n_analyze)), 2)),
 ]
 with open(OUT_SUMMARY, "w", newline="") as f:
     w = csv.writer(f)

@@ -1,0 +1,6 @@
+run,kp_injected,kp_after_fix,kp_reduced,kp_reduction_pct,rmse_before_deg,rmse_after_deg,rmse_reduction_pct,roll_identified,sequence_ok,found_sequence,passed,api_calls,input_tokens,output_tokens,cost_usd
+1,1.5,0.3,1,80.0,0.18655,0.04398,76.4,1,1,analyze_flight;suggest_pid_tuning;set_tuning_params;apply_tuning,1,15,86846,1931,0.289503
+2,1.5,0.3,1,80.0,0.1231,0.04326,64.9,1,1,analyze_flight;suggest_pid_tuning;set_tuning_params;apply_tuning,1,15,76475,1601,0.25344
+3,1.5,0.3,1,80.0,0.1347,0.04472,66.8,1,1,analyze_flight;suggest_pid_tuning;set_tuning_params;apply_tuning,1,15,76073,1600,0.252219
+4,1.5,0.3,1,80.0,0.1032,0.02834,72.5,1,1,analyze_flight;suggest_pid_tuning;set_tuning_params;apply_tuning,1,15,83922,1841,0.279381
+5,1.5,0.35,1,76.7,0.21591,0.03603,83.3,1,1,analyze_flight;suggest_pid_tuning;set_tuning_params;apply_tuning,1,15,79665,1752,0.265275

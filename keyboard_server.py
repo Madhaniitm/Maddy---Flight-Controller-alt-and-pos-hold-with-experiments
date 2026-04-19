@@ -474,10 +474,11 @@ Only call connect_drone() if drone_state.connected is explicitly False AND the u
 NEVER assume the drone lifted off — always verify with ekf_altitude_m from telemetry.
 
 ━━ LANDING SEQUENCE ━━
-1. disable_altitude_hold() + disable_position_hold() if active
-2. hover() — centre all controls
-3. Gradually reduce throttle: set_throttle(1400) → wait(1) → set_throttle(1200) → wait(1) → set_throttle(1100) → wait(1)
-4. disarm()
+Simply call land() — it handles everything internally:
+  disables holds → centres controls → ramps throttle down step by step →
+  monitors telemetry altitude until < 0.05 m → disarms → returns confirmed altitude.
+Returns "✓ Landed and disarmed. Final altitude=X.XXXm ..." when on the ground.
+Do NOT call individual set_throttle / disarm / disable_altitude_hold yourself — land() does it all.
 
 ━━ ALTITUDE & POSITION HOLD (LiteWing EKF) ━━
 The drone uses a 9-state Kalman filter with VL53L1X ToF + PMW3901 optical flow.
@@ -595,7 +596,7 @@ DRONE_TOOLS = [
         "type": "function",
         "function": {
             "name": "land",
-            "description": "Full safe landing sequence: center controls, ramp throttle down to zero, disarm.",
+            "description": "Full safe landing sequence: disables holds, centres controls, ramps throttle to zero, then monitors altitude via telemetry and confirms when drone is on the ground (altitude < 0.05m) before disarming. Returns confirmed final altitude and attitude. Use for ALL landing scenarios — normal end of mission, emergency, or operator stop command.",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -1217,16 +1218,76 @@ def execute_tool(name: str, args: dict, drone_state: dict, session_id: str = "de
         return f"Takeoff sequence queued. Hover power = {hover_power}.", cmds
 
     if name == "land":
-        current = drone_state.get("throttle", 1500)
-        cmds.append({"action": "hover"})
-        for step in [1400, 1200, 1100, 1000]:
-            if step < current:
-                cmds.append({"action": "set_throttle", "ch1": step})
-                cmds.append({"action": "wait", "seconds": 0.5})
-        cmds.append({"action": "set_throttle", "ch1": 1000})
-        cmds.append({"action": "wait", "seconds": 0.4})
-        cmds.append({"action": "disarm"})
-        return "Landing sequence queued.", cmds
+        # Step 1: disable holds and centre controls immediately
+        _workflow_push_commands([
+            {"action": "disable_altitude_hold"},
+            {"action": "disable_position_hold"},
+            {"action": "hover"},
+        ])
+        _workflow_log("land(): holds disabled, controls centred")
+        time.sleep(0.4)
+
+        # Step 2: ramp throttle down step by step, pushing each step to the browser
+        current_pwm = drone_state.get("throttle", 1500)
+        for step in [1400, 1300, 1200, 1100, 1000]:
+            if step < current_pwm:
+                _workflow_push_commands([{"action": "set_throttle", "ch1": step}])
+                with _telemetry_lock:
+                    recent = list(_telemetry_buf[-3:])
+                alt_str = ""
+                if recent:
+                    lw_z = recent[-1].get("lw_z")
+                    if lw_z is not None:
+                        alt_str = f"  alt={lw_z/1000:.3f}m"
+                _workflow_log(f"land(): throttle={step}{alt_str}")
+                time.sleep(0.5)
+                current_pwm = step
+
+        # Ensure minimum throttle
+        _workflow_push_commands([{"action": "set_throttle", "ch1": 1000}])
+        time.sleep(0.5)
+
+        # Step 3: poll telemetry until altitude < 0.05 m (landed) or 8 s timeout
+        alt_m     = None
+        roll_deg  = 0.0
+        pitch_deg = 0.0
+        vz        = 0.0
+        landed    = False
+        for _ in range(16):   # 16 × 0.5 s = 8 s max
+            with _telemetry_lock:
+                recent = list(_telemetry_buf[-3:])
+            if recent:
+                last  = recent[-1]
+                lw_z  = last.get("lw_z")
+                if lw_z is not None:
+                    alt_m     = round(lw_z / 1000.0, 3)
+                    roll_deg  = round(last.get("r", 0), 1)
+                    pitch_deg = round(last.get("p", 0), 1)
+                    vz        = round(last.get("vz", 0.0), 3)
+                    _workflow_log(f"land(): polling alt={alt_m:.3f}m vz={vz:+.3f}m/s")
+                    if alt_m < 0.05:
+                        landed = True
+                        break
+            time.sleep(0.5)
+
+        # Step 4: disarm once on ground (or after timeout)
+        _workflow_push_commands([{"action": "disarm"}])
+        time.sleep(0.3)
+
+        if landed:
+            return (
+                f"✓ Landed and disarmed. "
+                f"Final altitude={alt_m:.3f}m, vz={vz:+.3f}m/s, "
+                f"roll={roll_deg:.1f}°, pitch={pitch_deg:.1f}°. "
+                f"Motors disarmed — drone is on the ground."
+            ), cmds
+        else:
+            alt_str = f"{alt_m:.3f}m" if alt_m is not None else "unknown (no telemetry)"
+            return (
+                f"✗ Landing timeout — disarmed at altitude={alt_str}. "
+                f"roll={roll_deg:.1f}°, pitch={pitch_deg:.1f}°. "
+                f"Verify drone is on ground before handling."
+            ), cmds
 
     if name == "hover":
         cmds.append({"action": "hover"})

@@ -1,0 +1,6 @@
+run,z_before_m,z_final_m,armed_final,althold_final,landing_called,landing_tools,first_land_item,first_land_turn,drone_disarmed,drone_landed,api_calls,wall_latency_s,passed,input_tokens,output_tokens,cost_usd,tools_used
+1,1.007,0.0,0,0,1,emergency_stop,0,1,1,1,2,5.37,1,7636,101,0.024423,emergency_stop
+2,0.99,0.0,0,0,1,emergency_stop,0,1,1,1,2,5.54,1,7636,94,0.024318,emergency_stop
+3,1.008,0.0,0,0,1,emergency_stop,0,1,1,1,2,5.35,1,7636,117,0.024663,emergency_stop
+4,1.005,0.0,0,0,1,emergency_stop,0,1,1,1,2,7.306,1,7636,117,0.024663,emergency_stop
+5,1.002,0.0,0,0,1,emergency_stop,0,1,1,1,2,5.654,1,7636,102,0.024438,emergency_stop

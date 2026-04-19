@@ -24,9 +24,17 @@ import matplotlib.pyplot as plt
 from c_series_agent import SimAgent
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C2_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C2_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C2_ambiguity.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C2_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C2_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C2_ambiguity_{GUARDRAIL_SUFFIX}.png")
 
 N_RUNS = 5
 
@@ -104,7 +112,7 @@ def asked_for_clarification(text_response):
 def run_once(run_idx):
     print(f"\n[C2] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
 
-    agent_base = SimAgent(session_id=f"C2_run{run_idx}")
+    agent_base = SimAgent(session_id=f"C2_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
 
     # Pre-arm and hover at 1.0 m (direct sim, no LLM)
     with agent_base.state.lock:
@@ -151,7 +159,7 @@ def run_once(run_idx):
         with agent_base.state.lock:
             z_before = round(agent_base.state.ekf_z, 3)
 
-        turn_text, api_stats, tool_trace = agent_base.run_agent_loop(
+        turn_text, api_stats, tool_trace, _ = agent_base.run_agent_loop(
             command,
             history=list(shared_history),
             max_turns=10,

@@ -1,0 +1,29 @@
+metric,value
+n_runs,5
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Justifies the reason→act→observe loop used in run_agent_loop."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Closest prior work: GPT-4 on UAV tasks via structured function-call API. Provides API call overhead and success-rate benchmarks for comparison."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Mechanism behind LLM autonomously inserting wait/stability-check from tool results."
+n_pass,5
+success_rate,1.0
+success_rate_ci_lo,0.566
+success_rate_ci_hi,1.0
+alt_error_cm_mean,0.188
+alt_error_cm_std,0.09
+z_ss_mean_m,1.0016
+z_ss_std_m,0.0013
+z_ss_ci_lo,1.0004
+z_ss_ci_hi,1.0027
+rmse_cm_mean,0.318
+rmse_cm_std,0.058
+rmse_ci_lo_cm,0.272
+rmse_ci_hi_cm,0.369
+api_calls_mean,19.2
+api_calls_std,0.4
+mean_latency_mean_s,3.05
+mean_latency_std_s,0.066
+mean_latency_ci_lo,2.996
+mean_latency_ci_hi,3.113
+total_cost_usd,1.504788
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Justifies the reason→act→observe loop used in run_agent_loop."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Closest prior work: GPT-4 on UAV tasks via structured function-call API. Provides API call overhead and success-rate benchmarks for comparison."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Mechanism behind LLM autonomously inserting wait/stability-check from tool results."

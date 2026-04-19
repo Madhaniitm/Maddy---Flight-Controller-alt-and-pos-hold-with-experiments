@@ -1,0 +1,8 @@
+turn,description,n_pass,n_runs,success_rate,wilson_ci_lo,wilson_ci_hi
+1,Arm motors,5,5,1.0,0.566,1.0
+2,Takeoff + climb to 1.5 m,5,5,1.0,0.566,1.0
+3,Wait 5 s at altitude,5,5,1.0,0.566,1.0
+4,Yaw 90° CW,5,5,1.0,0.566,1.0
+5,Safe landing,5,5,1.0,0.566,1.0
+REF_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Multi-turn loop where each turn is a full reason→act→observe cycle.",,,,,
+REF_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. LLM uses accumulated conversation history as implicit state tracker across turns.",,,,,

@@ -25,9 +25,17 @@ import matplotlib.pyplot as plt
 from c_series_agent import SimAgent
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", "C1_runs.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", "C1_summary.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", "C1_nl_to_toolchain.png")
+# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+import argparse as _ap
+_parser = _ap.ArgumentParser(add_help=False)
+_parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_args, _ = _parser.parse_known_args()
+GUARDRAIL_ENABLED = _args.guardrail == "on"
+GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C1_runs_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C1_summary_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C1_nl_to_toolchain_{GUARDRAIL_SUFFIX}.png")
 
 COMMAND    = "take off and hover at 1 metre"
 TARGET_ALT = 1.0
@@ -78,10 +86,10 @@ def wilson_ci(k, n, z=1.96):
 
 def run_once(run_idx):
     print(f"\n[C1] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent = SimAgent(session_id=f"C1_run{run_idx}")
+    agent = SimAgent(session_id=f"C1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
     t_wall_start = time.time()
 
-    final_text, api_stats, tool_trace = agent.run_agent_loop(COMMAND)
+    final_text, api_stats, tool_trace, _ = agent.run_agent_loop(COMMAND)
     t_wall_total = time.time() - t_wall_start
 
     agent.wait_sim(8.0)
