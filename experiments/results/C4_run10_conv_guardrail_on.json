@@ -1,0 +1,177 @@
+{
+  "run": 10,
+  "phase1": {
+    "command": "hover at 0.5 metres",
+    "log": [
+      {
+        "role": "user",
+        "content": "hover at 0.5 metres"
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01CpgU2Bs8Y7kCm3drDg41G8",
+            "name": "plan_workflow",
+            "input": {
+              "goal": "Take off and hover stably at 0.5 metres altitude",
+              "steps": [
+                "Arm the drone",
+                "Find hover throttle",
+                "Check drone is stable",
+                "Enable altitude hold",
+                "Wait for stabilisation",
+                "Set altitude target to 0.5 m",
+                "Wait for drone to reach target",
+                "Verify altitude reached"
+              ]
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01CpgU2Bs8Y7kCm3drDg41G8",
+            "content": "Plan recorded (8 steps): Take off and hover stably at 0.5 metres altitude"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01UyFQj9QqFde3hmSuTy6SNR",
+            "name": "report_progress",
+            "input": {
+              "step": 1,
+              "total_steps": 8,
+              "description": "Arming the drone"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01UyFQj9QqFde3hmSuTy6SNR",
+            "content": "Progress: step 1/8 \u2014 Arming the drone"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01SshKpqeQNSpMsKi74ApCr4",
+            "name": "arm",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01SshKpqeQNSpMsKi74ApCr4",
+            "content": "Armed. ch5=1000, motors spinning at idle."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01UFL2eKqPkW5vSwKZZTtJWP",
+            "name": "report_progress",
+            "input": {
+              "step": 2,
+              "total_steps": 8,
+              "description": "Finding hover throttle by ramping up until vz\u22480"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01UFL2eKqPkW5vSwKZZTtJWP",
+            "content": "Progress: step 2/8 \u2014 Finding hover throttle by ramping up until vz\u22480"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01N6FheBkWm8YqCUBVuRfsxg",
+            "name": "find_hover_throttle",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01N6FheBkWm8YqCUBVuRfsxg",
+            "content": "Hover throttle found: PWM=1518, thr=0.518, z=0.069 m."
+          }
+        ]
+      }
+    ],
+    "z_achieved": 0.054
+  },
+  "phase2": {
+    "command": "actually go to 1.2 metres instead",
+    "log": [
+      {
+        "role": "user",
+        "content": "hover at 0.5 metres"
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": ""
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": "actually go to 1.2 metres instead"
+      }
+    ],
+    "z_achieved": 0.054
+  },
+  "passed": 0
+}

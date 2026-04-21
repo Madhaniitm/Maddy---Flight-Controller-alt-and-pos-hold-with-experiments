@@ -38,7 +38,7 @@ CORRECTION_CMD = "actually go to 1.2 metres instead"
 INITIAL_TARGET = 0.5
 CORRECT_TARGET = 1.2
 TOLERANCE      = 0.12
-N_RUNS         = 5
+N_RUNS         = 15
 
 PAPER_REFS = {
     "ReAct": (

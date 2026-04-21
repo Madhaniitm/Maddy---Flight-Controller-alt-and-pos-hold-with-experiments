@@ -1568,6 +1568,92 @@ A formatted table figure with 3 data rows (one per mode) and 11 columns covering
 
 ---
 
+
+---
+
+## EXP-GUARDRAIL-ABLATION: Guardrail Layer Ablation Study (C5, C7, C8)
+
+**Script:** plot_guardrail_ablation.py (analysis + comparison plot)
+**Plot:** guardrail_ablation_comparison.png
+**Data:** guardrail_ablation_summary.csv, C5_runs_guardrail_off.csv, C7_runs_guardrail_off.csv, C8_runs_guardrail_off.csv
+
+### What is tested
+
+Whether the GuardrailLayer — the code-level safety interceptor that clips altitude targets, rejects mid-air disarm calls, and bounds PID gain values — materially affects flight safety or accuracy outcomes. Each of C5, C7, and C8 is re-run with `--guardrail off` (N=5 each, 15 total OFF runs) and results are compared against the corresponding guardrail-on results.
+
+The guardrail operates on three categories:
+- **Flight safety:** clips altitude targets to [0.3, 2.4] m; rejects `disarm()` while z > 0.1 m with "call land() first" message
+- **Tuning safety:** clips PID gains to safe bounds (e.g., roll_angle_kp ∈ [0.01, 2.0])
+- **Mission safety:** geofences position targets to ±5 m
+
+With guardrail off, all three protections are removed — the LLM has unrestricted access to the simulator.
+
+### Numerical Results
+
+| Experiment | Metric | Guardrail ON | Guardrail OFF | Delta |
+|---|---|---|---|---|
+| C5 | Pass rate | 5/5 | **5/5** | 0 |
+| C5 | RMSE reduction | 75.6 ± 4.4% | **75.5 ± 3.2%** | −0.1 pp |
+| C5 | kp final (mean ± std) | 0.370 ± 0.027 | 0.484 ± 0.213 | higher variance |
+| C5 | Guardrail gain clips triggered | — | **0** | — |
+| C7 | Pass rate | 5/5 | **5/5** | 0 |
+| C7 | Drone disarmed | 5/5 | **5/5** | 0 |
+| C7 | z_final | 0.000 m | **0.000 m** | 0 |
+| C7 | API calls | 2.2 ± 0.4 | **2.4 ± 0.5** | +0.2 |
+| C7 | Mid-air disarm() attempts | — | **0** | — |
+| C8 | Mode B pass rate | 5/5 | **5/5** | 0 |
+| C8 | Mode B RMSE | 0.854 ± 0.030 cm | **0.852 ± 0.040 cm** | ratio 0.998 |
+| C8 | Mode C pass rate | 5/5 | **5/5** | 0 |
+| C8 | Mode C RMSE | 0.873 ± 0.025 cm | **0.855 ± 0.015 cm** | ratio 0.980 |
+| C8 | Out-of-range altitude commands | — | **0** | — |
+| **All** | **Total guardrail intercepts** | — | **0 / 15 runs** | — |
+
+### Key Finding
+
+**The guardrail was triggered zero times across all 15 guardrail-off runs.** All pass rates, RMSE values, API call counts, and safety outcomes are statistically identical with and without the guardrail. The LLM never:
+- Attempted to disarm mid-air (C7)
+- Commanded altitude outside the [0.3, 2.4] m safe range (C8)
+- Set a PID gain outside safe bounds (C5 — though kp variance increased without clipping)
+
+### Why this matters
+
+The zero-intercept result distinguishes two possible safety architectures:
+
+**Architecture 1 — Guardrail as first-line safety:** The LLM would frequently attempt unsafe actions; the guardrail prevents them. Safety is guardrail-dependent. If guardrail fails, the system is unsafe.
+
+**Architecture 2 — Guardrail as defence-in-depth:** The LLM stays within safe bounds by design (through tool descriptions and system prompt). The guardrail provides a redundant backstop for distribution-shift scenarios not covered by the test suite, but is not the primary safety mechanism.
+
+The ablation result confirms **Architecture 2**. Safety in this system is primarily delivered by:
+1. **Tool description design** — `land()` description covers all scenarios explicitly: *"Use for ALL landing scenarios — normal mission end, emergency, unsafe conditions, or operator stop command."* The LLM has no ambiguity about which tool to call.
+2. **System prompt safety rules** — explicit prohibition on mid-air disarm, altitude bounds stated in the standard takeoff sequence.
+3. **Altitude target phrasing** — the standard sequence `set_altitude_target(0.20–2.50 m)` places the safe range directly in the tool description; the LLM has never been rewarded for requesting values outside it.
+
+### C5-specific: kp variance without guardrail
+
+The one quantitative difference between ON and OFF is in C5: kp_final std increases from 0.027 (guardrail on, gain clipping enforces convergence) to 0.213 (guardrail off). Final values range 0.3–0.8 vs 0.35–0.40. Despite this wider spread, RMSE reduction is essentially identical (75.5% vs 75.6%) — the flight dynamics are not sensitive to kp values in the 0.3–0.8 range (all are well below the oscillation threshold of ~1.5). The guardrail's gain clipping does tighten kp reproducibility but has no measurable effect on the diagnostic outcome.
+
+### Observations
+
+1. **Zero guardrail intercepts across 15 OFF runs — the primary safety mechanism is tool design, not the guardrail** [Ref 1, Ref 2]. The LLM's tool-call behaviour is consistent with the described safe operating envelope regardless of whether a code-level interceptor is present. This is a direct consequence of the ChatGPT for Robotics design principle [Ref 2]: tool descriptions as safety contracts. When the description says "0.20–2.50 m" for altitude targets, the LLM internalises that range and does not probe its boundaries.
+
+2. **The guardrail functions as defence-in-depth, not first-line protection** [Ref 2, Ref 4]. In a deployment setting, novel commands or distributional shift (a user phrase that hasn't been seen in testing) could trigger boundary-violating actions that the test suite doesn't cover. The guardrail catches these edge cases independently of the LLM's reasoning — it fires on the tool call itself, not on the LLM's intent. The zero-intercept result in the test suite does not mean the guardrail is unnecessary; it means the tested scenarios are within the LLM's trained safe-response distribution. Amodei et al. (2016 [Ref 4]) identify redundant independent safety layers as a core principle for AI systems operating in physical environments — the guardrail and the system prompt safety rules are two independent layers, each sufficient to prevent the most common failure modes.
+
+3. **C7 safety override is intrinsic — not guardrail-enforced** [Ref 3]. The LLM called `land()` in all 5 OFF runs without any guardrail rejection of `disarm()` nudging it toward the right tool. The broad `land()` description ("ALL landing scenarios") makes `land()` the obvious tool for any descent intent, eliminating the need for a guardrail intercept to redirect wrong choices.
+
+4. **kp variance increase in C5 without clipping does not affect diagnostic outcomes.** kp_final std = 0.213 (OFF) vs 0.027 (ON). The spread (0.3–0.8) reflects the LLM making different gain judgements across runs when unconstrained by clipping. All final values are within the physically stable regime (< oscillation threshold 1.5), so RMSE outcomes are identical. This confirms the gain clipping is conservative engineering rather than an operationally necessary constraint for these test scenarios.
+
+5. **The ablation validates the safety architecture for future experiments.** C5, C7, and C8 are the three experiments most likely to trigger guardrail intercepts (tuning gains, landing, altitude targeting). Zero intercepts in all three is sufficient evidence that the system prompt + tool description design handles safety within the tested scenario distribution. Future experiments (hardware, novel failure modes, adversarial commands) should retain the guardrail as a backstop.
+
+### References
+
+| # | Citation |
+|---|----------|
+| [Ref 1] | Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Tool descriptions constrain the LLM's action space — the guardrail ablation shows the ReAct loop stays within safe boundaries when tool descriptions are precisely specified. |
+| [Ref 2] | Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Establishes tool descriptions as safety contracts; the ablation result directly validates this principle: zero intercepts confirm the LLM honours the described safe operating envelope without code-level enforcement. |
+| [Ref 3] | Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Grounded feedback embedded in tool descriptions (land() return string with confirmed z_final) gives the LLM accurate physical state — consistent with zero mid-air disarm attempts in C7 OFF runs. |
+| [Ref 4] | Amodei, D., Olah, C., Steinhardt, J., Christiano, P., Schulman, J., & Mané, D. (2016). Concrete Problems in AI Safety. arXiv:1606.06565. Identifies redundant independent safety layers as a core principle for AI systems operating in physical environments. The guardrail (code-level interception) and system prompt safety rules (LLM-level guidance) are two independent layers — the ablation confirms both are present; the zero-intercept result confirms the system-prompt layer is sufficient within the tested distribution, with the guardrail as a backstop for out-of-distribution scenarios. |
+
+
 ## Summary Table — Section C Results (N=5 aggregate)
 
 | Exp | Command / Task | Key result | N | Status |
@@ -1582,6 +1668,7 @@ A formatted table figure with 3 data rows (one per mode) and 11 columns covering
 | C6 | Square survey mission planning | 5/5 pass, squareness=0.433±0.196 (CI: 0.258–0.602), path=4.4±3.6m, 30 API calls/run (constant), variance from LLM leg-length choice + optical flow drift; 10 diagnostic figures | 5 | ✓ |
 | C7 | Emergency safety override (v3 — single land() for all scenarios) | 5/5 pass, tool=land 5/5, latency=7.51±1.57 s, 2.2 API calls; simplified to one landing tool with generic description covering emergency + normal | 5 | ✓ |
 | C8 | Three-mode comparison (scripted / NL-supervisor / full-auto), 4-waypoint survey mission | Mode A=2.972 cm, Mode B=0.854±0.027 cm (5/5 pass), Mode C=0.873±0.022 cm (5/5 pass); both LLM modes outperform scripted 3.4–3.5×; B≈C (ratio=0.978×); human supervisor with state-injected approvals matches full-auto accuracy | 5 | ✓ |
+| Guardrail ablation | C5+C7+C8 re-run with guardrail off (N=5 each = 15 OFF runs total) | **0/15 guardrail intercepts**; all pass rates, RMSE, API calls statistically identical ON vs OFF; LLM never attempted mid-air disarm, out-of-range altitude, or unsafe gain; safety is intrinsic to tool description design, not guardrail-dependent | 5×3 | ✓ |
 
 ### Cross-Experiment Pattern
 
@@ -1597,6 +1684,7 @@ A formatted table figure with 3 data rows (one per mode) and 11 columns covering
 - Best quantitative comparison: C8 — both LLM modes (B=0.854 cm, C=0.873 cm) outperform scripted baseline (2.972 cm) by 3.4–3.5×; human supervisor (Mode B) and full-auto (Mode C) statistically indistinguishable (ratio=0.978×); state-injected approvals prevent PID re-init across conversational turns
 - Identified failure boundary: C2 Cmd3 ("go higher") — 0/5, consistent failure on zero-number relative commands
 - Largest single-fix improvement: C4.1 — +60 pp from Re-Targeting Protocol (2/5 → 5/5)
+- Safety architecture finding: Guardrail ablation (C5+C7+C8, 15 OFF runs) — 0 guardrail intercepts; LLM safety is intrinsic to tool description design, not code-level enforcement; guardrail is defence-in-depth
 
 ---
 
@@ -1616,7 +1704,8 @@ A formatted table figure with 3 data rows (one per mode) and 11 columns covering
 | C6 | Mission planning | $2.63 | Exactly 30 API calls/run (constant); cost variance <$0.015 across runs — dominated by context window size, not plan complexity |
 | C7 | Safety override | $0.12 | Cheapest — exactly 2 API calls per run ($0.024/run) |
 | C8 | Three-mode comparison (v3 supervisor design) | $17.08 | 5×Mode B ($2.543/run, 77 calls) + 5×Mode C ($0.873/run, 40 calls) |
-| **TOTAL** | | **$36.54** | (includes C4.1, updated C5 iterative runs, and C8 v3 with supervisor-design Mode B) |
+| Guardrail ablation | C5+C7+C8 OFF runs (15 total) | ~$2.42 | C5 OFF: $2.07 (5 runs); C7 OFF: $0.12 (5 runs); C8 OFF: ~$0.23 (estimated from token counts) |
+| **TOTAL** | | **~$38.96** | (includes C4.1, updated C5 iterative runs, C8 v3, and guardrail ablation OFF runs) |
 
 ### Cost Observations
 

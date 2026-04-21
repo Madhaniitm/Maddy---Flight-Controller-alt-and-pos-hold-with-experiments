@@ -1,0 +1,36 @@
+metric,value
+mission,"waypoints=[0.8, 1.2, 1.5, 1.0] hold=8.0s arrival_tol=0.15m"
+n_runs,5
+mode_A_overall_rmse_cm,2.978
+mode_A_wp1_rmse_cm,2.919
+mode_A_wp2_rmse_cm,3.082
+mode_A_wp3_rmse_cm,3.032
+mode_A_wp4_rmse_cm,2.875
+mode_A_note,"deterministic scripted, 1 run, arrival-triggered RMSE window"
+mode_B_rmse_mean_cm,0.846
+mode_B_rmse_std_cm,0.034
+mode_B_rmse_ci_lo,0.815
+mode_B_rmse_ci_hi,0.874
+mode_B_pass_rate,1.0
+mode_B_pass_ci_lo,0.566
+mode_B_pass_ci_hi,1.0
+mode_B_api_mean,76.0
+mode_B_api_std,0.0
+mode_B_time_mean_s,59.9
+mode_B_cost_mean_usd,2.4878
+mode_C_rmse_mean_cm,0.822
+mode_C_rmse_std_cm,0.02
+mode_C_rmse_ci_lo,0.807
+mode_C_rmse_ci_hi,0.841
+mode_C_pass_rate,1.0
+mode_C_pass_ci_lo,0.566
+mode_C_pass_ci_hi,1.0
+mode_C_api_mean,40.0
+mode_C_api_std,0.0
+mode_C_time_mean_s,59.9
+mode_C_cost_mean_usd,0.8696
+ratio_A_vs_B,3.5
+ratio_A_vs_C,3.6
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Modes B and C use the ReAct loop; Mode A is the non-LLM scripted baseline."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Three-mode comparison follows Vemprala's manual vs LLM evaluation protocol."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Full-auto Mode C relies on inner monologue tool feedback with no human in the loop."

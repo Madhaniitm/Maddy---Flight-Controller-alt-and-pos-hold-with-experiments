@@ -1,0 +1,417 @@
+{
+  "run": 7,
+  "phase1": {
+    "command": "hover at 0.5 metres",
+    "log": [
+      {
+        "role": "user",
+        "content": "hover at 0.5 metres"
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_014df5v2vRW1Bgm7gmTLZ7vQ",
+            "name": "plan_workflow",
+            "input": {
+              "goal": "Take off and hover stably at 0.5 metres altitude",
+              "steps": [
+                "Arm the drone",
+                "Find hover throttle",
+                "Check drone is stable",
+                "Enable altitude hold",
+                "Wait for stabilisation",
+                "Set altitude target to 0.5 m",
+                "Wait for drone to reach target",
+                "Verify altitude reached"
+              ]
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_014df5v2vRW1Bgm7gmTLZ7vQ",
+            "content": "Plan recorded (8 steps): Take off and hover stably at 0.5 metres altitude"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01LXWA84ytNBcKjyGL3eBwXv",
+            "name": "report_progress",
+            "input": {
+              "step": 1,
+              "total_steps": 8,
+              "description": "Arming the drone"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01LXWA84ytNBcKjyGL3eBwXv",
+            "content": "Progress: step 1/8 \u2014 Arming the drone"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01HP3niNtEDKok3zxjeDSgUX",
+            "name": "arm",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01HP3niNtEDKok3zxjeDSgUX",
+            "content": "Armed. ch5=1000, motors spinning at idle."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_0175Z3CcN7ywJ6nDWDGmoUsF",
+            "name": "report_progress",
+            "input": {
+              "step": 2,
+              "total_steps": 8,
+              "description": "Finding hover throttle by ramping up until vz \u2248 0"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_0175Z3CcN7ywJ6nDWDGmoUsF",
+            "content": "Progress: step 2/8 \u2014 Finding hover throttle by ramping up until vz \u2248 0"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01PNQM5wq5HBiV2wXcVqTa89",
+            "name": "find_hover_throttle",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01PNQM5wq5HBiV2wXcVqTa89",
+            "content": "Hover throttle found: PWM=1518, thr=0.518, z=0.068 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_0187RpDyNkWP3WPbBfW7JA72",
+            "name": "report_progress",
+            "input": {
+              "step": 3,
+              "total_steps": 8,
+              "description": "Checking drone stability before enabling altitude hold"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_0187RpDyNkWP3WPbBfW7JA72",
+            "content": "Progress: step 3/8 \u2014 Checking drone stability before enabling altitude hold"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01Vn5E7sZwrLYbVcLsmStwfT",
+            "name": "check_drone_stable",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01Vn5E7sZwrLYbVcLsmStwfT",
+            "content": "\u2713 Stable: roll=0.0\u00b0, pitch=0.0\u00b0 (max 5.0\u00b0)"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01GceM6PBwbvTepDs8WBHdPG",
+            "name": "report_progress",
+            "input": {
+              "step": 4,
+              "total_steps": 8,
+              "description": "Enabling altitude hold"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01GceM6PBwbvTepDs8WBHdPG",
+            "content": "Progress: step 4/8 \u2014 Enabling altitude hold"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01FczMw8x3z2YoorSqd2aC6X",
+            "name": "enable_altitude_hold",
+            "input": {},
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01FczMw8x3z2YoorSqd2aC6X",
+            "content": "Altitude hold enabled at 0.068 m, hover_thr=0.518."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_018qdpGAYEz4Bx84X2o8HRRE",
+            "name": "report_progress",
+            "input": {
+              "step": 5,
+              "total_steps": 8,
+              "description": "Waiting 2 seconds for stabilisation"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_018qdpGAYEz4Bx84X2o8HRRE",
+            "content": "Progress: step 5/8 \u2014 Waiting 2 seconds for stabilisation"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01URM5cewAk9XinG4Fo618wm",
+            "name": "wait",
+            "input": {
+              "seconds": 2.0
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01URM5cewAk9XinG4Fo618wm",
+            "content": "Waited 2.0 s. Current EKF altitude: 0.052 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01Ri1bHY5HDkH2YrZeYZdstN",
+            "name": "report_progress",
+            "input": {
+              "step": 6,
+              "total_steps": 8,
+              "description": "Setting altitude target to 0.5 m"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01Ri1bHY5HDkH2YrZeYZdstN",
+            "content": "Progress: step 6/8 \u2014 Setting altitude target to 0.5 m"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_0128JQr28agHJTCi7ux9aetS",
+            "name": "set_altitude_target",
+            "input": {
+              "meters": 0.5
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_0128JQr28agHJTCi7ux9aetS",
+            "content": "Altitude target set to 0.50 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01JKPRE8qKD7hPjoBf8tGLpA",
+            "name": "report_progress",
+            "input": {
+              "step": 7,
+              "total_steps": 8,
+              "description": "Waiting 4 seconds for drone to climb to 0.5 m"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "toolu_01JKPRE8qKD7hPjoBf8tGLpA",
+            "content": "Progress: step 7/8 \u2014 Waiting 4 seconds for drone to climb to 0.5 m"
+          }
+        ]
+      }
+    ],
+    "z_achieved": 0.51
+  },
+  "phase2": {
+    "command": "actually go to 1.2 metres instead",
+    "log": [
+      {
+        "role": "user",
+        "content": "hover at 0.5 metres"
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": ""
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": "actually go to 1.2 metres instead"
+      }
+    ],
+    "z_achieved": 0.498
+  },
+  "passed": 0
+}

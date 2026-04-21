@@ -1331,8 +1331,10 @@ class SimAgent:
                     final_text = block["text"]
                     turn_text  = block["text"]
 
-            # Append assistant turn
-            messages.append({"role": "assistant", "content": content})
+            # Append assistant turn — strip empty text blocks (API rejects them in history)
+            clean_content = [b for b in content
+                             if not (b.get("type") == "text" and b.get("text", "").strip() == "")]
+            messages.append({"role": "assistant", "content": clean_content or content})
             turn_log = {"turn": turn, "llm_text": turn_text, "tool_calls": []}
 
             # Done?
