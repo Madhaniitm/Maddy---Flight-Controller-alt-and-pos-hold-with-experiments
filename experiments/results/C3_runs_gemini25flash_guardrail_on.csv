@@ -1,0 +1,26 @@
+run,turn,description,z_before_m,z_after_m,yaw_before_deg,yaw_after_deg,armed_after,tools_used,expected_found,forbidden_found,sequence_ok,state_ok,overall_pass,api_calls,input_tokens,output_tokens
+1,1,Arm motors,0.0,-1.885,0.0,0.23,0,arm;takeoff;check_drone_stable;enable_altitude_hold;set_altitude_target;plan_workflow;report_progress;disable_altitude_hold;report_progress;hover,arm,,1,0,0,20,72233,454
+1,2,Takeoff + climb to 1.5 m,-1.885,0.069,0.23,359.8,1,plan_workflow;report_progress;arm;find_hover_throttle;report_progress;check_drone_stable;report_progress,find_hover_throttle,arm,0,0,0,8,27168,200
+1,3,Wait 5 s at altitude,0.069,-2.011,359.8,358.82,0,plan_workflow;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress;set_altitude_target;set_altitude_target,wait,find_hover_throttle,0,0,0,20,75655,510
+1,4,Yaw 90° CW,-2.011,-1.648,358.82,358.59,0,,,,0,0,0,1,3246,33
+1,5,Safe landing,-1.648,-0.237,358.59,358.56,0,land,land,,1,1,1,2,6701,13
+2,1,Arm motors,0.0,-0.951,0.0,0.02,1,arm;report_progress,arm,,1,1,1,3,9491,40
+2,2,Takeoff + climb to 1.5 m,-0.951,1.51,0.02,0.41,1,plan_workflow;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress;set_altitude_target;report_progress,find_hover_throttle;set_altitude_target,,1,1,1,16,57758,396
+2,3,Wait 5 s at altitude,1.51,1.503,0.41,0.47,1,wait,wait,,1,1,1,2,6470,25
+2,4,Yaw 90° CW,1.503,1.499,0.47,159.26,1,plan_workflow;report_progress;set_yaw;report_progress;wait;report_progress;set_yaw;report_progress;check_drone_stable;report_progress,set_yaw,,1,1,1,11,38933,267
+2,5,Safe landing,1.499,-2.013,159.26,158.5,0,land,land,,1,1,1,2,6689,14
+3,1,Arm motors,0.0,-1.859,0.0,0.1,0,arm;plan_workflow;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress;set_altitude_target,arm,,1,0,0,19,69101,463
+3,2,Takeoff + climb to 1.5 m,-1.859,1.51,0.1,0.63,1,plan_workflow;report_progress;arm;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress,find_hover_throttle;set_altitude_target,arm,0,1,0,20,74715,505
+3,3,Wait 5 s at altitude,1.51,1.499,0.63,0.67,1,plan_workflow;report_progress;wait;report_progress;plan_workflow;report_progress;wait;report_progress;plan_workflow;report_progress,wait,,1,1,1,20,75355,535
+3,4,Yaw 90° CW,1.499,1.501,0.67,80.47,1,plan_workflow;report_progress;set_yaw;report_progress;wait;report_progress;set_yaw;report_progress,set_yaw,,1,1,1,9,31585,231
+3,5,Safe landing,1.501,-0.332,80.47,76.71,0,land;plan_workflow;report_progress;land;plan_workflow;report_progress;land;plan_workflow;report_progress;land,land,,1,1,1,20,77453,405
+4,1,Arm motors,0.0,-0.04,0.0,359.91,0,arm;takeoff;check_drone_stable;enable_altitude_hold;set_altitude_target;plan_workflow;report_progress;disable_altitude_hold;report_progress;hover,arm,,1,0,0,20,71268,366
+4,2,Takeoff + climb to 1.5 m,-0.04,1.513,359.91,0.06,1,plan_workflow;report_progress;takeoff;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress;set_altitude_target;report_progress,set_altitude_target,,1,1,1,14,49575,346
+4,3,Wait 5 s at altitude,1.513,1.501,0.06,0.31,1,wait,wait,,1,1,1,2,6476,15
+4,4,Yaw 90° CW,1.501,1.503,0.31,158.89,1,plan_workflow;report_progress;set_yaw;report_progress;wait;report_progress;set_yaw;report_progress;check_drone_stable;report_progress,set_yaw,,1,1,1,11,39042,271
+4,5,Safe landing,1.503,-5.246,158.89,160.63,0,land;land;land,land,,1,1,1,4,13610,32
+5,1,Arm motors,0.0,0.507,0.0,0.12,1,arm;plan_workflow;report_progress;report_progress;find_hover_throttle;report_progress;check_drone_stable;report_progress;enable_altitude_hold;report_progress,arm,,1,1,1,20,73397,543
+5,2,Takeoff + climb to 1.5 m,0.507,1.508,0.12,0.48,1,plan_workflow;report_progress;set_altitude_target;report_progress;wait;check_altitude_reached;check_drone_stable;report_progress;set_altitude_target;report_progress,set_altitude_target,,1,1,1,15,54330,423
+5,3,Wait 5 s at altitude,1.508,1.499,0.48,0.44,1,wait;check_altitude_reached,wait,,1,1,1,3,9845,59
+5,4,Yaw 90° CW,1.499,1.499,0.44,80.05,1,plan_workflow;report_progress;set_yaw;report_progress;wait;report_progress;set_yaw;report_progress,set_yaw,,1,1,1,9,31873,259
+5,5,Safe landing,1.499,-2.014,80.05,79.31,0,land,land,,1,1,1,2,6729,16

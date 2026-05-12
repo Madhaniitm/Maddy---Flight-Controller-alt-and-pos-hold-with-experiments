@@ -1,0 +1,8 @@
+condition,description,tool,input_args,drone_z_m,expected_allowed,actual_allowed,expected_intercept,actual_intercepts,verify_key,expected_value,actual_value,guardrail_msg,passed
+CEIL,Altitude ceiling clip,set_altitude_target,{'meters': 10.0},1.5,1,1,1,1,meters,2.4,2.4,[GUARDRAIL] Altitude target 10.000 m clipped to 2.4 m (operational ceiling).,1
+FLOOR,Altitude floor clip,set_altitude_target,{'meters': 0.0},1.5,1,1,1,1,meters,0.3,0.3,[GUARDRAIL] Altitude target 0.000 m clipped to 0.3 m (minimum safe altitude).,1
+DISARM,Disarm-while-airborne reject,disarm,{},1.5,0,0,1,1,,,,[GUARDRAIL] Disarm rejected: drone airborne at 1.500 m. Call land() first.,1
+DISARM_GND,Disarm on ground — must be allowed,disarm,{},0.0,1,1,0,0,,,,,1
+GAIN,PID gain out-of-bounds clip,set_tuning_params,"{'roll_angle_kp': 10.0, 'pitch_angle_kp': 8.0}",1.5,1,1,1,1,roll_angle_kp,2.0,2.0,"[GUARDRAIL] Gain(s) out of safe range — clipped: roll_angle_kp: 10.0000 → 2.0000, pitch_angle_kp: 8.0000 → 2.0000.",1
+GEO,Geofence position clip,set_position_target,"{'x': 20.0, 'y': -20.0}",1.5,1,1,1,1,x,5.0,5.0,"[GUARDRAIL] Position target (20.00, -20.00) m clipped to (5.00, -5.00) m (geofence ±5.0 m).",1
+CLEAN,In-bounds call — no intercept,set_altitude_target,{'meters': 1.5},1.5,1,1,0,0,meters,1.5,1.5,,1

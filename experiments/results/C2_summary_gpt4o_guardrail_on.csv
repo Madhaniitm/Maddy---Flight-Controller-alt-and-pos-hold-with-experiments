@@ -1,0 +1,11 @@
+cmd_idx,command,cmd_type,n_correct,n_runs,success_rate,wilson_ci_lo,wilson_ci_hi,increment_mean_m,increment_std_m
+1,go to 2 metres,explicit,15,15,1.0,0.796,1.0,1.003,0.004
+2,climb to 2m,paraphrase,15,15,1.0,0.796,1.0,-0.001,0.003
+3,go higher,relative_no_num,15,15,1.0,0.796,1.0,0.053,0.137
+4,go up a bit,vague_relative,9,15,0.6,0.357,0.802,0.141,0.358
+5,ascend slowly to a safe height,abstract,7,15,0.467,0.248,0.699,0.005,0.167
+6,I want it higher,indirect,3,15,0.2,0.07,0.452,0.001,0.004
+REF_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Agent loop that processes ambiguous commands via reason→act→observe.",,,,,,,,
+REF_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Benchmark for NL command interpretation rates on UAV tasks.",,,,,,,,
+REF_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Explains how the LLM infers intent from conversation context without explicit clarification.",,,,,,,,
+OVERALL,all commands,,64,90,0.711,0.61,0.795,0.2,0.4

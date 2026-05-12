@@ -1,0 +1,8 @@
+cmd_idx,command,cmd_type,n_correct,n_runs,success_rate,wilson_ci_lo,wilson_ci_hi,increment_mean_m,increment_std_m
+1,go to 2 metres,explicit,1,1,1,0.207,1.0,1.0,0.0
+2,climb to 2m,paraphrase,1,1,1,0.207,1.0,0.0,0.0
+3,go higher,relative_no_num,1,1,1,0.207,1.0,0.5,0.0
+4,go up a bit,vague_relative,0,1,0,0.0,0.793,0.0,0.0
+5,ascend slowly to a safe height,abstract,0,1,0,0.0,0.793,-1.0,0.0
+6,I want it higher,indirect,1,1,1,0.207,1.0,0.5,0.0
+OVERALL,all commands,,4,6,0.6667,0.3,0.9032,,

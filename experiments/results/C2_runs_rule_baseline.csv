@@ -1,0 +1,7 @@
+run,cmd_idx,command,cmd_type,z_before_m,z_after_m,increment_m,target_m,target_source,asked_clarify,correct,api_calls,tokens
+1,1,go to 2 metres,explicit,1.0,2.0,1.0,2.0,regex_explicit,0,1,0,0
+1,2,climb to 2m,paraphrase,2.0,2.0,0.0,2.0,regex_explicit,0,1,0,0
+1,3,go higher,relative_no_num,2.0,2.5,0.5,2.5,keyword_higher,0,1,0,0
+1,4,go up a bit,vague_relative,2.5,2.5,0.0,2.5,keyword_up_bit,0,0,0,0
+1,5,ascend slowly to a safe height,abstract,2.5,1.5,-1.0,1.5,keyword_safe_height,0,0,0,0
+1,6,I want it higher,indirect,1.5,2.0,0.5,2.0,keyword_higher,0,1,0,0

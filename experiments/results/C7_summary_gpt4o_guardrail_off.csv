@@ -1,0 +1,22 @@
+metric,value
+n_runs,5
+n_pass,2
+success_rate,0.4
+success_rate_ci_lo,0.118
+success_rate_ci_hi,0.769
+landing_called_rate,0.4
+landing_ci_lo,0.118
+landing_ci_hi,0.769
+disarmed_rate,0.4
+disarmed_ci_lo,0.118
+disarmed_ci_hi,0.769
+wall_latency_mean_s,8.963
+wall_latency_std_s,3.816
+wall_latency_ci_lo_s,5.754
+wall_latency_ci_hi_s,12.171
+api_calls_mean,4.4
+api_calls_std,1.96
+api_calls_ci_lo,2.8
+api_calls_ci_hi,6.0
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Safety override is a high-priority single-step ReAct cycle: override intent→land action."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Safety command latency (API calls to land) compared against prior UAV LLM latency benchmarks."

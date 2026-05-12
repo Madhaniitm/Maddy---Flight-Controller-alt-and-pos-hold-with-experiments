@@ -1,0 +1,91 @@
+run,cmd_idx,command,cmd_type,z_before_m,z_after_m,increment_m,target_m,target_source,asked_clarify,correct,api_calls,tokens
+1,1,go to 2 metres,explicit,1.0,16.678,15.678,2.0,set_altitude_target,0,1,10,24305
+1,2,climb to 2m,paraphrase,16.678,0.901,-15.777,2.0,set_altitude_target,0,1,7,17401
+1,3,go higher,relative_no_num,0.901,0.901,0.0,2.0,text_inference,0,0,10,25131
+1,4,go up a bit,vague_relative,0.901,0.901,0.0,,unknown,0,0,10,25219
+1,5,ascend slowly to a safe height,abstract,0.901,0.901,0.0,1.5,set_altitude_target,0,0,10,26325
+1,6,I want it higher,indirect,0.901,0.901,0.0,,unknown,0,0,10,25755
+2,1,go to 2 metres,explicit,0.999,-19.163,-20.162,2.0,set_altitude_target,0,1,10,24259
+2,2,climb to 2m,paraphrase,-19.163,-5.742,13.421,2.0,set_altitude_target,0,1,10,24263
+2,3,go higher,relative_no_num,-5.742,-3.625,2.117,2.4,set_altitude_target,0,0,7,17393
+2,4,go up a bit,vague_relative,-3.625,-1.768,1.857,,unknown,0,0,1,2257
+2,5,ascend slowly to a safe height,abstract,-1.768,1.502,3.27,1.5,set_altitude_target,0,0,10,25193
+2,6,I want it higher,indirect,1.502,2.002,0.5,2.0,set_altitude_target,0,1,3,7283
+3,1,go to 2 metres,explicit,0.994,13.418,12.424,2.0,set_altitude_target,0,1,10,24345
+3,2,climb to 2m,paraphrase,13.418,17.263,3.845,2.0,set_altitude_target,0,1,10,24808
+3,3,go higher,relative_no_num,17.263,14.624,-2.639,2.0,set_altitude_target,0,0,10,24389
+3,4,go up a bit,vague_relative,14.624,11.931,-2.693,2.0,set_altitude_target,0,0,10,25119
+3,5,ascend slowly to a safe height,abstract,11.931,9.653,-2.278,2.4,set_altitude_target,0,0,10,25859
+3,6,I want it higher,indirect,9.653,-0.008,-9.661,2.4,set_altitude_target,0,0,9,23765
+4,1,go to 2 metres,explicit,0.998,1.999,1.001,2.0,set_altitude_target,0,1,9,21615
+4,2,climb to 2m,paraphrase,1.999,2.0,0.001,2.0,set_altitude_target,0,1,5,11702
+4,3,go higher,relative_no_num,2.0,2.402,0.402,2.4,set_altitude_target,0,1,3,7106
+4,4,go up a bit,vague_relative,2.402,2.397,-0.005,2.4,set_altitude_target,0,0,2,4577
+4,5,ascend slowly to a safe height,abstract,2.397,2.399,0.002,2.4,set_altitude_target,0,0,2,4652
+4,6,I want it higher,indirect,2.399,2.408,0.009,2.4,set_altitude_target,0,0,8,20998
+5,1,go to 2 metres,explicit,0.994,2.004,1.01,2.0,set_altitude_target,0,1,8,19344
+5,2,climb to 2m,paraphrase,2.004,1.999,-0.005,2.0,set_altitude_target,0,1,5,11719
+5,3,go higher,relative_no_num,1.999,2.414,0.415,2.4,set_altitude_target,0,1,10,25683
+5,4,go up a bit,vague_relative,2.414,-0.616,-3.03,2.4,set_altitude_target,0,0,7,17725
+5,5,ascend slowly to a safe height,abstract,-0.616,-1.654,-1.038,,unknown,0,0,10,25049
+5,6,I want it higher,indirect,-1.654,2.417,4.071,2.4,set_altitude_target,0,0,10,27115
+6,1,go to 2 metres,explicit,0.995,2.0,1.005,2.0,set_altitude_target,0,1,9,21611
+6,2,climb to 2m,paraphrase,2.0,2.0,0.0,2.0,set_altitude_target,0,1,5,11714
+6,3,go higher,relative_no_num,2.0,2.404,0.404,2.4,set_altitude_target,0,1,3,7688
+6,4,go up a bit,vague_relative,2.404,2.402,-0.002,2.4,set_altitude_target,0,0,4,9374
+6,5,ascend slowly to a safe height,abstract,2.402,2.399,-0.003,2.4,set_altitude_target,0,0,4,9535
+6,6,I want it higher,indirect,2.399,2.4,0.001,2.4,set_altitude_target,0,0,2,4742
+7,1,go to 2 metres,explicit,1.01,-19.268,-20.278,2.0,set_altitude_target,0,1,10,24293
+7,2,climb to 2m,paraphrase,-19.268,10.966,30.234,2.0,set_altitude_target,0,1,10,24259
+7,3,go higher,relative_no_num,10.966,9.141,-1.825,2.4,set_altitude_target,0,0,10,25554
+7,4,go up a bit,vague_relative,9.141,0.001,-9.14,2.4,set_altitude_target,0,0,10,26595
+7,5,ascend slowly to a safe height,abstract,0.001,0.001,0.0,2.0,set_altitude_target,0,0,10,26845
+7,6,I want it higher,indirect,0.001,0.001,0.0,2.4,set_altitude_target,0,0,10,52201
+8,1,go to 2 metres,explicit,0.994,1.991,0.997,2.0,set_altitude_target,0,1,10,24073
+8,2,climb to 2m,paraphrase,1.991,0.113,-1.878,2.0,set_altitude_target,0,1,10,24516
+8,3,go higher,relative_no_num,0.113,2.01,1.897,2.0,set_altitude_target,0,0,10,25587
+8,4,go up a bit,vague_relative,2.01,2.403,0.393,2.4,set_altitude_target,0,1,4,10074
+8,5,ascend slowly to a safe height,abstract,2.403,2.399,-0.004,2.4,set_altitude_target,0,0,3,8002
+8,6,I want it higher,indirect,2.399,2.398,-0.001,2.4,set_altitude_target,0,0,4,10041
+9,1,go to 2 metres,explicit,0.998,-19.212,-20.21,2.0,set_altitude_target,0,1,10,24285
+9,2,climb to 2m,paraphrase,-19.212,11.267,30.479,2.0,set_altitude_target,0,1,10,24143
+9,3,go higher,relative_no_num,11.267,9.443,-1.824,2.0,set_altitude_target,0,0,10,25427
+9,4,go up a bit,vague_relative,9.443,-0.142,-9.585,2.4,set_altitude_target,0,0,10,26632
+9,5,ascend slowly to a safe height,abstract,-0.142,2.0,2.142,2.0,set_altitude_target,0,0,10,29594
+9,6,I want it higher,indirect,2.0,2.405,0.405,2.4,set_altitude_target,0,1,2,5273
+10,1,go to 2 metres,explicit,0.997,1.998,1.001,2.0,set_altitude_target,0,1,9,21610
+10,2,climb to 2m,paraphrase,1.998,2.001,0.003,2.0,set_altitude_target,0,1,5,11371
+10,3,go higher,relative_no_num,2.001,2.403,0.402,2.4,set_altitude_target,0,1,4,9204
+10,4,go up a bit,vague_relative,2.403,2.399,-0.004,2.4,set_altitude_target,0,0,4,9344
+10,5,ascend slowly to a safe height,abstract,2.399,2.403,0.004,2.4,set_altitude_target,0,0,5,11929
+10,6,I want it higher,indirect,2.403,2.4,-0.003,2.4,set_altitude_target,0,0,2,4709
+11,1,go to 2 metres,explicit,0.997,1.999,1.002,2.0,set_altitude_target,0,1,9,21615
+11,2,climb to 2m,paraphrase,1.999,2.006,0.007,2.0,set_altitude_target,0,1,5,11385
+11,3,go higher,relative_no_num,2.006,2.402,0.396,2.4,set_altitude_target,0,1,4,9370
+11,4,go up a bit,vague_relative,2.402,2.402,0.0,2.4,set_altitude_target,0,0,3,6978
+11,5,ascend slowly to a safe height,abstract,2.402,2.399,-0.003,2.4,set_altitude_target,0,0,2,4658
+11,6,I want it higher,indirect,2.399,2.4,0.001,2.4,set_altitude_target,0,0,2,4725
+12,1,go to 2 metres,explicit,0.993,2.007,1.014,2.0,set_altitude_target,0,1,10,24267
+12,2,climb to 2m,paraphrase,2.007,2.002,-0.005,2.0,set_altitude_target,0,1,6,14071
+12,3,go higher,relative_no_num,2.002,2.401,0.399,2.4,set_altitude_target,0,1,4,9148
+12,4,go up a bit,vague_relative,2.401,2.4,-0.001,2.4,set_altitude_target,0,0,3,6887
+12,5,ascend slowly to a safe height,abstract,2.4,-0.331,-2.731,2.4,set_altitude_target,0,0,10,24468
+12,6,I want it higher,indirect,-0.331,1.178,1.509,2.4,set_altitude_target,0,1,10,28117
+13,1,go to 2 metres,explicit,0.993,-36.03,-37.023,2.0,set_altitude_target,0,1,10,24152
+13,2,climb to 2m,paraphrase,-36.03,-13.195,22.835,2.0,set_altitude_target,0,1,8,18995
+13,3,go higher,relative_no_num,-13.195,-1.399,11.796,2.0,set_altitude_target,0,0,3,6777
+13,4,go up a bit,vague_relative,-1.399,1.5,2.899,1.5,set_altitude_target,0,0,9,32780
+13,5,ascend slowly to a safe height,abstract,1.5,2.0,0.5,2.0,set_altitude_target,0,1,9,22588
+13,6,I want it higher,indirect,2.0,2.401,0.401,2.4,set_altitude_target,0,1,4,9954
+14,1,go to 2 metres,explicit,1.001,1.998,0.997,2.0,set_altitude_target,0,1,9,21615
+14,2,climb to 2m,paraphrase,1.998,2.001,0.003,2.0,set_altitude_target,0,1,5,11385
+14,3,go higher,relative_no_num,2.001,2.402,0.401,2.4,set_altitude_target,0,1,10,25456
+14,4,go up a bit,vague_relative,2.402,2.407,0.005,2.4,set_altitude_target,0,0,5,12491
+14,5,ascend slowly to a safe height,abstract,2.407,2.414,0.007,2.4,set_altitude_target,0,0,5,12753
+14,6,I want it higher,indirect,2.414,2.399,-0.015,2.4,set_altitude_target,0,0,3,7772
+15,1,go to 2 metres,explicit,1.003,2.0,0.997,2.0,set_altitude_target,0,1,9,21615
+15,2,climb to 2m,paraphrase,2.0,1.998,-0.002,2.0,set_altitude_target,0,1,5,11720
+15,3,go higher,relative_no_num,1.998,2.404,0.406,2.4,set_altitude_target,0,1,8,19716
+15,4,go up a bit,vague_relative,2.404,2.401,-0.003,2.4,set_altitude_target,0,0,2,4564
+15,5,ascend slowly to a safe height,abstract,2.401,2.401,0.0,2.4,set_altitude_target,0,0,2,4645
+15,6,I want it higher,indirect,2.401,2.401,0.0,2.4,text_inference,0,0,1,2335

@@ -1,0 +1,19 @@
+metric,value
+n_runs,5
+n_pass,5
+success_rate,1.0
+success_rate_ci_lo,0.566
+success_rate_ci_hi,1.0
+squareness_mean,0.7319
+squareness_std,0.2722
+squareness_ci_lo,0.4772
+squareness_ci_hi,0.9538
+total_path_mean_m,46.199
+total_path_std_m,20.202
+total_path_ci_lo_m,30.989
+total_path_ci_hi_m,66.888
+plan_steps_mean,10.2
+plan_steps_std,1.9
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Mission decomposition (plan_workflow) then sequential execution is the ReAct planning loop."
+ref_SayCan,"Ahn, M., Brohan, A., Brown, N., et al. (2022). Do As I Can, Not As I Say: Grounding Language in Robotic Affordances. arXiv:2204.01691. Establishes LLM-based task decomposition for physical robots; C6 extends to micro-UAVs."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. GPT-4 waypoint planning on UAVs — benchmark for C6 waypoint count and trajectory quality."

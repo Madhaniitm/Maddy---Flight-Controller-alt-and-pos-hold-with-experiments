@@ -1,0 +1,29 @@
+metric,value
+n_runs,5
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Justifies the reason→act→observe loop used in run_agent_loop."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Closest prior work: GPT-4 on UAV tasks via structured function-call API. Provides API call overhead and success-rate benchmarks for comparison."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Mechanism behind LLM autonomously inserting wait/stability-check from tool results."
+n_pass,0
+success_rate,0.0
+success_rate_ci_lo,0.0
+success_rate_ci_hi,0.434
+alt_error_cm_mean,100.0
+alt_error_cm_std,0.0
+z_ss_mean_m,0.0
+z_ss_std_m,0.0
+z_ss_ci_lo,0.0
+z_ss_ci_hi,0.0
+rmse_cm_mean,100.0
+rmse_cm_std,0.0
+rmse_ci_lo_cm,100.0
+rmse_ci_hi_cm,100.0
+api_calls_mean,0.0
+api_calls_std,0.0
+mean_latency_mean_s,0.0
+mean_latency_std_s,0.0
+mean_latency_ci_lo,0.0
+mean_latency_ci_hi,0.0
+total_cost_usd,0
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Justifies the reason→act→observe loop used in run_agent_loop."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Closest prior work: GPT-4 on UAV tasks via structured function-call API. Provides API call overhead and success-rate benchmarks for comparison."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. Mechanism behind LLM autonomously inserting wait/stability-check from tool results."

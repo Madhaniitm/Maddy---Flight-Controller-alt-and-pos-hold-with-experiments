@@ -9,250 +9,367 @@
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_01Vdimbg1V47dmcvubPQzUSU",
+            "id": "gemini_tc_1",
             "name": "plan_workflow",
-            "input": {
-              "goal": "Take off and hover stably at 0.5 metres altitude",
+            "args": {
               "steps": [
                 "Arm the drone",
                 "Find hover throttle",
-                "Check drone is stable",
+                "Check drone stability",
                 "Enable altitude hold",
-                "Wait for stabilisation",
-                "Set altitude target to 0.5 m",
-                "Wait for drone to reach target",
-                "Verify altitude reached"
-              ]
-            },
-            "caller": {
-              "type": "direct"
+                "Set altitude target to 0.5 meters",
+                "Wait for altitude to be reached",
+                "Check if altitude target is reached"
+              ],
+              "goal": "hover at 0.5 meters"
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_01Vdimbg1V47dmcvubPQzUSU",
-            "content": "Plan recorded (8 steps): Take off and hover stably at 0.5 metres altitude"
+            "id": "gemini_tc_1",
+            "name": "plan_workflow",
+            "content": "Plan recorded (7 steps): hover at 0.5 meters"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_01CSJjRxTtzrvYjC5jKsd4Hu",
+            "id": "gemini_tc_1",
             "name": "report_progress",
-            "input": {
-              "step": 1,
-              "total_steps": 8,
-              "description": "Arming the drone"
-            },
-            "caller": {
-              "type": "direct"
+            "args": {
+              "description": "Arm the drone",
+              "total_steps": 7,
+              "step": 1
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_01CSJjRxTtzrvYjC5jKsd4Hu",
-            "content": "Progress: step 1/8 \u2014 Arming the drone"
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 1/7 \u2014 Arm the drone"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_019ZthkjixDzJcE1ipZbcpeY",
+            "id": "gemini_tc_1",
             "name": "arm",
-            "input": {},
-            "caller": {
-              "type": "direct"
-            }
+            "args": {}
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_019ZthkjixDzJcE1ipZbcpeY",
+            "id": "gemini_tc_1",
+            "name": "arm",
             "content": "Armed. ch5=1000, motors spinning at idle."
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_015jD1ndnqp29hbfKnxGEbF2",
+            "id": "gemini_tc_1",
             "name": "report_progress",
-            "input": {
-              "step": 2,
-              "total_steps": 8,
-              "description": "Finding hover throttle by ramping up until vz \u2248 0"
-            },
-            "caller": {
-              "type": "direct"
+            "args": {
+              "total_steps": 7,
+              "description": "Find hover throttle",
+              "step": 2
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_015jD1ndnqp29hbfKnxGEbF2",
-            "content": "Progress: step 2/8 \u2014 Finding hover throttle by ramping up until vz \u2248 0"
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 2/7 \u2014 Find hover throttle"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_01CWjdNKZhebkNPy6GEoqoKa",
+            "id": "gemini_tc_1",
             "name": "find_hover_throttle",
-            "input": {},
-            "caller": {
-              "type": "direct"
-            }
+            "args": {}
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_01CWjdNKZhebkNPy6GEoqoKa",
-            "content": "Hover throttle found: PWM=1518, thr=0.518, z=0.069 m."
+            "id": "gemini_tc_1",
+            "name": "find_hover_throttle",
+            "content": "Hover throttle found: PWM=1518, thr=0.518, z=0.070 m."
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_013dUy82DnNcGqSUB7zBAz8o",
+            "id": "gemini_tc_1",
             "name": "report_progress",
-            "input": {
+            "args": {
               "step": 3,
-              "total_steps": 8,
-              "description": "Checking drone stability before enabling altitude hold"
-            },
-            "caller": {
-              "type": "direct"
+              "description": "Check drone stability",
+              "total_steps": 7
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_013dUy82DnNcGqSUB7zBAz8o",
-            "content": "Progress: step 3/8 \u2014 Checking drone stability before enabling altitude hold"
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 3/7 \u2014 Check drone stability"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_01KznLeLq9HRwcZCCnB9UqGL",
+            "id": "gemini_tc_1",
             "name": "check_drone_stable",
-            "input": {},
-            "caller": {
-              "type": "direct"
-            }
+            "args": {}
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_01KznLeLq9HRwcZCCnB9UqGL",
+            "id": "gemini_tc_1",
+            "name": "check_drone_stable",
             "content": "\u2713 Stable: roll=0.0\u00b0, pitch=0.0\u00b0 (max 5.0\u00b0)"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_01EzGFJCci3tmdWzfVH92trN",
+            "id": "gemini_tc_1",
             "name": "report_progress",
-            "input": {
+            "args": {
+              "total_steps": 7,
               "step": 4,
-              "total_steps": 8,
-              "description": "Enabling altitude hold"
-            },
-            "caller": {
-              "type": "direct"
+              "description": "Enable altitude hold"
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_01EzGFJCci3tmdWzfVH92trN",
-            "content": "Progress: step 4/8 \u2014 Enabling altitude hold"
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 4/7 \u2014 Enable altitude hold"
           }
         ]
       },
       {
         "role": "assistant",
-        "content": [
+        "text": "",
+        "tool_calls": [
           {
-            "type": "tool_use",
-            "id": "toolu_011tKnmpWYBj2kpESRsgvxso",
+            "id": "gemini_tc_1",
             "name": "enable_altitude_hold",
-            "input": {},
-            "caller": {
-              "type": "direct"
+            "args": {}
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "enable_altitude_hold",
+            "content": "Altitude hold enabled at 0.070 m, hover_thr=0.518."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "step": 5,
+              "total_steps": 7,
+              "description": "Set altitude target to 0.5 meters"
             }
           }
         ]
       },
       {
-        "role": "user",
-        "content": [
+        "role": "tool_results",
+        "results": [
           {
-            "type": "tool_result",
-            "tool_use_id": "toolu_011tKnmpWYBj2kpESRsgvxso",
-            "content": "Altitude hold enabled at 0.069 m, hover_thr=0.518."
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 5/7 \u2014 Set altitude target to 0.5 meters"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "set_altitude_target",
+            "args": {
+              "meters": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "set_altitude_target",
+            "content": "Altitude target set to 0.50 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "step": 6,
+              "total_steps": 7,
+              "description": "Wait for altitude to be reached"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 6/7 \u2014 Wait for altitude to be reached"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "wait",
+            "args": {
+              "seconds": 4
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "wait",
+            "content": "Waited 4.0 s. Current EKF altitude: 0.513 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "total_steps": 7,
+              "step": 7,
+              "description": "Check if altitude target is reached"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 7/7 \u2014 Check if altitude target is reached"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "check_altitude_reached",
+            "args": {
+              "target_m": 0.5,
+              "tolerance_m": 0.1
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "check_altitude_reached",
+            "content": "\u2713 Altitude reached: 0.513 m (target 0.5 m, err 1.3 cm)"
           }
         ]
       }
     ],
-    "z_achieved": 0.069
+    "z_achieved": 0.507
   },
   "phase2": {
     "command": "actually go to 1.2 metres instead",
@@ -263,19 +380,211 @@
       },
       {
         "role": "assistant",
-        "content": [
-          {
-            "type": "text",
-            "text": ""
-          }
-        ]
+        "text": "Phase 1 complete.",
+        "tool_calls": []
       },
       {
         "role": "user",
         "content": "actually go to 1.2 metres instead"
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "plan_workflow",
+            "args": {
+              "goal": "Hover at 1.2 meters.",
+              "steps": [
+                "Arm the drone motors.",
+                "Find the hover throttle.",
+                "Check if the drone is stable.",
+                "Enable altitude hold.",
+                "Wait for 2 seconds.",
+                "Set altitude target to 1.2 meters.",
+                "Wait for 4 seconds.",
+                "Check if 1.2 meters altitude is reached."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "plan_workflow",
+            "content": "Plan recorded (8 steps): Hover at 1.2 meters."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "description": "Arming the drone motors.",
+              "step": 1,
+              "total_steps": 8
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 1/8 \u2014 Arming the drone motors."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "arm",
+            "args": {}
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "arm",
+            "content": "Armed. ch5=1000, motors spinning at idle."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "total_steps": 8,
+              "step": 2,
+              "description": "Finding the hover throttle."
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 2/8 \u2014 Finding the hover throttle."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "find_hover_throttle",
+            "args": {}
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "find_hover_throttle",
+            "content": "Hover throttle found: PWM=1200, thr=0.200, z=0.507 m."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "description": "Checking if the drone is stable.",
+              "total_steps": 8,
+              "step": 3
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 3/8 \u2014 Checking if the drone is stable."
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "check_drone_stable",
+            "args": {}
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "check_drone_stable",
+            "content": "\u2713 Stable: roll=0.0\u00b0, pitch=0.0\u00b0 (max 5.0\u00b0)"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "args": {
+              "total_steps": 8,
+              "description": "Enabling altitude hold.",
+              "step": 4
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool_results",
+        "results": [
+          {
+            "id": "gemini_tc_1",
+            "name": "report_progress",
+            "content": "Progress: step 4/8 \u2014 Enabling altitude hold."
+          }
+        ]
       }
     ],
-    "z_achieved": 0.07
+    "z_achieved": 0.5
   },
   "passed": 0
 }

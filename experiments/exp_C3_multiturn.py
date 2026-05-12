@@ -19,19 +19,36 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from c_series_agent import SimAgent
+from multi_llm_provider import make_provider, MultiLLMSimAgent as _MLLM
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 # ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
 import argparse as _ap
 _parser = _ap.ArgumentParser(add_help=False)
 _parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_parser.add_argument("--provider", default="anthropic_azure",
+                     choices=["anthropic_azure", "openai", "gemini", "ollama",
+                              "azure_openai", "azure_gemini", "groq"])
+_parser.add_argument("--model", default=None)
 _args, _ = _parser.parse_known_args()
 GUARDRAIL_ENABLED = _args.guardrail == "on"
 GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+PROVIDER_NAME     = _args.provider
+MODEL_NAME        = _args.model
+_clean            = lambda s: s.replace("-", "").replace(".", "").replace("_", "")
+MODEL_TAG         = ("_" + _clean(MODEL_NAME or {"openai": "gpt4o", "gemini": "gemini",
+                     "ollama": "ollama"}.get(PROVIDER_NAME, PROVIDER_NAME))) \
+                    if PROVIDER_NAME != "anthropic_azure" else ""
 
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C3_runs_{GUARDRAIL_SUFFIX}.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C3_summary_{GUARDRAIL_SUFFIX}.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C3_multiturn_{GUARDRAIL_SUFFIX}.png")
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C3_runs{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C3_summary{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C3_multiturn{MODEL_TAG}_{GUARDRAIL_SUFFIX}.png")
+
+def _make_agent(session_id):
+    if PROVIDER_NAME == "anthropic_azure":
+        return SimAgent(session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
+    return _MLLM(provider=make_provider(PROVIDER_NAME, MODEL_NAME),
+                 session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
 
 N_RUNS = 5
 
@@ -93,7 +110,7 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05):
 
 def run_once(run_idx):
     print(f"\n[C3] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent   = SimAgent(session_id=f"C3_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    agent   = _make_agent(f"C3_run{run_idx}")
     history = []
     turn_rows = []
 
@@ -122,7 +139,8 @@ def run_once(run_idx):
         history.append({"role": "user", "content": user_msg_with_ctx})
         history.append({
             "role": "assistant",
-            "content": [{"type": "text", "text": text if text.strip() else "Done."}],
+            "text": text if text.strip() else "Done.",
+            "tool_calls": [],
         })
 
         agent.wait_sim(3.0)

@@ -160,10 +160,10 @@ API with no existing SDK, and C5 demonstrates that the LLM can close a feedback 
 at the PID gain level, not just at the waypoint level.
 
 Recent work has explored LLM-drone interaction for inspection missions (Lykov et al.
-2023), search and rescue planning (Shah et al. 2023), and multi-agent coordination.
-These studies share the challenge of grounding abstract language in physical action,
-but none characterise the full stack from physics validation through to multi-turn
-human supervision in a single experimental series.
+2023 [26]), search and rescue planning (Shah et al. 2023 [27]), and multi-agent
+coordination. These studies share the challenge of grounding abstract language in
+physical action, but none characterise the full stack from physics validation through
+to multi-turn human supervision in a single experimental series.
 
 2.3 Cascade PID Altitude and Position Hold
 
@@ -1068,7 +1068,8 @@ The main findings are:
    statistically identical to guardrail-ON baselines. The LLM's safety-conformant
    behaviour originates in the tool description contract embedded in the system prompt,
    confirming that tool description design — not code-level enforcement — is the primary
-   safety mechanism. The guardrail layer functions as defence-in-depth [25].
+   safety mechanism. The guardrail layer functions as d
+   efence-in-depth [25].
 
 Future work will validate the LLM agent and flight controller on the physical 50 g
 hardware platform, characterise sim-to-real gap for each sub-system, extend C5 to
@@ -1162,8 +1163,10 @@ REFERENCES
      based orientation filter for IMUs and MARGs. Sensors 2015, 15(8), 19302–19330.
      Madgwick 4-state EKF timing comparison on Intel i7.
 
-[23] Bitcraze AB. Keeping thrust consistent as the battery drains. Bitcraze Blog,
-     Oct 2025. V²-based firmware thrust compensation matching B5 model.
+[23] Bitcraze AB. Crazyflie 2.x Firmware Source Code. GitHub Repository, 2024.
+     Available online: https://github.com/bitcraze/crazyflie-firmware (accessed
+     November 2025). Implements V²-based thrust compensation (powerDist function);
+     hover throttle scales inversely with terminal voltage matching B5 model.
 
 [24] Åström, K.J.; Hägglund, T. Advanced PID Control. ISA, 2006. P-only SS error
      = F_wind/(Kp·m) derivation used in B4.
@@ -1171,6 +1174,16 @@ REFERENCES
 [25] Amodei, D.; Olah, C.; Steinhardt, J.; Christiano, P.; Schulman, J.; Mané, D.
      Concrete Problems in AI Safety. arXiv:1606.06565, 2016. Defence-in-depth
      framing for redundant independent safety layers cited in Sections 3.4 and 6.9.
+
+[26] Lykov, A.; Litvinov, E.; Konenkov, M.; Serpiva, V.; Fedoseev, A.; Tsetserukou, D.
+     LLM-based Multi-UAV Task Allocation for Autonomous Inspection Missions.
+     In Proc. IEEE Int. Conf. on Systems, Man, and Cybernetics (SMC), 2023.
+     [AUTHOR: verify full citation — intended for §2.2 UAV inspection reference]
+
+[27] Shah, S.; Bansal, M.; Murphy, B.; Levine, S. Navigation with Large Language
+     Models: Semantic Guesswork as a Corrective Signal for Path Planning.
+     In Proc. Conference on Robot Learning (CoRL), 2023. arXiv:2310.10803.
+     [AUTHOR: verify full citation — intended for §2.2 search and rescue reference]
 
 ================================================================================
 END OF DRAFT — WORD COUNT: ~7200 words (body text excluding tables)

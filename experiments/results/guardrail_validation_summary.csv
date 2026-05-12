@@ -1,0 +1,9 @@
+metric,value
+part_A_unit_tests,6
+part_A_passed,6
+part_A_all_conditions_pass,1
+part_B_llm_runs_total,15
+part_B_guardrail_fired,4
+part_B_llm_safe_no_attempt,8
+part_B_unchecked_miss,3
+part_B_total_cost_usd,0.7913

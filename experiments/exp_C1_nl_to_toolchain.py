@@ -23,19 +23,36 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from c_series_agent import SimAgent
+from multi_llm_provider import make_provider, MultiLLMSimAgent as _MLLM
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 # ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
 import argparse as _ap
 _parser = _ap.ArgumentParser(add_help=False)
 _parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_parser.add_argument("--provider", default="anthropic_azure",
+                     choices=["anthropic_azure", "openai", "gemini", "ollama",
+                              "azure_openai", "azure_gemini", "groq"])
+_parser.add_argument("--model", default=None)
 _args, _ = _parser.parse_known_args()
 GUARDRAIL_ENABLED = _args.guardrail == "on"
 GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+PROVIDER_NAME     = _args.provider
+MODEL_NAME        = _args.model
+_clean            = lambda s: s.replace("-", "").replace(".", "").replace("_", "")
+MODEL_TAG         = ("_" + _clean(MODEL_NAME or {"openai": "gpt4o", "gemini": "gemini",
+                     "ollama": "ollama"}.get(PROVIDER_NAME, PROVIDER_NAME))) \
+                    if PROVIDER_NAME != "anthropic_azure" else ""
 
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C1_runs_{GUARDRAIL_SUFFIX}.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C1_summary_{GUARDRAIL_SUFFIX}.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C1_nl_to_toolchain_{GUARDRAIL_SUFFIX}.png")
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C1_runs{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C1_summary{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C1_nl_to_toolchain{MODEL_TAG}_{GUARDRAIL_SUFFIX}.png")
+
+def _make_agent(session_id):
+    if PROVIDER_NAME == "anthropic_azure":
+        return SimAgent(session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
+    return _MLLM(provider=make_provider(PROVIDER_NAME, MODEL_NAME),
+                 session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
 
 COMMAND    = "take off and hover at 1 metre"
 TARGET_ALT = 1.0
@@ -86,7 +103,7 @@ def wilson_ci(k, n, z=1.96):
 
 def run_once(run_idx):
     print(f"\n[C1] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
-    agent = SimAgent(session_id=f"C1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    agent = _make_agent(f"C1_run{run_idx}")
     t_wall_start = time.time()
 
     final_text, api_stats, tool_trace, _ = agent.run_agent_loop(COMMAND)

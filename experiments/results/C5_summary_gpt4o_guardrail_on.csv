@@ -1,0 +1,33 @@
+metric,value
+n_runs,5
+kp_default,0.3
+kp_injected,1.5
+n_pass,5
+success_rate,1.0
+success_rate_ci_lo,0.566
+success_rate_ci_hi,1.0
+sequence_ok_rate,1.0
+kp_reduced_rate,1.0
+roll_identified_rate,1.0
+rmse_before_mean_deg,0.14287
+rmse_before_std_deg,0.05223
+rmse_before_ci_lo,0.09806
+rmse_before_ci_hi,0.18776
+rmse_after_mean_deg,0.03203
+rmse_after_std_deg,0.00338
+rmse_after_ci_lo,0.02954
+rmse_after_ci_hi,0.03531
+rmse_reduction_mean_pct,74.5
+rmse_reduction_std_pct,8.7
+rmse_reduction_ci_lo,67.2
+rmse_reduction_ci_hi,81.7
+kp_reduction_mean_pct,74.7
+kp_reduction_std_pct,1.7
+llm_verified_rate,1.0
+tuning_cycles_mean,1.6
+tuning_cycles_std,0.8
+analyze_calls_mean,2.6
+analyze_calls_std,0.8
+ref_ReAct,"Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2022). ReAct: Synergizing Reasoning and Acting in Language Models. arXiv:2210.03629. Diagnostic cycle (analyze→suggest→apply) is a ReAct loop: reason from telemetry, act on gains."
+ref_InnerMonologue,"Huang, W., et al. (2022). Inner Monologue: Embodied Reasoning through Planning with Language Models. arXiv:2207.05608. analyze_flight() result embedded in context triggers LLM to self-diagnose and select fix."
+ref_Vemprala2023,"Vemprala, S., Bonatti, R., Bucker, A., & Kapoor, A. (2023). ChatGPT for Robotics: Design Principles and Model Abilities. MSR-TR-2023-8. arXiv:2306.17582. Establishes LLM-based gain tuning as a novel capability beyond prior UAV LLM work."

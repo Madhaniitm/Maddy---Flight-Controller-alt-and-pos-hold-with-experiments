@@ -65,6 +65,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import c_series_agent    # import module so we can patch SYSTEM_PROMPT
+import multi_llm_provider as _mlp
+from multi_llm_provider import make_provider, MultiLLMSimAgent as _MLLM
 
 # ── Patch the system prompt BEFORE creating any SimAgent ──────────────────────
 #
@@ -98,23 +100,40 @@ specifies a new altitude — regardless of how it is phrased:
 """
 
 c_series_agent.SYSTEM_PROMPT = c_series_agent.SYSTEM_PROMPT + RETARGETING_PROTOCOL
+_mlp.SYSTEM_PROMPT           = c_series_agent.SYSTEM_PROMPT  # keep both in sync
 
 from c_series_agent import SimAgent    # import class AFTER patching the module constant
 
 # ── Output paths ──────────────────────────────────────────────────────────────
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 
-# ── Guardrail toggle (--guardrail on|off) ──────────────────────────────────────
+# ── Provider / guardrail args ──────────────────────────────────────────────────
 import argparse as _ap
 _parser = _ap.ArgumentParser(add_help=False)
 _parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_parser.add_argument("--provider", default="anthropic_azure",
+                     choices=["anthropic_azure", "openai", "gemini", "ollama",
+                              "azure_openai", "azure_gemini", "groq"])
+_parser.add_argument("--model", default=None)
 _args, _ = _parser.parse_known_args()
 GUARDRAIL_ENABLED = _args.guardrail == "on"
 GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+PROVIDER_NAME     = _args.provider
+MODEL_NAME        = _args.model
+_clean            = lambda s: s.replace("-", "").replace(".", "").replace("_", "")
+MODEL_TAG         = ("_" + _clean(MODEL_NAME or {"openai": "gpt4o", "gemini": "gemini",
+                     "ollama": "ollama"}.get(PROVIDER_NAME, PROVIDER_NAME))) \
+                    if PROVIDER_NAME != "anthropic_azure" else ""
 
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C4_1_runs_{GUARDRAIL_SUFFIX}.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C4_1_summary_{GUARDRAIL_SUFFIX}.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C4_1_retarget_fix_{GUARDRAIL_SUFFIX}.png")
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C4_1_runs{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C4_1_summary{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C4_1_retarget_fix{MODEL_TAG}_{GUARDRAIL_SUFFIX}.png")
+
+def _make_agent(session_id):
+    if PROVIDER_NAME == "anthropic_azure":
+        return SimAgent(session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
+    return _MLLM(provider=make_provider(PROVIDER_NAME, MODEL_NAME),
+                 session_id=session_id, guardrail_enabled=GUARDRAIL_ENABLED)
 
 # ── Identical experimental parameters to C4 ───────────────────────────────────
 INITIAL_CMD    = "hover at 0.5 metres"
@@ -124,19 +143,34 @@ CORRECT_TARGET = 1.2
 TOLERANCE      = 0.12
 N_RUNS         = 5
 
-# C4 baseline results for comparison plots
-C4_BASELINE = {
-    "n_pass":          2,
-    "success_rate":    0.40,
-    "ci_lo":           0.12,
-    "ci_hi":           0.77,
-    "alt_error_mean":  36.3,
-    "alt_error_std":   31.2,
-    # per-run z_final for comparison
-    "z_finals":        [0.497, 0.497, 1.205, 0.803, 1.207],
-    "passed":          [0, 0, 1, 0, 1],
-    "api_calls_ph2":   [0, 0, 8, 8, 8],
-}
+# C4 baseline results for comparison plots — provider-specific
+if PROVIDER_NAME == "gemini":
+    # Gemini C4 (N=15): 1/15 pass, re_armed=15/15, alt_error=69.6±25.2cm
+    C4_BASELINE = {
+        "n_pass":          1,
+        "success_rate":    round(1/15, 3),
+        "ci_lo":           0.00,
+        "ci_hi":           0.28,
+        "alt_error_mean":  69.6,
+        "alt_error_std":   25.2,
+        "z_finals":        [],   # not available per-run at N=5 scale
+        "passed":          [],
+        "api_calls_ph2":   [],
+        "label":           "C4 Gemini (N=15)",
+    }
+else:
+    C4_BASELINE = {
+        "n_pass":          2,
+        "success_rate":    0.40,
+        "ci_lo":           0.12,
+        "ci_hi":           0.77,
+        "alt_error_mean":  36.3,
+        "alt_error_std":   31.2,
+        "z_finals":        [0.497, 0.497, 1.205, 0.803, 1.207],
+        "passed":          [0, 0, 1, 0, 1],
+        "api_calls_ph2":   [0, 0, 8, 8, 8],
+        "label":           "C4 Claude (N=5)",
+    }
 
 PAPER_REFS = {
     "ReAct": (
@@ -173,7 +207,7 @@ def bootstrap_ci(values, n_boot=2000, alpha=0.05):
 
 def run_once(run_idx):
     print(f"\n[C4.1] ── Run {run_idx+1}/{N_RUNS} ───────────────────────────────")
-    agent   = SimAgent(session_id=f"C4_1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    agent   = _make_agent(session_id=f"C4_1_run{run_idx}")
     history = []
 
     # ── Phase 1: initial hover command ────────────────────────────────────────
@@ -182,8 +216,7 @@ def run_once(run_idx):
         INITIAL_CMD, history=list(history), max_turns=15,
     )
     history.append({"role": "user",      "content": INITIAL_CMD})
-    history.append({"role": "assistant", "content": [{"type": "text",
-                                                       "text": text1 or "Done."}]})
+    history.append({"role": "assistant", "text": text1 or "Done.", "tool_calls": []})
 
     agent.wait_sim(4.0)
     with agent.state.lock:
@@ -290,7 +323,8 @@ delta_pp = round((n_pass / N_RUNS - C4_BASELINE["success_rate"]) * 100, 1)
 print(f"\n[C4.1] ── AGGREGATE ({N_RUNS} runs) ───────────────────────────────")
 print(f"  Success rate:       {n_pass}/{N_RUNS}  ({n_pass/N_RUNS:.0%})  "
       f"CI=[{pass_lo:.2f},{pass_hi:.2f}]")
-print(f"  vs C4 baseline:     2/5 (40%)  → Δ = {delta_pp:+.1f} pp")
+print(f"  vs {C4_BASELINE['label']}:  {C4_BASELINE['n_pass']}/{15 if PROVIDER_NAME=='gemini' else 5} "
+      f"({C4_BASELINE['success_rate']:.0%})  → Δ = {delta_pp:+.1f} pp")
 print(f"  Correct target set: {n_correct}/{N_RUNS}  CI=[{corr_lo:.2f},{corr_hi:.2f}]")
 print(f"  No re-arm:          {n_no_rearm}/{N_RUNS}  CI=[{nore_lo:.2f},{nore_hi:.2f}]")
 print(f"  Freeze runs:        {n_freeze}/{N_RUNS}  (was 2/5 in C4)")
@@ -342,8 +376,9 @@ print(f"[C4.1] Summary CSV : {OUT_SUMMARY}")
 fig, axes = plt.subplots(2, 3, figsize=(16, 10))
 fig.suptitle(
     f"EXP-C4.1: Mid-Mission Correction — Re-Targeting Protocol  "
-    f"(N={N_RUNS}, temperature=0.2)\n"
-    f"C4 baseline: 2/5 (40%)  →  C4.1: {n_pass}/{N_RUNS} "
+    f"({PROVIDER_NAME}/{MODEL_NAME or 'default'}, N={N_RUNS}, temperature=0.2)\n"
+    f"{C4_BASELINE['label']}: {C4_BASELINE['n_pass']}/{15 if PROVIDER_NAME=='gemini' else 5} "
+    f"({C4_BASELINE['success_rate']:.0%})  →  C4.1: {n_pass}/{N_RUNS} "
     f"({n_pass/N_RUNS:.0%}, CI: {pass_lo:.2f}–{pass_hi:.2f})  "
     f"  Δ = {delta_pp:+.1f} pp",
     fontsize=12, fontweight="bold"
@@ -354,7 +389,7 @@ pass_colors = ["#2ecc71" if r["passed"] else "#e74c3c" for r in all_results]
 
 # ── Fig A: C4 vs C4.1 success rate comparison ─────────────────────────────────
 ax = axes[0, 0]
-exps    = ["C4\n(baseline)", "C4.1\n(fix)"]
+exps    = [f"C4\n({C4_BASELINE['label']})", "C4.1\n(fix)"]
 rates   = [C4_BASELINE["success_rate"], n_pass / N_RUNS]
 ci_los_ = [C4_BASELINE["ci_lo"], pass_lo]
 ci_his_ = [C4_BASELINE["ci_hi"], pass_hi]
@@ -384,15 +419,20 @@ if delta_pp > 0:
 ax = axes[0, 1]
 x = np.arange(N_RUNS)
 w = 0.35
-c4_errs  = [abs(z - CORRECT_TARGET) * 100 for z in C4_BASELINE["z_finals"]]
 c41_errs = col("alt_error_cm")
-c4_cols  = ["#27ae60" if p else "#e74c3c" for p in C4_BASELINE["passed"]]
 c41_cols = ["#27ae60" if r["passed"] else "#e74c3c" for r in all_results]
-
-ax.bar(x - w/2, c4_errs,  w, color=c4_cols,  alpha=0.6, edgecolor="black",
-       label="C4 (baseline)")
-ax.bar(x + w/2, c41_errs, w, color=c41_cols, alpha=0.85, edgecolor="black",
-       label="C4.1 (fix)")
+if C4_BASELINE["z_finals"]:
+    c4_errs  = [abs(z - CORRECT_TARGET) * 100 for z in C4_BASELINE["z_finals"]]
+    c4_cols  = ["#27ae60" if p else "#e74c3c" for p in C4_BASELINE["passed"]]
+    ax.bar(x - w/2, c4_errs, w, color=c4_cols, alpha=0.6, edgecolor="black",
+           label=f"C4 ({C4_BASELINE['label']})")
+    ax.bar(x + w/2, c41_errs, w, color=c41_cols, alpha=0.85, edgecolor="black",
+           label="C4.1 (fix)")
+else:
+    ax.bar(x, c41_errs, w, color=c41_cols, alpha=0.85, edgecolor="black",
+           label="C4.1 (fix)")
+    ax.text(0.5, 0.92, f"C4 {C4_BASELINE['label']} — no per-run data (N=15)",
+            ha="center", transform=ax.transAxes, fontsize=8, style="italic", color="gray")
 ax.axhline(TOLERANCE * 100, color="purple", lw=1.5, ls="--",
            label=f"Pass threshold {TOLERANCE*100:.0f} cm")
 ax.set_xticks(x)
@@ -413,11 +453,11 @@ ax.axhspan(CORRECT_TARGET - TOLERANCE, CORRECT_TARGET + TOLERANCE,
            alpha=0.08, color="purple", label="±12 cm pass band")
 
 cmap_r = plt.cm.Blues(np.linspace(0.35, 0.85, N_RUNS))
-for i, (r, c4_z) in enumerate(zip(all_results, C4_BASELINE["z_finals"])):
-    # C4 as dashed
-    ax.plot([1, 2], [r["z_phase1_m"], c4_z], "--",
-            color=cmap_r[i], lw=1.2, alpha=0.5)
-    # C4.1 as solid
+for i, r in enumerate(all_results):
+    if C4_BASELINE["z_finals"]:
+        c4_z = C4_BASELINE["z_finals"][i]
+        ax.plot([1, 2], [r["z_phase1_m"], c4_z], "--",
+                color=cmap_r[i], lw=1.2, alpha=0.5)
     ax.plot([1, 2], [r["z_phase1_m"], r["z_final_m"]], "-o",
             color=cmap_r[i], lw=2, ms=7,
             label=f"R{i+1} ({'✓' if r['passed'] else '✗'})")
@@ -426,30 +466,34 @@ ax.set_xticks([1, 2])
 ax.set_xticklabels(["After Phase 1\n(target 0.5 m)",
                     "After Correction\n(target 1.2 m)"])
 ax.set_ylabel("EKF altitude (m)", fontsize=10)
-ax.set_title("Altitude Trajectory Per Run\n(solid=C4.1, dashed=C4 baseline)",
+title_suffix = "solid=C4.1, dashed=C4 baseline" if C4_BASELINE["z_finals"] else "C4.1 only"
+ax.set_title(f"Altitude Trajectory Per Run\n({title_suffix})",
              fontsize=11, fontweight="bold")
 ax.legend(fontsize=7, ncol=2)
 ax.grid(True, alpha=0.3)
 
 # ── Fig D: Phase 2 API calls  (freeze detection) ──────────────────────────────
 ax = axes[1, 0]
-c4_api2  = C4_BASELINE["api_calls_ph2"]
 c41_api2 = col("api_calls_ph2")
-bar_cols_c4  = ["#27ae60" if p else "#e74c3c" for p in C4_BASELINE["passed"]]
 bar_cols_c41 = ["#27ae60" if r["passed"] else "#e74c3c" for r in all_results]
-
-ax.bar(x - w/2, c4_api2,  w, color=bar_cols_c4,  alpha=0.6, edgecolor="black",
-       label="C4 (baseline)")
-ax.bar(x + w/2, c41_api2, w, color=bar_cols_c41, alpha=0.85, edgecolor="black",
-       label="C4.1 (fix)")
+if C4_BASELINE["api_calls_ph2"]:
+    c4_api2     = C4_BASELINE["api_calls_ph2"]
+    bar_cols_c4 = ["#27ae60" if p else "#e74c3c" for p in C4_BASELINE["passed"]]
+    ax.bar(x - w/2, c4_api2,  w, color=bar_cols_c4,  alpha=0.6, edgecolor="black",
+           label=f"C4 ({C4_BASELINE['label']})")
+    ax.bar(x + w/2, c41_api2, w, color=bar_cols_c41, alpha=0.85, edgecolor="black",
+           label="C4.1 (fix)")
+    ax.annotate("← C4 freeze runs\n(0 tool calls)", xy=(0.5, 0.3),
+                fontsize=8, color="#e74c3c", style="italic")
+else:
+    ax.bar(x, c41_api2, w, color=bar_cols_c41, alpha=0.85, edgecolor="black",
+           label="C4.1 (fix)")
 ax.axhline(0, color="red", lw=1.5, ls="--", alpha=0.5)
-ax.annotate("← C4 freeze runs\n(0 tool calls)", xy=(0.5, 0.3),
-            fontsize=8, color="#e74c3c", style="italic")
 ax.set_xticks(x)
 ax.set_xticklabels(run_labels, fontsize=9)
 ax.set_ylabel("Phase 2 API calls", fontsize=10)
 ax.set_title("Phase 2 LLM Activity (API calls)\n"
-             "C4 Runs 1&2: 0 calls = freeze failure",
+             "0 calls = freeze failure",
              fontsize=11, fontweight="bold")
 ax.legend(fontsize=8)
 ax.grid(True, axis="y", alpha=0.3)
@@ -457,7 +501,11 @@ ax.grid(True, axis="y", alpha=0.3)
 # ── Fig E: Binary metric comparison C4 vs C4.1 ────────────────────────────────
 ax = axes[1, 1]
 metrics_labels = ["Success\nrate", "Correct\ntarget", "No\nre-arm", "Alt\nreached"]
-c4_rates   = [C4_BASELINE["success_rate"], 0.40, 1.00, 0.40]
+# Gemini C4: correct_target=1/15, re_armed=15/15 (no_rearm=0), alt_reached~0
+if PROVIDER_NAME == "gemini":
+    c4_rates = [C4_BASELINE["success_rate"], 1/15, 0.00, 1/15]
+else:
+    c4_rates = [C4_BASELINE["success_rate"], 0.40, 1.00, 0.40]
 c41_rates  = [n_pass/N_RUNS, n_correct/N_RUNS, n_no_rearm/N_RUNS, n_alt_ok/N_RUNS]
 x2 = np.arange(len(metrics_labels))
 ax.bar(x2 - w/2, c4_rates,  w, color="#e74c3c", alpha=0.7, edgecolor="black",
@@ -480,7 +528,11 @@ ax.grid(True, axis="y", alpha=0.3)
 
 # ── Fig F: Failure mode breakdown ─────────────────────────────────────────────
 ax = axes[1, 2]
-n_c4_freeze    = 2; n_c4_wrong = 1; n_c4_pass = 2
+# Gemini C4 (N=15): re_armed=15/15 = new failure mode; "wrong_target" maps to re-arm here
+if PROVIDER_NAME == "gemini":
+    n_c4_freeze = 0; n_c4_wrong = 14; n_c4_pass = 1   # 14 re-arm failures, 1 pass
+else:
+    n_c4_freeze = 2; n_c4_wrong = 1; n_c4_pass = 2
 n_c41_freeze   = n_freeze
 n_c41_wrong    = n_wrong_tgt
 n_c41_pass     = n_pass
@@ -520,6 +572,7 @@ print(f"[C4.1] Plot: {OUT_PNG}")
 
 print(f"\n[C4.1] RESULT: {n_pass}/{N_RUNS} passed  "
       f"(95% CI: {pass_lo:.2f}–{pass_hi:.2f})  "
-      f"vs C4 baseline 2/5 (40%)  Δ = {delta_pp:+.1f} pp")
-print(f"[C4.1] Freeze failures:      {n_freeze}/5  (was 2/5 in C4)")
-print(f"[C4.1] Wrong-target failures:{n_wrong_tgt}/5  (was 1/5 in C4)")
+      f"vs {C4_BASELINE['label']} {C4_BASELINE['n_pass']}/{15 if PROVIDER_NAME=='gemini' else 5} "
+      f"({C4_BASELINE['success_rate']:.0%})  Δ = {delta_pp:+.1f} pp")
+print(f"[C4.1] Freeze failures:      {n_freeze}/{N_RUNS}")
+print(f"[C4.1] Wrong-target failures:{n_wrong_tgt}/{N_RUNS}")

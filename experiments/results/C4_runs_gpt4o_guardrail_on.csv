@@ -1,0 +1,16 @@
+run,z_phase1_m,z_final_m,alt_error_cm,correct_target_set,re_armed,re_took_off,alt_reached,tools_before_set,passed,api_calls_ph1,api_calls_ph2,input_tokens,output_tokens,cost_usd,tools_ph2
+1,0.504,1.2,0.0,1,0,0,1,0,1,7,5,29258,770,0.080848,plan_workflow;report_progress;set_altitude_target;wait;check_altitude_reached;report_progress
+2,0.51,1.2,0.0,1,0,0,1,0,1,14,6,49315,817,0.131461,plan_workflow;report_progress;set_altitude_target;wait;check_altitude_reached;report_progress
+3,0.503,1.2,0.0,1,0,0,1,0,1,7,4,26646,748,0.074099,plan_workflow;report_progress;set_altitude_target;wait;report_progress;check_altitude_reached
+4,0.503,1.204,0.4,1,0,0,1,0,1,7,4,26407,685,0.07287,plan_workflow;report_progress;set_altitude_target;wait;check_altitude_reached
+5,0.504,1.195,0.5,1,0,0,1,0,1,8,6,34502,780,0.094058,plan_workflow;report_progress;set_altitude_target;check_altitude_reached;wait;check_altitude_reached;report_progress
+6,0.506,1.203,0.3,1,0,0,1,0,1,7,7,33418,657,0.090118,plan_workflow;report_progress;set_altitude_target;wait;check_altitude_reached;report_progress
+7,0.506,1.205,0.5,1,0,0,1,1,1,14,4,43983,687,0.116831,enable_altitude_hold;set_altitude_target;wait;check_altitude_reached
+8,0.505,-4.827,602.7,1,1,1,0,5,0,15,8,57984,818,0.153144,plan_workflow;arm;find_hover_throttle;check_drone_stable;enable_altitude_hold;wait;set_altitude_target;wait;check_altitude_reached;wait
+9,0.507,1.205,0.5,1,0,0,1,0,1,7,7,33386,660,0.090069,plan_workflow;report_progress;set_altitude_target;wait;report_progress;check_altitude_reached;report_progress
+10,0.503,1.2,0.0,1,0,0,1,0,1,14,5,46591,736,0.123842,report_progress;set_altitude_target;wait;check_altitude_reached;report_progress
+11,0.507,1.198,0.2,1,0,0,1,0,1,7,4,26146,600,0.071366,report_progress;set_altitude_target;wait;check_altitude_reached
+12,0.504,1.201,0.1,1,0,0,1,0,1,9,4,30965,549,0.082904,report_progress;set_altitude_target;wait;check_altitude_reached
+13,0.502,1.201,0.1,1,0,0,1,1,1,14,5,46754,769,0.12458,report_progress;enable_altitude_hold;report_progress;set_altitude_target;wait;check_altitude_reached
+14,0.506,1.201,0.1,1,0,0,1,0,1,14,7,50606,698,0.133499,plan_workflow;report_progress;set_altitude_target;wait;check_altitude_reached;report_progress
+15,0.506,1.206,0.6,1,0,0,1,1,1,14,5,45735,779,0.122131,report_progress;enable_altitude_hold;report_progress;set_altitude_target;wait;check_altitude_reached

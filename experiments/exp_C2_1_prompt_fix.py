@@ -63,11 +63,13 @@ import matplotlib.pyplot as plt
 
 import c_series_agent                    # import module so we can patch SYSTEM_PROMPT
 
-# ── Patch the system prompt BEFORE creating any SimAgent ──────────────────────
+# ── Patch the system prompt BEFORE importing multi_llm_provider ───────────────
 #
-# ONE general rule — not a per-command lookup table, no specific phrases named.
-# Describes the rule by linguistic structure alone: direction without magnitude.
-# Covers both upward and downward intents symmetrically.
+# multi_llm_provider does `from c_series_agent import SYSTEM_PROMPT` at module
+# load time, copying the value into its own namespace. The patch must happen
+# BEFORE that import so multi_llm_provider picks up the patched value directly.
+# Importing multi_llm_provider after the patch is the only reliable way to
+# guarantee all providers (GPT-4o, mini, etc.) see the updated system prompt.
 #
 CONSERVATIVE_DEFAULT_POLICY = """
 ━━ CONSERVATIVE DEFAULT POLICY FOR MAGNITUDE-UNSPECIFIED ALTITUDE COMMANDS ━━
@@ -91,6 +93,9 @@ Operational limits:
 
 c_series_agent.SYSTEM_PROMPT = c_series_agent.SYSTEM_PROMPT + CONSERVATIVE_DEFAULT_POLICY
 
+# Import multi_llm_provider AFTER the patch — its `from c_series_agent import
+# SYSTEM_PROMPT` now copies the already-patched value into its namespace.
+from multi_llm_provider import make_provider, MultiLLMSimAgent as _MLLM
 from c_series_agent import SimAgent      # import class AFTER patching the module constant
 
 # ── Output paths ──────────────────────────────────────────────────────────────
@@ -99,13 +104,24 @@ os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 import argparse as _ap
 _parser = _ap.ArgumentParser(add_help=False)
 _parser.add_argument("--guardrail", choices=["on", "off"], default="on")
+_parser.add_argument("--provider", default="anthropic_azure",
+                     choices=["anthropic_azure", "openai", "gemini", "ollama",
+                              "azure_openai", "azure_gemini", "groq"])
+_parser.add_argument("--model", default=None)
 _args, _ = _parser.parse_known_args()
 GUARDRAIL_ENABLED = _args.guardrail == "on"
 GUARDRAIL_SUFFIX  = "guardrail_on" if GUARDRAIL_ENABLED else "guardrail_off"
+PROVIDER_NAME     = _args.provider
+MODEL_NAME        = _args.model
+_clean            = lambda s: s.replace("-", "").replace(".", "").replace("_", "")
+MODEL_TAG         = ("_" + _clean(MODEL_NAME or {"openai": "gpt4o", "gemini": "gemini",
+                     "ollama": "ollama"}.get(PROVIDER_NAME, PROVIDER_NAME))) \
+                    if PROVIDER_NAME != "anthropic_azure" else ""
 
-OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C2_1_runs_{GUARDRAIL_SUFFIX}.csv")
-OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C2_1_summary_{GUARDRAIL_SUFFIX}.csv")
-OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C2_1_ambiguity_{GUARDRAIL_SUFFIX}.png")
+OUT_RUNS    = os.path.join(os.path.dirname(__file__), "results", f"C2_1_runs{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_SUMMARY = os.path.join(os.path.dirname(__file__), "results", f"C2_1_summary{MODEL_TAG}_{GUARDRAIL_SUFFIX}.csv")
+OUT_PNG     = os.path.join(os.path.dirname(__file__), "results", f"C2_1_ambiguity{MODEL_TAG}_{GUARDRAIL_SUFFIX}.png")
+OUT_CONV    = os.path.join(os.path.dirname(__file__), "results", f"C2_1_conv{MODEL_TAG}_{GUARDRAIL_SUFFIX}.json")
 
 N_RUNS = 5
 
@@ -187,7 +203,11 @@ def asked_for_clarification(text_response):
 def run_once(run_idx):
     print(f"\n[C2.1] ── Run {run_idx+1}/{N_RUNS} ─────────────────────────────────")
 
-    agent_base = SimAgent(session_id=f"C2_1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    if PROVIDER_NAME == "anthropic_azure":
+        agent_base = SimAgent(session_id=f"C2_1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
+    else:
+        agent_base = _MLLM(provider=make_provider(PROVIDER_NAME, MODEL_NAME),
+                           session_id=f"C2_1_run{run_idx}", guardrail_enabled=GUARDRAIL_ENABLED)
 
     with agent_base.state.lock:
         agent_base.state.armed = True
@@ -212,6 +232,12 @@ def run_once(run_idx):
         z_base = round(agent_base.state.ekf_z, 3)
     print(f"  Drone ready at {z_base:.3f} m")
 
+    def _asst_msg(text):
+        """Return assistant history item in the correct format for the active provider."""
+        if PROVIDER_NAME == "anthropic_azure":
+            return {"role": "assistant", "content": [{"type": "text", "text": text}]}
+        return {"role": "assistant", "text": text or "Command executed.", "tool_calls": []}
+
     shared_history = [
         {
             "role": "user",
@@ -220,15 +246,12 @@ def run_once(run_idx):
                 "altitude hold active. I will give you a series of flight commands."
             ),
         },
-        {
-            "role": "assistant",
-            "content": [{"type": "text", "text":
-                "Understood. The drone is airborne at ~1.0 m with altitude hold active. "
-                "Ready to receive your commands."}],
-        },
+        _asst_msg("Understood. The drone is airborne at ~1.0 m with altitude hold active. "
+                  "Ready to receive your commands."),
     ]
 
     cmd_results = []
+    conv_log = []   # full text log: one entry per command
     for idx, (command, gt_exact, gt_range, cmd_type) in enumerate(COMMANDS, start=1):
         with agent_base.state.lock:
             z_before = round(agent_base.state.ekf_z, 3)
@@ -239,11 +262,20 @@ def run_once(run_idx):
             max_turns=10,
         )
 
-        shared_history.append({"role": "user", "content": command})
-        shared_history.append({
-            "role": "assistant",
-            "content": [{"type": "text", "text": turn_text}],
+        conv_log.append({
+            "run":        run_idx + 1,
+            "cmd_idx":    idx,
+            "command":    command,
+            "cmd_type":   cmd_type,
+            "z_before_m": z_before,
+            "api_calls":  len(api_stats),
+            "tool_trace": [{"name": t["name"], "args": t["args"], "result": t["result"]}
+                           for t in tool_trace],
+            "llm_text":   turn_text,   # ← the actual words the model returned
         })
+
+        shared_history.append({"role": "user", "content": command})
+        shared_history.append(_asst_msg(turn_text))
 
         agent_base.wait_sim(6.0)
         with agent_base.state.lock:
@@ -283,13 +315,16 @@ def run_once(run_idx):
 
     n_correct = sum(r["correct"] for r in cmd_results)
     print(f"  Run {run_idx+1}: {n_correct}/{N_CMDS} correct")
-    return cmd_results
+    return cmd_results, conv_log
 
 # ── Run N times ────────────────────────────────────────────────────────────────
 
 all_run_rows = []
+all_conv_logs = []
 for i in range(N_RUNS):
-    all_run_rows.extend(run_once(i))
+    rows, conv = run_once(i)
+    all_run_rows.extend(rows)
+    all_conv_logs.extend(conv)
 
 # ── Aggregate ─────────────────────────────────────────────────────────────────
 
@@ -365,6 +400,10 @@ with open(OUT_SUMMARY, "w", newline="") as f:
         "increment_std_m":  round(float(np.std([r["increment_m"]  for r in all_run_rows])), 3),
     })
 print(f"[C2.1] Summary CSV: {OUT_SUMMARY}")
+
+with open(OUT_CONV, "w") as f:
+    json.dump(all_conv_logs, f, indent=2)
+print(f"[C2.1] Conv log  : {OUT_CONV}")
 
 # ── Basic plot (same layout as C2 for direct visual comparison) ───────────────
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
