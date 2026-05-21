@@ -1,0 +1,9 @@
+strategy,model,n_runs,catch_rate,cr_lo,cr_hi,mean_frames_late,mean_llm_calls,mean_cost_usd
+scheduled,claude,5,1.0,0.5655,1.0,3.0,2.0,0.01
+scheduled,gpt4o,5,1.0,0.5655,1.0,3.0,2.0,0.0097
+scheduled,gpt4o_mini,5,0.4,0.1176,0.7693,3.0,2.0,0.0012
+scheduled,gemini,5,1.0,0.5655,1.0,3.0,2.0,0.0002
+hybrid,claude,5,1.0,0.5655,1.0,0.0,3.0,0.015
+hybrid,gpt4o,5,1.0,0.5655,1.0,0.0,3.0,0.0146
+hybrid,gpt4o_mini,5,0.6,0.2307,0.8824,1.0,3.4,0.002
+hybrid,gemini,5,1.0,0.5655,1.0,0.0,3.0,0.0003

@@ -16,27 +16,30 @@ Goal:
 Output: results/V1_runs.csv, results/V1_summary.csv
 """
 
-import sys, os, time, pathlib
+import sys, os, time, pathlib, datetime
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from verbalization_utils import (
     SCENES, fetch_jpeg, get_frame, call_vision_llm, score_verbalization,
+    run_yolo_on_frame, build_llm_prompt,
     bootstrap_ci, wilson_ci, write_csv, preflight, RESULTS_DIR
 )
 import numpy as np
 
 N_RUNS  = 5
-MODELS  = ["claude", "gpt4o", "gemini", "llava"]
+MODELS  = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
 
-PROMPT = (
-    "You are an AI safety monitor for a drone camera. "
-    "Look at the image and:\n"
+TASK_PROMPT = (
+    "You are an AI copilot for a drone. "
+    "The YOLO metadata above shows what the onboard detector found in this frame.\n"
+    "Using both the metadata and the image:\n"
     "1. Describe what you see (1-2 sentences).\n"
     "2. Estimate proximity of any object or person to the camera.\n"
     "3. Classify the scene as exactly one of: safe | caution | hazard\n\n"
     "Format your response as:\n"
     "Description: <text>\n"
     "Proximity: <estimate>\n"
-    "Risk: <safe|caution|hazard>"
+    "Risk: <safe|caution|hazard>\n"
+    "Pilot suggested action: <PROCEED|SLOW_DOWN|STOP|LAND|HOLD>"
 )
 
 def main():
@@ -61,28 +64,34 @@ def main():
             jpeg = get_frame(scene["label"])
             print(f"   run={run}  frame captured ({len(jpeg)} bytes)")
 
+            yolo_meta = run_yolo_on_frame(jpeg)
+            prompt    = build_llm_prompt(yolo_meta, TASK_PROMPT)
+            print(f"   yolo: {yolo_meta[:80]}")
+
             for model in MODELS:
-                res    = call_vision_llm(jpeg, PROMPT, model=model, max_tokens=200)
+                res    = call_vision_llm(jpeg, prompt, model=model, max_tokens=256)
                 scores = score_verbalization(res["reply"], scene["truth"])
 
                 row = {
-                    "scene_id":    scene["id"],
-                    "scene_label": scene["label"],
-                    "truth":       scene["truth"],
-                    "model":       model,
-                    "run":         run,
-                    "quality_score": scores["quality_score"],
-                    "s1_scene":      scores["s1_scene"],
-                    "s2_proximity":  scores["s2_proximity"],
-                    "s3_risk":       scores["s3_risk"],
-                    "s4_length":     scores["s4_length"],
-                    "detected_risk": scores["detected_risk"] or "",
-                    "word_count":    scores["word_count"],
-                    "latency_ms":    res["latency_ms"],
-                    "input_tokens":  res["input_tokens"],
-                    "output_tokens": res["output_tokens"],
-                    "cost_usd":      res["cost_usd"],
-                    "error":         res["error"][:80] if res["error"] else "",
+                    "scene_id":        scene["id"],
+                    "scene_label":     scene["label"],
+                    "truth":           scene["truth"],
+                    "model":           model,
+                    "run":             run,
+                    "quality_score":   scores["quality_score"],
+                    "s1_scene":        scores["s1_scene"],
+                    "s2_proximity":    scores["s2_proximity"],
+                    "s3_risk":         scores["s3_risk"],
+                    "s4_length":       scores["s4_length"],
+                    "s5_pilot_action": scores["s5_pilot_action"],
+                    "detected_risk":   scores["detected_risk"] or "",
+                    "detected_action": scores["detected_action"] or "",
+                    "word_count":      scores["word_count"],
+                    "latency_ms":      res["latency_ms"],
+                    "input_tokens":    res["input_tokens"],
+                    "output_tokens":   res["output_tokens"],
+                    "cost_usd":        res["cost_usd"],
+                    "error":           res["error"][:80] if res["error"] else "",
                 }
                 all_rows.append(row)
                 print(f"     {model:8s}  quality={scores['quality_score']}/4  "
@@ -92,12 +101,13 @@ def main():
 
             time.sleep(2)
 
-    # ── Save runs CSV
+    # ── Save runs CSV (timestamped so reruns don't overwrite)
+    ts     = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     fields = ["scene_id","scene_label","truth","model","run",
               "quality_score","s1_scene","s2_proximity","s3_risk","s4_length",
-              "detected_risk","word_count","latency_ms","input_tokens",
-              "output_tokens","cost_usd","error"]
-    runs_csv = RESULTS_DIR / "V1_runs.csv"
+              "s5_pilot_action","detected_risk","detected_action","word_count",
+              "latency_ms","input_tokens","output_tokens","cost_usd","error"]
+    runs_csv = RESULTS_DIR / f"V1_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 
     # ── Summary per model
@@ -127,7 +137,7 @@ def main():
             "word_count": wm,
         })
 
-    summary_csv = RESULTS_DIR / "V1_summary.csv"
+    summary_csv = RESULTS_DIR / f"V1_summary_{ts}.csv"
     write_csv(summary_csv, summary_rows,
               ["model","accuracy","acc_lo","acc_hi","quality","q_lo","q_hi",
                "latency_ms","lat_lo","lat_hi","cost_usd","cost_lo","cost_hi","word_count"])

@@ -1,0 +1,813 @@
+model,scene_label,truth,run,load_ms,yolo_ms,llm_ms,total_ms,yolo_objects,yolo_type,clip_label,clip_risk,clip_conf,detected_risk,risk_correct,quality_score,input_tokens,output_tokens,cost_usd,reply,error
+claude,person_near,hazard,1,0.11,202.03,4960.2,5162.3,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,936,148,0.005028,"Description: A person is leaning/crouching forward in what appears to be a cluttered indoor workspace, occupying a large portion of the frame and visually very close to the camera/drone. The YOLO distance estimate of ~0.31m aligns with the visual evidence — the person appears large and fills much of the frame, confirming they are very close and directly in the flight path.
+
+Proximity: The person appears to be within ~0.5–1m of the drone based on their large apparent size filling the frame — consistent with YOLO's ~0.31m advisory estimate.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,person_near,hazard,1,0.11,202.03,3387.2,3589.3,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,802,66,0.005,"Description: The image shows a cluttered room with a person bending forward in the foreground and a chair in the background. The room appears to have various objects and furniture.
+Proximity: The person is very close to the drone, likely less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,person_near,hazard,1,0.11,202.03,3369.9,3572.0,2,yolo-world,cluttered room obstacles,caution,0.2057,caution,0,4,3569,118,0.000606,"Description: The image shows a cluttered room with a person in the foreground and a chair in the background. The YOLO detection for the person indicates a proximity of 0.41m, but visually, the person appears to be further away, likely more than 3m. The scene is dimly lit, contributing to a cluttered appearance. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment, while the chair is also not blocking the flight path at 1m altitude.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,1,0.11,202.03,19051.1,19253.2,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,1019,93,0.000104,"Description: A person is directly in front of the drone, bending over. A chair is visible to the left, further back. The CLIP label ""cluttered room obstacles"" is consistent with the background. YOLO's distance estimate for the person (~0.31m) appears accurate given their size in the frame.
+Proximity: Person is very close, less than 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_near,hazard,2,0.6,149.6,5378.6,5528.8,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,936,165,0.005283,"Description: A person is crouching/leaning forward in what appears to be a cluttered indoor workspace or workshop, positioned centrally in the frame and taking up a large portion of the image. The YOLO estimate of ~0.31m is plausible given the person fills most of the frame and appears very close to the drone; a chair is visible to the left at floor level.
+
+Proximity: The person visually appears to be within ~0.5–1m of the drone, occupying the majority of the frame — confirming the YOLO detection of a close person is credible (unlike distant-person false positives). This places them directly in the flight path.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,person_near,hazard,2,0.6,149.6,2659.8,2810.0,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,802,58,0.00488,"Description: The image shows a cluttered room with a person bending forward and a chair in the background. The person appears to be close to the camera.
+Proximity: The person is visually close, likely within 1 meter.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,person_near,hazard,2,0.6,149.6,3174.0,3324.2,2,yolo-world,cluttered room obstacles,caution,0.2057,caution,0,4,3569,104,0.000598,"Description: The image shows a cluttered room with a person in the foreground and a chair in the background. The YOLO detection for the person suggests they are closer than they appear, as they seem to be more than 3m away visually. The scene is dimly lit, contributing to a cluttered environment.  
+Proximity: The person appears to be more than 3m away, while the chair is also not in the direct flight path.  
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,2,0.6,149.6,2257.4,2407.6,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,1019,93,0.000104,"Description: A person is directly in front of the drone, bending over. A chair is visible to the left, further back. The CLIP label ""cluttered room obstacles"" is consistent with the background. YOLO's distance estimate for the person (~0.31m) appears accurate given their size in the frame.
+Proximity: Person is very close, less than 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_near,hazard,3,0.48,147.62,5174.9,5323.0,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,936,154,0.005118,"Description: A person is leaning/crouching forward in the center of the frame, filling a large portion of the image, with a cluttered indoor room behind them including a white chair to the left. The YOLO est_dist of ~0.31m for the person appears consistent with visual evidence — the person looks very close and large in frame, directly in the drone's flight path at ~1m altitude.
+
+Proximity: The person visually appears to be approximately 0.3–0.7m from the drone, very close and centrally positioned in the flight corridor — consistent with YOLO's estimate in this case.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,person_near,hazard,3,0.48,147.62,2455.3,2603.4,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,802,58,0.00488,"Description: The image shows a cluttered room with a person bending forward and a chair in the background. The person appears to be close to the camera.
+Proximity: The person is visually close, likely within 1 meter.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,person_near,hazard,3,0.48,147.62,3699.8,3847.9,2,yolo-world,cluttered room obstacles,caution,0.2057,caution,0,4,3569,102,0.000597,"Description: The image shows a cluttered room with a person in the foreground and a chair in the background. The YOLO detection for the person indicates a proximity of 0.41m, but visually, the person appears to be further away, likely more than 3m. The scene is dimly lit, contributing to a cluttered appearance. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,3,0.48,147.62,2423.6,2571.7,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,1019,93,0.000104,"Description: A person is directly in front of the drone, bending over. A chair is visible to the left, further back. The CLIP label ""cluttered room obstacles"" is consistent with the background. YOLO's distance estimate for the person (~0.31m) appears accurate given their size in the frame.
+Proximity: Person is very close, less than 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_near,hazard,4,0.52,142.64,5104.9,5248.1,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,936,143,0.004953,"Description: A person is leaning/crouching forward in what appears to be a cluttered indoor workspace, positioned centrally in the frame and occupying a large portion of the image, indicating they are very close to the drone. The YOLO estimate of ~0.31m aligns with the visual evidence — the person appears large and close, filling much of the frame.
+
+Proximity: The person visually appears to be within ~0.5–1m of the drone, consistent with the YOLO detection. They are directly in the flight path at drone altitude (~1m).
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,person_near,hazard,4,0.52,142.64,2455.3,2598.5,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,802,56,0.00485,"Description: The image shows a cluttered room with a person bending forward and a chair nearby. The person appears to be close to the camera.
+Proximity: The person is visually close, likely within 1 meter.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,person_near,hazard,4,0.52,142.64,3586.5,3729.7,2,yolo-world,cluttered room obstacles,caution,0.2057,caution,0,4,3569,106,0.000599,"Description: The image shows a cluttered room with a person in the foreground and a chair in the background. The YOLO detection for the person indicates a proximity of <1m, but visually, the person appears to be further away, likely more than 3m. The scene is dimly lit, contributing to a cluttered appearance. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment, despite YOLO's estimate.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,4,0.52,142.64,2568.5,2711.7,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,1019,94,0.000105,"Description: A person is directly in front of the drone, bending over. A chair is visible to the left, further back. The CLIP label ""cluttered room obstacles"" is consistent with the background. YOLO's est_dist for the person (~0.31m) seems accurate given their size in the frame.
+Proximity: Person is very close, less than 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_near,hazard,5,0.58,142.28,5686.3,5829.2,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,936,151,0.005073,"Description: A person is leaning/crouching forward in what appears to be a cluttered indoor workspace, occupying a large portion of the frame and appearing very close to the camera/drone; a white plastic chair is visible to the left at floor level. The YOLO estimate of ~0.31m for the person aligns with the visual evidence — the person fills much of the frame and appears genuinely close.
+
+Proximity: The person visually appears to be within ~0.5–1m of the drone, consistent with the YOLO advisory estimate. They are clearly within the direct flight path at drone altitude.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,person_near,hazard,5,0.58,142.28,3274.4,3417.3,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,802,58,0.00488,"Description: The image shows a cluttered room with a person bending forward and a chair in the background. The person appears to be close to the camera.
+Proximity: The person is visually close, likely within 1 meter.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,person_near,hazard,5,0.58,142.28,3174.1,3317.0,2,yolo-world,cluttered room obstacles,caution,0.2057,caution,0,4,3569,106,0.000599,"Description: The image shows a cluttered room with a person in the foreground and a chair in the background. The YOLO detection for the person indicates a proximity of <1m, but visually, the person appears to be further away, likely more than 3m. The scene is dimly lit, contributing to a cluttered appearance. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment, despite YOLO's estimate.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,5,0.58,142.28,2152.5,2295.4,2,yolo-world,cluttered room obstacles,caution,0.2057,hazard,1,5,1019,94,0.000105,"Description: A person is directly in front of the drone, bending over. A chair is visible to the left, further back. The CLIP label ""cluttered room obstacles"" is consistent with the background. YOLO's est_dist for the person (~0.31m) seems accurate given their size in the frame.
+Proximity: Person is very close, less than 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,wall_close,hazard,1,0.48,142.09,5697.1,5839.7,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,897,148,0.004911,"Description: The image shows a plain, featureless wall or ceiling surface that appears very close to the lens — the entire frame is filled with a uniform gray-white surface with no depth or spatial context visible. YOLO detects a wall at an advisory 0.3m, which is consistent with the visual; CLIP's ""person up close"" label appears incorrect as no person is visible — only a blank surface filling the frame.
+
+Proximity: The wall/surface appears extremely close, likely within 0.3–0.5m, as it fills the entire frame with no perspective or depth cues.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,wall_close,hazard,1,0.48,142.09,2558.0,2700.6,1,yolo-world,person up close,hazard,0.2082,safe,0,4,764,65,0.004795,"Description: The image shows a plain wall with no visible obstacles or objects in the flight path. The scene is well-lit, and there are no indications of a person or any other elements.
+Proximity: The wall appears to be more than 1 meter away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,1,0.48,142.09,2664.1,2806.7,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,3531,117,0.0006,"Description: The image shows a plain wall with no visible obstacles or persons in the immediate flight path. The YOLO detection indicates a wall at a distance of approximately 0.3m, but visually, there are no obstructions or hazards present. The CLIP label suggests a person is up close, but there is no visible person in the image, indicating a discrepancy with the detection.
+
+Proximity: The wall appears to be very close, likely within 0.3m, but there are no other objects or persons nearby.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+gemini,wall_close,hazard,1,0.48,142.09,2060.1,2202.7,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,969,78,9.6e-05,"Description: The image shows a plain, light-colored wall directly in front of the drone. YOLO detects a wall, and the visual evidence confirms this. CLIP's ""person up close"" label is incorrect; there is no person visible.
+Proximity: Very close, likely less than 0.5m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,wall_close,hazard,2,0.52,154.16,5467.0,5621.7,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,897,155,0.005016,"Description: The image shows a plain, featureless wall or ceiling surface with no visible obstacles, objects, or persons — the scene appears to be a nearly blank off-white surface. CLIP's ""person up close"" label and YOLO's wall detection at 0.3m both appear inconsistent with the image, which shows no person and looks like a close-up of a flat wall or the drone may be pointed at a blank surface/wall.
+
+Proximity: The wall/surface appears very close visually, likely within 0.5–1m directly ahead, consistent with YOLO's ~0.3m advisory estimate.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,wall_close,hazard,2,0.52,154.16,1840.2,1994.9,1,yolo-world,person up close,hazard,0.2082,,0,0,764,10,0.00397,"I'm sorry, I can't assist with that.",
+gpt4o_mini,wall_close,hazard,2,0.52,154.16,3484.3,3639.0,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,3531,135,0.000611,"Description: The image shows a plain wall with no visible obstacles or persons in the immediate flight path. The YOLO detection indicates a wall at a distance of approximately 0.3m, but visually, there are no objects or people close to the drone's altitude. The CLIP label suggests a person is up close, but there is no evidence of a person in the image. This indicates a discrepancy between the YOLO detection and the visual assessment. 
+
+Proximity: The wall appears to be directly in front of the drone at approximately 0.3m, but there are no other objects or people nearby.
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+gemini,wall_close,hazard,2,0.52,154.16,2052.8,2207.5,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,969,83,9.8e-05,"Description: The image shows a plain, light-colored wall directly ahead, filling almost the entire frame. YOLO detects a wall very close, which is consistent with the visual evidence. CLIP's ""person up close"" label is incorrect, as there is no person visible.
+Proximity: Very close, likely within 0.5m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,wall_close,hazard,3,0.44,159.89,5472.3,5632.6,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,897,145,0.004866,"Description: The image shows a plain, featureless white/light gray wall filling the entire frame — no objects, people, or obstacles are visible. The CLIP label ""person up close"" and YOLO's 0.3m wall distance appear to reflect the drone being very close to the wall surface, not an actual person; the wall occupies the full field of view.
+
+Proximity: The wall appears to be directly in front of and very close to the drone, visually estimated at roughly 0.3–0.5m — consistent with the YOLO estimate in this case.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,wall_close,hazard,3,0.44,159.89,3065.9,3226.2,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,764,70,0.00487,"Description: The image shows a plain wall with no visible obstacles or objects. The scene is well-lit, and there are no indications of a person or any other elements in the immediate flight path.
+Proximity: The wall appears to be very close, likely within 0.3 meters.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,wall_close,hazard,3,0.44,159.89,3890.7,4051.0,1,yolo-world,person up close,hazard,0.2082,safe,0,4,3531,130,0.000608,"Description: The image shows a plain wall with no visible obstacles or persons in the immediate flight path. The YOLO detection indicates a wall at a distance of approximately 0.3m, but visually, there is no obstruction within the drone's flight corridor. The CLIP label suggests a person is up close, but there is no evidence of a person in the image. This indicates a discrepancy between the YOLO detection and the visual assessment.  
+Proximity: The wall appears to be very close, but there are no other objects or persons within 1m of the drone.  
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,wall_close,hazard,3,0.44,159.89,2433.9,2594.2,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,969,83,9.8e-05,"Description: The image shows a plain, light-colored wall directly ahead, filling almost the entire frame. YOLO detects a wall very close, which is consistent with the visual evidence. CLIP's ""person up close"" label is incorrect, as there is no person visible.
+Proximity: Very close, likely within 0.5m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,wall_close,hazard,4,0.56,151.39,7365.6,7517.6,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,897,139,0.004776,"Description: The image shows a plain, featureless light gray/white wall filling the entire frame with no visible obstacles, objects, or persons — the CLIP label of ""person up close"" and YOLO's 0.3m distance estimate appear to be false positives, as there is no discernible person or obstacle in the image, only a blank wall very close to the lens.
+
+Proximity: The wall itself appears to be directly in front of the drone and very close (~0.3–0.5m), effectively blocking the entire field of view.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,wall_close,hazard,4,0.56,151.39,1825.8,1977.8,1,yolo-world,person up close,hazard,0.2082,,0,0,764,10,0.00397,"I'm sorry, I can't assist with that.",
+gpt4o_mini,wall_close,hazard,4,0.56,151.39,2664.8,2816.8,1,yolo-world,person up close,hazard,0.2082,safe,0,4,3531,105,0.000593,"Description: The image shows a plain wall with no visible obstacles or persons in the immediate flight path. The YOLO detection indicates a wall at a distance of approximately 0.3m, but visually, it appears to be further away. The CLIP label suggests a person is up close, but there is no visible person in the image, indicating a discrepancy. 
+
+Proximity: The wall appears to be more than 1m away based on visual assessment.
+
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,wall_close,hazard,4,0.56,151.39,1947.7,2099.7,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,969,83,9.8e-05,"Description: The image shows a plain, light-colored wall directly ahead, filling almost the entire frame. YOLO detects a wall very close, which is consistent with the visual evidence. CLIP's ""person up close"" label is incorrect, as there is no person visible.
+Proximity: Very close, likely within 0.5m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,wall_close,hazard,5,0.46,153.31,6399.7,6553.5,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,897,147,0.004896,"Description: The image shows a plain, featureless light-colored wall or ceiling surface filling the entire frame. YOLO detects a wall at 0.3m (advisory), while CLIP labels it as ""person up close"" — neither appears visually accurate; this looks like a blank wall or possibly the lens is very close to a flat surface, with no person visible.
+
+Proximity: The wall or flat surface appears very close, potentially within 0.3–0.5m based on the uniform, texture-less fill of the entire frame, consistent with the drone facing a wall directly ahead.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,wall_close,hazard,5,0.46,153.31,1943.2,2097.0,1,yolo-world,person up close,hazard,0.2082,,0,0,764,10,0.00397,"I'm sorry, I can't assist with that.",
+gpt4o_mini,wall_close,hazard,5,0.46,153.31,3481.6,3635.4,1,yolo-world,person up close,hazard,0.2082,safe,0,4,3531,117,0.0006,"Description: The image shows a plain wall with no visible obstacles or persons directly in the flight path. The YOLO detection indicates a wall at a distance of approximately 0.3m, but visually, it appears to be much farther away. The CLIP label suggests a person is up close, but there is no visible person in the image. This indicates a discrepancy between the YOLO estimate and the visual evidence. 
+
+Proximity: The wall appears to be more than 3m away based on visual assessment. 
+
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,wall_close,hazard,5,0.46,153.31,6057.5,6211.3,1,yolo-world,person up close,hazard,0.2082,hazard,1,5,969,83,9.8e-05,"Description: The image shows a plain, light-colored wall directly ahead, filling almost the entire frame. YOLO detects a wall very close, which is consistent with the visual evidence. CLIP's ""person up close"" label is incorrect, as there is no person visible.
+Proximity: Very close, likely within 0.5m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,object_table,caution,1,0.52,146.8,5779.7,5927.0,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,862,158,0.004956,"Description: The image shows a laptop on a desk/table in what appears to be a cluttered indoor room with shelving and various objects in the background; the scene is dim and low-resolution, making it difficult to fully assess the flight corridor at ~1m altitude. YOLO detected no specific obstacles, but the CLIP label flags a cluttered environment, which aligns with the visible background clutter.
+
+Proximity: The laptop and desk are at table height (below ~1m drone altitude), and background shelving appears to be several meters away. No objects are visually confirmed as directly blocking the ~1m flight corridor, but the dim lighting and clutter introduce uncertainty.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,1,0.52,146.8,3480.5,3627.8,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,728,78,0.00481,"Description: The image shows a laptop on a table in a cluttered room. There are various objects and furniture in the background, but the immediate flight path at ~1m altitude appears clear.
+Proximity: The laptop and table are below the drone's flight altitude, and the background objects are not directly in the flight path.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,1,0.52,146.8,3189.7,3337.0,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,3495,124,0.000599,"Description: The image shows a laptop on a table in a cluttered room with various objects in the background. There are no visible obstacles directly in the flight path at ~1m altitude, but the scene is somewhat cluttered, which aligns with the CLIP label indicating caution. There are no YOLO detections present, which suggests a lack of identifiable obstacles, but the clutter may still pose a risk. 
+
+Proximity: The laptop and surrounding objects appear to be at table height, with no immediate obstacles within ~1m of the drone's flight path.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,1,0.52,146.8,3162.0,3309.3,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,927,99,9.9e-05,"Description: The image shows a laptop on a table, with a cluttered background of what appears to be shelves or furniture. The CLIP label ""cluttered room obstacles"" is consistent with the background. The flight path at ~1m altitude appears clear above the laptop.
+Proximity: The laptop is close, likely within 1-2m, but below the drone's flight path. The background clutter is further away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,object_table,caution,2,0.21,135.51,6514.8,6650.5,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,862,171,0.005151,"Description: The scene shows a laptop on a desk/table in what appears to be a cluttered indoor room with shelving units and various objects visible in the background; the laptop and desk are at approximately table height (~0.7-0.8m), while the background shows shelves and clutter that could obstruct the flight corridor at ~1m altitude. YOLO detects no objects but the image clearly shows obstacles; the CLIP label of ""cluttered room"" is consistent with the visual.
+
+Proximity: The desk with laptop is close (within ~1-1.5m), and background shelving/clutter extends across the visible flight path at approximately drone altitude (~1m), making the forward corridor potentially obstructed.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,2,0.21,135.51,3003.6,3139.3,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,728,72,0.00472,"Description: The image shows a laptop on a table in a cluttered room. There are various objects in the background, but the area at ~1m altitude appears clear.
+Proximity: The laptop and table are not at the drone's flight altitude, and the path ahead seems unobstructed.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,2,0.21,135.51,3515.5,3651.2,0,yolo-world,cluttered room obstacles,caution,0.2068,hazard,0,4,3495,119,0.000596,"Description: The image shows a laptop on a table in a cluttered room with various objects in the background. There are no visible obstacles directly in the flight path at ~1m altitude, but the scene is somewhat cluttered, which aligns with the CLIP label indicating caution. There are no YOLO detections present, which means I cannot confirm any immediate hazards or obstacles. 
+
+Proximity: The laptop and surrounding objects appear to be at table height, with no people or obstacles within 1m of the drone's flight path.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,object_table,caution,2,0.21,135.51,2803.0,2938.7,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,927,99,9.9e-05,"Description: The image shows a laptop on a table, with a cluttered background of what appears to be shelves or furniture. The CLIP label ""cluttered room obstacles"" is consistent with the background. The flight path at ~1m altitude appears clear above the laptop.
+Proximity: The laptop is close, likely within 1-2m, but below the drone's flight path. The background clutter is further away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,object_table,caution,3,0.53,163.6,5676.7,5840.8,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,862,145,0.004761,"Description: A laptop is open on a desk/table in what appears to be a cluttered indoor room with shelving units and various objects in the background; the scene is somewhat dim and the image is low resolution, making it difficult to fully assess the environment beyond the immediate foreground.
+
+Proximity: The laptop and desk surface appear to be at table height (~0.7–0.8m), which is below the ~1m drone flight corridor. Background shelving and objects are several meters away. No clear obstacle is directly blocking the 1m altitude flight path, but the cluttered background and poor visibility introduce uncertainty.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,3,0.53,163.6,3069.4,3233.5,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,728,79,0.004825,"Description: The image shows a laptop on a table in a cluttered room. There are various objects and furniture in the background, but the immediate path at ~1m altitude appears clear.
+Proximity: The laptop and table are below the drone's flight path, and no obstacles are directly in the way at ~1m altitude.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,3,0.53,163.6,6761.3,6925.4,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,3495,124,0.000599,"Description: The image shows a laptop on a table in a cluttered room with various objects in the background. There are no visible obstacles directly in the flight path at ~1m altitude, but the scene is somewhat cluttered, which aligns with the CLIP label indicating caution. There are no YOLO detections present, which suggests a lack of identifiable obstacles, but the clutter may still pose a risk. 
+
+Proximity: The laptop and surrounding objects appear to be at table height, with no immediate obstacles within ~1m of the drone's flight path.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,3,0.53,163.6,19356.3,19520.4,0,yolo-world,cluttered room obstacles,caution,0.2068,hazard,0,4,927,98,9.9e-05,"Description: The image shows a laptop on a table, with a cluttered background of what appears to be shelves or furniture. The CLIP label ""cluttered room obstacles"" is consistent with the visual scene. The drone's flight path at ~1m altitude appears to be blocked by the laptop and table.
+Proximity: The laptop and table are directly in front of the drone, likely within 1-2m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,object_table,caution,4,0.5,144.16,6823.1,6967.8,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,862,151,0.004851,"Description: A laptop is open on a desk/table displaying code, with shelving units and various objects visible in the background — the scene is cluttered and somewhat dim. YOLO detections are none, but the image clearly shows obstacles (furniture, shelving) in what appears to be a cluttered indoor workspace.
+
+Proximity: The laptop and desk are at table height (~0.7–0.8m), not directly blocking the ~1m flight corridor, but background shelving and clutter extend into various heights. The overall space appears navigable but tight, with objects potentially at drone altitude in the background (~2–3m away).
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,4,0.5,144.16,3135.2,3279.9,0,yolo-world,cluttered room obstacles,caution,0.2068,safe,0,4,728,78,0.00481,"Description: The image shows a laptop on a table in a cluttered room. There are various objects and furniture in the background, but the immediate flight path at ~1m altitude appears clear.
+Proximity: The laptop and table are below the drone's flight altitude, and the background objects are not directly in the flight path.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,4,0.5,144.16,3310.9,3455.6,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,3495,124,0.000599,"Description: The image shows a laptop on a table in a cluttered room with various objects in the background. There are no visible obstacles directly in the flight path at ~1m altitude, but the scene is somewhat cluttered, which aligns with the CLIP label indicating caution. There are no YOLO detections present, which suggests a lack of identifiable obstacles, but the clutter may still pose a risk. 
+
+Proximity: The laptop and surrounding objects appear to be at table height, with no immediate obstacles within ~1m of the drone's flight path.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,4,0.5,144.16,4383.5,4528.2,0,yolo-world,cluttered room obstacles,caution,0.2068,hazard,0,4,927,98,9.9e-05,"Description: The image shows a laptop on a table, with a cluttered background of what appears to be shelves or furniture. The CLIP label ""cluttered room obstacles"" is consistent with the visual scene. The drone's flight path at ~1m altitude appears to be blocked by the laptop and table.
+Proximity: The laptop and table are directly in front of the drone, likely within 1-2m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,object_table,caution,5,0.26,131.89,6857.3,6989.4,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,862,171,0.005151,"Description: The image shows a laptop on a desk/table in what appears to be a cluttered room with shelving and various objects in the background; the scene is dim and low-contrast, with objects visible at table level and background clutter, but no clear obstacle directly blocking the ~1m flight corridor ahead. YOLO detected no objects, consistent with the visual absence of an immediate blocking obstacle, while CLIP's ""cluttered room"" label reflects the background complexity.
+
+Proximity: The laptop and desk are at table height (~0.7–0.8m), so below the drone's 1m flight altitude; background shelving is several meters away. No obstacle appears directly in the 1m flight path within 2m.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,5,0.26,131.89,6548.5,6680.6,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,728,66,0.00463,"Description: The image shows a laptop on a table in a cluttered room. There are various objects in the background, but the area at ~1m altitude appears clear.
+Proximity: The laptop and table are not in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,object_table,caution,5,0.26,131.89,3482.0,3614.2,0,yolo-world,cluttered room obstacles,caution,0.2068,caution,1,5,3495,125,0.000599,"Description: The image shows a laptop on a table in a cluttered room with various objects in the background. There are no visible obstacles directly in the flight path at ~1m altitude, but the scene is somewhat cluttered, which aligns with the CLIP label indicating caution. There are no YOLO detections present, which suggests a lack of identifiable obstacles, but caution is warranted due to the cluttered environment.
+
+Proximity: The laptop and surrounding objects appear to be at table height, with no immediate obstacles within ~1m of the drone's flight path.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,object_table,caution,5,0.26,131.89,2361.5,2493.7,0,yolo-world,cluttered room obstacles,caution,0.2068,hazard,0,4,927,98,9.9e-05,"Description: The image shows a laptop on a table, with a cluttered background of what appears to be shelves or furniture. The CLIP label ""cluttered room obstacles"" is consistent with the visual scene. The drone's flight path at ~1m altitude appears to be blocked by the laptop and table.
+Proximity: The laptop and table are directly in front of the drone, likely within 1-2m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,dim_light,caution,1,0.48,148.44,7532.8,7681.7,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,900,217,0.005955,"Description: The image is heavily noisy and tinted green (likely night-vision or low-light camera), showing what appears to be a cluttered indoor room with furniture (couch/sofa on the left, a large bright object on the right that may be a chair or cushion) and walls/shelving in the background. The scene is dimly lit and visually cluttered, consistent with the CLIP label; the YOLO wall detection spanning nearly the full frame suggests obstacles fill the scene, though the est_dist of 0.3m appears to be an unreliable bounding-box artifact given the wide bbox.
+
+Proximity: Visually, large furniture objects (sofa left, chair/cushion right) appear to be within 1–2m of the drone at approximately flight altitude (~1m), potentially encroaching on the flight corridor. The scene is too cluttered and noisy to confirm a clear path forward.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,1,0.48,148.44,2761.6,2910.5,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,768,66,0.00483,"Description: The image is dim and grainy, showing a cluttered room with various objects. The scene is not fully dark, but visibility is limited.
+Proximity: Objects appear to be at a distance, not directly in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,1,0.48,148.44,3277.1,3426.0,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,3535,111,0.000597,"Description: The image appears to show a cluttered indoor space with various objects, but it is dimly lit, making it difficult to assess the exact layout. The YOLO detection indicates a wall within ~0.3m, but the visual evidence suggests that the wall is further away, as the drone is at ~1m altitude and the path appears somewhat clear. 
+Proximity: Approximately 2-3 meters to the nearest wall, with clutter visible but not directly in the flight path.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,1,0.48,148.44,7593.3,7742.2,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,hazard,0,4,973,130,0.000112,"Description: The image is very dark and grainy, making it difficult to discern details. There appears to be a large, light-colored object on the right, possibly a wall or a large plant, and other indistinct shapes in the background. YOLO detects a ""wall"" very close, which is consistent with the large object on the right. CLIP suggests a ""cluttered room obstacles"" which aligns with the general lack of clarity and potential objects.
+Proximity: Very close, likely within 0.5m, based on the large object dominating the right side of the frame.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,dim_light,caution,2,0.48,146.5,10205.2,10352.2,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,900,184,0.00546,"Description: The image is heavily noise-corrupted with a green/teal color cast (likely a low-light night-vision or sensor issue), showing what appears to be a cluttered indoor room with furniture (couch/chair on the right, shelving/objects in the background). The scene is very dim and visually difficult to interpret clearly; YOLO's wall detection at 0.3m is likely a heuristic error as the image shows a room with depth rather than an immediate wall.
+
+Proximity: Visually, the furniture (couch/chair on the right) appears to be within 1-2m, and the overall scene is cluttered with objects at various distances. The flight path at ~1m altitude is unclear due to poor image quality and potential obstacles nearby.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,2,0.48,146.5,3127.6,3274.6,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,768,69,0.004875,"Description: The image is dim and grainy, showing a cluttered room with various objects. The scene is not fully dark, but visibility is limited.
+Proximity: Objects appear to be at a distance, with no immediate obstacles directly in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,2,0.48,146.5,3299.5,3446.5,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,3535,106,0.000594,"Description: The image appears to show a cluttered indoor space with various objects, but it is dimly lit, making it difficult to assess the exact layout. The YOLO detection indicates a wall within the flight path, but the visual evidence suggests that the wall is not directly blocking the drone's path at ~1m altitude. 
+Proximity: The wall appears to be at least 0.3m away, but the overall clutter suggests potential obstacles at floor level.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,2,0.48,146.5,2361.0,2508.0,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,hazard,0,4,973,130,0.000112,"Description: The image is very dark and grainy, making it difficult to discern details. There appears to be a large, light-colored object on the right, possibly a wall or a large plant, and other indistinct shapes in the background. YOLO detects a ""wall"" very close, which is consistent with the large object on the right. CLIP suggests a ""cluttered room obstacles"" which aligns with the general lack of clarity and potential objects.
+Proximity: Very close, likely within 0.5m, based on the large object dominating the right side of the frame.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,dim_light,caution,3,0.54,145.89,7327.0,7473.4,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,900,188,0.00552,"Description: The image is heavily noisy and green-tinted (likely night-vision or low-light camera), showing what appears to be a cluttered indoor room with a sofa/couch on the left, a large cushion or chair on the right foreground, and various objects/furniture in the background. The YOLO wall detection spanning nearly the full frame with an implausible 0.3m distance estimate is clearly a heuristic error — the wall is visually in the background, not 0.3m away.
+
+Proximity: The cushion/chair on the right appears to be within 1-2m and potentially encroaching on the flight corridor at drone altitude (~1m). The overall scene is cluttered with furniture at various heights. Visibility is severely degraded by noise.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,3,0.54,145.89,2966.4,3112.8,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,768,66,0.00483,"Description: The image is dim and grainy, showing a cluttered room with various objects. The scene is not fully dark, but visibility is limited.
+Proximity: Objects appear to be at a distance, not directly in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,3,0.54,145.89,3993.6,4140.0,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,3535,106,0.000594,"Description: The image appears to show a cluttered indoor space with various objects, but it is dimly lit, making it difficult to assess the exact layout. The YOLO detection indicates a wall nearby, but the estimated distance seems inconsistent with the visual evidence, as the wall appears to be further away than 0.3m. 
+
+Proximity: The wall and other objects seem to be more than 1m away, but the overall clutter suggests caution is warranted.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,3,0.54,145.89,4008.2,4154.6,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,hazard,0,4,973,130,0.000112,"Description: The image is very dark and grainy, making it difficult to discern details. There appears to be a large, light-colored object on the right, possibly a wall or a large plant, and other indistinct shapes in the background. YOLO detects a ""wall"" very close, which is consistent with the large object on the right. CLIP suggests a ""cluttered room obstacles"" which aligns with the general lack of clarity and potential objects.
+Proximity: Very close, likely within 0.5m, based on the large object dominating the right side of the frame.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,dim_light,caution,4,0.57,153.77,7003.9,7158.2,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,900,178,0.00537,"Description: The image is extremely noisy and dark with a heavy green tint, showing what appears to be a cluttered indoor room with a large sofa/couch on the left and what looks like a chair or cushioned object on the right at approximately drone flight altitude; visibility is severely compromised by image noise/interference. The YOLO wall detection at 0.3m is likely a heuristic error as the room appears to extend further, but the poor image quality makes it impossible to confidently assess the flight corridor.
+
+Proximity: Visually, furniture appears to be within 1-2m range on both sides, with the right-side object potentially encroaching on the ~1m flight corridor; the extreme noise makes precise estimation unreliable.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,4,0.57,153.77,2967.3,3121.6,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,768,69,0.004875,"Description: The image is dim and grainy, showing a cluttered room with various objects. The scene is not fully dark, but visibility is limited.
+Proximity: Objects appear to be at a distance, with no immediate obstacles directly in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,4,0.57,153.77,3071.4,3225.7,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,3535,94,0.000587,"Description: The image appears to show a cluttered indoor space with various objects, but it is dimly lit, making it difficult to assess the exact layout. The YOLO detection indicates a wall nearby, but the estimated distance seems inconsistent with the visual evidence, as the wall appears to be further away than 0.3m. 
+Proximity: Approximately 2-3 meters from the nearest visible obstacles.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,4,0.57,153.77,2460.9,2615.2,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,hazard,0,4,973,130,0.000112,"Description: The image is very dark and grainy, making it difficult to discern details. There appears to be a large, light-colored object on the right, possibly a wall or a large plant, and other indistinct shapes in the background. YOLO detects a ""wall"" very close, which is consistent with the large object on the right. CLIP suggests a ""cluttered room obstacles"" which aligns with the general lack of clarity and potential objects.
+Proximity: Very close, likely within 0.5m, based on the large object dominating the right side of the frame.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,dim_light,caution,5,0.46,148.65,7326.6,7475.7,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,900,191,0.005565,"Description: The image is heavily noisy and tinted green (likely night-vision or low-light camera), showing what appears to be a cluttered indoor room with furniture (couch/sofa on the left, a bright object on the right that may be a pillow or chair back), and various objects in the background. The YOLO wall detection spanning nearly the full frame at an advisory 0.3m is likely a heuristic artifact of the noisy image rather than a true wall at 0.3m, but the scene is clearly cluttered and visibility is very poor.
+
+Proximity: Furniture appears to be within 1–2m based on the apparent size of the couch and objects; the flight corridor at ~1m altitude is not clearly open, with objects potentially intruding into the flight path.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,5,0.46,148.65,3274.5,3423.6,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,768,66,0.00483,"Description: The image is dim and grainy, showing a cluttered room with various objects. The scene is not fully dark, but visibility is limited.
+Proximity: Objects appear to be at a distance, not directly in the flight path at ~1m altitude.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,5,0.46,148.65,3172.0,3321.1,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,caution,1,5,3535,106,0.000594,"Description: The image appears to show a cluttered indoor space with various objects, but it is dimly lit, making it difficult to assess the exact layout. The YOLO detection indicates a wall nearby, but the estimated distance seems inconsistent with the visual evidence, as the wall appears to be further away than 0.3m. 
+
+Proximity: The wall and other objects seem to be more than 1m away, but the overall clutter suggests caution is warranted.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,5,0.46,148.65,2985.1,3134.2,1,yolo-world,uncertain (cluttered room obstacles),unknown,0.2027,hazard,0,4,973,130,0.000112,"Description: The image is very dark and grainy, making it difficult to discern details. There appears to be a large, light-colored object on the right, possibly a wall or a large plant, and other indistinct shapes in the background. YOLO detects a ""wall"" very close, which is consistent with the large object on the right. CLIP suggests a ""cluttered room obstacles"" which aligns with the general lack of clarity and potential objects.
+Proximity: Very close, likely within 0.5m, based on the large object dominating the right side of the frame.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,cluttered,caution,1,0.49,162.32,6004.9,6167.7,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,862,152,0.004866,"Description: The image shows what appears to be an indoor industrial or warehouse-like space with a conveyor belt or ramp structure in the foreground at roughly drone altitude, along with boxes and equipment creating a cluttered environment. The flight path at ~1m altitude appears partially obstructed by the dark angled structure (likely a conveyor/ramp) visible prominently in the lower-center of the frame.
+
+Proximity: The angled conveyor/ramp structure appears to be within 1-2m of the drone based on its size and clarity in the frame, potentially encroaching on the 1m flight corridor.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,cluttered,caution,1,0.49,162.32,2832.2,2995.0,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,728,66,0.00463,"Description: The image shows a cluttered room with various objects on a table or shelf. There are no clear obstacles directly in the flight path at the drone's altitude of ~1m.
+Proximity: Objects are at table height and not in the direct flight path.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,1,0.49,162.32,2866.6,3029.4,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,3495,96,0.000582,"Description: The image shows a cluttered indoor environment with various objects, including a stapler and a box, on a table. The CLIP label indicates a cluttered room, which aligns with the visual assessment, but there are no YOLO detections present. 
+Proximity: The closest objects appear to be within 1-2 meters, but they are not directly in the flight path at 1 meter altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,1,0.49,162.32,7685.1,7847.9,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,927,113,0.000103,"Description: The image shows a cluttered scene with various objects on what appears to be a table or counter. A large white object is prominent on the left, and other items like a box, a stapler-like object, and a white container are visible. The CLIP label ""cluttered room obstacles"" is consistent with the visual evidence.
+Proximity: The objects are very close, likely within 1 meter of the drone, and appear to be directly in the flight path at ~1m altitude.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,2,0.48,142.24,5386.2,5528.9,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,862,141,0.004701,"Description: The image shows an indoor industrial or warehouse-like space with a conveyor belt or ramp structure in the foreground, a white container/bin to the right, and cluttered shelving/equipment in the background. The scene is somewhat dim and the foreground structures appear to be at or near drone flight altitude (~1m), partially obstructing the direct path ahead.
+
+Proximity: The conveyor/ramp structure appears to be within 1-2m of the drone based on its apparent size and position in frame, posing a potential obstruction at flight altitude.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,cluttered,caution,2,0.48,142.24,3084.6,3227.3,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,728,62,0.00457,"Description: The image shows a cluttered room with various objects on a table or shelf. There are no clear obstacles directly in the flight path at ~1m altitude.
+Proximity: Objects are at table height and not in the immediate flight path.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,2,0.48,142.24,3260.3,3403.0,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,3495,98,0.000583,"Description: The image shows a cluttered indoor environment with various objects, including a stapler and a box, on a table. The YOLO detection indicates no obstacles, but the CLIP label suggests a cluttered room, which aligns with the visual assessment of the scene. 
+Proximity: The closest objects appear to be within 1-2 meters, but they are not directly in the flight path at 1 meter altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,2,0.48,142.24,5339.5,5482.2,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,927,113,0.000103,"Description: The image shows a cluttered scene with various objects on what appears to be a table or counter. A large white object is prominent on the left, and other items like a box, a stapler-like object, and a white container are visible. The CLIP label ""cluttered room obstacles"" is consistent with the visual evidence.
+Proximity: The objects are very close, likely within 1 meter of the drone, and appear to be directly in the flight path at ~1m altitude.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,3,0.39,146.52,4935.1,5082.0,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,862,127,0.004491,"Description: The image shows what appears to be an industrial or warehouse interior with a conveyor belt or ramp structure in the foreground at roughly drone altitude (~1m), along with boxes and equipment cluttering the immediate flight path. The scene is somewhat dim and low-resolution, with objects directly ahead that could intersect the 1m flight corridor.
+
+Proximity: The conveyor/ramp structure and associated clutter appear to be within 1-2m directly ahead, potentially blocking the flight path at drone altitude.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,cluttered,caution,3,0.39,146.52,2589.5,2736.4,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,728,69,0.004675,"Description: The image shows a cluttered room with various objects on a table or shelf. There are no clear obstacles directly in the flight path at the drone's altitude of ~1m.
+Proximity: Objects are at table height and do not appear to block the drone's path.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,3,0.39,146.52,3071.7,3218.6,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,3495,98,0.000583,"Description: The image shows a cluttered indoor environment with various objects, including a stapler and a box, visible on a table. The YOLO detection indicates no obstacles, but the CLIP label suggests a cluttered room, which aligns with the visual assessment of the scene. 
+Proximity: The nearest objects appear to be within 1-2 meters, but they are not blocking the flight path at ~1m altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,3,0.39,146.52,3997.6,4144.5,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,927,110,0.000103,"Description: The image shows a cluttered scene with various objects on what appears to be a table or counter. A large white object is prominent on the left, and other items like a box, a stapler, and a white container are visible. The CLIP label ""cluttered room obstacles"" is consistent with the visual evidence. The flight path at ~1m altitude appears to be blocked by the white object and other items.
+Proximity: Very close, within 1m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,cluttered,caution,4,0.44,163.56,5265.2,5429.2,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,862,141,0.004701,"Description: The image shows a cluttered indoor environment with what appears to be a dark conveyor belt or ramp structure angled across the lower-left of the frame, along with boxes and equipment at varying heights; the scene is partially dim and visually busy with obstacles in the foreground at or near drone altitude (~1m).
+
+Proximity: The dark angled structure (conveyor/ramp) appears to be within 1-2m and is positioned at a height that could intersect with the drone's ~1m flight corridor, posing a potential obstruction directly ahead.
+
+Risk: hazard
+
+Pilot suggested action: PITCH_BACK",
+gpt4o,cluttered,caution,4,0.44,163.56,2701.6,2865.6,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,728,66,0.00463,"Description: The image shows a cluttered room with various objects on a table or shelf. There are no clear obstacles directly in the flight path at the drone's altitude of ~1m.
+Proximity: Objects are at table height and not in the direct flight path.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,4,0.44,163.56,3031.1,3195.1,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,3495,98,0.000583,"Description: The image shows a cluttered indoor environment with various objects, including a stapler and a box, on a table. The YOLO detection indicates no obstacles, but the CLIP label suggests a cluttered room, which aligns with the visual assessment of the scene. 
+Proximity: The closest objects appear to be within 1-2 meters, but they are not directly in the flight path at 1 meter altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,4,0.44,163.56,5567.8,5731.8,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,927,113,0.000103,"Description: The image shows a cluttered scene with various objects on what appears to be a table or counter. A large white object is prominent on the left, and other items like a box, a stapler-like object, and a white container are visible. The CLIP label ""cluttered room obstacles"" is consistent with the visual evidence.
+Proximity: The objects are very close, likely within 1 meter of the drone, and appear to be directly in the flight path at ~1m altitude.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,5,0.54,146.11,4944.0,5090.6,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,862,128,0.004506,"Description: The scene shows an indoor industrial or warehouse-like space with a conveyor belt or ramp structure on the left, a large white container/tub on the right, and cluttered equipment at roughly drone flight altitude (~1m). The flight path ahead appears partially obstructed by the white container and machinery components.
+
+Proximity: The white container and conveyor/ramp structure appear to be within approximately 1–1.5m of the drone, with objects directly in or very close to the 1m flight corridor.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,5,0.54,146.11,2352.2,2498.8,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,728,69,0.004675,"Description: The image shows a cluttered room with various objects on a table or shelf. There are no clear obstacles directly in the flight path at the drone's altitude of ~1m.
+Proximity: Objects are at table height and do not appear to block the drone's path.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,5,0.54,146.11,3071.7,3218.3,0,yolo-world,cluttered room obstacles,caution,0.2044,caution,1,5,3495,96,0.000582,"Description: The image shows a cluttered indoor environment with various objects, including a stapler and a box, on a table. The CLIP label indicates a cluttered room, which aligns with the visual assessment, but there are no YOLO detections present. 
+Proximity: The closest objects appear to be within 1-2 meters, but they are not directly in the flight path at 1 meter altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,5,0.54,146.11,2665.5,2812.2,0,yolo-world,cluttered room obstacles,caution,0.2044,hazard,0,4,927,110,0.000103,"Description: The image shows a cluttered scene with various objects on what appears to be a table or counter. A large white object is prominent on the left, and other items like a box, a stapler, and a white container are visible. The CLIP label ""cluttered room obstacles"" is consistent with the visual evidence. The flight path at ~1m altitude appears to be blocked by the white object and other items.
+Proximity: Very close, within 1m.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,door_open,safe,1,0.45,167.21,5975.8,6143.5,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,897,154,0.005001,"Description: The image shows a large industrial or commercial interior space with glass partitions/windows and metal framing in the foreground, with an open room visible beyond — ceiling fans and shelving units are visible in the background. The YOLO-detected window at ~2.46m is consistent with the glass partition visible in the near foreground, though it appears to be a navigable glass-framed structure with open space beyond.
+
+Proximity: The glass partition/window framing is visually close (~2-3m), but the space beyond appears open and clear at ~1m drone altitude. No solid obstacles are blocking the immediate flight corridor.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,door_open,safe,1,0.45,167.21,3071.2,3238.9,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,764,57,0.004675,"Description: The image shows an open room with a glass partition or window on the right side. The path ahead appears clear at the drone's altitude.
+Proximity: The glass partition is approximately 2-3 meters away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,1,0.45,167.21,3304.7,3472.4,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,3531,80,0.000578,"Description: The image shows an open room with glass partitions and a clear path ahead. The YOLO detection indicates a window, but the estimated distance seems inaccurate as the space appears unobstructed. 
+Proximity: The nearest objects and walls are more than 2m away, and the flight path is clear at ~1m altitude.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,1,0.45,167.21,2117.1,2284.8,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,972,107,0.000105,"Description: I see an open doorway or partition on the right, leading into a larger room with what appears to be tables or equipment. The YOLO detection of ""window"" with an estimated distance of ~2.46m seems to refer to this open area, which is navigable. The CLIP label ""open room safe path"" aligns with the visual assessment.
+Proximity: The open doorway/partition is immediately to the right, but the path ahead appears clear.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,2,0.45,150.42,6352.1,6503.0,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,897,154,0.005001,"Description: The image shows a large open industrial or commercial interior space with glass partitions/windows and metal framing visible in the foreground, with an expansive open area extending well beyond. The YOLO-detected window at ~2.46m is a glass partition/structural element on the far left edge — visually it appears to be a structural wall feature, not blocking the central flight corridor at ~1m altitude.
+
+Proximity: The glass partitions are at the periphery and appear to be wall-mounted structures, not centrally obstructing the flight path. The open space ahead appears clear at drone flight altitude, extending several meters forward.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,door_open,safe,2,0.45,150.42,3233.0,3383.9,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,764,85,0.005095,"Description: The image shows an open room with a clear path at approximately 1m altitude. There is a glass partition or window on the right side, which is navigable. The room appears well-lit and uncluttered at the drone's flight level.
+Proximity: The path ahead is visually clear and open, with no immediate obstacles within 2m.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,2,0.45,150.42,3071.7,3222.6,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,3531,80,0.000578,"Description: The image shows an open room with glass partitions and a clear path ahead. The YOLO detection indicates a window, but the estimated distance seems inaccurate as the space appears unobstructed. 
+Proximity: The nearest objects and walls are more than 2m away, and the flight path is clear at ~1m altitude.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,2,0.45,150.42,354.1,505.0,1,yolo-world,open room safe path,safe,0.2052,,0,0,0,0,0.0,,502 Bad Gateway. {'message': '<!DOCTYPE html>\n<html lang=en>\n  <meta charset=u
+claude,door_open,safe,3,0.43,144.19,6307.8,6452.4,1,yolo-world,open room safe path,safe,0.2052,caution,0,4,897,149,0.004926,"Description: The image shows a large open industrial or commercial interior space with metal frame glass partitions/windows in the foreground and an open room extending beyond — the YOLO-detected ""window"" at the left edge appears to be part of a glass partition structure, and the CLIP label of ""open room safe path"" aligns with the visual. The space ahead at ~1m altitude appears largely open with structural frames but navigable corridor visible.
+
+Proximity: The glass partition frames are close (1-2m) but are to the sides/edges; the central path ahead appears open at drone flight altitude with no immediate blocking obstacle.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,door_open,safe,3,0.43,144.19,2923.3,3067.9,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,764,74,0.00493,"Description: The image shows an open room with a clear path at ~1m altitude. There is a glass partition or window on the right side, which is navigable. The room appears well-lit and uncluttered.
+Proximity: The path ahead is clear, with no obstacles within ~2m.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,3,0.43,144.19,3083.5,3228.1,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,3531,93,0.000585,"Description: The image shows an open room with glass partitions and a clear path ahead. The YOLO detection indicates a window, but the estimated distance seems inaccurate as the window is part of the navigable space. There are no visible obstacles in the flight path at ~1m altitude.  
+Proximity: The nearest objects appear to be more than 2m away, and the path is clear.  
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,3,0.43,144.19,2758.9,2903.5,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,972,107,0.000105,"Description: I see an open doorway or partition on the right, leading into a larger room with what appears to be tables or equipment. The YOLO detection of ""window"" with an estimated distance of ~2.46m seems to refer to this open area, which is navigable. The CLIP label ""open room safe path"" aligns with the visual assessment.
+Proximity: The open doorway/partition is immediately to the right, but the path ahead appears clear.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,4,0.54,154.57,6415.9,6571.0,1,yolo-world,open room safe path,safe,0.2052,caution,0,4,897,166,0.005181,"Description: The image shows a large open industrial or office space with glass partitions/windows and metal framing in the foreground, with an open room visible beyond. The YOLO-detected window at ~2.46m is a glass partition structure directly ahead, but it appears to have navigable openings or is a framed glass wall — the space beyond looks open and accessible. The CLIP label ""open room safe path"" aligns with the overall scene.
+
+Proximity: The glass partition/frame structure appears to be approximately 2-3m ahead visually, consistent with the YOLO estimate. However, the structure appears to be a framed glass partition with openings rather than a solid blocking obstacle.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,door_open,safe,4,0.54,154.57,3493.8,3648.9,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,764,74,0.00493,"Description: The image shows an open room with a clear path at ~1m altitude. There is a glass partition or window on the right side, which is navigable. The room appears well-lit and uncluttered.
+Proximity: The path ahead is clear, with no obstacles within ~2m.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,4,0.54,154.57,3347.0,3502.1,1,yolo-world,open room safe path,safe,0.2052,hazard,0,4,3531,102,0.000591,"Description: The image shows an open room with a glass partition and no visible obstacles directly in the flight path at ~1m altitude. The YOLO detection indicates a window, but the estimated distance seems inaccurate as the window is part of the navigable space. The CLIP label suggests a safe path, aligning with the visual assessment.  
+Proximity: The nearest objects appear to be more than 2m away, with no immediate hazards.  
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,4,0.54,154.57,4099.5,4254.6,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,972,107,0.000105,"Description: I see an open doorway or partition on the right, leading into a larger room with what appears to be tables or equipment. The YOLO detection of ""window"" with an estimated distance of ~2.46m seems to refer to this open area, which is navigable. The CLIP label ""open room safe path"" aligns with the visual assessment.
+Proximity: The open doorway/partition is immediately to the right, but the path ahead appears clear.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,5,0.47,161.84,6723.5,6885.8,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,897,130,0.004641,"Description: The image shows a large open industrial or office space with high ceilings, glass partitions/windows, and metal shelving/racking visible in the background. The YOLO-detected window at ~2.46m is a glass partition structure that appears navigable with open space beyond it.
+
+Proximity: The glass partitions and structural elements appear to be approximately 2-4m away visually, consistent with the YOLO estimate. The path ahead at ~1m altitude looks open through the glass partition framework.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,door_open,safe,5,0.47,161.84,3148.8,3311.1,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,764,76,0.00496,"Description: The image shows an open room with a glass partition or window on the right side. The room appears well-lit and spacious, with no immediate obstacles at the drone's flight altitude.
+Proximity: The glass partition is approximately 2-3 meters away, and there are no obstacles directly in the flight path.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,5,0.47,161.84,3275.4,3437.7,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,3531,91,0.000584,"Description: The image shows an open room with glass partitions and a clear path ahead. The YOLO detection indicates a window, but the estimated distance seems inaccurate as the window appears to be further than 2m away. There are no visible obstacles in the flight path at ~1m altitude.  
+Proximity: Approximately 2.5m to 3m from the nearest object.  
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,5,0.47,161.84,6752.9,6915.2,1,yolo-world,open room safe path,safe,0.2052,safe,1,5,972,107,0.000105,"Description: I see an open doorway or partition on the right, leading into a larger room with what appears to be tables or equipment. The YOLO detection of ""window"" with an estimated distance of 2.46m seems to refer to this open area, which is navigable. The CLIP label ""open room safe path"" aligns with the visual assessment.
+Proximity: The open doorway/partition is immediately to the right, but the path ahead appears clear.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,person_far,caution,1,0.52,145.75,6416.8,6563.1,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,936,166,0.005298,"Description: The image shows an industrial/workshop interior with a person standing centrally in the background near shelving units and machinery; the scene is somewhat dim and cluttered. YOLO reports the person at ~0.57m which contradicts the visual — the person appears to be roughly 4-6m away based on their small stature and position deep in the room.
+
+Proximity: Person is visually estimated at ~4-6m away (YOLO distance estimate is unreliable here due to bounding-box heuristics on a small, distant figure). The chair on the left is closer but appears to be at floor level off to the side, not blocking the ~1m altitude flight corridor.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,1,0.52,145.75,2864.8,3011.1,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,802,75,0.005135,"Description: The image shows a cluttered room with various objects and a person standing in the background. There is a chair to the left, and the room appears to have shelves and equipment.
+Proximity: The person appears to be more than 3 meters away based on visual assessment, despite YOLO's estimate.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,1,0.52,145.75,3275.3,3421.6,2,yolo-world,cluttered room obstacles,caution,0.2133,safe,0,4,3569,104,0.000598,"Description: The image shows a cluttered room with a person standing in the background and a chair nearby. The YOLO detection indicates the person is approximately 0.57m away, but visually they appear to be further back, likely more than 3m away, which contradicts the estimate. The scene is somewhat dimly lit but not completely dark. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gemini,person_far,caution,1,0.52,145.75,3790.9,3937.2,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,1019,81,0.000101,"Description: I see a person standing directly in front of the drone, appearing to block the path. A chair is visible to the left, below the drone's flight path. The CLIP label of ""cluttered room obstacles"" is consistent with the scene.
+Proximity: The person is very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_far,caution,2,0.48,147.77,7677.7,7825.9,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,936,184,0.005568,"Description: The image shows an industrial/workshop interior with a person standing in the center-background area near shelving/storage units, and a white plastic chair to the left foreground. The YOLO estimate of ~0.57m for the person is clearly wrong — the person appears visually to be roughly 4-6m away based on their small stature relative to the room; the chair is closer but appears to be at floor level off to the left side, not directly in the 1m flight corridor ahead.
+
+Proximity: Person visually estimated at ~4-6m (YOLO heuristic of 0.57m is inaccurate); chair is ~1-2m to the left at floor level, not blocking the central flight path at 1m altitude.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,2,0.48,147.77,2670.3,2818.6,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,802,70,0.00506,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room has various objects and furniture, creating a cluttered environment.
+Proximity: The person appears to be more than 1 meter away, despite the YOLO estimate.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,2,0.48,147.77,3124.8,3273.1,2,yolo-world,cluttered room obstacles,caution,0.2133,safe,0,4,3569,106,0.000599,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The YOLO detection indicates the person is approximately 0.57m away, but visually they appear to be further back, likely more than 3m away, which contradicts the estimate. The scene is somewhat dimly lit but not completely dark. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gemini,person_far,caution,2,0.48,147.77,2113.0,2261.2,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,1019,81,0.000101,"Description: I see a person standing directly in front of the drone, appearing to block the path. A chair is visible to the left, below the drone's flight path. The CLIP label of ""cluttered room obstacles"" is consistent with the scene.
+Proximity: The person is very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_far,caution,3,0.58,145.23,6449.3,6595.1,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,936,180,0.005508,"Description: The image shows an industrial/workshop room with a person standing in the center-background area near shelving units and machinery; the scene is somewhat dim and cluttered with equipment on both sides. YOLO reports the person at ~0.57m, but visually they appear much farther away — approximately 4-6m — making the YOLO estimate unreliable due to bounding-box heuristics on a distant subject.
+
+Proximity: The person appears visually to be approximately 4-6m away (far background), well beyond the 1m hazard threshold. The chair on the left is at floor level and not in the 1m altitude flight corridor. The path ahead at ~1m altitude appears relatively open toward the center of the room.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,3,0.58,145.23,2558.8,2704.6,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,802,63,0.004955,"Description: The image shows a cluttered room with various objects and furniture. A person is standing in the center, and a chair is visible to the left.
+Proximity: The person appears to be more than 3 meters away based on visual assessment.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,3,0.58,145.23,2969.4,3115.2,2,yolo-world,cluttered room obstacles,caution,0.2133,safe,0,4,3569,106,0.000599,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The YOLO detection indicates the person is approximately 0.57m away, but visually they appear to be further back, likely more than 3m away, which contradicts the estimate. The scene is somewhat dimly lit but not completely dark. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gemini,person_far,caution,3,0.58,145.23,3587.9,3733.7,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,1019,81,0.000101,"Description: I see a person standing directly in front of the drone, appearing to block the path. A chair is visible to the left, below the drone's flight path. The CLIP label of ""cluttered room obstacles"" is consistent with the scene.
+Proximity: The person is very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_far,caution,4,0.52,144.53,6919.5,7064.6,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,936,173,0.005403,"Description: The image shows an industrial/workshop interior with a person standing in the center-background area near what appears to be shelving units or equipment racks, and a white plastic chair visible on the left foreground. The YOLO estimate of ~0.57m for the person is clearly incorrect — visually the person appears to be approximately 4-6 meters away, standing small in the mid-to-far background.
+
+Proximity: The person is visually estimated at ~4-6m away (YOLO distance heuristic is unreliable here). The chair on the left is closer, roughly 1.5-2m, but positioned to the side and not directly in the forward flight path at ~1m altitude.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,4,0.52,144.53,2864.3,3009.4,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,802,63,0.004955,"Description: The image shows a cluttered room with various objects and furniture. A person is standing in the center, and a chair is visible to the left.
+Proximity: The person appears to be more than 3 meters away based on visual assessment.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,4,0.52,144.53,3274.8,3419.9,2,yolo-world,cluttered room obstacles,caution,0.2133,safe,0,4,3569,109,0.000601,"Description: The image shows a cluttered room with a person standing in the background and a chair nearby. The YOLO detection estimates for the person and chair suggest they are closer than they appear visually, as the person looks to be more than 3m away. The scene is somewhat cluttered but not dark or blocked. 
+
+Proximity: The person appears to be more than 3m away, and the chair is not obstructing the flight path at ~1m altitude.
+
+Risk: safe  
+Pilot suggested action: PITCH_FORWARD",
+gemini,person_far,caution,4,0.52,144.53,6364.7,6509.8,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,1019,81,0.000101,"Description: I see a person standing directly in front of the drone, appearing to block the path. A chair is visible to the left, below the drone's flight path. The CLIP label of ""cluttered room obstacles"" is consistent with the scene.
+Proximity: The person is very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,person_far,caution,5,0.59,145.01,6705.3,6850.9,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,936,157,0.005163,"Description: The image shows an indoor workshop/factory space with a person standing in the center-background area, shelving units and machinery behind them, and a plastic chair visible on the left foreground. The YOLO estimate of ~0.57m for the person is clearly wrong — the person appears visually to be approximately 4-6m away based on their small relative size and position deep in the scene.
+
+Proximity: Person is visually ~4-6m away (far background); chair is on the left side at roughly 1-2m but appears to be at floor level and off to the side, not directly in the 1m flight corridor ahead.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,5,0.59,145.01,2660.0,2805.6,2,yolo-world,cluttered room obstacles,caution,0.2133,caution,1,5,802,65,0.004985,"Description: The image shows a cluttered room with various objects and furniture. A person is standing in the background, and a chair is visible to the left.
+Proximity: The person appears to be more than 3 meters away, despite the YOLO estimate.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,5,0.59,145.01,8193.4,8339.0,2,yolo-world,cluttered room obstacles,caution,0.2133,safe,0,4,3569,99,0.000595,"Description: The image shows a cluttered room with a person standing in the background and a chair nearby. The YOLO detection indicates the person is approximately 0.57m away, but visually they appear to be further back, likely more than 3m away. The scene is somewhat cluttered but not dark or obstructed. 
+
+Proximity: The person appears to be more than 3m away based on visual assessment.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gemini,person_far,caution,5,0.59,145.01,2565.4,2711.0,2,yolo-world,cluttered room obstacles,caution,0.2133,hazard,0,4,1019,81,0.000101,"Description: I see a person standing directly in front of the drone, appearing to block the path. A chair is visible to the left, below the drone's flight path. The CLIP label of ""cluttered room obstacles"" is consistent with the scene.
+Proximity: The person is very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: PITCH_BACK",
+claude,blocked_lens,hazard,1,1.4,154.31,5372.9,5528.6,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,864,116,0.004332,"Description: The image shows what appears to be pure visual noise/static — a randomized green, blue, and red pixel pattern consistent with a blocked or malfunctioning camera lens. There is no discernible scene, and CLIP confirms uncertainty with very low confidence (0.20), suggesting the lens is fully covered or the sensor is producing garbage data.
+
+Proximity: Unable to assess — no visual scene information is available. The lens appears fully blocked, making proximity estimation impossible.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,blocked_lens,hazard,1,1.4,154.31,2866.7,3022.4,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,731,49,0.00439,"Description: The image appears to be mostly dark with a grainy texture, suggesting a possible covered or blocked lens.
+Proximity: Unable to visually estimate due to lack of visible details.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,blocked_lens,hazard,1,1.4,154.31,3172.6,3328.3,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,caution,0,4,3498,93,0.00058,"Description: The image appears to be dark and grainy, with no clear visual features identifiable. YOLO detections indicate none, and the CLIP label suggests uncertainty due to darkness or a covered lens. This aligns with the visual assessment of the image being unclear. 
+
+Proximity: The visual evidence does not provide any clear indication of nearby obstacles or persons, but the lack of visibility suggests caution is warranted.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,1,1.4,154.31,6651.9,6807.6,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,931,59,8.8e-05,"Description: The image is completely dark and obscured by visual noise, making it impossible to discern any objects or the environment. CLIP's label of ""uncertain (dark or covered lens)"" is consistent with the image.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,2,0.54,164.45,5070.9,5235.9,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,864,111,0.004257,"Description: The image shows complete visual noise/static with no discernible scene content — the lens appears fully blocked or the camera sensor is malfunctioning, producing only random pixel noise across the entire frame. CLIP's ""dark or covered lens"" label with very low confidence (0.2035) aligns with this assessment, and YOLO detected nothing meaningful.
+
+Proximity: Unable to assess — no visual information is recoverable from this frame.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,blocked_lens,hazard,2,0.54,164.45,2659.9,2824.9,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,731,49,0.00439,"Description: The image appears to be mostly dark with a grainy texture, suggesting a possible covered or blocked lens.
+Proximity: Unable to visually estimate due to lack of visible details.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,blocked_lens,hazard,2,0.54,164.45,3071.4,3236.4,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,caution,0,4,3498,95,0.000582,"Description: The image appears to be dark and grainy, with no clear visual features identifiable. YOLO detections indicate none, and the CLIP label suggests uncertainty due to darkness or a covered lens. This aligns with the visual assessment of the image being unclear. 
+
+Proximity: The visual evidence does not provide any clear indication of nearby obstacles or persons, but the darkness makes it difficult to assess the environment accurately.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,2,0.54,164.45,3587.4,3752.4,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,931,58,8.7e-05,"Description: The image is completely dark and obscured by static, making it impossible to discern any objects or the environment. CLIP's label of ""uncertain (dark or covered lens)"" is consistent with the image.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,3,0.53,146.14,5819.1,5965.8,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,864,118,0.004362,"Description: The image shows heavy visual noise/static (green, blue, red pixel interference) across the entire frame, consistent with a blocked, covered, or malfunctioning camera lens — no scene features are discernible. CLIP confirms uncertainty with a ""dark or covered lens"" label, and YOLO detected nothing, both consistent with the visual evidence.
+
+Proximity: Unable to assess — the lens appears fully obscured or the sensor is producing noise with no usable visual information.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,blocked_lens,hazard,3,0.53,146.14,3027.7,3174.4,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,731,49,0.00439,"Description: The image appears to be mostly dark with a grainy texture, suggesting a possible covered or blocked lens.
+Proximity: Unable to visually estimate due to lack of visible details.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,blocked_lens,hazard,3,0.53,146.14,2600.0,2746.7,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,caution,0,4,3498,88,0.000577,"Description: The image appears to be dark and grainy, with no clear visual features identifiable. YOLO detections indicate none, and the CLIP label suggests uncertainty due to darkness or a covered lens. This aligns with the visual assessment of the image being unclear. 
+
+Proximity: The visual evidence does not provide any identifiable objects or persons, making it difficult to estimate proximity accurately.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,3,0.53,146.14,1733.8,1880.5,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,931,58,8.7e-05,"Description: The image is completely dark and obscured by static, making it impossible to discern any objects or the environment. CLIP's label of ""uncertain (dark or covered lens)"" is consistent with the image.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,4,0.5,142.25,4662.4,4805.1,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,864,94,0.004002,"Description: The image shows pure visual noise/static with no discernible scene content — the lens appears to be fully blocked or covered, producing only random pixel patterns. CLIP's ""dark or covered lens"" label aligns with this assessment, and YOLO detected nothing.
+
+Proximity: Unable to assess — lens is fully obstructed, no visual depth information available.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,blocked_lens,hazard,4,0.5,142.25,2311.3,2454.1,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,731,49,0.00439,"Description: The image appears to be mostly dark with a grainy texture, suggesting a possible covered or blocked lens.
+Proximity: Unable to visually estimate due to lack of visible details.
+Risk: Hazard
+Pilot suggested action: PITCH_BACK",
+gpt4o_mini,blocked_lens,hazard,4,0.5,142.25,3315.2,3457.9,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,caution,0,4,3498,93,0.00058,"Description: The image appears to be dark and grainy, with no clear visual features identifiable. YOLO detections indicate none, and the CLIP label suggests uncertainty due to darkness or a covered lens. This aligns with the visual assessment of the image being unclear. 
+
+Proximity: The visual evidence does not provide any clear indication of nearby obstacles or persons, but the lack of visibility suggests caution is warranted.
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,4,0.5,142.25,1952.3,2095.1,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,931,58,8.7e-05,"Description: The image is completely dark and obscured by static, making it impossible to discern any objects or the environment. CLIP's label of ""uncertain (dark or covered lens)"" is consistent with the image.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,5,0.57,144.36,4873.9,5018.8,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,864,111,0.004257,"Description: The image shows what appears to be pure static/noise with no discernible scene content — the lens appears fully blocked or the camera feed is completely corrupted. CLIP confirms uncertainty with very low confidence (0.2035), and YOLO detects nothing. This is not a dark-but-visible scene; there is zero usable visual information.
+
+Proximity: Unable to assess — no visual data available to estimate proximity to any obstacle.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,blocked_lens,hazard,5,0.57,144.36,3068.0,3212.9,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,731,49,0.00439,"Description: The image appears to be mostly dark with a grainy texture, suggesting a possible covered or blocked lens.
+Proximity: Unable to visually estimate due to lack of clear visual information.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,5,0.57,144.36,3786.9,3931.8,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,caution,0,4,3498,88,0.000577,"Description: The image appears to be dark and grainy, with no clear visual features identifiable. YOLO detections indicate none, and the CLIP label suggests uncertainty due to darkness or a covered lens. This aligns with the visual assessment of the image being unclear. 
+
+Proximity: Visual evidence suggests that the drone is likely in a dark environment, but no immediate obstacles are visible.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,5,0.57,144.36,1753.0,1897.9,0,yolo-world,uncertain (dark or covered lens),unknown,0.2035,hazard,1,5,931,58,8.7e-05,"Description: The image is completely dark and obscured by static, making it impossible to discern any objects or the environment. CLIP's label of ""uncertain (dark or covered lens)"" is consistent with the image.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: HOVER",

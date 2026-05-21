@@ -1,290 +1,305 @@
 """
-EXP-G2: Event-Triggered vs Periodic Claude Activation
-======================================================
+EXP-G2: Trigger Strategy — Scheduled-Only vs Scheduled+YOLO-Hybrid
+====================================================================
 Goal:
-    Run a 3-minute simulated hover mission under two Claude wake strategies:
-    (a) Periodic   : Claude activates every 10 seconds regardless of scene change
-    (b) Event-triggered: Claude activates only when YOLO raises a proximity/change flag
+    YOLO runs on every frame in both conditions. Compare two LLM trigger
+    strategies on a simulated 10-frame mission sequence:
 
-    N=5 runs per strategy. Proves event-triggered strategy reduces API cost and
-    latency while maintaining equivalent safety (stop accuracy).
+    Condition A — scheduled:
+        LLM called every SCHEDULE_INTERVAL frames only.
+        YOLO detects hazards but does NOT trigger extra LLM calls.
+        Hazards appearing between ticks are missed until next tick.
 
-Metrics:
-    - api_calls_total  : total Claude API calls over 3-min mission (Bootstrap CI)
-    - cost_usd         : total USD cost per mission (Bootstrap CI)
-    - stop_accuracy    : fraction of injected hazards caught (Wilson CI)
-    - mean_response_ms : mean time from hazard inject to stop command (Bootstrap CI)
-    - missed_hazards   : count of hazards not stopped within 5s window
+    Condition B — hybrid:
+        LLM called on the same schedule PLUS immediately on first YOLO
+        hazard detection (with cooldown to avoid hammering).
+        Catches hazards the moment YOLO sees them.
 
-Paper References:
-    - ReAct (Yao et al. 2022): event-driven outer loop recommended
-    - Redmon & Farhadi 2018 (YOLOv3): YOLO as event gate
-    - Vemprala et al. 2023: API call reduction directly cuts operational cost
+    Sequence (10 frames):
+        Frames 1-2  : door_open (safe)   — baseline
+        Frames 3-7  : person_near (hazard) ← hazard window
+        Frames 8-10 : door_open (safe)   — hazard cleared
+
+    Schedule interval = 5 frames → ticks at frames 1 and 6.
+    Hazard starts at frame 3 (between ticks 1 and 6).
+
+    Scheduled: first LLM call during hazard window = frame 6 (3 frames late).
+    Hybrid:    YOLO triggers LLM at frame 3 immediately.
+
+Models:  claude, gpt4o, gpt4o_mini, gemini
+N runs:  5 sequences per condition per model
+Total:   2 conditions × 4 models × 5 runs × ~3 LLM calls = ~120 LLM calls (~15 min)
+
+Output: Image verbalization experiments/results/G2_runs_<ts>.csv
+        Image verbalization experiments/results/G2_summary_<ts>.csv
 """
 
-import os, sys, time, csv, math, pathlib, random
+import sys, pathlib, datetime, time
 import numpy as np
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from d_series_agent import DAgent
+REPO_ROOT = pathlib.Path(__file__).parent.parent
+VIZ_DIR   = REPO_ROOT / "Image verbalization experiments"
+EXP_DIR   = pathlib.Path(__file__).parent
+sys.path.insert(0, str(VIZ_DIR))
+sys.path.insert(0, str(EXP_DIR))
 
-OUT_DIR = pathlib.Path(__file__).parent / "results"
-OUT_DIR.mkdir(exist_ok=True)
+from verbalization_utils import (  # noqa: E402
+    call_vision_llm, score_verbalization,
+    bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
+)
+from enhanced_yolo_pipeline import (  # noqa: E402
+    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
+    enhanced_rule_risk, COMBINED_PROMPT_TEMPLATE
+)
 
-N_RUNS          = 5
-MISSION_SECS    = 180        # 3-minute simulated mission
-PERIODIC_INTERVAL_S = 10.0  # Claude wakes every 10 s in periodic mode
-SIM_SPEED       = 50.0       # simulation runs 50× real-time
-HAZARD_DIST_M   = 0.18       # injected obstacle distance
-HAZARD_WINDOW_S = 5.0        # seconds after inject to catch hazard (sim time)
-SAFE_DIST_M     = 2.0        # background (no hazard)
+N_RUNS            = 5
+MODELS            = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
+SCHEDULE_INTERVAL = 5          # LLM called every 5 frames
+YOLO_COOLDOWN     = 3          # min frames between YOLO-triggered calls
+HAZARD_FRAME_RANGE = (3, 7)    # frames where hazard is active (inclusive)
 
-PAPER_REFS = {
-    "ReAct":      "Yao et al. 2022 — ReAct: Synergizing Reasoning and Acting in Language Models",
-    "YOLO":       "Redmon & Farhadi 2018 — YOLOv3: An Incremental Improvement",
-    "Vemprala":   "Vemprala et al. 2023 — ChatGPT for Robotics: Design Principles and Model Abilities",
-}
+# 10-frame sequence: door_open×2, person_near×5, door_open×3
+# run02-run05 used (run01 buggy); run02 repeated for seq5
+SEQ_TO_RUN = {1: 2, 2: 3, 3: 4, 4: 5, 5: 2}
 
-# ── Statistics helpers ─────────────────────────────────────────────────────────
-def wilson_ci(k, n, z=1.96):
-    if n == 0: return 0.0, 0.0, 0.0
-    p = k / n
-    denom = 1 + z**2/n
-    c = (p + z**2/(2*n)) / denom
-    m = (z * math.sqrt(p*(1-p)/n + z**2/(4*n**2))) / denom
-    return round(p,4), round(max(0,c-m),4), round(min(1,c+m),4)
+SEQUENCE = [
+    (1,  "door_open",   "safe"),
+    (2,  "door_open",   "safe"),
+    (3,  "person_near", "hazard"),   # ← hazard starts
+    (4,  "person_near", "hazard"),
+    (5,  "person_near", "hazard"),
+    (6,  "person_near", "hazard"),
+    (7,  "person_near", "hazard"),   # ← hazard ends
+    (8,  "door_open",   "safe"),
+    (9,  "door_open",   "safe"),
+    (10, "door_open",   "safe"),
+]
 
-def bootstrap_ci(data, stat=np.mean, n_boot=2000, alpha=0.05):
-    if len(data) < 2:
-        v = float(stat(data)) if data else float("nan")
-        return v, v, v
-    arr = np.array(data, dtype=float)
-    boots = [stat(np.random.choice(arr, size=len(arr), replace=True)) for _ in range(n_boot)]
-    lo, hi = np.percentile(boots, [100*alpha/2, 100*(1-alpha/2)])
-    return round(float(stat(arr)),4), round(float(lo),4), round(float(hi),4)
 
-# ── Hazard schedule (fixed seed for reproducibility) ──────────────────────────
-def make_hazard_schedule(mission_secs: float, rng: random.Random) -> list:
-    """Return sorted list of sim-time seconds at which hazards are injected."""
-    n = int(mission_secs / 30)   # one hazard roughly every 30 s
-    times = sorted(rng.uniform(5, mission_secs - 10) for _ in range(n))
-    return times
 
-# ── Single run ─────────────────────────────────────────────────────────────────
-def run_once(run_idx: int, strategy: str) -> dict:
+def get_frame(scene_label: str, run_n: int) -> bytes:
+    path = FRAMES_DIR / f"{scene_label}_run{run_n:02d}_real.jpg"
+    if path.exists():
+        return path.read_bytes()
+    path = FRAMES_DIR / f"{scene_label}_run03_real.jpg"
+    return path.read_bytes()
+
+
+def is_yolo_hazard(yolo_meta: str, clip_risk: str) -> bool:
+    """True if enhanced rule risk is hazard or caution (not safe).
+    Uses enhanced_rule_risk so door/window detections are not treated as hazards."""
+    return enhanced_rule_risk(yolo_meta, clip_risk) in ("hazard", "caution")
+
+
+def run_sequence(strategy: str, model: str, seq: int,
+                 yolo_model, yolo_type, clip_model, clip_preprocess,
+                 clip_tokenizer) -> tuple[dict, list]:
     """
-    Simulate a MISSION_SECS hover, injecting hazards at scheduled times.
-    strategy: 'periodic' | 'event'
+    Simulate one 10-frame mission sequence.
+    Returns (per-sequence stats, per-call rows with reply).
     """
-    rng = random.Random(run_idx * 7 + 42)
-    hazard_times = make_hazard_schedule(MISSION_SECS, rng)
-    n_hazards = len(hazard_times)
+    run_n = SEQ_TO_RUN[seq]
+    llm_calls       = 0
+    scheduled_calls = 0
+    yolo_calls      = 0
+    total_cost      = 0.0
+    hazard_caught   = False
+    hazard_catch_frame = None
+    last_yolo_call_frame = -YOLO_COOLDOWN
+    call_rows       = []
 
-    api_calls   = 0
-    total_cost  = 0.0
-    stop_times  = []   # (sim_t, response_ms) for each caught hazard
-    missed      = 0
+    for frame_num, scene_label, expected_risk in SEQUENCE:
+        jpeg     = get_frame(scene_label, run_n)
+        tier2    = enhanced_yolo_infer(yolo_model, yolo_type,
+                                       clip_model, clip_preprocess,
+                                       clip_tokenizer, jpeg)
+        yolo_meta = tier2["yolo_meta"]
+        yolo_flag = is_yolo_hazard(yolo_meta, tier2["clip_risk"])
+        in_hazard = HAZARD_FRAME_RANGE[0] <= frame_num <= HAZARD_FRAME_RANGE[1]
 
-    sim_t      = 0.0
-    dt         = 1.0 / SIM_SPEED  # wall-clock seconds per sim-second
-    next_periodic = PERIODIC_INTERVAL_S
+        should_call  = False
+        call_source  = None
 
-    active_hazard_t = None  # sim_t when current hazard was injected
-    hazard_queue    = list(hazard_times)
+        # Scheduled tick
+        if (frame_num - 1) % SCHEDULE_INTERVAL == 0:
+            should_call = True
+            call_source = "scheduled"
 
-    agent = DAgent(session_id=f"G2_{strategy}_r{run_idx}")
+        # YOLO interrupt (hybrid only)
+        if (strategy == "hybrid"
+                and not should_call
+                and yolo_flag
+                and not hazard_caught
+                and (frame_num - last_yolo_call_frame) >= YOLO_COOLDOWN):
+            should_call = True
+            call_source = "yolo"
 
-    wall_start = time.perf_counter()
-
-    while sim_t < MISSION_SECS:
-        # Inject hazard?
-        if hazard_queue and sim_t >= hazard_queue[0]:
-            active_hazard_t = hazard_queue.pop(0)
-            agent.scene_sim.set_obstacle_distance(HAZARD_DIST_M)
-
-        # Should Claude activate?
-        yolo_flag = (active_hazard_t is not None)   # YOLO detects close obstacle
-        should_activate = False
-
-        if strategy == "periodic":
-            if sim_t >= next_periodic:
-                should_activate = True
-                next_periodic += PERIODIC_INTERVAL_S
-        else:  # event-triggered
-            if yolo_flag:
-                should_activate = True
-
-        if should_activate:
-            call_wall_t0 = time.perf_counter()
-            prompt = (
-                "Check current obstacle distance. "
-                "If obstacle < 25 cm, issue stop_movement immediately. "
-                "Otherwise confirm hover is normal."
+        if should_call:
+            prompt = COMBINED_PROMPT_TEMPLATE.format(
+                yolo_meta  = yolo_meta,
+                clip_label = tier2["clip_label"],
+                clip_conf  = tier2["clip_conf"],
+                clip_risk  = tier2["clip_risk"],
             )
-            reply, stats, trace = agent.run_agent_loop(prompt)
-            call_ms = (time.perf_counter() - call_wall_t0) * 1000.0
+            res    = call_vision_llm(jpeg, prompt, model=model,
+                                     max_tokens=300, temperature=0.0)
+            scores = score_verbalization(res["reply"], expected_risk)
+            llm_calls  += 1
+            total_cost += res["cost_usd"]
 
-            api_calls  += stats.get("api_calls", 1)
-            total_cost += stats.get("cost_usd", 0.0)
+            if call_source == "scheduled":
+                scheduled_calls += 1
+            else:
+                yolo_calls      += 1
+                last_yolo_call_frame = frame_num
 
-            stop_issued = any(
-                step.get("name") == "stop_movement"
-                for step in trace if step.get("role") == "tool_use"
-            ) or "stop" in reply.lower()
+            # Did this call catch the hazard?
+            stop_or_hazard = (scores["detected_risk"] in ("hazard", "caution")
+                               or "hover" in res["reply"].lower()
+                               or "pitch_back" in res["reply"].lower()
+                               or "stop" in res["reply"].lower())
+            if in_hazard and not hazard_caught and stop_or_hazard:
+                hazard_caught      = True
+                hazard_catch_frame = frame_num
 
-            if active_hazard_t is not None and stop_issued:
-                response_sim_s = sim_t - active_hazard_t
-                if response_sim_s <= HAZARD_WINDOW_S:
-                    stop_times.append(call_ms)
-                    active_hazard_t = None
-                    agent.scene_sim.set_obstacle_distance(SAFE_DIST_M)
+            call_rows.append({
+                "strategy":      strategy,
+                "model":         model,
+                "seq":           seq,
+                "frame_num":     frame_num,
+                "scene_label":   scene_label,
+                "expected_risk": expected_risk,
+                "call_source":   call_source,
+                "in_hazard":     int(in_hazard),
+                "yolo_meta":     yolo_meta,
+                "clip_label":    tier2["clip_label"],
+                "clip_risk":     tier2["clip_risk"],
+                "clip_conf":     tier2["clip_conf"],
+                "detected_risk": scores["detected_risk"] or "",
+                "risk_correct":  scores["s3_risk"],
+                "latency_ms":    res["latency_ms"],
+                "cost_usd":      res["cost_usd"],
+                "reply":         res["reply"],
+                "error":         res["error"][:80] if res["error"] else "",
+            })
 
-        # Advance sim time
-        sim_t += 1.0   # 1 sim-second per tick
-        time.sleep(dt)
+            time.sleep(0.2)
 
-        # Timeout check: hazard not caught within window
-        if active_hazard_t is not None and (sim_t - active_hazard_t) > HAZARD_WINDOW_S:
-            missed += 1
-            active_hazard_t = None
-            agent.scene_sim.set_obstacle_distance(SAFE_DIST_M)
-
-    caught = len(stop_times)
-    mean_resp = float(np.mean(stop_times)) if stop_times else float("nan")
-
-    return {
-        "run":           run_idx,
-        "strategy":      strategy,
-        "api_calls":     api_calls,
-        "cost_usd":      round(total_cost, 7),
-        "n_hazards":     n_hazards,
-        "caught":        caught,
-        "missed":        missed,
-        "mean_resp_ms":  round(mean_resp, 2),
-        "wall_s":        round(time.perf_counter() - wall_start, 2),
+    seq_stats = {
+        "strategy":          strategy,
+        "model":             model,
+        "seq":               seq,
+        "llm_calls":         llm_calls,
+        "scheduled_calls":   scheduled_calls,
+        "yolo_calls":        yolo_calls,
+        "cost_usd":          round(total_cost, 7),
+        "hazard_caught":     int(hazard_caught),
+        "catch_frame":       hazard_catch_frame if hazard_caught else -1,
+        "frames_late":       (hazard_catch_frame - HAZARD_FRAME_RANGE[0])
+                             if hazard_caught else -1,
     }
+    return seq_stats, call_rows
 
-# ── Main ───────────────────────────────────────────────────────────────────────
+
 def main():
-    print("=" * 60)
-    print("EXP-G2: Event-Triggered vs Periodic Claude Activation")
-    print(f"N_RUNS={N_RUNS} per strategy, MISSION={MISSION_SECS}s sim")
-    print("=" * 60)
+    ts    = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    total = 2 * len(MODELS) * N_RUNS
+    print("=" * 65)
+    print("EXP-G2: Scheduled vs Hybrid YOLO Trigger")
+    print(f"Sequence: safe×2 → hazard×5 → safe×3  (10 frames)")
+    print(f"Schedule every {SCHEDULE_INTERVAL} frames  |  YOLO cooldown {YOLO_COOLDOWN} frames")
+    print(f"Conditions: scheduled | hybrid  |  Models={MODELS}")
+    print(f"Total runs: {total}  (~15 min)")
+    print("=" * 65)
 
-    all_rows = []
-    for strategy in ("periodic", "event"):
-        print(f"\n--- {strategy.upper()} strategy ---")
-        for r in range(1, N_RUNS + 1):
-            row = run_once(r, strategy)
-            all_rows.append(row)
-            print(f"  run={r} calls={row['api_calls']} cost=${row['cost_usd']:.6f} "
-                  f"caught={row['caught']}/{row['n_hazards']} missed={row['missed']}")
+    print("\nLoading enhanced YOLO tier…")
+    yolo_model, yolo_type = load_enhanced_yolo()
+    print("Loading CLIP scene screener…")
+    clip_model, clip_preprocess, clip_tokenizer = load_clip()
 
-    # ── Save CSV ───────────────────────────────────────────────────────────────
-    runs_csv = OUT_DIR / "G2_runs.csv"
-    fields   = ["run","strategy","api_calls","cost_usd","n_hazards","caught","missed",
-                "mean_resp_ms","wall_s"]
-    with open(runs_csv, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
-        w.writeheader()
-        w.writerows(all_rows)
-    print(f"\nPer-run data → {runs_csv}")
+    all_rows  = []
+    all_calls = []
 
-    # ── Stats per strategy ─────────────────────────────────────────────────────
-    summary_csv = OUT_DIR / "G2_summary.csv"
-    with open(summary_csv, "w", newline="") as f:
-        cw = csv.writer(f)
-        cw.writerow(["strategy","metric","value","ci_lo","ci_hi","note"])
+    for strategy in ("scheduled", "hybrid"):
+        print(f"\n{'='*55}")
+        print(f"=== Strategy: {strategy} ===")
+        print(f"{'='*55}")
+        for model in MODELS:
+            print(f"\n  ── Model: {model} ──")
+            for seq in range(1, N_RUNS + 1):
+                row, call_rows = run_sequence(
+                    strategy, model, seq,
+                    yolo_model, yolo_type,
+                    clip_model, clip_preprocess, clip_tokenizer
+                )
+                all_rows.append(row)
+                all_calls.extend(call_rows)
+                status = "✓ CAUGHT" if row["hazard_caught"] else "✗ MISSED"
+                print(f"    seq={seq}  {status}  "
+                      f"catch_frame={row['catch_frame']}  "
+                      f"frames_late={row['frames_late']}  "
+                      f"llm_calls={row['llm_calls']}  "
+                      f"cost=${row['cost_usd']:.5f}")
 
-        for strat in ("periodic", "event"):
-            rows = [r for r in all_rows if r["strategy"] == strat]
-            ac_m, ac_lo, ac_hi = bootstrap_ci([r["api_calls"]    for r in rows])
-            co_m, co_lo, co_hi = bootstrap_ci([r["cost_usd"]     for r in rows])
-            mr_m, mr_lo, mr_hi = bootstrap_ci([r["mean_resp_ms"] for r in rows
-                                               if not math.isnan(r["mean_resp_ms"])])
-            kc = sum(r["caught"]   for r in rows)
-            nh = sum(r["n_hazards"]for r in rows)
-            sa, sa_lo, sa_hi = wilson_ci(kc, nh)
+    # ── Save runs (sequence-level)
+    fields = ["strategy","model","seq","llm_calls","scheduled_calls","yolo_calls",
+              "cost_usd","hazard_caught","catch_frame","frames_late"]
+    runs_csv = RESULTS_DIR / f"G2_runs_{ts}.csv"
+    write_csv(runs_csv, all_rows, fields)
 
-            cw.writerow([strat,"api_calls",    ac_m, ac_lo, ac_hi, "Bootstrap 95%"])
-            cw.writerow([strat,"cost_usd",     co_m, co_lo, co_hi, "Bootstrap 95%"])
-            cw.writerow([strat,"stop_accuracy",sa,   sa_lo, sa_hi, "Wilson 95%"])
-            cw.writerow([strat,"mean_resp_ms", mr_m, mr_lo, mr_hi, "Bootstrap 95%"])
+    # ── Save calls (per-LLM-call with reply)
+    call_fields = ["strategy","model","seq","frame_num","scene_label","expected_risk",
+                   "call_source","in_hazard","yolo_meta","clip_label","clip_risk",
+                   "clip_conf","detected_risk","risk_correct",
+                   "latency_ms","cost_usd","reply","error"]
+    calls_csv = RESULTS_DIR / f"G2_calls_{ts}.csv"
+    write_csv(calls_csv, all_calls, call_fields)
+    print(f"Calls   → {calls_csv}")
 
-        for k, ref in PAPER_REFS.items():
-            cw.writerow(["", f"ref_{k}", ref, "", "", ""])
+    # ── Summary
+    print(f"\n── G2 Summary ──────────────────────────────────────────────────")
+    print(f"  {'strategy':12s}  {'model':12s}  {'catch_rate':>10s}  "
+          f"{'frames_late':>11s}  {'llm_calls':>9s}  {'cost':>9s}")
+    print("-" * 72)
 
-    print(f"Summary      → {summary_csv}")
+    summary_rows = []
+    for strategy in ("scheduled", "hybrid"):
+        for model in MODELS:
+            hr = [r for r in all_rows
+                  if r["strategy"] == strategy and r["model"] == model]
+            if not hr:
+                continue
 
-    # ── Plot ───────────────────────────────────────────────────────────────────
-    try:
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
+            catch_rate, cr_lo, cr_hi = wilson_ci(
+                sum(r["hazard_caught"] for r in hr), len(hr))
+            late_data = [r["frames_late"] for r in hr if r["frames_late"] >= 0]
+            late_m, _, _  = bootstrap_ci(late_data) if late_data else (float("nan"),)*3
+            calls_m, _, _ = bootstrap_ci([r["llm_calls"] for r in hr])
+            cost_m, _, _  = bootstrap_ci([r["cost_usd"]  for r in hr])
 
-        periodic_rows = [r for r in all_rows if r["strategy"] == "periodic"]
-        event_rows    = [r for r in all_rows if r["strategy"] == "event"]
+            print(f"  {strategy:12s}  {model:12s}  "
+                  f"{catch_rate:.3f}[{cr_lo:.3f},{cr_hi:.3f}]  "
+                  f"late={late_m:.1f}fr    "
+                  f"calls={calls_m:.1f}    ${cost_m:.5f}")
 
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+            summary_rows.append({
+                "strategy": strategy, "model": model, "n_runs": len(hr),
+                "catch_rate": round(catch_rate, 4),
+                "cr_lo": round(cr_lo, 4), "cr_hi": round(cr_hi, 4),
+                "mean_frames_late": round(late_m, 2) if late_data else float("nan"),
+                "mean_llm_calls": round(calls_m, 2),
+                "mean_cost_usd": round(cost_m, 6),
+            })
 
-        # API calls comparison
-        ax = axes[0]
-        p_calls = [r["api_calls"] for r in periodic_rows]
-        e_calls = [r["api_calls"] for r in event_rows]
-        ax.boxplot([p_calls, e_calls], labels=["Periodic", "Event-triggered"])
-        ax.set_ylabel("API calls per mission")
-        ax.set_title("G2: API Calls per Strategy")
+    summary_csv = RESULTS_DIR / f"G2_summary_{ts}.csv"
+    write_csv(summary_csv, summary_rows,
+              ["strategy","model","n_runs","catch_rate","cr_lo","cr_hi",
+               "mean_frames_late","mean_llm_calls","mean_cost_usd"])
 
-        # Cost comparison
-        ax2 = axes[1]
-        p_cost = [r["cost_usd"] for r in periodic_rows]
-        e_cost = [r["cost_usd"] for r in event_rows]
-        ax2.boxplot([p_cost, e_cost], labels=["Periodic", "Event-triggered"])
-        ax2.set_ylabel("Cost per mission (USD)")
-        ax2.set_title("G2: Cost per Strategy")
+    print(f"\nRuns    → {runs_csv}")
+    print(f"Summary → {summary_csv}")
+    print(f"[G2] Done — {len(all_rows)} runs recorded.")
 
-        # Accuracy comparison
-        ax3 = axes[2]
-        cats = ["Periodic", "Event-triggered"]
-        for idx, (strat, rows) in enumerate([("periodic", periodic_rows), ("event", event_rows)]):
-            kc = sum(r["caught"] for r in rows)
-            nh = sum(r["n_hazards"] for r in rows)
-            acc, lo, hi = wilson_ci(kc, nh)
-            ax3.bar(idx, acc, color=["#e74c3c","#2ecc71"][idx],
-                    label=f"{strat} {acc:.3f}")
-            ax3.errorbar(idx, acc, yerr=[[acc-lo],[hi-acc]], fmt="none",
-                         color="black", capsize=6)
-        ax3.set_xticks([0,1])
-        ax3.set_xticklabels(cats)
-        ax3.set_ylim(0, 1.1)
-        ax3.set_ylabel("Stop accuracy")
-        ax3.set_title("G2: Hazard Stop Accuracy")
-        ax3.legend(fontsize=8)
-
-        fig.suptitle(
-            "EXP-G2 Event-Triggered vs Periodic Claude Activation\n"
-            "Event strategy: fewer API calls, lower cost, equivalent safety\n"
-            "ReAct (Yao 2022), YOLO gate (Redmon 2018), Vemprala 2023",
-            fontsize=9
-        )
-        fig.tight_layout()
-        png = OUT_DIR / "G2_event_vs_periodic.png"
-        fig.savefig(png, dpi=150)
-        plt.close(fig)
-        print(f"Plot  → {png}")
-    except Exception as e:
-        print(f"[plot skipped] {e}")
-
-    # ── Console summary ────────────────────────────────────────────────────────
-    print(f"\n── G2 Summary ───────────────────────────────────────────────────")
-    for strat in ("periodic", "event"):
-        rows = [r for r in all_rows if r["strategy"] == strat]
-        ac_m,_,_ = bootstrap_ci([r["api_calls"] for r in rows])
-        co_m,_,_ = bootstrap_ci([r["cost_usd"]  for r in rows])
-        kc = sum(r["caught"] for r in rows)
-        nh = sum(r["n_hazards"] for r in rows)
-        sa,_,_ = wilson_ci(kc, nh)
-        print(f"  {strat:10s}: calls={ac_m:.1f}  cost=${co_m:.6f}  accuracy={sa:.3f}")
 
 if __name__ == "__main__":
     main()

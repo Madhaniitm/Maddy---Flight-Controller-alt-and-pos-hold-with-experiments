@@ -1,0 +1,204 @@
+scene_label,truth,known_failure,model,run,detected_risk,correct,quality_score,s1_scene,s2_proximity,s3_risk,word_count,yolo_meta,full_reply,latency_ms,input_tokens,output_tokens,cost_usd,error
+wall_close,hazard,all models say safe — blank wall misread as empty room,claude,1,caution,0,4,1,1,0,105,YOLO detections: none,"Description: The image shows a plain, nearly featureless light gray/white surface, likely a wall or ceiling close to the drone, with no discernible objects or people detected.
+Proximity: The surface appears to be very close to the camera, possibly within 0.5–1 meter, suggesting the drone may be in a confined space or near a wall.
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN**
+
+**Reasoning:** Although no objects are detected by YOLO, the near-featureless frame and apparent proximity to a flat surface (wall/ceiling) suggest the drone is in a tight or enclosed space. Slowing down and reassessing position is advisable to avoid a collision with the nearby surface.",5691.8,297,163,0.003336,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o,1,safe,0,4,1,1,0,35,YOLO detections: none,"Description: The image shows a plain, featureless surface, likely a wall or ceiling, with no objects or people detected.
+Proximity: No objects or people are present to estimate proximity.
+Risk: Safe
+Pilot suggested action: PROCEED",3500.0,226,50,0.00188,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o_mini,1,safe,0,4,1,1,0,43,YOLO detections: none,"Description: The image appears to be a blank or empty space with no visible objects or people detected. The surface is smooth and uniformly lit.  
+Proximity: No objects or people are present, so proximity cannot be estimated.  
+Risk: safe  
+Pilot suggested action: PROCEED",2345.6,2993,58,0.000484,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gemini,1,safe,0,4,1,1,0,41,YOLO detections: none,"Description: The image shows a plain, light gray surface, possibly a wall or ceiling, with no discernible objects or features. There are no YOLO detections.
+Proximity: No objects are visible, so proximity cannot be estimated.
+Risk: Safe
+Pilot suggested action: PROCEED",3009.9,415,57,4.8e-05,
+wall_close,hazard,all models say safe — blank wall misread as empty room,claude,2,caution,0,4,1,1,0,111,YOLO detections: none,"Description: The image shows a plain, light-colored wall or surface with no discernible objects, people, or obstacles detected. The frame is largely featureless and slightly blurry, suggesting proximity to a flat surface.
+
+Proximity: The wall or surface appears to be relatively close to the camera, estimated at approximately 1–3 meters based on how it fills the frame.
+
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN**
+
+> ⚠️ Rationale: Although no objects are detected by YOLO, the drone appears to be in close proximity to a wall or flat surface. Slowing down is advised to avoid collision while the environment is assessed more carefully. Recommend adjusting heading or altitude to gain more navigational clearance.",6209.7,297,170,0.003441,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o,2,safe,0,4,1,1,0,35,YOLO detections: none,"Description: The image shows a plain, featureless surface, likely a wall or ceiling, with no objects or people detected.
+Proximity: No objects or people are present to estimate proximity.
+Risk: Safe
+Pilot suggested action: PROCEED",3374.6,226,50,0.00188,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o_mini,2,safe,0,4,1,1,0,46,YOLO detections: none,"Description: The image appears to be a blank or empty space with no visible objects or people detected. The surface is uniformly lit and lacks any identifiable features.  
+Proximity: No objects or persons are present, so proximity cannot be estimated.  
+Risk: safe  
+Pilot suggested action: PROCEED",2186.2,2993,61,0.000486,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gemini,2,safe,0,4,1,1,0,36,YOLO detections: none,"Description: The image shows a plain, light gray surface, possibly a wall or ceiling, with no discernible objects or features. There are no YOLO detections.
+Proximity: N/A (no objects detected)
+Risk: safe
+Pilot suggested action: PROCEED",1503.6,415,54,4.7e-05,
+wall_close,hazard,all models say safe — blank wall misread as empty room,claude,3,hazard,1,5,1,1,1,127,YOLO detections: none,"Description: The image shows a nearly featureless, light-colored wall or surface with no discernible objects, people, or obstacles detected. The frame is very blurry and low contrast, suggesting the drone may be very close to a flat surface or the camera is out of focus.
+
+Proximity: The flat surface (likely a wall or ceiling) appears to be very close to the camera, potentially within 0.5–1 meter, given how the image fills the entire frame with no depth perspective.
+
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN** — The drone appears to be in close proximity to a wall or surface. While no specific hazards are detected, the lack of visual depth information and the proximity to a flat surface warrants slowing down and reassessing positioning to avoid a collision.",6073.5,297,177,0.003546,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o,3,safe,0,4,1,1,0,35,YOLO detections: none,"Description: The image shows a plain, featureless surface, likely a wall or ceiling, with no objects or people detected.
+Proximity: No objects or people are present to estimate proximity.
+Risk: Safe
+Pilot suggested action: PROCEED",2389.1,226,50,0.00188,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gpt4o_mini,3,safe,0,4,1,1,0,35,YOLO detections: none,"Description: The image appears to be a blank or empty space with no identifiable objects or features present.  
+Proximity: No objects or persons detected, so proximity cannot be estimated.  
+Risk: safe  
+Pilot suggested action: PROCEED",2587.8,2993,49,0.000478,
+wall_close,hazard,all models say safe — blank wall misread as empty room,gemini,3,safe,0,4,1,1,0,41,YOLO detections: none,"Description: The image shows a plain, light gray surface, possibly a wall or ceiling, with no discernible objects or features. There are no YOLO detections.
+Proximity: No objects are visible, so proximity cannot be estimated.
+Risk: Safe
+Pilot suggested action: PROCEED",1545.2,415,57,4.8e-05,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,claude,1,hazard,0,4,1,1,0,130,YOLO detections: none,"Description: The drone appears to be flying inside a large industrial or commercial building, with metal shelving/racking structures, glass partitions, and overhead lighting visible. The interior space shows multiple structural elements including beams and shelving units.
+
+Proximity: No persons detected by YOLO; however, structural elements such as shelving frames and glass partitions appear to be in close proximity — estimated within 1–3 meters on multiple sides.
+
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN**
+
+**Reasoning:** While no human or object threats were detected by YOLO, the drone is operating in a confined indoor environment with numerous structural obstacles (metal frames, glass partitions, shelving). The close proximity of these structures on multiple sides creates a moderate collision risk. Slowing down allows for better navigation control and sensor response time to avoid structural hazards.",6579.0,297,189,0.003726,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o,1,safe,1,5,1,1,1,48,YOLO detections: none,"Description: The image shows an indoor space with a row of tables or workstations and a glass door in the foreground. The area appears to be empty.
+Proximity: The glass door is very close to the camera, likely within a few feet.
+Risk: Safe
+Pilot suggested action: PROCEED",3478.7,226,62,0.00206,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o_mini,1,safe,1,5,1,1,1,52,YOLO detections: none,"Description: The image shows an indoor space with a series of tables or workstations, and glass doors leading to another area. The lighting is bright, and the environment appears organized and clean. 
+
+Proximity: The nearest objects, likely the tables, are approximately 2-3 meters from the camera.
+
+Risk: safe
+
+Pilot suggested action: PROCEED",2575.6,2993,73,0.000493,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gemini,1,caution,0,4,1,1,0,60,YOLO detections: none,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls and ceiling. There are multiple glass partitions and doors with white frames, suggesting a structured interior.
+Proximity: The closest object is a white-framed glass door on the right, appearing to be within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",1779.4,415,80,5.5e-05,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,claude,2,caution,0,4,1,1,0,139,YOLO detections: none,"Description: The drone appears to be inside a large industrial or warehouse-like building with metal shelving/racking structures, glass partitions, and fluorescent lighting visible overhead. The space appears to be an indoor facility with multiple structural elements and corridors.
+
+Proximity: No people or dynamic objects detected by YOLO. Structural elements (shelving, glass panels, ceiling) are in close proximity — glass partitions appear within 1–3 meters of the camera, and ceiling structures are approximately 1–2 meters above.
+
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN**
+
+**Reasoning:** Although no people or objects were flagged by YOLO, the drone is operating in a confined indoor space with glass partitions, metal racking, and low ceiling clearance. The narrow corridors and reflective glass surfaces pose collision risks, especially since glass may not be reliably detected by standard YOLO models. Reduced speed and careful navigation are strongly advised.",7012.1,297,213,0.004086,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o,2,safe,1,5,1,1,1,48,YOLO detections: none,"Description: The image shows an indoor space with glass doors and a row of tables or workstations. The area appears to be empty and well-lit.
+
+Proximity: Objects such as tables and doors are relatively close, within a few meters of the camera.
+
+Risk: Safe
+
+Pilot suggested action: PROCEED",3685.2,226,63,0.002075,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o_mini,2,safe,1,5,1,1,1,56,YOLO detections: none,"Description: The image shows an indoor space with a series of tables or workstations, and glass doors leading to another area. The lighting is bright, and the environment appears organized and clean. 
+
+Proximity: There are no detected objects or people in close proximity to the camera, suggesting a clear area.
+
+Risk: safe
+
+Pilot suggested action: PROCEED",3481.3,2993,73,0.000493,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gemini,2,caution,0,4,1,1,0,60,YOLO detections: none,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls and ceiling. There are multiple glass partitions and doors with white frames, suggesting a structured interior.
+Proximity: The closest object is a white-framed glass door on the right, appearing to be within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",2866.6,415,80,5.5e-05,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,claude,3,caution,0,4,1,1,0,124,YOLO detections: none,"Description: The drone appears to be inside a large industrial or warehouse-like building with metal shelving/racking structures, glass partitions, and fluorescent lighting visible. The space appears to be an indoor facility with multiple structural elements and tight corridors between shelving units.
+
+Proximity: No persons detected by YOLO. Structural elements (shelving frames, glass panels) are in close proximity — estimated within 1–3 meters on multiple sides, indicating a confined indoor environment.
+
+Risk: caution
+
+Pilot suggested action: **SLOW_DOWN**
+
+**Reasoning:** While no people or dynamic obstacles are detected, the drone is navigating a confined indoor space with metal structures, glass panels, and low clearance. The risk of collision with static infrastructure is elevated. Reducing speed allows for better reaction time and obstacle avoidance in this cluttered environment.",6611.8,297,186,0.003681,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o,3,safe,1,5,1,1,1,57,YOLO detections: none,"Description: The image shows an indoor space with a series of tables or workstations and a glass door in the foreground. The area appears to be empty with no people or objects detected by the YOLO system.
+
+Proximity: The glass door is closest to the camera, likely within a few feet.
+
+Risk: Safe
+
+Pilot suggested action: PROCEED",3621.1,226,72,0.00221,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gpt4o_mini,3,safe,1,5,1,1,1,52,YOLO detections: none,"Description: The image shows an indoor space with a series of tables or workstations, and glass doors leading to another area. The lighting is bright, and the environment appears organized and clean. 
+
+Proximity: The nearest objects, likely the tables, are approximately 2-3 meters from the camera.
+
+Risk: safe
+
+Pilot suggested action: PROCEED",2874.3,2993,73,0.000493,
+door_open,safe,all models say hazard/caution — open doorway misread as obstacle,gemini,3,caution,0,4,1,1,0,60,YOLO detections: none,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls and ceiling. There are multiple glass partitions and doors with white frames, suggesting a structured interior.
+Proximity: The closest object is a white-framed glass door on the right, appearing to be within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",2255.0,415,80,5.5e-05,
+person_far,safe,all models say caution — distant person escalated to risk,claude,1,caution,0,4,1,1,0,147,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an industrial workshop or factory floor, surrounded by machinery and shelving units in a dimly lit interior space.
+Proximity: The YOLO detector estimates the person is approximately **0.57 meters** from the camera, which is extremely close — though this may reflect a calibration artifact given the image perspective; visually the person appears to be several meters away in the mid-ground.
+Risk: **caution**
+
+Pilot suggested action: **SLOW_DOWN**
+
+> ⚠️ **Reasoning:** A person has been detected with moderate confidence (0.59) in the drone's field of view. The estimated proximity is flagged as very close by the onboard detector. Regardless of actual distance, the presence of a human in an enclosed industrial environment warrants reduced speed and heightened situational awareness. The drone should slow down, maintain safe clearance, and avoid approaching the individual further until the area is confirmed clear.",6983.7,331,213,0.004188,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o,1,caution,0,4,1,1,0,40,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows an indoor room with a person standing in the center. There are various pieces of office equipment and furniture around.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",4934.7,258,54,0.0021,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o_mini,1,caution,0,4,1,1,0,48,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows a person standing in a room with various objects and furniture, including a chair and a desk. The environment appears to be an indoor workspace or laboratory setting.
+
+Proximity: The person is approximately 0.57 meters from the camera.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",2558.8,3025,64,0.000492,
+person_far,safe,all models say caution — distant person escalated to risk,gemini,1,hazard,0,4,1,1,0,49,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an indoor setting, possibly an office or workshop, with various equipment and furniture visible in the background. The person is facing the camera.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: Hazard
+Pilot suggested action: STOP",4209.6,459,66,5.4e-05,
+person_far,safe,all models say caution — distant person escalated to risk,claude,2,hazard,0,4,1,1,0,132,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an industrial workshop or factory floor, positioned centrally in the frame between shelving units and machinery, under fluorescent lighting.
+Proximity: The YOLO detector estimates the person is approximately **0.57 meters** from the camera — this is extremely close and likely an indoor confined space with limited maneuver room.
+Risk: **hazard**
+
+Pilot suggested action: **STOP**
+
+**Reasoning:** The person is detected at an estimated distance of only ~0.57m, which is dangerously close to the drone. The indoor industrial environment adds additional risk due to confined space, overhead structures, and limited escape routes. Immediate stop is recommended to avoid collision with the person and surrounding equipment. Do not proceed until the person has moved to a safe distance and a clear flight path is confirmed.",6955.5,331,184,0.003753,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o,2,caution,0,4,1,1,0,49,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows an indoor setting with a person standing in the middle of a room that appears to be an office or a lab. There are desks, chairs, and equipment visible.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",3740.4,258,67,0.002295,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o_mini,2,caution,0,4,1,1,0,48,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows a person standing in a room with various objects and furniture, including a chair and a desk. The environment appears to be an indoor workspace or laboratory setting.
+
+Proximity: The person is approximately 0.57 meters from the camera.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",2795.0,3025,64,0.000492,
+person_far,safe,all models say caution — distant person escalated to risk,gemini,2,hazard,0,4,1,1,0,58,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an indoor office or workshop environment, facing the camera. The room has various equipment and furniture, including a white plastic chair on the left and an air conditioning unit on the wall.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: hazard
+Pilot suggested action: STOP",1615.1,459,75,5.7e-05,
+person_far,safe,all models say caution — distant person escalated to risk,claude,3,hazard,0,4,1,1,0,103,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an industrial workshop or factory floor, surrounded by machinery and equipment, with shelving units visible in the background.
+Proximity: The YOLO detector estimates the person is approximately **0.57 meters** from the camera, indicating they are **very close** to the drone — this is dangerously near.
+Risk: **hazard**
+
+Pilot suggested action: **STOP**
+
+> ⚠️ The detected person is estimated at ~0.57m from the camera/drone — this is critically close. Immediate halt of forward movement is required to avoid collision and ensure personnel safety. The drone should hold position and reassess before any further maneuvering.",5672.8,331,158,0.003363,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o,3,caution,0,4,1,1,0,49,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows an indoor setting with a person standing in the middle of a room that appears to be an office or a lab. There are desks, chairs, and equipment visible.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",3572.6,258,67,0.002295,
+person_far,safe,all models say caution — distant person escalated to risk,gpt4o_mini,3,caution,0,4,1,1,0,48,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: The image shows a person standing in a room with various objects and furniture, including a chair and a desk. The environment appears to be an indoor workspace or laboratory setting.
+
+Proximity: The person is approximately 0.57 meters from the camera.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",2966.7,3025,64,0.000492,
+person_far,safe,all models say caution — distant person escalated to risk,gemini,3,hazard,0,4,1,1,0,49,"YOLO detections: person (conf=0.59, est_dist~0.57m, bbox=[154.3,110.4,193.5,236.3])","Description: A person is standing in what appears to be an indoor setting, possibly an office or workshop, with various equipment and furniture visible in the background. The person is facing the camera.
+Proximity: The person is approximately 0.57 meters from the camera.
+Risk: Hazard
+Pilot suggested action: STOP",1463.5,459,66,5.4e-05,

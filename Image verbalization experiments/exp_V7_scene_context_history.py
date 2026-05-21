@@ -2,236 +2,255 @@
 EXP-V7: Scene Context History Effect
 ======================================
 Goal:
-    Does feeding the LLM a history of previous frame descriptions help it
-    detect mid-sequence scene changes?
+    Does feeding the LLM prior frame descriptions help it detect scene
+    changes? Tests three history modes on a 5-frame sequence with two
+    change events.
 
     History modes:
         stateless : each API call has no prior context
-        short     : last 2 frame descriptions prepended as context
-        full      : ALL prior frame descriptions in session
+        short     : last 2 frame descriptions prepended
+        full      : all prior frame descriptions prepended
 
-    Scenario: operator creates a 5-frame sequence with a change at frame 3:
-        Frame 1: clear     (baseline)
-        Frame 2: clear     (same)
-        Frame 3: hazard    ← CHANGE (e.g. person walks in / object placed)
-        Frame 4: hazard    (continues)
-        Frame 5: clear     ← CHANGE BACK (hazard removed)
+    Sequence (5 frames, change at frame 3 and frame 5):
+        Frame 1: door_open  (safe)   — baseline clear scene
+        Frame 2: door_open  (safe)   — same
+        Frame 3: person_near (hazard) ← CHANGE (person enters)
+        Frame 4: person_near (hazard) — continues
+        Frame 5: door_open  (safe)   ← CHANGE BACK (person leaves)
 
-    N=5 sequences per history mode = 75 trials per mode (15 total per sequence).
-    Each trial = one API call for one frame in the sequence.
+    Saved frames used: door_open_run{N}_real.jpg and
+    person_near_run{N}_real.jpg. Run01 is excluded (buggy frames).
+    Sequence→run mapping: [1→02, 2→03, 3→04, 4→05, 5→02]
+    run02 is used twice to fill 5 sequences without run01.
 
-Metrics:
-    - change_detected      : LLM flags the change at frame 3 and 5 (Wilson CI)
-    - description_drift    : semantic consistency across frames 1-2 (Bootstrap CI)
-    - input_tokens         : total context consumed per call (Bootstrap CI)
-    - cost_usd             : per call (Bootstrap CI)
-    - latency_ms           : per call (Bootstrap CI)
+    Models:  claude, gpt4o, gpt4o_mini, gemini
+    N runs:  5 sequences × 3 modes × 4 models × 5 frames = 300 trials
 
-Scoring:
-    change_detected_f3 = 1 if LLM says "hazard" on frame 3 (was "safe/clear")
-    change_detected_f5 = 1 if LLM says "safe" on frame 5   (was "hazard")
-    drift_score        = fraction of frames 1-2 with consistent "safe" output
+Output:  results/V7_runs_<timestamp>.csv
+         results/V7_summary_<timestamp>.csv
 """
 
-import sys, os, time, pathlib
+import sys, pathlib, datetime, time
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from verbalization_utils import (
-    get_frame, call_vision_llm, score_verbalization,
-    bootstrap_ci, wilson_ci, write_csv, preflight, RESULTS_DIR
+    get_saved_frame, call_vision_llm, score_verbalization,
+    run_yolo_on_frame, bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
 )
 
 N_SEQUENCES   = 5
 HISTORY_MODES = ["stateless", "short", "full"]
-MODEL         = "claude"
+MODELS        = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
+# run01 excluded (buggy); run02 used twice to fill 5 sequences
+SEQ_TO_RUN    = {1: 2, 2: 3, 3: 4, 4: 5, 5: 2}
 
+# Frame 1,2,5 = door_open (safe); Frame 3,4 = person_near (hazard)
 SEQUENCE_DEFINITION = [
-    # (frame_num, expected_risk, operator_instruction)
-    (1, "safe",    "Clear scene — empty floor, nothing in frame."),
-    (2, "safe",    "Same clear scene."),
-    (3, "hazard",  "CHANGE: Place an obstacle close OR person steps in front."),
-    (4, "hazard",  "Same hazard — keep obstacle/person in place."),
-    (5, "safe",    "CHANGE BACK: Remove obstacle/person — clear again."),
+    (1, "safe",   "door_open"),
+    (2, "safe",   "door_open"),
+    (3, "hazard", "person_near"),
+    (4, "hazard", "person_near"),
+    (5, "safe",   "door_open"),
 ]
 
 BASE_PROMPT = (
-    "You are a drone camera monitor analysing a live sequence of frames.\n"
+    "You are an AI copilot for a drone analysing a live sequence of frames.\n"
     "{context}"
-    "Current frame: Describe what you see. "
-    "Has the scene changed from before? "
-    "Classify as: safe | caution | hazard"
+    "YOLO detections on current frame: {yolo_meta}\n\n"
+    "Using the YOLO metadata and the image:\n"
+    "Describe what you see. Has the scene changed from before? "
+    "Classify as: safe | caution | hazard\n"
+    "Pilot suggested action: PROCEED | SLOW_DOWN | STOP | LAND | HOLD"
 )
+
+
+def get_frame_for_run(scene_label: str, run: int) -> bytes:
+    """Load a specific run's saved frame (run01–run05)."""
+    path = FRAMES_DIR / f"{scene_label}_run{run:02d}_real.jpg"
+    if path.exists():
+        return path.read_bytes()
+    # fallback to run03 if specific run missing
+    return get_saved_frame(scene_label)
+
 
 def build_context(history: list[dict], mode: str) -> str:
     if mode == "stateless" or not history:
         return ""
-    if mode == "short":
-        prev = history[-2:]
-    else:
-        prev = history
+    prev = history[-2:] if mode == "short" else history
     lines = "\n".join(
-        f"Frame {h['frame_num']}: [{h['detected_risk'] or 'unknown'}] {h['reply'][:80]}"
+        f"Frame {h['frame_num']}: [{h['detected_risk']}] {h['reply'][:80]}"
         for h in prev
     )
     return f"Previous frames:\n{lines}\n\n"
 
-def detect_change(reply: str, expected_risk: str) -> int:
-    r = reply.lower()
-    for lvl in ("hazard", "caution", "safe"):
-        if lvl in r:
-            return int(lvl == expected_risk)
-    return 0
 
-def consistency_score(history_safe_frames: list[str]) -> float:
-    if not history_safe_frames:
-        return float("nan")
-    return sum(1 for r in history_safe_frames if "safe" in r.lower()) / len(history_safe_frames)
+def extract_risk(reply: str) -> str:
+    low = reply.lower()
+    for lvl in ("hazard", "caution", "safe"):
+        if lvl in low:
+            return lvl
+    return "unknown"
+
 
 def main():
-    print("="*60)
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    total = len(HISTORY_MODES) * N_SEQUENCES * len(SEQUENCE_DEFINITION) * len(MODELS)
+    print("=" * 65)
     print("EXP-V7: Scene Context History Effect")
-    print(f"History modes={HISTORY_MODES}  Sequences={N_SEQUENCES}")
-    print("="*60)
-    if not preflight():
-        ans = input("ESP32 not reachable. Use synthetic frames? [y/N]: ")
-        if ans.strip().lower() != "y":
-            return
+    print(f"Modes={HISTORY_MODES}  Sequences={N_SEQUENCES}  Models={MODELS}")
+    print(f"Sequence: safe→safe→hazard→hazard→safe  (door_open / person_near)")
+    print(f"Total trials: {total}")
+    print("=" * 65)
 
     all_rows = []
 
     for hist_mode in HISTORY_MODES:
-        print(f"\n{'='*50}")
+        print(f"\n{'='*55}")
         print(f"=== History mode: {hist_mode} ===")
-        print(f"{'='*50}")
+        print(f"{'='*55}")
 
-        for seq in range(1, N_SEQUENCES+1):
-            print(f"\n  ── Sequence {seq}/{N_SEQUENCES} ──")
-            history: list[dict] = []
+        for seq in range(1, N_SEQUENCES + 1):
+            run_n = SEQ_TO_RUN[seq]
+            print(f"\n  ── Sequence {seq}/{N_SEQUENCES} (using run{run_n:02d} frames) ──")
 
-            for frame_num, expected_risk, instruction in SEQUENCE_DEFINITION:
-                print(f"\n  Frame {frame_num}/5  expected={expected_risk}")
-                print(f"  [SETUP] {instruction}")
-                input(f"  Press Enter when ready (mode={hist_mode} seq={seq})…")
+            # Per-model history — each model maintains its own context
+            histories = {model: [] for model in MODELS}
 
-                context = build_context(history, hist_mode)
-                prompt  = BASE_PROMPT.format(context=context)
+            for frame_num, expected_risk, scene_label in SEQUENCE_DEFINITION:
+                jpeg      = get_frame_for_run(scene_label, run_n)
+                yolo_meta = run_yolo_on_frame(jpeg)
+                change_event = frame_num in (3, 5)
 
-                # Use appropriate scene label for synthetic fallback
-                scene_label = "clear_open" if expected_risk == "safe" else "person_near"
-                jpeg  = get_frame(scene_label)
+                print(f"\n    Frame {frame_num}/5  scene={scene_label}  "
+                      f"expected={expected_risk}  change={change_event}")
 
-                res     = call_vision_llm(jpeg, prompt, model=MODEL,
-                                         max_tokens=200, temperature=0.2)
-                reply   = res["reply"]
-                det_ok  = detect_change(reply, expected_risk)
+                for model in MODELS:
+                    context = build_context(histories[model], hist_mode)
+                    prompt  = BASE_PROMPT.format(context=context, yolo_meta=yolo_meta)
 
-                # Detect change events specifically
-                change_event = frame_num in (3, 5)  # frames where change occurs
-                detected_change_correctly = 0
-                if change_event:
-                    if frame_num == 3:  # safe → hazard
-                        detected_change_correctly = int("hazard" in reply.lower() or
-                                                        "caution" in reply.lower() or
-                                                        "change" in reply.lower() or
-                                                        "different" in reply.lower() or
-                                                        "new" in reply.lower())
-                    elif frame_num == 5:  # hazard → safe
-                        detected_change_correctly = int("safe" in reply.lower() or
-                                                        "clear" in reply.lower() or
-                                                        "removed" in reply.lower() or
-                                                        "gone" in reply.lower() or
-                                                        "empty" in reply.lower())
+                    res   = call_vision_llm(jpeg, prompt, model=model,
+                                            max_tokens=200, temperature=0.0)
+                    reply = res["reply"]
+                    det_risk = extract_risk(reply)
+                    risk_correct = int(det_risk == expected_risk)
 
-                row = {
-                    "history_mode":        hist_mode,
-                    "sequence":            seq,
-                    "frame_num":           frame_num,
-                    "expected_risk":       expected_risk,
-                    "change_event":        int(change_event),
-                    "risk_correct":        det_ok,
-                    "change_detected":     detected_change_correctly if change_event else -1,
-                    "input_tokens":        res["input_tokens"],
-                    "output_tokens":       res["output_tokens"],
-                    "latency_ms":          res["latency_ms"],
-                    "cost_usd":            res["cost_usd"],
-                    "reply_snippet":       reply[:100].replace("\n"," "),
-                    "error":               res["error"][:80] if res["error"] else "",
-                }
-                all_rows.append(row)
+                    # Change detection: did model flag the transition?
+                    if change_event:
+                        if frame_num == 3:  # safe → hazard
+                            change_detected = int(det_risk in ("hazard", "caution"))
+                        else:               # hazard → safe (frame 5)
+                            change_detected = int(det_risk == "safe")
+                    else:
+                        change_detected = -1  # not a change frame
 
-                # Add to history for next frames in sequence
-                history.append({
-                    "frame_num":    frame_num,
-                    "detected_risk": ("hazard" if "hazard" in reply.lower()
-                                      else "caution" if "caution" in reply.lower()
-                                      else "safe"),
-                    "reply": reply,
-                })
+                    row = {
+                        "history_mode":    hist_mode,
+                        "sequence":        seq,
+                        "frame_num":       frame_num,
+                        "scene_label":     scene_label,
+                        "expected_risk":   expected_risk,
+                        "model":           model,
+                        "detected_risk":   det_risk,
+                        "risk_correct":    risk_correct,
+                        "change_event":    int(change_event),
+                        "change_detected": change_detected,
+                        "input_tokens":    res["input_tokens"],
+                        "output_tokens":   res["output_tokens"],
+                        "latency_ms":      res["latency_ms"],
+                        "cost_usd":        res["cost_usd"],
+                        "reply_snippet":   reply[:120].replace("\n", " "),
+                        "error":           res["error"][:80] if res["error"] else "",
+                    }
+                    all_rows.append(row)
 
-                print(f"  → risk_ok={det_ok}  change_ok={detected_change_correctly if change_event else 'n/a'}  "
-                      f"tok={res['input_tokens']}  lat={res['latency_ms']:.0f}ms")
-                time.sleep(1)
+                    histories[model].append({
+                        "frame_num":    frame_num,
+                        "detected_risk": det_risk,
+                        "reply":        reply,
+                    })
 
-    # ── Save
-    fields = ["history_mode","sequence","frame_num","expected_risk",
-              "change_event","risk_correct","change_detected",
-              "input_tokens","output_tokens","latency_ms","cost_usd",
-              "reply_snippet","error"]
-    runs_csv = RESULTS_DIR / "V7_runs.csv"
+                    print(f"      {model:12s}  risk={det_risk:8s}  "
+                          f"correct={risk_correct}  "
+                          f"{'change_ok='+str(change_detected) if change_event else '':12s}  "
+                          f"lat={res['latency_ms']:.0f}ms")
+
+                time.sleep(0.5)
+
+    # ── Save runs CSV
+    fields = ["history_mode","sequence","frame_num","scene_label","expected_risk",
+              "model","detected_risk","risk_correct","change_event","change_detected",
+              "input_tokens","output_tokens","latency_ms","cost_usd","reply_snippet","error"]
+    runs_csv = RESULTS_DIR / f"V7_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 
-    # ── Summary
-    print(f"\n── V7 Summary ──────────────────────────────────────────────")
+    # ── Summary by history_mode × model
+    print(f"\n── V7 Summary by Mode × Model ──────────────────────────────────")
+    print(f"  {'mode':10s}  {'model':12s}  {'risk_acc':>8s}  {'change_det':>10s}  "
+          f"{'tokens':>6s}  {'lat_ms':>7s}")
+    print("-" * 68)
+
     summary_rows = []
     for hm in HISTORY_MODES:
-        hr = [r for r in all_rows if r["history_mode"]==hm and not r["error"]]
-        if not hr: continue
+        for model in MODELS:
+            hr = [r for r in all_rows if r["history_mode"]==hm
+                  and r["model"]==model and not r["error"]]
+            if not hr:
+                continue
 
-        # Overall risk accuracy
-        acc, alo, ahi = wilson_ci(sum(r["risk_correct"] for r in hr), len(hr))
+            acc, alo, ahi = wilson_ci(sum(r["risk_correct"] for r in hr), len(hr))
 
-        # Change detection (only at change frames)
-        cr  = [r for r in hr if r["change_event"]==1 and r["change_detected"] >= 0]
-        cd, cdlo, cdhi = wilson_ci(sum(r["change_detected"] for r in cr), len(cr)) if cr else (0.,0.,0.)
+            cr = [r for r in hr if r["change_event"]==1 and r["change_detected"] >= 0]
+            cd, cdlo, cdhi = (wilson_ci(sum(r["change_detected"] for r in cr), len(cr))
+                              if cr else (0., 0., 0.))
 
-        # Token cost
-        tm, _, _  = bootstrap_ci([r["input_tokens"] for r in hr])
-        lm, _, _  = bootstrap_ci([r["latency_ms"]   for r in hr])
-        cm, _, _  = bootstrap_ci([r["cost_usd"]     for r in hr])
+            tm, _, _ = bootstrap_ci([r["input_tokens"] for r in hr])
+            lm, _, _ = bootstrap_ci([r["latency_ms"]   for r in hr])
+            cm, _, _ = bootstrap_ci([r["cost_usd"]     for r in hr])
 
-        print(f"  {hm:12s}  risk_acc={acc:.3f}[{alo:.3f},{ahi:.3f}]  "
-              f"change_det={cd:.3f}[{cdlo:.3f},{cdhi:.3f}]  "
-              f"tokens={tm:.0f}  lat={lm:.0f}ms  ${cm:.6f}")
+            print(f"  {hm:10s}  {model:12s}  {acc:.3f}[{alo:.3f},{ahi:.3f}]  "
+                  f"{cd:.3f}[{cdlo:.3f},{cdhi:.3f}]  {tm:.0f}  {lm:.0f}ms")
 
-        summary_rows.append({
-            "history_mode":  hm,
-            "risk_accuracy": acc,  "acc_lo": alo,  "acc_hi": ahi,
-            "change_detect": cd,   "cd_lo":  cdlo,  "cd_hi": cdhi,
-            "mean_tokens":   tm,
-            "latency_ms":    lm,
-            "cost_usd":      cm,
-        })
+            summary_rows.append({
+                "history_mode": hm, "model": model, "n_trials": len(hr),
+                "risk_accuracy": acc, "acc_lo": alo, "acc_hi": ahi,
+                "change_detect": cd, "cd_lo": cdlo, "cd_hi": cdhi,
+                "mean_input_tokens": tm, "latency_ms": lm, "cost_usd": cm,
+            })
 
-    # Per-frame accuracy across history modes (shows WHERE context helps)
-    print(f"\n── V7 Per-frame risk accuracy (all modes) ──────────────────")
-    print(f"  frame  " + "  ".join(f"{m:12s}" for m in HISTORY_MODES))
-    for fn, expected, _ in SEQUENCE_DEFINITION:
+    # ── Per-frame accuracy across modes (all models avg)
+    print(f"\n── V7 Per-frame risk accuracy (all models avg) ─────────────────")
+    print(f"  {'frame':8s}  {'stateless':>10s}  {'short':>10s}  {'full':>10s}")
+    for fn, expected, scene in SEQUENCE_DEFINITION:
         row_str = f"  f{fn}({expected[:4]}) "
         for hm in HISTORY_MODES:
             fr = [r for r in all_rows if r["history_mode"]==hm and r["frame_num"]==fn]
             if fr:
-                acc,_,_ = wilson_ci(sum(r["risk_correct"] for r in fr), len(fr))
-                row_str += f"  {acc:.3f}       "
+                acc, _, _ = wilson_ci(sum(r["risk_correct"] for r in fr), len(fr))
+                row_str += f"  {acc:.3f}      "
             else:
-                row_str += "  N/A         "
+                row_str += "  N/A        "
         print(row_str)
 
-    summary_csv = RESULTS_DIR / "V7_summary.csv"
-    write_csv(summary_csv, summary_rows,
-              ["history_mode","risk_accuracy","acc_lo","acc_hi",
-               "change_detect","cd_lo","cd_hi","mean_tokens","latency_ms","cost_usd"])
+    # ── Input token growth (shows context cost)
+    print(f"\n── Input token growth by mode (all models avg) ─────────────────")
+    print(f"  {'mode':10s}  " + "  ".join(f"f{fn}" for fn, _, _ in SEQUENCE_DEFINITION))
+    for hm in HISTORY_MODES:
+        tok_str = f"  {hm:10s}  "
+        for fn, _, _ in SEQUENCE_DEFINITION:
+            fr = [r for r in all_rows if r["history_mode"]==hm and r["frame_num"]==fn]
+            if fr:
+                tm, _, _ = bootstrap_ci([r["input_tokens"] for r in fr])
+                tok_str += f"{tm:.0f}   "
+        print(tok_str)
 
-    print(f"\nData   → {runs_csv}")
-    print(f"Summary→ {summary_csv}")
+    summary_csv = RESULTS_DIR / f"V7_summary_{ts}.csv"
+    write_csv(summary_csv, summary_rows,
+              ["history_mode","model","n_trials","risk_accuracy","acc_lo","acc_hi",
+               "change_detect","cd_lo","cd_hi","mean_input_tokens","latency_ms","cost_usd"])
+
+    print(f"\nRuns    → {runs_csv}")
+    print(f"Summary → {summary_csv}")
+    print(f"[V7] Done — {len(all_rows)} trials recorded.")
+
 
 if __name__ == "__main__":
     main()

@@ -14,92 +14,238 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CHAPTER 3 — IMAGE VERBALIZATION  (10 experiments)
+CHAPTER 3 — IMAGE VERBALIZATION  (12 experiments)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-── V series — Verbalization quality (4 experiments) ────────────────────────────
+  CHAPTER 3 ARCHITECTURE (applies to all experiments except G1):
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  Camera frame captured                                          │
+  │       ↓                                                         │
+  │  YOLO runs on frame → detections (label, conf, est_dist, bbox)  │
+  │       ↓ metadata passed alongside image                         │
+  │  LLM called (scheduled OR YOLO-triggered emergency)             │
+  │  Input  : image frame + YOLO metadata                           │
+  │  Output : scene verbalization + pilot suggested action          │
+  │           (PROCEED | SLOW_DOWN | STOP | LAND | HOLD)            │
+  │       ↓                                                         │
+  │  Pilot sees suggestion — accepts or overrides                   │
+  └─────────────────────────────────────────────────────────────────┘
+  Exception: G1 tests YOLO and LLM in pure isolation — no metadata sharing.
+
+  SCORING RUBRIC (0–5, used in V and H series):
+    s1 +1  scene content correctly described
+    s2 +1  proximity/spatial information mentioned
+    s3 +1  correct risk classification (safe/caution/hazard)
+    s4 +1  response length 10–150 words
+    s5 +1  pilot action explicitly suggested
+
+── V series — Verbalization quality (5 experiments) ────────────────────────────
 
   V1  Model comparison
       CLAIM  : CLAIM 1
-      PROVES : Which VLM produces the most command-compatible descriptions
-      KEY METRIC : Scene classification accuracy per model (%)
-      WHY KEEP   : Essential — thesis must justify the model chosen
-      STATUS : NOT RUN
+      PROVES : 4 models (Claude, GPT-4o, GPT-4o Mini, Gemini) × 8 scenes × 5 runs = 160 trials.
+               Each model receives identical image + YOLO metadata.
+               Gemini leads on accuracy (65%), quality (4.65/5), and cost ($0.0001/call).
+               Gemini is 60× cheaper than Claude and 3.2× faster — recommended model
+               for the production pipeline.
+      KEY METRIC : Quality score /5 per model (Bootstrap CI);
+                   classification accuracy (Wilson CI);
+                   pilot action rate (%); latency (ms); cost (USD)
+      WHY KEEP   : Essential — thesis must justify the model chosen for
+                   the production pipeline
+      STATUS : DONE  ✓  (results/V1_runs_20260521_015524.csv + V1_observations.md)
 
   V2  Prompt techniques
       CLAIM  : CLAIM 1
-      PROVES : Zero-shot vs few-shot vs chain-of-thought on verbalization quality
-      KEY METRIC : Command accuracy per prompt style (%)
-      WHY KEEP   : Essential — prompt choice directly affects command reliability
-      STATUS : NOT RUN
+      PROVES : 5 prompting styles (zero-shot, few-shot, CoT, structured, ReAct)
+               × 4 models × 8 scenes × 5 runs = 800 trials.
+               No single technique dominates — best varies per model:
+               Gemini→zero_shot (60%), GPT-4o→few_shot_3 (57.5%),
+               GPT-4o Mini→react (45%), Claude→zero_shot (37.5%).
+               Open-loop react_template collapses on door_open (5%) —
+               ReAct framing without real feedback is just verbose zero_shot.
+      KEY METRIC : Quality score /5 per technique (Bootstrap CI);
+                   pilot action rate (%); classification accuracy (Wilson CI)
+      WHY KEEP   : Essential — prompt choice directly affects whether
+                   the pilot suggestion is actionable and trustworthy
+      STATUS : DONE  ✓  (results/V2_runs_20260521_020936.csv + V2_observations.md)
+
+  V2R ReAct agentic feedback loop vs open-loop template
+      CLAIM  : CLAIM 1
+      PROVES : Isolates the feedback loop contribution in ReAct prompting.
+               Condition A (react_template, open-loop): loaded from V2 —
+                 door_open accuracy = 5% across all 4 models.
+               Condition B (react_agentic, 2-call feedback loop):
+                 Call 1 [image only] → model observes.
+                 Call 2 [observation + YOLO] → final classification.
+                 door_open accuracy = 35% overall; gpt4o_mini = 100%.
+               +30pp improvement on the worst open-loop failure proves the
+               feedback loop — not the Reason-Observe-Act text structure —
+               drives correct classification. Directly justifies the C-series
+               architecture where ReAct uses real tool feedback per step.
+      KEY METRIC : Classification accuracy per condition (Wilson CI);
+                   per-model delta (agentic − template) on door_open
+      WHY KEEP   : Closes the ReAct justification gap — without this,
+                   using ReAct in C-series while rejecting it in V2 is
+                   a contradiction. V2R proves they differ architecturally.
+      STATUS : DONE  ✓  (results/V2R_runs_20260521_034438.csv + V2R_observations.md)
 
   V6  Verbosity vs quality
       CLAIM  : CLAIM 1
-      PROVES : Concise descriptions produce better commands than long ones
-      KEY METRIC : Command accuracy vs token count curve
-      WHY KEEP   : Practical design parameter — tells reader how to prompt
-      STATUS : NOT RUN
+      PROVES : 4 token levels (64, 128, 256, 512) × 4 models × 8 scenes × 5 runs = 640 trials.
+               Quality and accuracy plateau at 128 tokens — 256→512 adds nothing.
+               Claude requires 256 to avoid truncation (97.5% truncation at 128).
+               GPT-4o/Mini/Gemini plateau at ~40–53 words regardless of budget.
+               max_tokens=256 selected as minimum sufficient budget for all 4 models.
+      KEY METRIC : Quality score /5 vs token budget; truncation rate (Wilson CI);
+                   efficiency (quality/USD); word count vs token budget
+      WHY KEEP   : Practical design parameter — identifies minimum token
+                   budget for a complete verbalization + pilot suggestion
+      STATUS : DONE  ✓  (results/V6_runs_20260521_053358.csv + V6_observations.md)
+
+  V7  Scene context history
+      CLAIM  : CLAIM 1
+      PROVES : Stateless vs short-history vs full-history — YOLO metadata
+               from each frame is passed into the LLM call, and prior frame
+               descriptions are optionally prepended as context.
+               Does temporal context improve scene-change detection
+               and pilot suggestion accuracy?
+      KEY METRIC : Change detection rate (Wilson CI);
+                   pilot action correctness at change frames (%);
+                   input token count per history mode (Bootstrap CI)
+      WHY KEEP   : Shows the scheduled LLM call benefits from temporal
+                   context — relevant to real deployment where frames
+                   are sequential
+                   RESULT: Stateless is sufficient and best. Gemini stateless
+                   achieves 72% risk accuracy and 90% change detection — best
+                   across all modes and models. History adds token cost without
+                   consistent benefit. Claude rerun with structured prompt fix:
+                   stateless=0% (indoor caution bias), short/full=40% (history
+                   enables caution→hazard escalation for person_near but never
+                   fixes door_open safe-scene bias). Decision: LLM copilot
+                   layer runs stateless.
+      STATUS : DONE  ✓  (results/V7_runs_20260521_063401.csv + V7_observations.md)
 
   V8  Temperature sweep
       CLAIM  : CLAIM 1
-      PROVES : Low temperature (≤0.2) minimises hallucination in commands
-      KEY METRIC : Hallucination rate vs temperature
-      WHY KEEP   : Design parameter — justifies deterministic settings used
+      PROVES : Temperature [0.0, 0.2, 0.5, 0.8, 1.0] × 4 models × 8 scenes × 5 runs = 800 trials.
+               t=0.0 achieves highest accuracy (40.6%) and lowest flip rate (5.5%).
+               Higher temperatures increase variance without improving accuracy.
+               Gemini degrades most sharply (37.5% → 25% at t=0.5).
+               GPT-4o Mini is perfectly temperature-insensitive (0% flip at all temps).
+               t=0.2 (Yao et al. 2022) is for iterative ReAct agents — not applicable
+               to single-pass classification. t=0.0 selected for all V-series calls.
+      KEY METRIC : Classification accuracy (Wilson CI) vs temperature;
+                   label-flip rate vs temperature; quality score vs temperature
+      WHY KEEP   : Design parameter — justifies t=0.0 for all production pipeline
+                   calls with direct experimental evidence
+      STATUS : DONE  ✓  (results/V8_runs_20260521_042814.csv + V8_observations.md)
+
+── G series — Pipeline architecture (4 experiments) ────────────────────────────
+
+  G1  YOLO vs Claude latency and accuracy  [ISOLATION EXPERIMENT — no metadata sharing]
+      CLAIM  : CLAIM 1
+      PROVES : Pure YOLO alone vs pure LLM alone — neither is sufficient.
+               YOLO is fast but cannot suggest contextual pilot actions.
+               LLM alone is slow and lacks structured detection metadata.
+               Combined pipeline (G2, G5) outperforms both.
+      KEY METRIC : Latency (ms); description richness score; detection accuracy
+      WHY KEEP   : Justifies why both YOLO and LLM are needed in the pipeline
       STATUS : NOT RUN
 
-── G series — Pipeline architecture (3 experiments) ────────────────────────────
-
-  G1  YOLO vs Claude latency and accuracy
+  G2  Trigger strategy — scheduled-only vs scheduled+YOLO-triggered
       CLAIM  : CLAIM 1
-      PROVES : Why VLM is used over pure object detection
-      KEY METRIC : Latency (ms), description richness score
-      WHY KEEP   : Justifies pipeline design choice
+      HARDWARE   : Laptop webcam (or ESP32-S3-Sense) — real camera frames required
+      PROVES : YOLO always running on real camera frames in both conditions.
+               Every LLM call receives real YOLO metadata and outputs pilot suggestion.
+               Condition A — YOLO + scheduled LLM only (YOLO runs but never triggers extra LLM)
+               Condition B — YOLO + scheduled LLM + YOLO emergency interrupt
+               Hazards = real YOLO detections above confidence threshold.
+               Condition A misses hazards between ticks even with YOLO running.
+               Condition B catches them — real YOLO detection immediately triggers
+               LLM interrupt call which suggests STOP to the pilot.
+      KEY METRIC : Missed emergency rate (%) — A vs B (Wilson CI);
+                   extra LLM calls per mission from YOLO interrupts (Bootstrap CI);
+                   cost overhead of adding the interrupt (USD)
+      WHY KEEP   : Directly proves the core Chapter 3 architectural claim —
+                   YOLO-triggered LLM calls are not redundant; they close
+                   the gap between scheduled ticks for time-critical hazards.
+                   Uses real camera + real YOLO — not simulated text strings.
       STATUS : NOT RUN
 
   G4  Three-tier timescale analysis
       CLAIM  : CLAIM 1 + CLAIM 2
-      PROVES : YOLO at <10ms, VLM at ~1Hz, mission reasoning at ~0.1Hz
-               — each tier operates at its natural timescale
-      KEY METRIC : Latency distribution per tier
-      WHY KEEP   : The entire architecture argument lives in this experiment
+      HARDWARE   : Laptop webcam (or ESP32-S3-Sense) — real camera frames required
+      PROVES : PID ~0.25ms (firmware arithmetic), YOLO measured on real camera frames,
+               Claude measured with real YOLO metadata from those frames.
+               Each tier operates at its natural timescale.
+               Proves YOLO is fast enough to interrupt meaningfully before
+               the next scheduled LLM tick.
+      KEY METRIC : Latency distribution per tier on real hardware (Bootstrap CI);
+                   tier separation ratios (YOLO/PID, LLM/YOLO)
+      WHY KEEP   : The timescale data physically justifies the entire
+                   three-tier hierarchy and the YOLO interrupt design.
+                   Real camera + real YOLO — not synthetic frames or text strings.
       STATUS : NOT RUN
 
   G5  Real vision pipeline end-to-end
       CLAIM  : CLAIM 1
-      PROVES : Full pipeline working: camera → JPEG → VLM → JSON command
-      KEY METRIC : End-to-end latency (ms), command accuracy on live frames
-      WHY KEEP   : Essential validation — shows pipeline works on real frames
+      PROVES : Full pipeline on live camera frames:
+               camera → YOLO → YOLO metadata + image → LLM →
+               scene verbalization + pilot action suggestion.
+               Measures each stage latency and validates the LLM
+               correctly suggests actions on real frames.
+      KEY METRIC : End-to-end latency (ms) per stage (Bootstrap CI);
+                   pilot action suggestion accuracy on live frames (Wilson CI)
+      WHY KEEP   : Essential validation — proves the integrated pipeline
+                   works on real hardware frames, not just simulation
       STATUS : NOT RUN
 
 ── H series — Safety and trust (2 experiments) ──────────────────────────────────
 
   H1  Runtime mode switch
-      CLAIM  : CLAIM 2
-      PROVES : Cognitive layer can be interrupted and overridden at runtime
-      KEY METRIC : Switch latency (ms), success rate
-      WHY KEEP   : Safety — cognitive layer must not be a single point of failure
+      CLAIM  : CLAIM 1 + CLAIM 2
+      HARDWARE   : Laptop webcam — real camera frame captured at each waypoint
+      PROVES : YOLO + LLM pipeline runs continuously in both modes.
+               Real camera frame captured + real YOLO run at each waypoint.
+               Full-auto mode: LLM receives real YOLO metadata, suggests
+                 pilot action, drone executes automatically.
+               HITL mode: LLM still receives real YOLO metadata and
+                 suggests pilot action, but operator must approve/reject
+                 before execution.
+               Operator can switch modes mid-mission at any time.
+               Proves the pilot always has the last word regardless of
+               what the LLM suggests.
+      KEY METRIC : Switch latency (ms) (Bootstrap CI);
+                   auto-mode success rate (Wilson CI);
+                   HITL approval rate (Wilson CI);
+                   total mission time (Bootstrap CI)
+      WHY KEEP   : Safety — the pilot copilot model is only trustworthy if
+                   the operator can interrupt any LLM suggestion and take
+                   manual control instantly; this experiment proves it
       STATUS : NOT RUN
 
   H4  Decision verbalization
-      CLAIM  : CLAIM 2
-      PROVES : LLM narrates its reasoning before each command — operator
-               can understand and trust every decision
-      KEY METRIC : Operator trust rating, verbalization latency (ms)
-      WHY KEEP   : Transparency — differentiates from black-box autonomy
+      CLAIM  : CLAIM 1 + CLAIM 2
+      HARDWARE   : Laptop webcam — real camera frame captured per trial
+      PROVES : Real camera frame captured + real YOLO run before each trial.
+               LLM receives real YOLO metadata, narrates its assessment,
+               and suggests a pilot action — across 5 scenarios:
+               (arm/takeoff, obstacle scene description, altitude hold,
+               battery warning, mission complete).
+               LLM only SUGGESTS — pilot decides what to do.
+               Pilot can read/hear the TTS verbalization and trust it.
+      KEY METRIC : Verbalization quality score /4 (Bootstrap CI);
+                   pilot action suggestion present (%);
+                   verbalization latency (ms); TTS latency (ms)
+      WHY KEEP   : Transparency — differentiates from black-box autonomy;
+                   pilot copilot model requires explainable suggestions
       STATUS : NOT RUN
 
-── I series — Multi-model benchmark (1 experiment) ─────────────────────────────
-
-  I1  Multimodal vision benchmark
-      CLAIM  : CLAIM 1
-      PROVES : 4 models × 10 scene classes — head-to-head on drone frames
-      KEY METRIC : Accuracy per model per scene class, latency, cost
-      WHY KEEP   : Objective model selection evidence for Chapter 3
-      STATUS : NOT RUN
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (14 experiments)
+CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (16 experiments)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ── C series — Manual cognitive commands in sim (6 experiments) ──────────────────
@@ -149,21 +295,7 @@ CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (14 experiments)
       WHY KEEP   : Evaluation framework — where does autonomy help vs hurt?
       STATUS : DONE  ✓  (results/C8_runs.csv + multi-LLM + guardrail on/off)
 
-── D series — Vision-guided autonomy in sim (4 experiments) ─────────────────────
-
-  D2  Autonomous wall approach and stop
-      CLAIM  : CLAIM 1 + CLAIM 2
-      PROVES : Verbalization → LLM command → drone stops before wall contact
-      KEY METRIC : Stopping distance (m), success rate across 5 runs
-      WHY KEEP   : Clearest end-to-end vision-to-action demonstration
-      STATUS : NOT RUN
-
-  D4  Obstacle avoidance
-      CLAIM  : CLAIM 1 + CLAIM 2
-      PROVES : Drone autonomously navigates around a mid-path obstacle
-      KEY METRIC : Avoidance success rate, path deviation (m)
-      WHY KEEP   : Core autonomous navigation claim
-      STATUS : NOT RUN
+── D series — Vision-guided autonomy in sim (3 experiments) ─────────────────────
 
   D7  LLM iterative PID adaptation
       CLAIM  : CLAIM 2
@@ -171,6 +303,18 @@ CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (14 experiments)
                corrects it iteratively to below 5 cm RMSE — 4 LLM models
       KEY METRIC : RMSE before/after (cm), iterations to stable, cost
       WHY KEEP   : Most unique technical result — LLM as control engineer
+      STATUS : NOT RUN
+
+  D8  Sensor dropout
+      CLAIM  : CLAIM 2
+      PROVES : When a sensor (ToF, barometer) drops mid-flight, the cognitive
+               layer detects the telemetry anomaly and responds safely —
+               switches mode, alerts operator, or initiates safe land —
+               rather than issuing commands blind
+      KEY METRIC : Detection latency (ms), correct response rate (%), false
+                   positive rate
+      WHY KEEP   : Robustness — proves cognitive layer handles hardware faults,
+                   not just mission commands; pairs with H1 (mode switch)
       STATUS : NOT RUN
 
   D9  End-to-end integration
@@ -181,7 +325,7 @@ CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (14 experiments)
       WHY KEEP   : Capstone experiment — validates entire system as integrated
       STATUS : NOT RUN
 
-── E series — Architecture justification (2 experiments) ───────────────────────
+── E series — Architecture justification (5 experiments) ───────────────────────
 
   E1  API latency measurement
       CLAIM  : CLAIM 2
@@ -190,6 +334,32 @@ CHAPTER 4 — SYSTEM DESIGN AND HARDWARE  (14 experiments)
       KEY METRIC : Latency distribution (ms) per model, percentiles
       WHY KEEP   : Justifies the entire architecture — without this the
                    hierarchy looks arbitrary
+      STATUS : NOT RUN
+
+  E2  Human vs auto time
+      CLAIM  : CLAIM 2
+      PROVES : Full-auto LLM completes structured missions in comparable time
+               to an experienced human operator
+      KEY METRIC : Task completion time (s) per mode, error rate
+      WHY KEEP   : Direct evidence that LLM autonomy is operationally viable
+      STATUS : NOT RUN
+
+  E3  Memory retention
+      CLAIM  : CLAIM 2
+      PROVES : Cognitive layer retains mission context across a long session —
+               later commands correctly reference earlier decisions
+      KEY METRIC : Context-dependent success rate across 10-turn sessions
+      WHY KEEP   : Shows stateful cognition at session timescale, not just
+                   turn-by-turn; complements C3 (5-turn)
+      STATUS : NOT RUN
+
+  E4  Token scaling
+      CLAIM  : CLAIM 2
+      PROVES : Performance plateaus beyond a token budget threshold —
+               identifies the minimum viable context window for this task
+      KEY METRIC : Task success rate vs input token count curve
+      WHY KEEP   : Practical deployment parameter — informs API cost vs
+                   performance tradeoff
       STATUS : NOT RUN
 
   E5  LLM vs rule-based supervisor
@@ -270,10 +440,11 @@ CHAPTER 5 — HYBRID LOCOMOTION  (~3 experiments, to be designed)
   V3  Multilingual input        — does not affect flight performance
   V4  Model × prompt matrix     — covered by V1 + V2 separately
   V5  YOLO threshold sweep      — implementation detail, not a claim
-  V7  Scene context history     — nice to have, not core
   V9  Model × params matrix     — overlaps V4 + V8
 
-  G2  Event vs periodic         — cost optimisation, not a thesis claim
+  I1  Multimodal vision benchmark — covered by V1 (same models × same scenes;
+                                     V1 kept as it is already scripted and scoped)
+
   G3  Monocular depth accuracy  — tangential, depth not a core contribution
 
   H2  Face recognition auth     — not related to flight control or cognition
@@ -290,14 +461,17 @@ CHAPTER 5 — HYBRID LOCOMOTION  (~3 experiments, to be designed)
   C2.1, C4.1, C6.1             — implementation fix variants, not results
 
   D1  Scene classification      — covered by G1 + I1
+  D2  Autonomous wall approach  — camera+LLM too slow for collision response
+                                   (500–2000 ms vs drone reaction need < 50 ms);
+                                   correct layer is firmware-level LiDAR reflex
+                                   (planned future hardware revision)
   D3  Human loop navigation     — overlaps C8
-  D5  Autonomous waypoint       — overlaps D2 + D4
-  D6  Anomaly detection         — covered by D7 (detection implied by adaptation)
-  D8  Sensor dropout            — overlaps D6
-
-  E2  Human vs auto time        — covered by C8
-  E3  Memory retention          — covered by C3
-  E4  Token scaling             — implementation detail
+  D4  Obstacle avoidance        — same architectural reason as D2; LLM cannot
+                                   command avoidance safely at flight speeds;
+                                   LiDAR-based avoidance is future work
+  D5  Autonomous waypoint       — overlaps D9
+  D6  Anomaly detection         — covered by D8 (sensor dropout is the concrete
+                                   anomaly scenario)
 
   F3  Open-source reproducibility — nice to have, not a claim
 
@@ -309,15 +483,15 @@ CHAPTER 5 — HYBRID LOCOMOTION  (~3 experiments, to be designed)
 # ═══════════════════════════════════════════════════════════════════════════════
 
   Original experiment count    : ~58 across all series
-  Main body (kept)             : 27  (10 Ch3 + 14 Ch4 + 3 Ch5)
+  Main body (kept)             : 31  (12 Ch3 + 16 Ch4 + 3 Ch5)
   Appendix                     : 7
-  Dropped entirely             : ~31
+  Dropped entirely             : ~29
   MCP series (never included)  : ~18
 
-  Already done (main body)     : 6   (C1, C2, C3, C5, C7, C8)
+  Already done (main body)     : 12  (V1, V2, V2R, V6, V7, V8, C1, C2, C3, C5, C7, C8)
   Already done (appendix)      : 7   (A1–A3, A5, B1–B3)
-  Still need to run            : 21  (V1,V2,V6,V8 + G1,G4,G5 + H1,H4 + I1
-                                      + D2,D4,D7,D9 + E1,E5 + F1,F2 + L1,L2,L3)
+  Still need to run            : 19  (G1,G2,G4,G5 + H1,H4
+                                      + D7,D8,D9 + E1,E2,E3,E4,E5 + F1,F2 + L1,L2,L3)
 
   Experiments needing only laptop + API  : 18  (run these first)
   Experiments needing hardware           :  3  (L1, L2, L3)

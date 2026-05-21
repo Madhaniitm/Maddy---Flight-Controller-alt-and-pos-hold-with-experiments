@@ -1,0 +1,1568 @@
+condition,model,scene_label,truth,run,yolo_type,yolo_meta,clip_label,clip_risk,clip_conf,detected_risk,risk_correct,quality_score,s1_scene,s2_proximity,s3_risk,s4_length,s5_pilot_action,word_count,latency_ms,input_tokens,output_tokens,cost_usd,reply,error
+yolo_enhanced_only,yolo_enhanced,person_near,hazard,1,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,1,0,0,1,0,0,0,56.81,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_near,hazard,2,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,1,0,0,1,0,0,0,56.64,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_near,hazard,3,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,1,0,0,1,0,0,0,57.37,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_near,hazard,4,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,1,0,0,1,0,0,0,54.88,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_near,hazard,5,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,1,0,0,1,0,0,0,57.12,0,0,0.0,,
+llm_only,claude,person_near,hazard,1,,,,,0.0,hazard,1,5,1,1,1,1,1,49,4376.9,274,76,0.001962,"Description: A person is leaning forward aggressively in what appears to be an indoor workspace or workshop environment, possibly moving toward the camera/drone.
+Proximity: The person appears to be very close, estimated 1–2 meters from the drone based on their size in frame.
+Risk: hazard
+Pilot suggested action: LAND",
+llm_only,gpt4o,person_near,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,48,3240.5,207,60,0.001935,"Description: The image shows a person standing indoors, leaning forward with hands behind their back. There is a plastic chair and some furniture in the background.
+Proximity: The person appears to be very close to the camera, possibly within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_near,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,52,2495.6,2974,68,0.000487,"Description: The image shows a person bending forward in a dimly lit indoor environment, with some furniture visible in the background, including a chair and what appears to be a desk or table.  
+Proximity: The person seems to be within a few meters of the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_near,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,54,2377.8,398,75,5.2e-05,"Description: A person is standing in what appears to be an indoor setting, possibly a workshop or office, with various objects and furniture in the background. The image quality is poor, making details difficult to discern.
+Proximity: The person appears to be within 5-10 feet of the drone.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_near,hazard,2,,,,,0.0,hazard,1,5,1,1,1,1,1,59,3712.0,274,88,0.002142,"Description: A person is leaning forward in what appears to be an indoor workspace or shop, positioned centrally in the frame and appearing to be in motion or bending down.
+Proximity: The person appears to be very close to the camera/drone, estimated at approximately 1–2 meters, occupying a large portion of the frame.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,person_near,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,48,2711.2,207,60,0.001935,"Description: The image shows a person standing indoors, leaning forward with hands behind their back. There is a plastic chair and some furniture in the background.
+Proximity: The person appears to be very close to the camera, possibly within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_near,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,52,2155.4,2974,68,0.000487,"Description: The image shows a person bending forward in a dimly lit indoor environment, with some furniture visible in the background, including a chair and what appears to be a desk or table.  
+Proximity: The person seems to be within a few meters of the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_near,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,56,1946.0,398,79,5.4e-05,"Description: A person is standing in what appears to be an indoor setting, possibly a workshop or office, with various objects and furniture in the background. The image quality is poor, making details difficult to discern.
+Proximity: The person appears to be within 5-10 feet of the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_near,hazard,3,,,,,0.0,hazard,1,5,1,1,1,1,1,58,3588.5,274,85,0.002097,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workspace or workshop environment with shelving and equipment visible in the background.
+Proximity: Person is very close to the drone, estimated 1–2 meters away and approaching or leaning directly into the camera's field of view.
+Risk: hazard
+Pilot suggested action: LAND",
+llm_only,gpt4o,person_near,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,47,2658.9,207,59,0.00192,"Description: The image shows a person standing indoors, leaning forward with hands behind their back. There is a plastic chair and some furniture in the background.
+Proximity: The person appears to be close to the camera, possibly within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_near,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,52,2251.6,2974,69,0.000487,"Description: The image shows a person bending forward in a dimly lit indoor environment, with some furniture visible in the background, including a chair and what appears to be a desk or table.  
+Proximity: The person seems to be relatively close, possibly within a few meters.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_near,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,54,1464.9,398,75,5.2e-05,"Description: A person is standing in what appears to be an indoor setting, possibly a workshop or office, with various objects and furniture in the background. The image quality is poor, making details difficult to discern.
+Proximity: The person appears to be within 5-10 feet of the drone.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_near,hazard,4,,,,,0.0,hazard,1,5,1,1,1,1,1,57,5505.2,274,83,0.002067,"Description: A person is standing in what appears to be an indoor workshop or storage area, leaning forward in an active stance, possibly moving or dancing.
+Proximity: Person appears to be approximately 2–4 meters from the camera, taking up a significant portion of the frame and posing an immediate obstruction risk.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,person_near,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,45,2762.0,207,58,0.001905,"Description: The image shows a person standing indoors, leaning forward with hands behind their back. There are chairs and office equipment in the background.
+Proximity: The person appears to be close to the camera, possibly within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_near,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,52,2253.2,2974,69,0.000487,"Description: The image shows a person bending forward in a dimly lit indoor environment, with some furniture visible in the background, including a chair and what appears to be a desk or table.  
+Proximity: The person seems to be relatively close, possibly within a few meters.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_near,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,56,3592.6,398,79,5.4e-05,"Description: A person is standing in what appears to be an indoor setting, possibly a workshop or office, with various objects and furniture in the background. The image quality is poor, making details difficult to discern.
+Proximity: The person appears to be within 5-10 feet of the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_near,hazard,5,,,,,0.0,hazard,1,5,1,1,1,1,1,51,3787.8,274,78,0.001992,"Description: A person is leaning forward in what appears to be an indoor workspace or workshop environment, possibly in motion or dancing.
+Proximity: Person appears to be **very close** to the camera/drone, estimated within 1–2 meters based on their large size relative to the frame.
+Risk: hazard
+
+Pilot suggested action: STOP",
+llm_only,gpt4o,person_near,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,48,2452.9,207,61,0.00195,"Description: The image shows a person standing indoors, leaning forward with hands behind their back. There is a plastic chair and some furniture in the background.
+Proximity: The person appears to be very close to the camera, possibly within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_near,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,56,2558.2,2974,74,0.000491,"Description: The image shows a person in a gray shirt and jeans, bending forward in what appears to be an indoor space with some furniture in the background. The lighting is dim, and the environment seems cluttered.  
+Proximity: The person appears to be relatively close, possibly within a few meters.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_near,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,56,2157.3,398,79,5.4e-05,"Description: A person is standing in what appears to be an indoor setting, possibly a workshop or office, with various objects and furniture in the background. The image quality is poor, making details difficult to discern.
+Proximity: The person appears to be within 5-10 feet of the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_near,hazard,1,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,89,4706.0,492,132,0.003456,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workspace, with a chair visible to the left; the person occupies a large portion of the frame, consistent with being very close to the drone, and the YOLO distance estimate of ~0.31m appears plausible given the large bounding box coverage.
+Proximity: Very close — the person fills roughly half the frame vertically and horizontally, suggesting they are within 0.5–1m of the drone, possibly reaching toward it.
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_near,hazard,1,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,57,2763.9,402,71,0.003075,"Description: The image shows a person standing in an indoor space with a chair and some furniture in the background. The person is leaning forward, and the environment appears to be a room with various objects.
+Proximity: The person is very close to the camera, likely less than 1 meter away.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,person_near,hazard,1,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,75,2460.7,3169,100,0.000535,"Description: The image shows a person bending forward in a room with a chair in the background. The YOLO detection estimates a distance of approximately 0.31m for the person, which seems inconsistent with the visual evidence, as the person appears to be closer than that. The CLIP label indicates uncertainty about the scene. 
+
+Proximity: The person appears to be very close, likely within 1 meter based on visual assessment. 
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_near,hazard,1,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,77,3529.0,606,97,7.5e-05,"Description: The image shows a person standing in what appears to be an indoor setting, possibly a workshop or storage area, with a white plastic chair visible to the left. The person is facing the camera and appears to be looking down or bending forward slightly. The YOLO estimate for the person's distance seems plausible given their size in the frame.
+Proximity: The person is very close, likely within 1-2 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,person_near,hazard,2,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,86,4870.0,492,129,0.003411,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workspace, with a plastic chair visible to the left. The YOLO estimate of ~0.31m feels consistent with the visual — the person occupies most of the frame and appears very close, likely within 0.5–1m of the drone.
+
+Proximity: Extremely close — the person fills the majority of the frame, indicating they are within approximately 0.5–1 meter of the drone based on visual assessment.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_near,hazard,2,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,49,2863.3,402,64,0.00297,"Description: The image shows a person standing in an indoor space with a chair and some furniture in the background. The person appears to be leaning forward slightly.
+Proximity: The person is very close to the camera, likely less than 0.5 meters away.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,person_near,hazard,2,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,80,2499.2,3169,103,0.000537,"Description: The image shows a person bending forward in a room with a chair in the background. The YOLO detection estimates a distance of approximately 0.31m for the person, which seems inaccurate as they appear to be much closer than that. The CLIP label indicates uncertainty about the scene, which aligns with the visual ambiguity of the situation.
+
+Proximity: The person appears to be very close, likely within 1 meter based on visual assessment.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_near,hazard,2,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,70,2297.9,606,92,7.3e-05,"Description: The image shows a person standing in what appears to be an indoor setting, possibly a workshop or storage area, with a white plastic chair visible to the left. The person is facing the camera and appears to be relatively close. The YOLO estimated distance for the person (0.31m) seems plausible given their size in the frame.
+Proximity: Very close (within 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,person_near,hazard,3,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,88,5754.7,492,142,0.003606,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workshop/store environment; their large presence in the frame confirms they are very close to the drone, consistent with the YOLO estimate of ~0.31m, though that specific value may be slightly underestimated given the full-body visibility — visually I'd estimate 1–2 meters realistically, but still dangerously close.
+Proximity: Very close — person occupies most of the frame, estimated 1–2m visually, posing immediate risk to drone operation.
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_near,hazard,3,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,47,2627.8,402,62,0.00294,"Description: The image shows a person standing in an indoor space with a chair and some furniture in the background. The person appears to be leaning forward slightly.
+Proximity: The person is relatively close to the camera, likely within 1 meter.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_near,hazard,3,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,77,2489.0,3169,102,0.000537,"Description: The image shows a person bending forward in a room with a chair in the background. The YOLO detection estimates a distance of approximately 0.31m for the person, which seems inaccurate as they appear to be much closer than that. The CLIP label indicates uncertainty about the scene, which aligns with the visual ambiguity. 
+
+Proximity: The person appears to be very close, likely within 1 meter based on visual assessment. 
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_near,hazard,3,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,70,1914.9,606,92,7.3e-05,"Description: The image shows a person standing in what appears to be an indoor setting, possibly a workshop or storage area, with a white plastic chair visible to the left. The person is facing the camera and appears to be relatively close. The YOLO estimated distance for the person (0.31m) seems plausible given their size in the frame.
+Proximity: Very close (within 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,person_near,hazard,4,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,82,4950.1,492,124,0.003336,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workspace, with a white chair visible to the left. The YOLO estimated distance of ~0.31m appears consistent with the visual — the person's large bounding box and close framing confirm they are very near the drone.
+
+Proximity: Extremely close, likely under 0.5m based on how large the person appears in frame and their forward-leaning posture directly toward the camera/drone.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_near,hazard,4,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,47,2865.6,402,62,0.00294,"Description: The image shows a person standing in an indoor space with a chair and some furniture in the background. The person appears to be leaning forward slightly.
+Proximity: The person is relatively close to the camera, likely within 1 meter.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_near,hazard,4,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,68,2459.4,3169,92,0.000531,"Description: The image shows a person standing in a room with a chair visible in the background. The YOLO detection estimates a distance of approximately 0.31m for the person, which seems inaccurate as they appear to be standing much closer than that. The CLIP label indicates uncertainty about the scene.  
+Proximity: The person appears to be very close, likely within 1 meter.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_near,hazard,4,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,77,2033.3,606,97,7.5e-05,"Description: The image shows a person standing in what appears to be an indoor setting, possibly a workshop or storage area, with a white plastic chair visible to the left. The person is facing the camera and appears to be looking down or bending forward slightly. The YOLO estimate for the person's distance seems plausible given their size in the frame.
+Proximity: The person is very close, likely within 1-2 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,person_near,hazard,5,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,103,5239.4,492,154,0.003786,"Description: A person is leaning forward aggressively toward the camera in what appears to be an indoor workspace/workshop environment, with a white plastic chair visible to the left. The person's large bounding box and forward-leaning posture suggest they are very close to the drone, consistent with YOLO's ~0.31m estimate, though visually they appear to occupy most of the frame suggesting extreme proximity.
+
+Proximity: Extremely close — the person fills the majority of the frame and is leaning directly toward the camera, indicating they are likely within 0.5–1m at most, possibly closer than the YOLO advisory estimate suggests.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_near,hazard,5,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,49,2559.3,402,64,0.00297,"Description: The image shows a person standing in an indoor space with a chair and some furniture in the background. The person appears to be leaning forward slightly.
+Proximity: The person is very close to the camera, likely less than 0.5 meters away.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,person_near,hazard,5,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,caution,0,4,1,1,0,1,1,60,2262.3,3169,84,0.000526,"Description: The image shows a person standing in a room with a chair visible in the background. The YOLO detection estimates a distance of approximately 0.31m for the person, which seems inconsistent with the visual evidence, as the person appears to be further away than that. 
+
+Proximity: Approximately 1-2 meters based on visual assessment. 
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_near,hazard,5,yolo-world,"YOLO detections: chair (conf=0.65, est_dist~0.75m [advisory], bbox=[49.9,139.9,112.4,235.7]); person (conf=0.41, est_dist~0.31m [advisory], bbox=[132.4,4.3,245.2,239.9])",uncertain (a person standing very close t),unknown,0.1176,hazard,1,5,1,1,1,1,1,70,2146.3,606,92,7.3e-05,"Description: The image shows a person standing in what appears to be an indoor setting, possibly a workshop or storage area, with a white plastic chair visible to the left. The person is facing the camera and appears to be relatively close. The YOLO estimated distance for the person (0.31m) seems plausible given their size in the frame.
+Proximity: Very close (within 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+yolo_enhanced_only,yolo_enhanced,wall_close,hazard,1,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,1,0,0,1,0,0,0,56.46,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,wall_close,hazard,2,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,1,0,0,1,0,0,0,56.75,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,wall_close,hazard,3,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,1,0,0,1,0,0,0,59.15,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,wall_close,hazard,4,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,1,0,0,1,0,0,0,58.75,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,wall_close,hazard,5,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,1,0,0,1,0,0,0,58.82,0,0,0.0,,
+llm_only,claude,wall_close,hazard,1,,,,,0.0,hazard,1,5,1,1,1,1,1,66,4282.1,274,99,0.002307,"Description: The image shows a nearly blank, light gray surface — likely a wall or ceiling viewed at close range. The image is very low contrast and blurry with minimal distinguishable features.
+Proximity: The drone appears to be very close to a flat surface (wall or ceiling), possibly within 0.5–1 meter based on the uniform, featureless fill of the frame.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,wall_close,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,33,2455.7,207,45,0.00171,"Description: The image appears to be very dark or possibly blocked, showing no discernible objects or features.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,wall_close,hazard,1,,,,,0.0,safe,0,4,1,1,0,1,1,27,1740.9,2974,42,0.000471,"Description: The image shows a blank, well-lit surface with no visible objects or features.  
+Proximity: No objects or persons are visible.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,wall_close,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,37,4002.6,398,55,4.6e-05,"Description: The image is mostly white with a slight gradient, suggesting a very bright, possibly overexposed, or blank scene. There are no discernible objects or features.
+Proximity: N/A (No objects visible)
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,wall_close,hazard,2,,,,,0.0,hazard,1,5,1,1,1,1,1,70,4397.8,274,95,0.002247,"Description: The image shows a nearly featureless, light gray surface — likely a blank wall or ceiling very close to the drone's camera, with a dark edge visible at the top suggesting a border or surface boundary.
+Proximity: Extremely close — the surface appears to fill almost the entire frame, suggesting an object is within centimeters to less than a meter of the lens.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,wall_close,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,33,2352.1,207,45,0.00171,"Description: The image appears to be very dark or possibly blocked, showing no discernible objects or features.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,wall_close,hazard,2,,,,,0.0,safe,0,4,1,1,0,1,1,27,1799.5,2974,42,0.000471,"Description: The image shows a blank, light-colored surface with no visible objects or features.  
+Proximity: No objects or persons are visible.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,wall_close,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,37,2099.6,398,55,4.6e-05,"Description: The image is mostly white with a slight gradient, suggesting a very bright, possibly overexposed, or blank scene. There are no discernible objects or features.
+Proximity: N/A (No objects visible)
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,wall_close,hazard,3,,,,,0.0,hazard,1,5,1,1,1,1,1,64,4194.9,274,100,0.002322,"Description: The image appears nearly blank/white with very little visible detail, suggesting the camera lens may be obscured, overexposed, or the drone is very close to a flat light-colored surface such as a wall or ceiling.
+Proximity: Potentially very close to a surface — estimated within 0.5–1 meter based on the uniform, featureless white fill of the frame.
+Risk: hazard
+Pilot suggested action: HOLD",
+llm_only,gpt4o,wall_close,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,34,2147.4,207,46,0.001725,"Description: The image appears to be very dark or possibly blocked, with no discernible objects or features visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,wall_close,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,32,1843.7,2974,46,0.000474,"Description: The image shows a blank, light-colored surface with no visible objects or features.  
+Proximity: No objects or persons are visible, so proximity cannot be estimated.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,wall_close,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,35,1949.8,398,51,4.5e-05,"Description: The image is mostly white with a slight gradient, suggesting a very bright or overexposed scene. There are no discernible objects or features.
+Proximity: N/A (no objects visible)
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,wall_close,hazard,4,,,,,0.0,hazard,1,5,1,1,1,1,1,62,3583.9,274,86,0.002112,"Description: The image shows a nearly featureless, light gray surface — likely a wall or ceiling very close to the camera lens, with minimal detail or depth visible.
+Proximity: Extremely close — the drone appears to be within centimeters of a flat surface, possibly a wall or ceiling directly in front of or above the camera.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,wall_close,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,34,2876.2,207,45,0.00171,"Description: The image appears to be very dark or possibly blocked, showing a mostly uniform dark surface.
+Proximity: Unable to determine proximity due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,wall_close,hazard,4,,,,,0.0,safe,0,4,1,1,0,1,1,24,2856.9,2974,39,0.000469,"Description: The image shows a blank, well-lit surface with no visible objects or features.  
+Proximity: No objects detected.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,wall_close,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,37,1541.2,398,55,4.6e-05,"Description: The image is mostly white with a slight gradient, suggesting a very bright, possibly overexposed, or blank scene. There are no discernible objects or features.
+Proximity: N/A (No objects visible)
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,wall_close,hazard,5,,,,,0.0,hazard,1,5,1,1,1,1,1,60,3479.7,274,87,0.002127,"Description: The image shows a nearly featureless, light gray/white surface — likely a blank wall or ceiling very close to the camera lens, with minimal detail or depth cues visible.
+Proximity: Extremely close — the surface appears to fill the entire frame, suggesting the drone may be within centimeters of a wall or surface.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,wall_close,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,34,2249.1,207,46,0.001725,"Description: The image appears to be very dark or possibly blocked, with no discernible objects or features visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,wall_close,hazard,5,,,,,0.0,safe,0,4,1,1,0,1,1,27,1834.5,2974,42,0.000471,"Description: The image shows a blank, well-lit surface with no visible objects or features.  
+Proximity: No objects or persons are visible.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,wall_close,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,35,3290.6,398,51,4.5e-05,"Description: The image is mostly white with a slight gradient, suggesting a very bright or overexposed scene. There are no discernible objects or features.
+Proximity: N/A (no objects visible)
+Risk: caution
+Pilot suggested action: HOLD",
+combined_enhanced,claude,wall_close,hazard,1,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,87,5429.5,454,129,0.003297,"Description: The image shows a plain, featureless wall filling nearly the entire frame, appearing very close to the camera. The YOLO estimate of ~0.3m is plausible given how the wall dominates the entire field of view with no perspective depth visible, and the CLIP label of ""a wall directly blocking"" aligns well with the visual evidence.
+
+Proximity: Extremely close — the wall occupies the full frame with no visible margins, suggesting the drone is within 0.5m or less of the surface.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,wall_close,hazard,1,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,56,2759.8,364,75,0.002945,"Description: The image shows a plain wall with no other discernible features. The YOLO detection suggests a wall is present, which aligns with the visual evidence. The CLIP scene label is uncertain but mentions a wall.
+Proximity: The wall appears to be very close, likely less than 0.5 meters away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,wall_close,hazard,1,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,caution,0,4,1,1,0,1,1,74,2051.9,3131,101,0.00053,"Description: The image shows a plain wall with no visible obstacles or features. The YOLO detection indicates a wall at an estimated distance of 0.3m, but visually, it appears to be further away than that estimate. The CLIP label suggests uncertainty about the scene, which aligns with the lack of detail in the image. 
+
+Proximity: The wall appears to be approximately 1-2 meters away based on visual assessment. 
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,wall_close,hazard,1,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,54,1428.6,556,77,6.5e-05,"Description: The image shows a plain, light-colored wall filling the entire frame. YOLO detects a wall, and its estimated distance of 0.3m seems consistent with the visual evidence of the wall being very close and directly in front of the drone.
+Proximity: Very close, likely within 0.5 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,wall_close,hazard,2,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,88,5227.7,454,128,0.003282,"Description: The image shows a plain, featureless wall filling nearly the entire frame, consistent with both the YOLO wall detection and the CLIP label suggesting a wall directly blocking the path. The YOLO estimated distance of ~0.3m appears plausible given how the wall dominates the entire field of view with no visible depth cues or surrounding context.
+
+Proximity: Very close — the wall occupies the full frame with no perspective gaps, suggesting the drone is within 0.5m or less of the surface.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,wall_close,hazard,2,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,48,2290.4,364,65,0.002795,"Description: The image shows a plain wall with no other discernible features or objects. The YOLO detection suggests a wall is present, which aligns with the visual evidence.
+Proximity: The wall appears to be very close, likely less than 0.5 meters away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,wall_close,hazard,2,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,caution,0,4,1,1,0,1,1,78,2109.2,3131,101,0.00053,"Description: The image shows a plain wall with no visible obstacles or features. The YOLO detection indicates a wall with an estimated distance of approximately 0.3m, but visually, the wall appears to be further away than that estimate. The CLIP label suggests uncertainty about the scene, which aligns with the lack of additional context in the image.
+
+Proximity: The wall appears to be at least 1 meter away based on visual assessment.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,wall_close,hazard,2,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,54,3591.8,556,77,6.5e-05,"Description: The image shows a plain, light-colored wall filling the entire frame. YOLO detects a wall, and its estimated distance of 0.3m seems consistent with the visual evidence of the wall being very close and directly in front of the drone.
+Proximity: Very close, likely within 0.5 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,wall_close,hazard,3,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,90,5731.4,454,135,0.003387,"Description: The image shows a plain, featureless wall filling nearly the entire frame, appearing very close to the camera. The YOLO estimate of ~0.3m is plausible given how the wall dominates the entire field of view with no perspective depth visible; the CLIP label ""a wall directly blocking"" aligns well with what is seen.
+
+Proximity: Extremely close — the wall occupies the full frame with no visible edges or depth cues, suggesting the drone is within centimeters to perhaps 0.5m of the wall surface.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,wall_close,hazard,3,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,40,2351.7,364,57,0.002675,"Description: The image shows a plain wall with no other discernible features or objects. The YOLO detection suggests a wall is present, which aligns with the visual evidence.
+Proximity: Very close, approximately 0.3 meters.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,wall_close,hazard,3,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,caution,0,4,1,1,0,1,1,78,2662.5,3131,102,0.000531,"Description: The image shows a plain wall with no visible obstacles or features. The YOLO detection indicates a wall with an estimated distance of approximately 0.3m, but this seems inconsistent as the wall appears to be further away based on visual assessment. The CLIP label suggests uncertainty about the scene, indicating a wall directly blocking the view.
+
+Proximity: The wall appears to be at least 1-2 meters away based on visual assessment.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,wall_close,hazard,3,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,46,1932.7,556,67,6.2e-05,"Description: The image shows a light-colored, featureless wall directly in front of the drone, filling the entire frame. YOLO detects a wall, and the CLIP label suggests a wall directly blocking the path.
+Proximity: Very close, likely within 0.5 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,wall_close,hazard,4,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,100,5037.6,454,143,0.003507,"Description: The image shows a plain, featureless wall filling nearly the entire frame, consistent with both the YOLO wall detection and the CLIP label suggesting a wall directly blocking the view. The wall appears very close and occupies the full field of view, though the YOLO estimated distance of ~0.3m is a heuristic — visually the wall does appear to be at very close range given how it dominates the entire frame.
+
+Proximity: Very close — the wall fills essentially the entire frame, suggesting the drone is within 0.5–1m of the surface at most.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,wall_close,hazard,4,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,56,3170.0,364,75,0.002945,"Description: The image shows a plain wall with no other discernible features. The YOLO detection suggests a wall is present, which aligns with the visual evidence. The CLIP scene label is uncertain but mentions a wall.
+Proximity: The wall appears to be very close, likely less than 0.5 meters away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,wall_close,hazard,4,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,caution,0,4,1,1,0,1,1,78,2253.8,3131,102,0.000531,"Description: The image shows a plain wall with no visible obstacles or features. The YOLO detection indicates a wall with an estimated distance of approximately 0.3m, but this seems inconsistent as the wall appears to be further away based on visual assessment. The CLIP label suggests uncertainty about the scene, indicating a wall directly blocking the view.
+
+Proximity: The wall appears to be at least 1-2 meters away based on visual assessment.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,wall_close,hazard,4,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,54,1643.0,556,77,6.5e-05,"Description: The image shows a plain, light-colored wall filling the entire frame. YOLO detects a wall, and its estimated distance of 0.3m seems consistent with the visual evidence of the wall being very close and directly in front of the drone.
+Proximity: Very close, likely within 0.5 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,wall_close,hazard,5,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,110,5328.2,454,159,0.003747,"Description: The image shows a plain, nearly featureless wall filling the entire frame, consistent with both the YOLO detection and CLIP label. The wall appears to be very close and occupying the full field of view, though the YOLO estimated distance of 0.3m is a heuristic — visually, the wall appears to be filling the entire frame, suggesting the drone is indeed very close or nearly in contact with it.
+
+Proximity: Extremely close — the wall fills the entire frame, suggesting the drone is within a very short distance (likely under 1 meter), consistent with or potentially even closer than the 0.3m YOLO estimate.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,wall_close,hazard,5,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,48,2659.9,364,65,0.002795,"Description: The image shows a plain wall with no other discernible features or objects. The YOLO detection suggests a wall is present, which aligns with the visual evidence.
+Proximity: The wall appears to be very close, likely less than 0.5 meters away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,wall_close,hazard,5,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,61,2049.9,3131,87,0.000522,"Description: The image shows a plain wall with a uniform surface, indicating a confined space. The YOLO detection suggests a distance of approximately 0.3m, but visually, the wall appears to be much closer, indicating a discrepancy in the estimated distance. 
+Proximity: The wall appears to be very close, likely within 0.1m based on visual assessment. 
+Risk: hazard 
+Pilot suggested action: STOP",
+combined_enhanced,gemini,wall_close,hazard,5,yolo-world,"YOLO detections: wall (conf=0.49, est_dist~0.3m [advisory], bbox=[0.4,0.1,319.8,239.6])",uncertain (a wall directly blocking and f),unknown,0.1174,hazard,1,5,1,1,1,1,1,46,1744.7,556,67,6.2e-05,"Description: The image shows a light-colored, featureless wall directly in front of the drone, filling the entire frame. YOLO detects a wall, and the CLIP label suggests a wall directly blocking the path.
+Proximity: Very close, likely within 0.5 meters.
+Risk: hazard
+Pilot suggested action: STOP",
+yolo_enhanced_only,yolo_enhanced,object_table,safe,1,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,safe,1,1,0,0,1,0,0,0,56.31,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,object_table,safe,2,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,safe,1,1,0,0,1,0,0,0,60.47,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,object_table,safe,3,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,safe,1,1,0,0,1,0,0,0,57.8,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,object_table,safe,4,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,safe,1,1,0,0,1,0,0,0,58.08,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,object_table,safe,5,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,safe,1,1,0,0,1,0,0,0,58.16,0,0,0.0,,
+llm_only,claude,object_table,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,61,4082.7,274,95,0.002247,"Description: The image shows an indoor environment with a laptop computer open on a desk displaying code or a development environment, with shelving/storage units visible in the background.
+Proximity: The desk and laptop appear to be within 1-2 meters; surrounding furniture and shelving are at moderate distances of 2-4 meters. No persons are visibly detected.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,object_table,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,47,2885.4,207,59,0.00192,"Description: The image shows a laptop on a table with a screen displaying code or data. The background appears to be an indoor setting with shelves or cabinets.
+Proximity: The laptop is close, likely within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,object_table,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,63,3463.4,2974,81,0.000495,"Description: The image shows a laptop on a table, displaying a software interface with various colored elements, likely related to audio or video editing. The background appears to be a room with multiple objects and furniture, but details are unclear due to low lighting.  
+Proximity: The laptop is close to the camera, likely within a few feet.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,object_table,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,50,2164.2,398,66,5e-05,"Description: The image shows a laptop on a table, with a software interface visible on its screen. The background appears to be an indoor setting with shelves or cabinets and windows.
+Proximity: The laptop is very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,claude,object_table,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,105,5621.5,274,161,0.003237,"Description: A laptop computer displaying code/programming environment is sitting on a desk in what appears to be an indoor office or library setting with shelving visible in the background.
+Proximity: The scene shows an indoor environment; nearest objects (desk, laptop) appear to be within 1-2 meters; shelving units visible at approximately 3-5 meters.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN
+
+**Reasoning:** The drone appears to be indoors in a confined space with furniture, shelving, and limited clearance. Indoor environments with obstacles present collision risks. The image is also somewhat dark/low quality, reducing situational awareness. Slowing down is advised to allow for safe navigation and obstacle avoidance.",
+llm_only,gpt4o,object_table,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,47,3511.3,207,59,0.00192,"Description: The image shows a laptop on a table with a screen displaying code or data. The background appears to be an indoor setting with shelves or cabinets.
+Proximity: The laptop is close, likely within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,object_table,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,63,2995.2,2974,81,0.000495,"Description: The image shows a laptop on a table, displaying a software interface with various colored elements, likely related to audio or video editing. The background appears to be a room with multiple objects and furniture, but details are unclear due to low lighting.  
+Proximity: The laptop is close to the camera, likely within a few feet.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,object_table,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,45,2096.1,398,61,4.8e-05,"Description: The image shows a laptop on a table, with a software interface visible on its screen. The background appears to be an indoor setting with shelves and windows.
+Proximity: The laptop is very close, likely within 0-1 meters.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,object_table,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,53,4402.5,274,79,0.002007,"Description: A laptop computer displaying code/programming environment is sitting on a desk in what appears to be an indoor room with shelving and equipment in the background.
+Proximity: Indoor enclosed space; walls and furniture appear within 3-5 meters; no moving persons visible but cluttered environment with obstacles.
+Risk: caution
+
+Pilot suggested action: HOLD",
+llm_only,gpt4o,object_table,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,47,2763.6,207,59,0.00192,"Description: The image shows a laptop on a table with a screen displaying code or data. The background appears to be an indoor setting with shelves or cabinets.
+Proximity: The laptop is close, likely within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,object_table,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,63,2352.9,2974,81,0.000495,"Description: The image shows a laptop on a table, displaying a software interface with various colored elements, likely related to audio or video editing. The background appears to be a room with multiple objects and furniture, but details are unclear due to low lighting.  
+Proximity: The laptop is close to the camera, likely within a few feet.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,object_table,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,50,2052.0,398,66,5e-05,"Description: The image shows a laptop on a table, with a software interface visible on its screen. The background appears to be an indoor setting with shelves or cabinets and windows.
+Proximity: The laptop is very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,claude,object_table,safe,4,,,,,0.0,hazard,0,4,1,1,0,1,1,105,5429.8,274,156,0.003162,"Description: A laptop computer displaying code/programming environment is sitting on a desk in what appears to be an indoor office or library setting with shelving visible in the background.
+Proximity: The laptop and desk surface are very close to the camera (within 1-2 feet); shelving and furniture are visible at moderate distance (5-10 feet).
+Risk: caution
+
+Pilot suggested action: HOLD
+
+> **Note:** The drone appears to be indoors in a confined space with nearby obstacles (desk, laptop, shelving). Indoor flight poses significant risk due to limited clearance, GPS unreliability, and potential collision hazards. Recommend landing immediately or carefully maneuvering away from obstacles before holding position.",
+llm_only,gpt4o,object_table,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,48,2619.9,207,60,0.001935,"Description: The image shows a laptop on a table with a screen displaying code or data analysis. The background appears to be an indoor setting with shelves and equipment.
+Proximity: The laptop is close, likely within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,object_table,safe,4,,,,,0.0,safe,1,5,1,1,1,1,1,56,2702.8,2974,74,0.000491,"Description: The image shows a laptop on a table, displaying a software interface with various colored elements and text. The background appears to be a room with multiple objects, possibly indicating a workspace or studio environment.  
+Proximity: The laptop is likely within arm's reach, suggesting close proximity to the observer.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,object_table,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,45,2111.3,398,61,4.8e-05,"Description: The image shows a laptop on a table, with a software interface visible on its screen. The background appears to be an indoor setting with shelves and windows.
+Proximity: The laptop is very close, likely within 0-1 meters.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,object_table,safe,5,,,,,0.0,hazard,0,4,1,1,0,1,1,119,5731.4,274,160,0.003222,"Description: A laptop computer displaying code/programming environment is sitting on a desk or table in what appears to be an indoor office or library setting with shelving visible in the background.
+Proximity: The laptop and desk are very close to the camera/drone, appearing to be within 1-2 feet. Shelving and other objects are visible at a moderate distance in the background.
+Risk: hazard
+
+Pilot suggested action: LAND
+
+**Rationale:** The drone appears to be extremely close to or resting on a desk surface with a laptop directly in front of it. The indoor confined space with nearby objects on all sides presents a high collision risk. Immediate landing or controlled stop is recommended to prevent damage to equipment or surroundings.",
+llm_only,gpt4o,object_table,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,47,2708.1,207,59,0.00192,"Description: The image shows a laptop on a table with a screen displaying code or data. The background appears to be an indoor setting with shelves or cabinets.
+Proximity: The laptop is close, likely within a few feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,object_table,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,62,2148.4,2974,81,0.000495,"Description: The image shows a laptop on a table, displaying a screen with various coding or editing software open. The background appears to be a room with multiple objects and furniture, but details are unclear due to low lighting.  
+Proximity: The laptop is likely within arm's reach, but the exact distance to other objects is indeterminate.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,object_table,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,50,1744.1,398,66,5e-05,"Description: The image shows a laptop on a table, with a software interface visible on its screen. The background appears to be an indoor setting with shelves or cabinets and windows.
+Proximity: The laptop is very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,claude,object_table,safe,1,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,93,5257.2,418,134,0.003264,"Description: The image shows an indoor environment with a laptop computer open on a desk, displaying code/development software, with shelving or storage units visible in the background. YOLO detected no objects despite clear visual content, and CLIP's low confidence ""dark scene"" label is somewhat accurate given the dim lighting conditions.
+
+Proximity: The desk and laptop appear to be at close range (estimated 1-3 meters), with walls and shelving structure in the background at approximately 3-5 meters. The environment is clearly a confined indoor space with multiple obstacles.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+combined_enhanced,gpt4o,object_table,safe,1,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,70,3343.5,328,91,0.003005,"Description: The image shows a laptop on a table in what appears to be an indoor setting, possibly a workspace or office. The scene is dimly lit, which aligns with the CLIP label of a very dark scene. There are no YOLO detections, but the environment seems cluttered with various objects in the background.
+
+Proximity: The laptop is close, likely within a few feet.
+
+Risk: Caution
+
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,object_table,safe,1,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,68,2548.3,3095,90,0.000518,"Description: The image shows a laptop on a table in a dimly lit environment, with some indistinct objects in the background. The YOLO detection indicates none, and the CLIP label suggests uncertainty, which aligns with the low visibility in the scene. 
+
+Proximity: The laptop appears to be close, likely within a few feet, but the overall environment is unclear due to darkness.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,object_table,safe,1,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,64,1760.0,514,84,6.4e-05,"Description: The image shows a laptop on a desk, with a room visible in the background. The CLIP label of ""uncertain (a very dark scene with almost )"" is inaccurate as the scene is clearly visible and not particularly dark.
+Proximity: The laptop is very close, likely within 1-2 feet. The background appears to be several feet away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,object_table,safe,2,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,96,5119.2,418,143,0.003399,"Description: The image shows an indoor environment with a laptop computer open on a desk, displaying what appears to be code or a development environment; the scene is dimly lit with shelving/equipment visible in the background. YOLO detected no objects despite visible obstacles, and CLIP's low-confidence ""dark scene"" label aligns with the poor lighting conditions.
+
+Proximity: Multiple objects are in close proximity — the laptop and desk are in the foreground (estimated 1–2 meters), with shelving and structures visible within 3–5 meters in the background, indicating a cluttered indoor space.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+combined_enhanced,gpt4o,object_table,safe,2,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,72,2862.3,328,91,0.003005,"Description: The image shows a laptop on a table in what appears to be an indoor setting. The scene is somewhat dark, and the laptop screen displays a program with various charts and code. There are no YOLO detections, and the CLIP label is uncertain, which aligns with the lack of clear context in the image.
+Proximity: The laptop is close, likely within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,object_table,safe,2,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,68,2343.6,3095,89,0.000518,"Description: The image shows a laptop on a table in a dimly lit environment, with no visible objects or people around. The YOLO detection indicates none, and the CLIP label suggests uncertainty, which aligns with the low visibility in the scene. 
+
+Proximity: The laptop appears to be close, likely within a few feet, but the overall environment is unclear due to darkness.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,object_table,safe,2,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,67,1550.9,514,89,6.5e-05,"Description: The image shows a laptop on a desk, with a blurred background that appears to be an indoor setting with shelves or windows. The CLIP label of ""uncertain (a very dark scene with almost )"" is inaccurate as the scene is clearly visible and not particularly dark.
+Proximity: The laptop is very close, likely within 1-2 feet of the camera.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,object_table,safe,3,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,88,5243.2,418,126,0.003144,"Description: The image shows an indoor environment with a laptop on a desk displaying code/programming interface, with shelving units and equipment visible in the background. YOLO detected no objects and CLIP flagged uncertainty due to darkness, but the image clearly shows an indoor room with multiple obstacles including furniture, shelving, and electronic equipment.
+
+Proximity: Multiple obstacles are visually close — the desk and laptop appear within 1-2 meters, with shelving and walls forming a confined indoor space with very limited navigable clearance.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+combined_enhanced,gpt4o,object_table,safe,3,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,55,2845.4,328,71,0.002705,"Description: The image shows a laptop on a table in what appears to be an indoor setting, possibly a workspace or office. The scene is somewhat dark, and the CLIP label indicates uncertainty, which aligns with the low visibility.
+Proximity: The laptop is close, likely within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,object_table,safe,3,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,68,2353.7,3095,89,0.000518,"Description: The image shows a laptop on a table in a dimly lit environment, with no visible objects or people around. The YOLO detection indicates none, and the CLIP label suggests uncertainty, which aligns with the low visibility of the scene. 
+
+Proximity: The laptop appears to be close, likely within a few feet, but the overall environment is unclear due to darkness.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,object_table,safe,3,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,64,1954.1,514,84,6.4e-05,"Description: The image shows a laptop on a desk, with a room visible in the background. The CLIP label of ""uncertain (a very dark scene with almost )"" is inaccurate as the scene is clearly visible and not particularly dark.
+Proximity: The laptop is very close, likely within 1-2 feet. The background appears to be several feet away.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,object_table,safe,4,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,82,5327.4,418,117,0.003009,"Description: The image shows an indoor environment with a laptop on a desk displaying code/IDE, with shelving units and equipment visible in the background. YOLO detected no objects and CLIP is uncertain, but the image clearly shows an enclosed indoor space with multiple obstacles including furniture, shelving, and electronic equipment.
+
+Proximity: Multiple obstacles are visually close — the desk and laptop appear within 1-2 meters, with shelving and walls forming a confined space throughout the frame.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+combined_enhanced,gpt4o,object_table,safe,4,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,55,3165.9,328,71,0.002705,"Description: The image shows a laptop on a table in what appears to be an indoor setting, possibly a workspace or office. The scene is somewhat dark, and the CLIP label indicates uncertainty, which aligns with the low visibility.
+Proximity: The laptop is close, likely within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,object_table,safe,4,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,68,2354.2,3095,89,0.000518,"Description: The image shows a laptop on a table in a dimly lit environment, with no visible objects or people around. The YOLO detection indicates none, and the CLIP label suggests uncertainty, which aligns with the low visibility in the scene. 
+
+Proximity: The laptop appears to be close, likely within a few feet, but the overall environment is unclear due to darkness.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,object_table,safe,4,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,67,2053.3,514,89,6.5e-05,"Description: The image shows a laptop on a desk, with a blurred background that appears to be an indoor setting with shelves or windows. The CLIP label of ""uncertain (a very dark scene with almost )"" is inaccurate as the scene is clearly visible and not particularly dark.
+Proximity: The laptop is very close, likely within 1-2 feet of the camera.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,object_table,safe,5,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,95,5225.9,418,133,0.003249,"Description: The image shows an indoor environment with a laptop computer on a desk displaying code/development environment, with shelving units and office equipment visible in the background. Despite YOLO detecting nothing and CLIP labeling it as a dark uncertain scene, the image clearly shows a cluttered indoor space with multiple obstacles including furniture, shelving, and equipment.
+
+Proximity: Multiple obstacles are within close range — the desk and laptop appear to be approximately 1-2 meters away, with shelving and walls forming a confined indoor space with very limited navigable clearance.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+combined_enhanced,gpt4o,object_table,safe,5,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,55,2761.7,328,71,0.002705,"Description: The image shows a laptop on a table in what appears to be an indoor setting, possibly a workspace or office. The scene is somewhat dark, and the CLIP label indicates uncertainty, which aligns with the low visibility.
+Proximity: The laptop is close, likely within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,object_table,safe,5,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,caution,0,4,1,1,0,1,1,74,2461.8,3095,96,0.000522,"Description: The image shows a laptop on a table in a dimly lit environment, with some reflections and shadows indicating a cluttered background. The YOLO detection indicates no objects, but the CLIP label suggests uncertainty about the scene, which aligns with the low visibility in the image. 
+
+Proximity: The laptop appears to be close, likely within a few feet, but the overall environment is unclear due to darkness.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,object_table,safe,5,yolo-world,YOLO detections: none,uncertain (a very dark scene with almost ),unknown,0.1155,hazard,0,4,1,1,0,1,1,64,2053.5,514,84,6.4e-05,"Description: The image shows a laptop on a desk, with a room visible in the background. The CLIP label of ""uncertain (a very dark scene with almost )"" is inaccurate as the scene is clearly visible and not particularly dark.
+Proximity: The laptop is very close, likely within 1-2 feet. The background appears to be several feet away.
+Risk: hazard
+Pilot suggested action: STOP",
+yolo_enhanced_only,yolo_enhanced,dim_light,caution,1,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,0,0,0,0,0,0,0,56.55,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,dim_light,caution,2,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,0,0,0,0,0,0,0,57.04,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,dim_light,caution,3,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,0,0,0,0,0,0,0,58.24,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,dim_light,caution,4,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,0,0,0,0,0,0,0,57.8,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,dim_light,caution,5,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,0,0,0,0,0,0,0,57.89,0,0,0.0,,
+llm_only,claude,dim_light,caution,1,,,,,0.0,caution,1,5,1,1,1,1,1,76,4698.3,274,122,0.002652,"Description: The image shows what appears to be an indoor room captured with night vision or infrared imaging, revealing furniture including what looks like a couch/sofa and possibly a chair or pillow in the foreground-right area, with windows or shelving visible in the background.
+Proximity: Objects (furniture) appear to be within 1-3 meters, with a large object (chair/cushion) close on the right side potentially within 1-2 meters of the drone.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,dim_light,caution,1,,,,,0.0,caution,1,5,1,1,1,1,1,50,2761.8,207,66,0.002025,"Description: The image is very grainy and dark, making it difficult to discern specific details. It appears to be an indoor setting with some furniture visible.
+Proximity: Objects appear to be within a few meters, but exact distances are unclear due to poor visibility.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o_mini,dim_light,caution,1,,,,,0.0,caution,1,5,1,1,1,1,1,50,2457.7,2974,69,0.000487,"Description: The image appears to be dark and grainy, with indistinct shapes and outlines that suggest a cluttered indoor environment. There are no clearly visible objects or people.  
+Proximity: Objects seem to be close, but visibility is too poor to make a precise estimate.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,dim_light,caution,1,,,,,0.0,caution,1,5,1,1,1,1,1,52,1855.0,398,79,5.4e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern clear objects. There appears to be some foliage or blurred shapes, possibly a building in the background, and a large, light-green, curved object on the right.
+Proximity: Indiscernible due to poor image quality.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,dim_light,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,65,7877.1,274,115,0.002547,"Description: The image shows what appears to be an indoor room with furniture (possibly a couch or chair) visible, captured with heavy green-tinted noise/grain, suggesting a low-light or night-vision-style feed with poor image quality.
+Proximity: Furniture appears to be within 2–4 meters; a large object (chair/cushion) is visible on the right side at close range, roughly 1–2 meters away.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,dim_light,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,50,3581.5,207,66,0.002025,"Description: The image is very grainy and dark, making it difficult to discern specific details. It appears to be an indoor setting with some furniture visible.
+Proximity: Objects appear to be within a few meters, but exact distance is unclear due to poor visibility.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o_mini,dim_light,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,50,2355.3,2974,69,0.000487,"Description: The image appears to be dark and grainy, with indistinct shapes and outlines that suggest a cluttered indoor environment. There are no clearly visible objects or people.  
+Proximity: Objects seem to be close, but visibility is too poor to make a precise estimate.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,dim_light,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,52,1949.9,398,79,5.4e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern clear objects. There appears to be some foliage or blurred shapes, possibly a building in the background, and a large, light-green, curved object on the right.
+Proximity: Indiscernible due to poor image quality.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,dim_light,caution,3,,,,,0.0,hazard,0,4,1,1,0,1,1,70,5431.9,274,114,0.002532,"Description: The image appears to be a heavily noise-corrupted, low-light indoor scene showing what looks like furniture (possibly a couch or chair) and room elements, captured with significant green-channel interference or night-vision distortion.
+Proximity: Multiple objects appear close — furniture is estimated within 1–3 meters, with a large object (possibly a chair or cushion) prominently visible on the right side at approximately 1–2 meters.
+Risk: hazard
+
+Pilot suggested action: HOLD",
+llm_only,gpt4o,dim_light,caution,3,,,,,0.0,caution,1,5,1,1,1,1,1,50,2966.2,207,66,0.002025,"Description: The image is very grainy and dark, making it difficult to discern specific details. It appears to be an indoor setting with some furniture visible.
+Proximity: Objects appear to be within a few meters, but exact distance is unclear due to poor visibility.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o_mini,dim_light,caution,3,,,,,0.0,caution,1,5,1,1,1,1,1,54,2452.8,2974,73,0.00049,"Description: The image appears to be dark and grainy, with indistinct shapes and outlines that suggest a cluttered indoor environment. There are no clearly identifiable objects or people visible.  
+Proximity: Objects seem to be within a close range, but visibility is too poor to make a precise estimate.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,dim_light,caution,3,,,,,0.0,caution,1,5,1,1,1,1,1,42,1853.9,398,63,4.9e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern clear objects. There appears to be some foliage or indistinct shapes in the foreground and background.
+Proximity: Indiscernible due to poor image quality.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,dim_light,caution,4,,,,,0.0,hazard,0,4,1,1,0,1,1,64,4094.2,274,100,0.002322,"Description: The image shows what appears to be an indoor room with heavy noise/grain and a strong green color cast, suggesting night vision or low-light imaging conditions. Furniture including what looks like a couch or chair is visible in the foreground.
+Proximity: Objects (furniture) appear to be within 1–3 meters of the drone, posing a close-range obstruction risk.
+Risk: hazard
+Pilot suggested action: HOLD",
+llm_only,gpt4o,dim_light,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,50,2965.6,207,66,0.002025,"Description: The image is very grainy and dark, making it difficult to discern specific details. It appears to be an indoor setting with some furniture visible.
+Proximity: Objects appear to be within a few meters, but exact distance is unclear due to poor visibility.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o_mini,dim_light,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,56,2457.9,2974,75,0.000491,"Description: The image appears to be dark and grainy, with indistinct shapes and outlines that suggest a cluttered indoor environment. There are no clearly visible objects or people identifiable in the scene.  
+Proximity: Objects seem to be relatively close, but their exact distance is unclear due to the low visibility.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,dim_light,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,52,1745.3,398,79,5.4e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern clear objects. There appears to be some foliage or blurred shapes, possibly a building in the background, and a large, light-green, curved object on the right.
+Proximity: Indiscernible due to poor image quality.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,dim_light,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,77,5119.1,274,112,0.002502,"Description: The image shows an indoor room scene captured with significant green/blue noise and poor image quality, appearing to be a living room or bedroom with furniture including what looks like a couch or chair and possibly a pillow or cushion on the right side.
+Proximity: Furniture appears to be within 1-3 meters; a large object (possible chair/cushion) is prominent on the right side and may be close to the drone.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,dim_light,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,41,3204.1,207,57,0.00189,"Description: The image is grainy and appears to be taken in a dimly lit indoor environment with indistinct objects and possibly furniture.
+Proximity: Objects appear to be within a few meters, but details are unclear.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o_mini,dim_light,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,47,2223.6,2974,66,0.000486,"Description: The image appears to be dark and grainy, with indistinct shapes and outlines that suggest a cluttered indoor environment. There are no clearly visible objects or people.  
+Proximity: Objects seem to be within a few meters, but visibility is poor.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,dim_light,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,42,1848.4,398,63,4.9e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern clear objects. There appears to be some foliage or indistinct shapes in the foreground and background.
+Proximity: Indiscernible due to poor image quality.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,dim_light,caution,1,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,96,5935.3,454,149,0.003597,"Description: The image shows what appears to be an indoor room captured under night-vision or low-light conditions, with visible furniture (couch/chair) and walls filling the frame; the YOLO detection of a wall at ~0.3m is plausible given how much of the frame is occupied by nearby objects, and CLIP's ""wall directly blocking"" label aligns with the confined, cluttered indoor environment.
+
+Proximity: Very close — walls and furniture appear to fill most of the frame, suggesting the drone is likely within 0.5–1m of surrounding obstacles, consistent with the YOLO advisory distance.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,dim_light,caution,1,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,47,3175.7,364,61,0.002735,"Description: The image is grainy and dark, showing an indoor environment with furniture and possibly a wall. The visibility is poor, making it difficult to discern specific objects clearly.
+Proximity: The objects appear to be very close, likely within a meter.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,dim_light,caution,1,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,73,2556.0,3131,102,0.000531,"Description: The image appears to show a dimly lit indoor environment with indistinct shapes, possibly furniture or walls. The YOLO detection indicates a wall at a distance of approximately 0.3m, but the visual evidence suggests that the scene is more complex and potentially obstructed, contradicting the estimate. 
+
+Proximity: The visual estimate suggests that the wall and other objects may be closer than indicated, possibly within 1-2 meters.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,dim_light,caution,1,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,77,1748.0,556,106,7.3e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern details. A large, bright, vertical object is visible on the right, and a smaller, lighter object is in the center. The YOLO detection of a ""wall"" with an estimated distance of 0.3m seems plausible given the large object on the right, which appears to be very close and blocking the view.
+Proximity: Very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,dim_light,caution,2,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,96,5936.3,454,158,0.003732,"Description: The image appears to be a night-vision or heavily filtered view of an indoor room showing furniture (what appears to be a couch/chair and cushion) with walls visible in the background; the YOLO 0.3m wall estimate seems exaggerated as the wall appears further away, though the room is clearly enclosed with obstacles present.
+
+Proximity: The walls appear to be at moderate distance (estimated 1.5–3m), but furniture obstacles are present in the mid-to-near range (~1–2m), making the space constrained. The YOLO 0.3m estimate is likely inaccurate based on visual context.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,dim_light,caution,2,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,64,3068.7,364,81,0.003035,"Description: The image is very grainy and appears to show an indoor environment with a wall and possibly furniture. The visibility is poor, making it difficult to discern specific objects clearly. The YOLO detection suggests a wall is present, but the confidence is low.
+Proximity: The wall seems to be very close, likely less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,dim_light,caution,2,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,76,2561.9,3131,103,0.000531,"Description: The image appears to show a dimly lit indoor environment with a wall visible in the foreground. The YOLO detection indicates a wall with a low confidence level, and the CLIP label suggests uncertainty about the scene, which aligns with the unclear visibility in the image. 
+
+Proximity: The wall seems to be very close, likely within 1 meter based on visual assessment, contradicting the YOLO estimated distance of 0.3m.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,dim_light,caution,2,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,86,2153.4,556,113,7.6e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern details. A large, bright green object on the right appears to be a wall or large leaf, and there are other indistinct green shapes in the background. The YOLO detection of a ""wall"" with an estimated distance of 0.3m seems plausible given the large object on the right, which appears very close and occupies a significant portion of the frame.
+Proximity: Very close (less than 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,dim_light,caution,3,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,103,6143.2,454,160,0.003762,"Description: The image shows an indoor room environment captured in night-vision/infrared mode, revealing what appears to be furniture (couch/chair) and walls in a confined interior space. The YOLO detection of a wall at 0.3m is likely an overestimate of closeness given the scene appears to show a full room, but walls are clearly present on multiple sides, and the CLIP label corroborates a wall-blocking scenario.
+
+Proximity: Walls and furniture appear to be within 1-3 meters on multiple sides — close enough to pose a collision risk, though likely not as immediate as the 0.3m YOLO estimate suggests.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,dim_light,caution,3,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,50,2867.4,364,65,0.002795,"Description: The image is grainy and dark, showing an indoor environment with furniture and possibly a wall. The visibility is poor, making it difficult to discern specific objects clearly.
+Proximity: The proximity to objects appears to be very close, likely less than 1 meter.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,dim_light,caution,3,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,76,2662.1,3131,103,0.000531,"Description: The image appears to show a dimly lit indoor environment with a wall visible in the foreground. The YOLO detection indicates a wall with a low confidence level, and the CLIP label suggests uncertainty about the scene, which aligns with the unclear visibility in the image. 
+
+Proximity: The wall seems to be very close, likely within 1 meter based on visual assessment, contradicting the YOLO estimated distance of 0.3m.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,dim_light,caution,3,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,77,2054.6,556,106,7.3e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern details. A large, bright, vertical object is visible on the right, and a smaller, lighter object is in the center. The YOLO detection of a ""wall"" with an estimated distance of 0.3m seems plausible given the large object on the right, which appears to be very close and blocking the view.
+Proximity: Very close, likely within 1 meter.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,dim_light,caution,4,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,106,5524.5,454,156,0.003702,"Description: The image shows what appears to be an indoor room scene captured in night-vision/infrared mode, showing a couch or chair, pillows, and walls in close proximity; the YOLO detection of a wall at 0.3m advisory distance appears plausible given how the walls and furniture fill nearly the entire frame, and the CLIP label suggesting a wall directly blocking aligns with the visual evidence.
+
+Proximity: Very close — walls and furniture appear to occupy most of the field of view, suggesting the drone is likely within 0.5–1.5m of surrounding obstacles; the room appears small and cluttered with little navigable space.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,dim_light,caution,4,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,72,2814.9,364,89,0.003155,"Description: The image is very grainy and appears to show an indoor environment with a wall and possibly furniture. The visibility is poor, making it difficult to discern specific objects clearly. The YOLO detection suggests a wall is present, but the distance estimate may not be reliable due to the image quality.
+Proximity: The wall seems to be very close, likely less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,dim_light,caution,4,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,73,2319.0,3131,100,0.00053,"Description: The image appears to show a dimly lit indoor environment with indistinct shapes, possibly furniture or walls. The YOLO detection indicates a wall at a distance of approximately 0.3m, but the visual evidence suggests that the space may be larger and less confined than indicated. 
+
+Proximity: The visual estimate suggests a distance of about 1-2 meters, as the space appears more open than the YOLO estimate.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,dim_light,caution,4,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,86,1730.2,556,113,7.6e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern details. A large, bright green object on the right appears to be a wall or large leaf, and there are other indistinct green shapes in the background. The YOLO detection of a ""wall"" with an estimated distance of 0.3m seems plausible given the large object on the right, which appears very close and occupies a significant portion of the frame.
+Proximity: Very close (less than 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,dim_light,caution,5,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,90,5616.9,454,161,0.003777,"Description: The image shows what appears to be an indoor room environment captured in night-vision/infrared mode, with visible furniture (sofa/couch) and a wall in the background; the YOLO-estimated distance of 0.3m for the wall seems overestimated as the wall appears to be several meters away, though the low-light noisy image makes precise depth assessment difficult.
+
+Proximity: Visually, the wall appears to be approximately 2-4 meters away rather than the 0.3m YOLO estimate — significant discrepancy noted. Furniture is present in the mid-to-near field (~1-2m).
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o,dim_light,caution,5,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,49,2906.6,364,66,0.00281,"Description: The image is grainy and dark, showing an indoor environment with furniture and possibly a wall. The visibility is poor, making it difficult to discern specific objects clearly.
+Proximity: The wall and objects appear to be very close, likely within 0.5 meters.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o_mini,dim_light,caution,5,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,caution,1,5,1,1,1,1,1,78,2534.1,3131,104,0.000532,"Description: The image appears to show a dimly lit indoor environment with a wall visible in the foreground. The YOLO detection indicates a wall with a low confidence level, and the CLIP label suggests uncertainty about the scene, which aligns with the unclear visibility in the image. 
+
+Proximity: The wall seems to be very close, likely within 1 meter based on visual assessment, contradicting the YOLO estimated distance of approximately 0.3 meters.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,dim_light,caution,5,yolo-world,"YOLO detections: wall (conf=0.32, est_dist~0.3m [advisory], bbox=[0.6,0.2,319.7,239.9])",uncertain (a wall directly blocking and f),unknown,0.1178,hazard,0,4,1,1,0,1,1,86,1847.9,556,113,7.6e-05,"Description: The image is very grainy and green-tinted, making it difficult to discern details. A large, bright green object on the right appears to be a wall or large leaf, and there are other indistinct green shapes in the background. The YOLO detection of a ""wall"" with an estimated distance of 0.3m seems plausible given the large object on the right, which appears very close and occupies a significant portion of the frame.
+Proximity: Very close (less than 1 meter)
+Risk: hazard
+Pilot suggested action: STOP",
+yolo_enhanced_only,yolo_enhanced,cluttered,caution,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,safe,0,0,0,0,0,0,0,0,59.07,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,cluttered,caution,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,safe,0,0,0,0,0,0,0,0,57.77,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,cluttered,caution,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,safe,0,0,0,0,0,0,0,0,58.44,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,cluttered,caution,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,safe,0,0,0,0,0,0,0,0,60.13,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,cluttered,caution,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,safe,0,0,0,0,0,0,0,0,64.16,0,0,0.0,,
+llm_only,claude,cluttered,caution,1,,,,,0.0,hazard,0,4,1,1,0,1,1,65,4470.7,274,103,0.002367,"Description: The image shows an indoor industrial or warehouse-like environment with what appears to be machinery, conveyor belts or equipment, and boxes/containers at close range. The image is low quality, slightly blurry, and taken from a low angle.
+Proximity: Objects appear very close — within 1-2 meters, particularly the dark machinery/conveyor structure and white container visible in the foreground.
+Risk: hazard
+
+Pilot suggested action: STOP",
+llm_only,gpt4o,cluttered,caution,1,,,,,0.0,safe,0,4,1,1,0,1,1,48,2551.1,207,63,0.00198,"Description: The image shows an indoor setting with a white chair, a table, and some office supplies like a stapler and a box. There is a window or partition in the background.
+Proximity: Objects are within a few feet of the camera.
+Risk: safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,cluttered,caution,1,,,,,0.0,safe,0,4,1,1,0,1,1,42,2040.5,2974,62,0.000483,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The lighting appears adequate, and there are no visible obstructions.  
+Proximity: Objects appear to be within arm's reach.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,cluttered,caution,1,,,,,0.0,caution,1,5,1,1,1,1,1,61,2211.7,398,83,5.5e-05,"Description: The image shows an indoor scene with various objects on a surface, including a large white board or panel, a cardboard box, a stapler, and a white container. The background appears to be an office or workshop setting with a window or light source visible at the top.
+Proximity: Objects are within 1-2 meters.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,cluttered,caution,2,,,,,0.0,hazard,0,4,1,1,0,1,1,54,4038.9,274,80,0.002022,"Description: The image shows what appears to be an indoor industrial or warehouse environment with equipment, boxes, and structural elements visible at close range.
+Proximity: Objects appear very close to the drone, within 1-2 meters, including what looks like a conveyor or mechanical structure directly in the foreground.
+Risk: hazard
+
+Pilot suggested action: STOP",
+llm_only,gpt4o,cluttered,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,47,2774.6,207,61,0.00195,"Description: The image shows an indoor setting with a white chair, a table, and some office supplies like a stapler and a box. There is a window or partition in the background.
+Proximity: Objects are very close, within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,cluttered,caution,2,,,,,0.0,safe,0,4,1,1,0,1,1,38,2032.6,2974,57,0.00048,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The environment appears well-lit and organized.  
+Proximity: Objects appear to be within arm's reach.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,cluttered,caution,2,,,,,0.0,caution,1,5,1,1,1,1,1,63,1845.2,398,86,5.6e-05,"Description: The image shows an indoor setting with various objects on a surface, including a large white board or panel, a cardboard box, a stapler, and a white container. The background appears to be a room with a window or light source at the top.
+Proximity: Objects are very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,cluttered,caution,3,,,,,0.0,hazard,0,4,1,1,0,1,1,68,4197.6,274,100,0.002322,"Description: The image shows what appears to be an indoor industrial or warehouse environment with shelving, boxes, and equipment visible at low altitude. The image is blurry and taken at a low angle, suggesting the drone is flying close to surfaces or objects.
+Proximity: Objects (shelving, boxes, and surfaces) appear to be very close — estimated within 1-2 meters on multiple sides.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,cluttered,caution,3,,,,,0.0,caution,1,5,1,1,1,1,1,48,2383.9,207,62,0.001965,"Description: The image shows an indoor setting with a white chair, a table, and some office supplies like a stapler and a box. There is a window or glass partition in the background.
+Proximity: Objects are very close, within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,cluttered,caution,3,,,,,0.0,safe,0,4,1,1,0,1,1,38,2431.6,2974,57,0.00048,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The environment appears well-lit and organized.  
+Proximity: Objects appear to be within arm's reach.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,cluttered,caution,3,,,,,0.0,caution,1,5,1,1,1,1,1,63,1749.2,398,86,5.6e-05,"Description: The image shows an indoor setting with various objects on a surface, including a large white board or panel, a cardboard box, a stapler, and a white container. The background appears to be a room with a window or light source at the top.
+Proximity: Objects are very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,cluttered,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,60,3882.7,274,90,0.002172,"Description: The image shows an indoor industrial or warehouse-like environment with what appears to be equipment, boxes, and structural elements including overhead lighting and metal framework.
+Proximity: Several objects appear to be within close range (1-3 meters), including what looks like a box/cardboard structure and some equipment on the left side of the frame.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,cluttered,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,47,2688.8,207,61,0.00195,"Description: The image shows an indoor setting with a white chair, a table, and some office supplies like a stapler and a box. There is a window or partition in the background.
+Proximity: Objects are very close, within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,cluttered,caution,4,,,,,0.0,safe,0,4,1,1,0,1,1,38,1929.5,2974,57,0.00048,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The environment appears well-lit and organized.  
+Proximity: Objects appear to be within arm's reach.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,cluttered,caution,4,,,,,0.0,caution,1,5,1,1,1,1,1,63,2347.9,398,86,5.6e-05,"Description: The image shows an indoor setting with various objects on a surface, including a large white board or panel, a cardboard box, a stapler, and a white container. The background appears to be a room with a window or light source at the top.
+Proximity: Objects are very close, likely within 1-2 feet of the camera.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,cluttered,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,53,4305.3,274,84,0.002082,"Description: The image shows what appears to be an indoor industrial or warehouse environment with conveyor belt equipment, boxes, and overhead ceiling structures visible at low altitude.
+Proximity: Objects (conveyor/equipment and boxes) appear to be very close — estimated within 1-2 meters, filling much of the frame.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,cluttered,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,47,2904.1,207,61,0.00195,"Description: The image shows an indoor setting with a white chair, a table, and some office supplies like a stapler and a box. There is a window or partition in the background.
+Proximity: Objects are very close, within a few feet.
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,cluttered,caution,5,,,,,0.0,safe,0,4,1,1,0,1,1,38,2105.5,2974,57,0.00048,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The environment appears well-lit and organized.  
+Proximity: Objects appear to be within arm's reach.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,cluttered,caution,5,,,,,0.0,caution,1,5,1,1,1,1,1,61,2161.9,398,83,5.5e-05,"Description: The image shows an indoor scene with various objects on a surface, including a large white board or panel, a cardboard box, a stapler, and a white container. The background appears to be an office or workshop setting with a window or light source visible at the top.
+Proximity: Objects are within 1-2 meters.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,cluttered,caution,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,109,7264.6,417,160,0.003651,"Description: The image shows a cluttered indoor industrial or warehouse environment with a large white surface (possibly a tub or equipment) dominating the right foreground, a dark conveyor-like structure on the left, and various boxes/objects at close range. YOLO detected nothing, but the CLIP label correctly hints at a wall or obstruction directly blocking the field of view, which is consistent with the image showing multiple close obstacles.
+
+Proximity: Very close — multiple large objects (white structure, dark ramp/conveyor, boxes) appear to be within 1-2 meters, with the white object nearly filling the right frame and the dark structure encroaching from the left.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,cluttered,caution,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,44,3062.6,327,60,0.002535,"Description: The image shows an indoor setting with a white wall, a window, and some objects like a box and a stapler on a desk. The scene appears cluttered and enclosed.
+Proximity: Very close, within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,cluttered,caution,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,74,2160.2,3094,98,0.000523,"Description: The image shows a workspace with a wall in the background, a stapler, and some boxes, but the view is obstructed and unclear. The CLIP label indicates uncertainty, which aligns with the lack of YOLO detections, suggesting potential risks in the environment. 
+
+Proximity: The visible objects appear to be within a few feet, but the exact distance is hard to determine due to the angle and obstruction.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,cluttered,caution,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,69,1538.8,513,93,6.6e-05,"Description: The image shows a cluttered indoor scene with a large white object, possibly a wall or board, dominating the left side. Various objects, including a brown box, a black object, and a white cylindrical object, are visible on a surface in the foreground. CLIP suggests ""a wall directly blocking,"" which aligns with the large white object.
+Proximity: Very close, within 1-2 feet.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,cluttered,caution,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,85,6795.3,417,122,0.003081,"Description: The image shows an indoor industrial or warehouse setting with large white surfaces/walls very close to the camera, along with what appears to be conveyor belt equipment or machinery in the foreground. YOLO detected no objects, but the image clearly shows significant structural obstructions filling most of the frame at very close range.
+
+Proximity: Extremely close — the white wall/surface appears to be within 1-2 meters, occupying the majority of the frame and posing an immediate collision risk.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,cluttered,caution,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,48,2413.5,327,64,0.002595,"Description: The image shows an indoor setting with a white wall, a window, and some objects like a box and a stapler on a desk. The scene appears cluttered with no clear path for navigation.
+Proximity: Very close, within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,cluttered,caution,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,74,2362.7,3094,98,0.000523,"Description: The image shows a workspace with a wall in the background, a stapler, and some boxes, but the view is obstructed and unclear. The CLIP label indicates uncertainty, which aligns with the lack of YOLO detections, suggesting potential risks in the environment. 
+
+Proximity: The visible objects appear to be within a few feet, but the exact distance is hard to determine due to the angle and obstruction.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,cluttered,caution,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,69,2144.9,513,93,6.6e-05,"Description: The image shows a cluttered indoor scene with a large white object, possibly a wall or board, dominating the left side. Various objects, including a brown box, a black object, and a white cylindrical object, are visible on a surface in the foreground. CLIP suggests ""a wall directly blocking,"" which aligns with the large white object.
+Proximity: Very close, within 1-2 feet.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,cluttered,caution,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,89,4840.6,417,124,0.003111,"Description: The image shows what appears to be an indoor industrial or warehouse environment with large white surfaces, walls, and some equipment/boxes visible at close range. The CLIP label suggesting ""a wall directly blocking"" aligns with the visual — there are large white structures very close to the camera, and the scene is cluttered with objects at various distances.
+
+Proximity: Extremely close — white surfaces and structures appear to be within 1-2 meters of the drone, with walls/panels filling most of the frame.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,cluttered,caution,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,48,2442.0,327,64,0.002595,"Description: The image shows an indoor setting with a white wall, a window, and some objects like a box and a stapler on a desk. The scene appears cluttered with no clear path for navigation.
+Proximity: Very close, within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,cluttered,caution,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,59,2249.2,3094,85,0.000515,"Description: The image shows a cluttered workspace with a stapler, a box, and some white surfaces, but the view is partially obstructed. The CLIP label indicates uncertainty, which aligns with the lack of YOLO detections, suggesting potential risks in the environment. 
+
+Proximity: The objects appear to be within arm's reach, indicating close proximity.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,cluttered,caution,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,69,1646.6,513,93,6.6e-05,"Description: The image shows a cluttered indoor scene with a large white object, possibly a wall or board, dominating the left side. Various objects, including a brown box, a black object, and a white cylindrical object, are visible on a surface in the foreground. CLIP suggests ""a wall directly blocking,"" which aligns with the large white object.
+Proximity: Very close, within 1-2 feet.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,cluttered,caution,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,96,4911.9,417,131,0.003216,"Description: The image shows what appears to be an indoor industrial or warehouse environment with large white structures/walls very close to the camera, along with what looks like conveyor belt equipment or machinery at close range. YOLO detected no objects, but the image clearly shows significant physical obstructions directly in the drone's field of view, consistent with the CLIP label suggesting a wall blocking the scene.
+
+Proximity: Extremely close — large white surfaces and mechanical equipment appear to be within 1-2 meters of the drone, filling most of the frame.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,cluttered,caution,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,42,2660.5,327,58,0.002505,"Description: The image shows an indoor setting with a white wall, a window, and some office supplies like a stapler and a box. The scene appears cluttered and enclosed.
+Proximity: Very close, within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,cluttered,caution,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,72,2559.7,3094,96,0.000522,"Description: The image shows a workspace with a wall in the background, a stapler, and some boxes, but the view is obstructed and unclear. The CLIP label indicates uncertainty, which aligns with the lack of YOLO detections, suggesting potential risks in the environment. 
+
+Proximity: The visible objects appear to be within a few feet, but the exact distance is hard to determine due to the obstruction.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,cluttered,caution,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,69,1847.4,513,93,6.6e-05,"Description: The image shows a cluttered indoor scene with a large white object, possibly a wall or board, dominating the left side. Various objects, including a brown box, a black object, and a white cylindrical object, are visible on a surface in the foreground. CLIP suggests ""a wall directly blocking,"" which aligns with the large white object.
+Proximity: Very close, within 1-2 feet.
+Risk: hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,cluttered,caution,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,89,5786.4,417,126,0.003141,"Description: The image shows a cluttered indoor industrial or warehouse-like environment with large white surfaces/walls very close to the camera, along with what appears to be conveyor equipment or machinery and cardboard boxes in the foreground. YOLO detected nothing, but the image clearly shows significant obstacles at very close range, consistent with the CLIP label suggesting a wall directly blocking the view.
+
+Proximity: Extremely close — white surfaces and equipment appear to be within 1-2 meters of the drone, nearly filling the frame.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,cluttered,caution,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,42,2290.1,327,58,0.002505,"Description: The image shows an indoor setting with a white wall, a window, and some office supplies like a stapler and a box. The scene appears cluttered and enclosed.
+Proximity: Very close, within a few feet.
+Risk: Caution
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,cluttered,caution,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,caution,1,5,1,1,1,1,1,59,2293.1,3094,85,0.000515,"Description: The image shows a cluttered workspace with a stapler, a box, and some white surfaces, but the view is partially obstructed. The CLIP label indicates uncertainty, which aligns with the lack of YOLO detections, suggesting potential risks in the environment. 
+
+Proximity: The objects appear to be within arm's reach, indicating close proximity.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,cluttered,caution,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.119,hazard,0,4,1,1,0,1,1,69,1531.4,513,93,6.6e-05,"Description: The image shows a cluttered indoor scene with a large white object, possibly a wall or board, dominating the left side. Various objects, including a brown box, a black object, and a white cylindrical object, are visible on a surface in the foreground. CLIP suggests ""a wall directly blocking,"" which aligns with the large white object.
+Proximity: Very close, within 1-2 feet.
+Risk: hazard
+Pilot suggested action: STOP",
+yolo_enhanced_only,yolo_enhanced,door_open,safe,1,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,0,0,0,0,0,0,0,57.37,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,door_open,safe,2,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,0,0,0,0,0,0,0,65.63,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,door_open,safe,3,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,0,0,0,0,0,0,0,57.2,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,door_open,safe,4,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,0,0,0,0,0,0,0,59.22,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,door_open,safe,5,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,0,0,0,0,0,0,0,59.84,0,0,0.0,,
+llm_only,claude,door_open,safe,1,,,,,0.0,hazard,0,4,1,1,0,1,1,109,6397.4,274,159,0.003207,"Description: The drone appears to be inside a large industrial or warehouse-like building with metal-framed glass partitions, shelving units, and fluorescent lighting visible in the background.
+Proximity: Glass partition walls and structural frames are very close — estimated within 1–2 meters on multiple sides. Ceiling structures are also in near proximity above.
+Risk: hazard
+
+Pilot suggested action: HOLD
+
+**Reasoning:** The drone is surrounded by glass walls, metal frames, and shelving in a confined indoor space. Moving in any direction risks collision. The environment is cluttered with obstacles at close range. Recommend holding position, assessing surroundings carefully, and executing a slow controlled landing if safe ground space is available below.",
+llm_only,gpt4o,door_open,safe,1,,,,,0.0,safe,1,5,1,1,1,1,1,43,2516.7,207,57,0.00189,"Description: The image shows an indoor space with glass doors and a row of tables or workstations. The area appears to be well-lit and organized.
+Proximity: Objects such as tables and doors are within a few meters.
+Risk: Safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,door_open,safe,1,,,,,0.0,safe,1,5,1,1,1,1,1,47,2193.2,2974,63,0.000484,"Description: The image shows an indoor space with glass doors and a long table or counter in the background. The area appears well-lit and organized, with some equipment visible along the walls.  
+Proximity: Objects appear to be within a few meters.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,door_open,safe,1,,,,,0.0,hazard,0,4,1,1,0,1,1,73,3688.8,398,100,6e-05,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls, a ceiling fan, and what appears to be a partially open door or partition on the right. There are multiple reflective surfaces and structural elements.
+Proximity: The open door/partition on the right is very close, likely within 1-2 meters. Other structures and the ceiling fan appear further away, perhaps 5-10 meters.
+Risk: Hazard
+Pilot suggested action: STOP",
+llm_only,claude,door_open,safe,2,,,,,0.0,hazard,0,4,1,1,0,1,1,54,4094.5,274,89,0.002157,"Description: The drone appears to be flying indoors inside a large industrial or commercial building, with metal shelving/racking structures, glass partitions, and ceiling infrastructure visible.
+Proximity: Multiple structural elements (shelving units, glass panels, ceiling beams) are in very close proximity — estimated within 1–2 meters on multiple sides.
+Risk: hazard
+
+Pilot suggested action: HOLD",
+llm_only,gpt4o,door_open,safe,2,,,,,0.0,safe,1,5,1,1,1,1,1,43,2561.3,207,57,0.00189,"Description: The image shows an indoor space with glass doors and a row of tables or workstations. The area appears to be well-lit and organized.
+Proximity: Objects such as tables and doors are within a few meters.
+Risk: safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,door_open,safe,2,,,,,0.0,safe,1,5,1,1,1,1,1,44,2044.9,2974,61,0.000483,"Description: The image shows an indoor space with glass doors and a long table or counter in the background. The area appears well-lit and organized, with no visible obstructions.  
+Proximity: Objects appear to be within a few meters.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,door_open,safe,2,,,,,0.0,hazard,0,4,1,1,0,1,1,73,3896.3,398,100,6e-05,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls, a ceiling fan, and what appears to be a partially open door or partition on the right. There are multiple reflective surfaces and structural elements.
+Proximity: The open door/partition on the right is very close, likely within 1-2 meters. Other structures and the ceiling fan appear further away, perhaps 5-10 meters.
+Risk: Hazard
+Pilot suggested action: STOP",
+llm_only,claude,door_open,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,60,4297.4,274,95,0.002247,"Description: The drone appears to be inside a large industrial or warehouse-like building with metal shelving/racking structures, glass partitions, and fluorescent lighting overhead.
+Proximity: Metal frame structures and glass panels are very close — within 1–2 meters on multiple sides, suggesting the drone is navigating through a confined indoor space with shelving units nearby.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,door_open,safe,3,,,,,0.0,safe,1,5,1,1,1,1,1,45,2912.1,207,59,0.00192,"Description: The image shows an indoor space with a row of tables or workstations and a glass door partially open. The area appears to be well-lit.
+Proximity: Objects such as tables and the door are within a few meters.
+Risk: safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,door_open,safe,3,,,,,0.0,safe,1,5,1,1,1,1,1,44,2004.6,2974,60,0.000482,"Description: The image shows a well-lit indoor space with glass doors and a series of tables or workstations in the background. The area appears organized and free of clutter.  
+Proximity: Objects appear to be within a few meters.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,door_open,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,76,4044.5,398,104,6.1e-05,"Description: The image shows the interior of a building, possibly an office or industrial space, with white walls, a ceiling fan, and what appears to be a glass door slightly ajar on the right. There are also some tables or workbenches visible in the background.
+Proximity: The glass door on the right is very close, likely within 1-2 meters. Other objects in the background are further away, beyond 5 meters.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,door_open,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,59,4117.8,274,93,0.002217,"Description: The drone appears to be inside a large industrial or commercial building, likely a warehouse or factory, with metal shelving/racking structures, glass partitions, and overhead lighting visible.
+Proximity: Metal frame structures and shelving units appear very close on the right side (within 1-2 meters); ceiling structures also appear within close range above.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,door_open,safe,4,,,,,0.0,safe,1,5,1,1,1,1,1,45,2897.2,207,59,0.00192,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The area appears to be well-lit and organized.
+Proximity: Objects such as tables and the door are within a few meters.
+Risk: Safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,door_open,safe,4,,,,,0.0,safe,1,5,1,1,1,1,1,44,2256.9,2974,60,0.000482,"Description: The image shows a well-lit indoor space with glass doors and a series of tables or workstations in the background. The area appears organized and free of clutter.  
+Proximity: Objects appear to be within a few meters.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,door_open,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,76,2322.4,398,104,6.1e-05,"Description: The image shows the interior of a building, possibly an office or industrial space, with white walls, a ceiling fan, and what appears to be a glass door slightly ajar on the right. There are also some tables or workbenches visible in the background.
+Proximity: The glass door on the right is very close, likely within 1-2 meters. Other objects in the background are further away, beyond 5 meters.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,door_open,safe,5,,,,,0.0,hazard,0,4,1,1,0,1,1,56,4334.7,274,89,0.002157,"Description: The drone appears to be inside a large industrial or warehouse-like building with metal shelving/racking structures, glass partitions, and fluorescent lighting visible overhead.
+Proximity: Metal frame structures and shelving units appear very close — approximately 1–2 meters on multiple sides, posing significant collision risk in a confined indoor space.
+Risk: hazard
+Pilot suggested action: HOLD",
+llm_only,gpt4o,door_open,safe,5,,,,,0.0,safe,1,5,1,1,1,1,1,43,5321.3,207,57,0.00189,"Description: The image shows an indoor space with glass doors and a row of tables or workstations. The area appears to be well-lit and organized.
+Proximity: Objects such as tables and doors are within a few meters.
+Risk: safe
+Pilot suggested action: PROCEED",
+llm_only,gpt4o_mini,door_open,safe,5,,,,,0.0,safe,1,5,1,1,1,1,1,47,2038.9,2974,63,0.000484,"Description: The image shows an indoor space with glass doors and a long table or counter in the background. The area appears well-lit and organized, with some equipment visible along the walls.  
+Proximity: Objects appear to be within a few meters.  
+Risk: safe  
+Pilot suggested action: PROCEED",
+llm_only,gemini,door_open,safe,5,,,,,0.0,hazard,0,4,1,1,0,1,1,73,3665.4,398,100,6e-05,"Description: The image shows an indoor environment, possibly an office or industrial space, with white walls, a ceiling fan, and what appears to be a partially open door or partition on the right. There are multiple reflective surfaces and structural elements.
+Proximity: The open door/partition on the right is very close, likely within 1-2 meters. Other structures and the ceiling fan appear further away, perhaps 5-10 meters.
+Risk: Hazard
+Pilot suggested action: STOP",
+combined_enhanced,claude,door_open,safe,1,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,hazard,0,4,1,1,0,1,1,98,6487.9,453,156,0.003699,"Description: The image shows an indoor industrial or warehouse-like space with metal-framed glass partitions/walls and shelving units visible in the background. The YOLO detection of a window at ~2.46m aligns with the visible glass partition frames in the foreground, and the CLIP label referencing ""a wall directly blocking"" is consistent with the enclosed, obstacle-dense environment visible in the image.
+
+Proximity: The glass partitions and structural frames appear very close — visually estimated at 1.5–3m — with multiple structural elements (metal frames, ceiling infrastructure, shelving) creating a confined, cluttered space with limited clearance.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,door_open,safe,1,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,62,2555.3,363,83,0.00306,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The YOLO detection of a window seems to be referring to the glass door. The CLIP label is uncertain, but the scene appears to be a corridor or workspace.
+Proximity: The glass door is approximately 2-3 meters away.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,door_open,safe,1,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,76,2561.9,3130,102,0.000531,"Description: The image shows an indoor space with glass doors and a wall, suggesting a corridor or room with some furniture or equipment in the background. The YOLO detection indicates a window, but the visual evidence does not clearly support this, as the area appears more enclosed than open. 
+
+Proximity: The visual estimate suggests that the nearest objects are within approximately 2-3 meters, contradicting the YOLO estimate of 2.46 meters.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,door_open,safe,1,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,61,1950.0,557,84,6.7e-05,"Description: The image shows an indoor environment with multiple glass partitions and an open doorway. YOLO detects a ""window"" which appears to be an open glass door, and the CLIP label ""a wall directly blocking and f"" is inaccurate as there is an open path.
+Proximity: Very close, within 1-2 meters of the open doorway.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,door_open,safe,2,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,hazard,0,4,1,1,0,1,1,97,5933.9,453,144,0.003519,"Description: The image shows an indoor industrial or warehouse-like space with large glass partition walls/windows and metal framing structures very close to the camera; the YOLO detection of a window at ~2.46m appears consistent with the nearby glass panels visible in the frame, and the CLIP label referencing ""a wall directly blocking"" aligns with the heavily obstructed foreground.
+Proximity: The glass partition and metal frame structures appear to be within 1-3 meters, with structural elements (metal frames) potentially within arm's reach in the immediate foreground — very close proximity confirmed visually.
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,door_open,safe,2,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,63,2970.6,363,86,0.003105,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The YOLO detection of a window seems to be referring to the glass door. The CLIP label is uncertain, mentioning a wall, which is not clearly visible.
+Proximity: The glass door appears to be close, likely within 2-3 meters.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,door_open,safe,2,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,83,2449.0,3130,110,0.000535,"Description: The image shows an indoor space with glass doors and a wall, suggesting a corridor or room with some furniture or equipment in the background. The YOLO detection indicates a window, but the visual evidence does not clearly support this, as the area appears more like a partitioned space rather than an open window. 
+
+Proximity: The visual estimate suggests that the nearest objects are within approximately 2-3 meters, contradicting the YOLO estimated distance of 2.46 meters.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,door_open,safe,2,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,102,2471.2,557,133,8.2e-05,"Description: The image shows an indoor environment with a partially open glass door or partition in the foreground, framed by white or silver colored metal. Beyond the door, there appears to be a hallway or room with multiple tables or workbenches. The YOLO detection identifies a ""window"" which is consistent with the glass partition/door. The CLIP label ""uncertain (a wall directly blocking and f)"" is somewhat contradictory as the scene is not entirely blocked, but rather shows an opening.
+Proximity: Very close, the drone is directly in front of or very near the open glass door/partition.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,door_open,safe,3,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,hazard,0,4,1,1,0,1,1,106,7344.9,453,153,0.003654,"Description: The image shows an indoor industrial or warehouse space with large glass-and-metal frame partitions/windows very close to the camera, with the space extending further back showing ceiling structures, lights, and shelving. The YOLO detection of a window at ~2.46m appears consistent with the glass partition frames visible in the foreground, though the structures appear even closer than estimated; the CLIP label is low-confidence but the image clearly shows an enclosed interior with obstructions.
+
+Proximity: The glass partition frames and structural elements appear to be within 1-2 meters of the drone, very close and immediately surrounding the field of view.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,door_open,safe,3,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,67,2901.5,363,88,0.003135,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The YOLO detection of a window seems to be incorrect as it appears to be a glass door instead. The CLIP label is uncertain, but the scene appears to be a corridor or workspace.
+Proximity: The glass door is approximately 2-3 meters away.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,door_open,safe,3,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,83,2451.2,3130,110,0.000535,"Description: The image shows an indoor space with glass doors and a wall, suggesting a corridor or room with some furniture or equipment in the background. The YOLO detection indicates a window, but the visual evidence does not clearly support this, as the area appears more like a partitioned space rather than an open window. 
+
+Proximity: The visual estimate suggests that the nearest objects are within approximately 2-3 meters, contradicting the YOLO estimated distance of 2.46 meters.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,door_open,safe,3,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,102,2257.9,557,133,8.2e-05,"Description: The image shows an indoor environment with a partially open glass door or partition in the foreground, framed by white or silver colored metal. Beyond the door, there appears to be a hallway or room with multiple tables or workbenches. The YOLO detection identifies a ""window"" which is consistent with the glass partition/door. The CLIP label ""uncertain (a wall directly blocking and f)"" is somewhat contradictory as the scene is not entirely blocked, but rather shows an opening.
+Proximity: Very close, the drone is directly in front of or very near the open glass door/partition.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,door_open,safe,4,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,hazard,0,4,1,1,0,1,1,104,7577.8,453,153,0.003654,"Description: The image shows an indoor industrial or warehouse-like space with large glass partition walls/windows and metal framing in the foreground, with an open hall visible beyond. The YOLO detection of a window at ~2.46m appears plausible given the glass panels are visually close and prominent; the CLIP label is uncertain but the ""wall blocking"" hint aligns with the glass partitions filling the frame.
+
+Proximity: The glass partition walls and metal frames appear to be within 1–3 meters, with structural elements very close — the metal framing is likely within 1–2 meters based on visual scale and perspective.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,door_open,safe,4,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,67,3580.1,363,88,0.003135,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The YOLO detection of a window seems to be incorrect as it appears to be a glass door instead. The CLIP label is uncertain, but the scene appears to be a corridor or workspace.
+Proximity: The glass door is approximately 2-3 meters away.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,door_open,safe,4,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,83,2662.6,3130,110,0.000535,"Description: The image shows an indoor space with glass doors and a wall, suggesting a corridor or room with some furniture or equipment in the background. The YOLO detection indicates a window, but the visual evidence does not clearly support this, as the area appears more like a partitioned space rather than an open window. 
+
+Proximity: The visual estimate suggests that the nearest objects are within approximately 2-3 meters, contradicting the YOLO estimated distance of 2.46 meters.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,door_open,safe,4,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,102,2363.1,557,133,8.2e-05,"Description: The image shows an indoor environment with a partially open glass door or partition in the foreground, framed by white or silver colored metal. Beyond the door, there appears to be a hallway or room with multiple tables or workbenches. The YOLO detection identifies a ""window"" which is consistent with the glass partition/door. The CLIP label ""uncertain (a wall directly blocking and f)"" is somewhat contradictory as the scene is not entirely blocked, but rather shows an opening.
+Proximity: Very close, the drone is directly in front of or very near the open glass door/partition.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,door_open,safe,5,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,hazard,0,4,1,1,0,1,1,96,5629.4,453,149,0.003594,"Description: The image shows an indoor industrial or warehouse space with large glass-panel partitions/windows and metal framework structures. The YOLO detection flags a window at ~2.46m but visually the glass partitions appear to be the dominant obstacle — large transparent panels with metal frames are very close to the camera/drone, likely within 1-2 meters, making the YOLO estimate potentially optimistic.
+
+Proximity: Glass partitions and metal framing appear within 1-2 meters visually; the structural elements (metal frames, glass panels) are immediately in the drone's path and pose a significant collision risk.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,door_open,safe,5,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,67,2557.8,363,88,0.003135,"Description: The image shows an indoor space with a series of tables or workstations and a glass door. The YOLO detection of a window seems to be incorrect as it appears to be a glass door instead. The CLIP label is uncertain, but the scene appears to be a corridor or workspace.
+Proximity: The glass door is approximately 2-3 meters away.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,door_open,safe,5,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,97,3074.1,3130,120,0.000541,"Description: The image shows an indoor space with glass doors and a wall, suggesting a corridor or room with some furniture or equipment visible in the background. The YOLO detection indicates a window, but the visual evidence does not clearly support this, as the area appears more like a partitioned space rather than an open window. The CLIP label suggests uncertainty due to a wall blocking the view.
+
+Proximity: The visible elements suggest a proximity of approximately 2-3 meters, as the space appears confined and the objects are relatively close together.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,door_open,safe,5,yolo-world,"YOLO detections: window (conf=0.34, est_dist~2.46m [advisory], bbox=[0.0,120.2,16.8,149.5])",uncertain (a wall directly blocking and f),unknown,0.117,caution,0,4,1,1,0,1,1,102,2462.9,557,133,8.2e-05,"Description: The image shows an indoor environment with a partially open glass door or partition in the foreground, framed by white or silver colored metal. Beyond the door, there appears to be a hallway or room with multiple tables or workbenches. The YOLO detection identifies a ""window"" which is consistent with the glass partition/door. The CLIP label ""uncertain (a wall directly blocking and f)"" is somewhat contradictory as the scene is not entirely blocked, but rather shows an opening.
+Proximity: Very close, the drone is directly in front of or very near the open glass door/partition.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+yolo_enhanced_only,yolo_enhanced,person_far,safe,1,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,0,0,0,0,0,0,0,57.91,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_far,safe,2,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,0,0,0,0,0,0,0,58.1,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_far,safe,3,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,0,0,0,0,0,0,0,57.65,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_far,safe,4,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,0,0,0,0,0,0,0,57.93,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,person_far,safe,5,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,0,0,0,0,0,0,0,58.25,0,0,0.0,,
+llm_only,claude,person_far,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,63,3899.2,274,98,0.002292,"Description: An indoor industrial or workshop environment with a person standing in the center of the frame, surrounded by machinery, shelving units, and equipment. The space appears dimly lit with overhead lighting.
+Proximity: A person is approximately 3–5 meters away, centered in the frame. Various large machines and shelving are present within 2–6 meters on multiple sides.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,person_far,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,43,2423.0,207,56,0.001875,"Description: The image shows an indoor room with a person standing in the center. There are desks, chairs, and various equipment around the room.
+Proximity: The person appears to be a few meters away from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_far,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,55,2353.1,2974,76,0.000492,"Description: The image shows an indoor space with a person standing in the center, surrounded by furniture and equipment, including a desk and a chair. The lighting appears to be adequate, but the overall environment looks somewhat cluttered.  
+Proximity: The person is approximately 2-3 meters away from the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_far,safe,1,,,,,0.0,caution,0,4,1,1,0,1,1,56,2676.6,398,78,5.3e-05,"Description: The image shows a person standing in what appears to be an indoor office or workshop environment. There are various objects like a chair, a desk, and what looks like machinery or equipment in the background.
+Proximity: The person is approximately 5-10 feet away from the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_far,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,73,4394.6,274,110,0.002472,"Description: An indoor industrial or workshop environment with a person standing in the center of the frame, surrounded by machinery, shelving units, and equipment. The space appears to be a factory or workshop floor with overhead lighting.
+Proximity: A person is present approximately 3–5 meters away (center frame), with walls, shelving, and machinery at roughly 2–6 meters on multiple sides — confined indoor space with limited clearance.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,person_far,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,40,2353.7,207,56,0.001875,"Description: The image shows an indoor room with a person standing in the center. There are desks, chairs, and equipment around the room.
+Proximity: The person is approximately 2-3 meters away from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_far,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,55,2149.1,2974,76,0.000492,"Description: The image shows an indoor space with a person standing in the center, surrounded by furniture and equipment, including a desk and a chair. The lighting appears to be adequate, but the overall environment looks somewhat cluttered.  
+Proximity: The person is approximately 2-3 meters away from the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_far,safe,2,,,,,0.0,caution,0,4,1,1,0,1,1,56,1851.9,398,78,5.3e-05,"Description: The image shows a person standing in what appears to be an indoor office or workshop environment. There are various objects like a chair, a desk, and what looks like machinery or equipment in the background.
+Proximity: The person is approximately 5-10 feet away from the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_far,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,68,5219.6,274,101,0.002337,"Description: An indoor industrial or workshop environment with a person standing in the center of the frame, surrounded by machinery, shelving units, and equipment. The space is dimly lit with overhead fluorescent lighting.
+Proximity: A person is approximately 3–5 meters away, centered in the frame. Various large machines and structures are close on the left and right sides, posing lateral collision risks.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,person_far,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,42,2761.2,207,58,0.001905,"Description: The image shows an indoor room with a person standing in the center. There are desks, chairs, and various equipment around the room.
+Proximity: The person appears to be approximately 2-3 meters from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_far,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,56,2326.7,2974,74,0.000491,"Description: The image shows an indoor space with a person standing in the center, surrounded by furniture and equipment, including a desk and a chair. The lighting appears adequate, and the environment seems organized but somewhat cluttered.  
+Proximity: The person appears to be a few meters away from the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_far,safe,3,,,,,0.0,caution,0,4,1,1,0,1,1,56,2290.3,398,78,5.3e-05,"Description: The image shows a person standing in what appears to be an indoor office or workshop environment. There are various objects like a chair, a desk, and what looks like machinery or equipment in the background.
+Proximity: The person is approximately 5-10 feet away from the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_far,safe,4,,,,,0.0,hazard,0,4,1,1,0,1,1,69,4315.3,274,102,0.002352,"Description: An indoor industrial or workshop environment with a person standing in the center of the frame, surrounded by machinery, shelving units, and equipment. The space has overhead lighting but appears dimly lit with limited visibility.
+Proximity: A person is present at approximately 4–6 meters, standing directly in the drone's forward path. Various structures and machinery are within 2–3 meters on the sides.
+Risk: hazard
+Pilot suggested action: STOP",
+llm_only,gpt4o,person_far,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,42,2738.1,207,58,0.001905,"Description: The image shows an indoor room with a person standing in the center. There are desks, chairs, and various equipment around the room.
+Proximity: The person appears to be approximately 2-3 meters from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_far,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,56,2284.0,2974,74,0.000491,"Description: The image shows an indoor space with a person standing in the center, surrounded by furniture and equipment, including a desk and a chair. The lighting appears adequate, and the environment seems organized but somewhat cluttered.  
+Proximity: The person appears to be a few meters away from the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_far,safe,4,,,,,0.0,caution,0,4,1,1,0,1,1,56,2128.3,398,78,5.3e-05,"Description: The image shows a person standing in what appears to be an indoor office or workshop environment. There are various objects like a chair, a desk, and what looks like machinery or equipment in the background.
+Proximity: The person is approximately 5-10 feet away from the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+llm_only,claude,person_far,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,54,4127.8,274,84,0.002082,"Description: An indoor industrial or workshop space with a person standing in the center, surrounded by machinery, shelving units, and equipment under fluorescent lighting.
+Proximity: A person is present at approximately 4–6 meters distance, centered in the frame; shelving and machinery are close on both sides and behind.
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+llm_only,gpt4o,person_far,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,42,2631.9,207,58,0.001905,"Description: The image shows an indoor room with a person standing in the center. There are desks, chairs, and various equipment around the room.
+Proximity: The person appears to be approximately 2-3 meters from the camera.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,person_far,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,57,2352.2,2974,75,0.000491,"Description: The image shows an indoor space with a person standing in the center, surrounded by furniture and equipment, including a desk and a chair. The lighting appears to be adequate, but the overall environment looks somewhat cluttered.  
+Proximity: The person appears to be a few meters away from the camera.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+llm_only,gemini,person_far,safe,5,,,,,0.0,caution,0,4,1,1,0,1,1,56,2262.0,398,78,5.3e-05,"Description: The image shows a person standing in what appears to be an indoor office or workshop environment. There are various objects like a chair, a desk, and what looks like machinery or equipment in the background.
+Proximity: The person is approximately 5-10 feet away from the drone's current position.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_far,safe,1,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,4,1,1,0,1,1,122,6129.7,494,182,0.004212,"Description: The image shows an indoor industrial or workshop space with a person standing in the center-background area, a white plastic chair on the left, and various equipment/shelving units filling the space. The YOLO distance estimate of ~0.57m for the person appears to be a significant overestimate — visually the person looks to be approximately 4-6 meters away based on their relative size and perspective. The CLIP label of ""cluttered room full of obstacles"" is consistent with the image.
+
+Proximity: The person is visually estimated at 4-6m away; the chair is roughly 2-3m away. Multiple fixed obstacles (shelving, equipment, walls) are present throughout the space. The environment is tight and cluttered with limited clear flight paths.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_far,safe,1,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,54,2778.4,404,70,0.00307,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room appears to be an indoor space with various objects and equipment around.
+Proximity: The person is approximately 1 meter away, and the chair is slightly further.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_far,safe,1,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,77,2353.4,3171,100,0.000536,"Description: The image shows a cluttered room with a person standing in the center and a chair nearby. The YOLO detection estimates for the person and chair suggest they are closer than they appear, as the room seems to have a significant amount of space and obstacles. The CLIP label indicates uncertainty due to the cluttered environment.  
+Proximity: The person appears to be approximately 2-3 meters away based on visual assessment.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_far,safe,1,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,87,1750.3,607,120,8.2e-05,"Description: The image shows a person standing in what appears to be an indoor room or workshop. A white plastic chair is visible on the left. The CLIP label ""a cluttered room full of obsta"" seems plausible given the general appearance, though the immediate area around the person and chair isn't excessively cluttered.
+Proximity: The person appears to be several meters away, perhaps 3-4 meters. The chair is closer, possibly 2-3 meters away. YOLO's distance estimates seem to be significantly underestimated.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_far,safe,2,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,,0,0,0,0,0,0,0,0,60917.8,0,0,0.0,,The read operation timed out
+combined_enhanced,gpt4o,person_far,safe,2,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,54,2458.0,404,70,0.00307,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room appears to be an indoor space with various objects and equipment around.
+Proximity: The person is approximately 1 meter away, and the chair is slightly further.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_far,safe,2,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,85,2509.2,3171,119,0.000547,"Description: The image shows a cluttered room with a person standing in the center and a chair nearby. The YOLO detection estimates for the person and chair seem low, as the person appears to be closer than the estimated distance of 0.57m, and the chair also seems nearer than 0.97m. The CLIP label indicates uncertainty due to the cluttered environment. 
+
+Proximity: The person appears to be approximately 2-3 meters away based on visual assessment, which contradicts the YOLO estimate.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_far,safe,2,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,87,2308.8,607,120,8.2e-05,"Description: The image shows a person standing in what appears to be an indoor room or workshop. A white plastic chair is visible on the left. The CLIP label ""a cluttered room full of obsta"" seems plausible given the general appearance, though the immediate area around the person and chair isn't excessively cluttered.
+Proximity: The person appears to be several meters away, perhaps 3-4 meters. The chair is closer, possibly 2-3 meters away. YOLO's distance estimates seem to be significantly underestimated.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_far,safe,3,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,4,1,1,0,1,1,104,6250.2,494,176,0.004122,"Description: The image shows an indoor industrial or workshop environment with a person standing in the center-background area, a plastic chair on the left, and various machinery/shelving units filling the space. The YOLO distance estimate of ~0.57m for the person appears significantly underestimated — visually the person appears to be roughly 4–6 meters away; the cluttered CLIP scene label accurately reflects the dense, obstacle-filled environment.
+
+Proximity: The person is visually estimated at 4–6m away (YOLO's 0.57m is a clear heuristic error); the chair is approximately 1.5–2m away. Multiple structural obstacles (shelves, machinery, walls) are present throughout the space.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_far,safe,3,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,53,2762.7,404,69,0.003055,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room appears to be an indoor space with various equipment and furniture.
+Proximity: The person is approximately 1 meter away, and the chair is slightly further.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_far,safe,3,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,81,2455.8,3171,110,0.000542,"Description: The image shows a cluttered room with a person standing in the center and a chair nearby. The YOLO detection estimates for the person and chair seem low given the proximity and size of the objects in the image, indicating a potential discrepancy. The CLIP label suggests uncertainty due to the cluttered environment. 
+
+Proximity: The person appears to be approximately 1-2 meters away based on visual assessment, which contradicts the YOLO estimate of ~0.57m.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_far,safe,3,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,94,2048.4,607,123,8.2e-05,"Description: The image shows a person standing in what appears to be an indoor room or workshop. A white plastic chair is visible on the left. The CLIP label ""a cluttered room full of obsta"" seems plausible given the general appearance, though the immediate area around the person is not excessively cluttered. The YOLO estimated distance for the person seems too close given their size in the frame.
+Proximity: The person appears to be several meters away, perhaps 3-5 meters. The chair is closer, likely 1-2 meters away.
+Risk: caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_far,safe,4,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,116,6556.2,494,185,0.004257,"Description: The image shows an indoor industrial or workshop space with a person standing in the center-background area, a white plastic chair on the left, shelving units, and various equipment/machinery. The YOLO distance estimate of ~0.57m for the person appears to be a significant overestimate — visually the person appears to be several meters away (roughly 4-6m), likely due to bounding box heuristics failing in this low-light, wide-angle scenario. The CLIP label correctly identifies a cluttered environment with multiple obstacles.
+
+Proximity: The person appears visually ~4-6 meters away; the chair is closer at approximately 2-3 meters to the left. Multiple structural obstacles (shelving, machinery, walls) are present throughout the space.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o,person_far,safe,4,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,55,2766.0,404,74,0.00313,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room appears to be an indoor space with various objects and furniture.
+Proximity: The person is approximately 0.5 to 1 meter away, and the chair is slightly further.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_far,safe,4,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,85,2406.5,3171,119,0.000547,"Description: The image shows a cluttered room with a person standing in the center and a chair nearby. The YOLO detection estimates for the person and chair seem low, as the person appears to be closer than the estimated distance of 0.57m, and the chair also seems nearer than 0.97m. The CLIP label indicates uncertainty due to the cluttered environment. 
+
+Proximity: The person appears to be approximately 1-2 meters away based on visual assessment, which contradicts the YOLO estimate.
+
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_far,safe,4,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,87,2002.6,607,120,8.2e-05,"Description: The image shows a person standing in what appears to be an indoor room or workshop. A white plastic chair is visible on the left. The CLIP label ""a cluttered room full of obsta"" seems plausible given the general appearance, though the immediate area around the person and chair isn't excessively cluttered.
+Proximity: The person appears to be several meters away, perhaps 3-4 meters. The chair is closer, possibly 2-3 meters away. YOLO's distance estimates seem to be significantly underestimated.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,claude,person_far,safe,5,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,hazard,0,4,1,1,0,1,1,110,5830.7,494,173,0.004077,"Description: The image shows an indoor industrial or workshop environment with a person standing in the center-background area, a white plastic chair on the left, and various equipment/shelving units filling the space. The YOLO estimate of ~0.57m for the person appears significantly underestimated — visually the person appears to be roughly 4-6 meters away; the CLIP label of ""cluttered room full of obstacles"" accurately reflects the dense, confined environment with limited navigable space.
+
+Proximity: Person appears approximately 4-6m away visually; chair roughly 2-3m; multiple structural obstacles (shelving, equipment, walls) throughout the space at varying distances — the room is heavily cluttered with limited clearance.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,person_far,safe,5,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,54,2353.8,404,70,0.00307,"Description: The image shows a cluttered room with a person standing in the center and a chair to the left. The room appears to be an indoor space with various objects and equipment around.
+Proximity: The person is approximately 1 meter away, and the chair is slightly further.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gpt4o_mini,person_far,safe,5,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,77,2566.2,3171,100,0.000536,"Description: The image shows a cluttered room with a person standing in the center and a chair nearby. The YOLO detection estimates for the person and chair suggest they are closer than they appear, as the room seems to have a significant amount of space and obstacles. The CLIP label indicates uncertainty due to the cluttered environment.  
+Proximity: The person appears to be approximately 2-3 meters away based on visual assessment.  
+Risk: caution  
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,person_far,safe,5,yolo-world,"YOLO detections: person (conf=0.48, est_dist~0.57m [advisory], bbox=[149.2,114.1,193.3,240.0]); chair (conf=0.48, est_dist~0.97m [advisory], bbox=[8.8,165.5,79.3,240.0])",uncertain (a cluttered room full of obsta),unknown,0.1158,caution,0,4,1,1,0,1,1,87,2870.0,607,120,8.2e-05,"Description: The image shows a person standing in what appears to be an indoor room or workshop. A white plastic chair is visible on the left. The CLIP label ""a cluttered room full of obsta"" seems plausible given the general appearance, though the immediate area around the person and chair isn't excessively cluttered.
+Proximity: The person appears to be several meters away, perhaps 3-4 meters. The chair is closer, possibly 2-3 meters away. YOLO's distance estimates seem to be significantly underestimated.
+Risk: Caution
+Pilot suggested action: SLOW_DOWN",
+yolo_enhanced_only,yolo_enhanced,blocked_lens,hazard,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,safe,0,0,0,0,0,0,0,0,56.91,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,blocked_lens,hazard,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,safe,0,0,0,0,0,0,0,0,57.61,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,blocked_lens,hazard,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,safe,0,0,0,0,0,0,0,0,56.33,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,blocked_lens,hazard,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,safe,0,0,0,0,0,0,0,0,56.13,0,0,0.0,,
+yolo_enhanced_only,yolo_enhanced,blocked_lens,hazard,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,safe,0,0,0,0,0,0,0,0,56.35,0,0,0.0,,
+llm_only,claude,blocked_lens,hazard,1,,,,,0.0,hazard,1,5,1,1,1,1,1,81,4793.9,274,120,0.002622,"Description: The image appears to show visual noise or static, possibly indicating a camera malfunction, lens obstruction, or severe interference — no discernible scene or objects are visible.
+Proximity: Unable to determine — no identifiable objects, terrain, or obstacles can be assessed from this feed.
+Risk: hazard
+
+Pilot suggested action: HOLD
+
+**Reason:** Camera feed is unreliable or completely obscured. Operating without visual confirmation is unsafe. Hold position immediately, do not maneuver until camera feed is restored or verified through alternate means.",
+llm_only,gpt4o,blocked_lens,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,34,2770.6,207,46,0.001725,"Description: The image appears to be filled with static or noise, with no discernible objects or features visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,blocked_lens,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,35,2142.0,2974,48,0.000475,"Description: The image appears to be a static or noise-filled screen with no discernible objects or features visible.  
+Proximity: Unable to estimate proximity due to lack of identifiable features.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,blocked_lens,hazard,1,,,,,0.0,caution,0,4,1,1,0,1,1,35,1439.4,398,48,4.4e-05,"Description: The image is very dark and appears to be static or noise, with no discernible objects or features. It is impossible to determine any environmental context.
+Proximity: Undeterminable
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,blocked_lens,hazard,2,,,,,0.0,hazard,1,5,1,1,1,1,1,95,5527.8,274,145,0.002997,"Description: The image shows what appears to be visual noise or static, possibly indicating a camera malfunction, lens obstruction, or severe interference. No discernible objects, terrain, or persons are visible.
+Proximity: Unable to determine — no recognizable objects or depth cues are visible through the noise/static.
+Risk: hazard
+
+Pilot suggested action: HOLD
+
+> ⚠️ **Camera feed appears corrupted or blocked.** Do not proceed without a reliable visual feed. Maintain current position (HOLD), attempt camera diagnostic or switch to backup feed if available. If no alternative sensor data is available, initiate controlled LAND at current position.",
+llm_only,gpt4o,blocked_lens,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,34,2870.5,207,46,0.001725,"Description: The image appears to be a static or noise pattern, with no discernible objects or people visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,blocked_lens,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,35,2111.7,2974,48,0.000475,"Description: The image appears to be a static or noise-filled screen with no discernible objects or features visible.  
+Proximity: Unable to estimate proximity due to lack of identifiable features.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,blocked_lens,hazard,2,,,,,0.0,caution,0,4,1,1,0,1,1,35,3006.2,398,48,4.4e-05,"Description: The image is very dark and appears to be static or noise, with no discernible objects or features. It is impossible to determine any environmental details.
+Proximity: Undeterminable
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,blocked_lens,hazard,3,,,,,0.0,hazard,1,5,1,1,1,1,1,53,4406.9,274,81,0.002037,"Description: The image shows what appears to be visual noise or static, possibly indicating a camera malfunction, lens obstruction, or severe interference. No discernible terrain, objects, or persons are visible.
+Proximity: Unable to determine — visual feed is compromised and provides no usable depth or spatial information.
+Risk: hazard
+Pilot suggested action: HOLD",
+llm_only,gpt4o,blocked_lens,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,34,2300.5,207,46,0.001725,"Description: The image appears to be a static or noise pattern, with no discernible objects or people visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,blocked_lens,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,42,2328.5,2974,56,0.00048,"Description: The image appears to be a static or noise-filled screen with a mix of colors, indicating a lack of clear visual information.  
+Proximity: Unable to estimate proximity due to lack of discernible objects or features.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,blocked_lens,hazard,3,,,,,0.0,caution,0,4,1,1,0,1,1,35,2338.8,398,48,4.4e-05,"Description: The image is very dark and appears to be static or noise, with no discernible objects or features. It is impossible to determine any environmental context.
+Proximity: Undeterminable
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,blocked_lens,hazard,4,,,,,0.0,hazard,1,5,1,1,1,1,1,98,5633.7,274,144,0.002982,"Description: The image appears to show visual noise or static, similar to a camera malfunction, heavily obscured lens, or complete signal loss — no discernible scene or objects are visible.
+Proximity: Unable to determine — visual feed is completely compromised with no identifiable features, objects, or terrain.
+Risk: hazard
+
+Pilot suggested action: HOLD
+
+> ⚠️ **Camera feed is corrupted or lens is fully obstructed.** Drone should hold position immediately. Do not proceed without a clear visual feed. Recommend switching to backup camera if available, or initiating a controlled landing in a known safe location using sensor data only.",
+llm_only,gpt4o,blocked_lens,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,34,2654.5,207,46,0.001725,"Description: The image appears to be filled with static or noise, with no discernible objects or features visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,blocked_lens,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,45,2357.0,2974,58,0.000481,"Description: The image appears to be a static or noisy screen with a mix of green and other colors, indicating a lack of clear visual information.  
+Proximity: Unable to estimate proximity due to lack of discernible objects or features.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,blocked_lens,hazard,4,,,,,0.0,caution,0,4,1,1,0,1,1,35,1641.5,398,48,4.4e-05,"Description: The image is very dark and appears to be static or noise, with no discernible objects or features. It is impossible to determine any environmental context.
+Proximity: Undeterminable
+Risk: caution
+Pilot suggested action: HOLD",
+llm_only,claude,blocked_lens,hazard,5,,,,,0.0,hazard,1,5,1,1,1,1,1,91,5528.8,274,135,0.002847,"Description: The image appears to show heavy visual noise or static, possibly indicating a camera malfunction, lens obstruction, or severe interference. No discernible objects, terrain, or persons are visible.
+Proximity: Unable to determine — visual feed is compromised and no objects can be identified.
+Risk: hazard
+
+Pilot suggested action: HOLD
+
+> ⚠️ **Camera feed appears corrupted or blocked.** Autonomous navigation is unsafe without reliable visual input. Recommend holding position immediately, switching to a backup camera if available, or initiating a controlled landing at the current location until the issue is resolved.",
+llm_only,gpt4o,blocked_lens,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,34,2459.5,207,46,0.001725,"Description: The image appears to be filled with static or noise, with no discernible objects or features visible.
+Proximity: Unable to estimate due to lack of visible objects.
+Risk: Caution
+Pilot suggested action: HOLD",
+llm_only,gpt4o_mini,blocked_lens,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,42,2185.0,2974,56,0.00048,"Description: The image appears to be a static or noise-filled screen with a mix of colors, indicating a lack of clear visual information.  
+Proximity: Unable to estimate proximity due to lack of discernible objects or features.  
+Risk: caution  
+Pilot suggested action: HOLD",
+llm_only,gemini,blocked_lens,hazard,5,,,,,0.0,caution,0,4,1,1,0,1,1,35,1908.9,398,48,4.4e-05,"Description: The image is very dark and appears to be static or noise, with no discernible objects or features. It is impossible to determine any environmental context.
+Proximity: Undeterminable
+Risk: caution
+Pilot suggested action: HOLD",
+combined_enhanced,claude,blocked_lens,hazard,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,84,5124.5,418,112,0.002934,"Description: The image shows what appears to be static noise or severe visual interference — the camera feed is heavily corrupted with green, blue, and red pixel noise, making it impossible to determine the actual scene or obstacles. The CLIP label suggesting ""a wall directly blocking"" combined with complete visual corruption is extremely concerning.
+
+Proximity: Unable to determine — visual feed is completely corrupted; CLIP hint suggests a potential wall obstruction at unknown but possibly very close range.
+
+Risk: hazard
+
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o,blocked_lens,hazard,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,51,2764.7,328,65,0.002615,"Description: The image appears to be mostly noise or static, with no clear objects or features visible. The CLIP label suggests an uncertain scene, possibly a wall, but this is not clear from the image.
+Proximity: Unable to determine due to lack of visible features.
+Risk: Hazard
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,blocked_lens,hazard,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,caution,0,4,1,1,0,1,1,64,2354.2,3095,85,0.000515,"Description: The image appears to be a static noise pattern, suggesting a lack of clear visual information. The CLIP label indicates uncertainty, which aligns with the indistinct nature of the image. There are no YOLO detections, reinforcing the ambiguity of the scene. 
+
+Proximity: The visual evidence does not provide any clear indication of proximity to objects or obstacles.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,blocked_lens,hazard,1,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,42,2055.2,514,54,5.5e-05,"Description: The image is heavily distorted with static, making it impossible to discern any clear objects or features. The CLIP label suggests a wall, but this cannot be confirmed due to the image quality.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: LAND",
+combined_enhanced,claude,blocked_lens,hazard,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,81,6140.5,418,121,0.003069,"Description: The image appears to be heavily distorted with visual noise/static (green, blue, red pixel interference), suggesting a camera malfunction, sensor failure, or significant electromagnetic interference — no actual scene content is discernible. The CLIP label referencing ""a wall directly blocking"" combined with total visual loss is a serious warning indicator.
+
+Proximity: Unable to determine — camera feed is completely corrupted, but CLIP hints at a possible close obstacle (wall). Treat as immediate proximity hazard.
+
+Risk: hazard
+
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o,blocked_lens,hazard,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,47,5322.0,328,63,0.002585,"Description: The image appears to be filled with static or noise, making it difficult to discern any clear objects or features. The CLIP scene label suggests uncertainty, and there are no YOLO detections.
+Proximity: Indeterminate due to lack of visible features.
+Risk: Hazard
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,blocked_lens,hazard,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,64,2412.8,3095,82,0.000513,"Description: The image appears to be a static noise pattern, suggesting a lack of clear visual information. The CLIP label indicates uncertainty, which aligns with the indistinct nature of the image. There are no YOLO detections, reinforcing the ambiguity of the scene.
+
+Proximity: The visual evidence does not provide any clear indication of proximity to objects or obstacles.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gemini,blocked_lens,hazard,2,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,38,1899.1,514,50,5.4e-05,"Description: The image is heavily distorted with static, making it impossible to discern any clear objects or features. The CLIP label suggests a wall, but the image quality prevents verification.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: LAND",
+combined_enhanced,claude,blocked_lens,hazard,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,95,5527.8,418,139,0.003339,"Description: The image shows what appears to be heavy visual noise or static, possibly indicating a severely degraded camera feed, sensor malfunction, or the drone is extremely close to a surface (like grass or foliage) causing the camera to be overwhelmed. The CLIP label suggesting ""a wall directly blocking"" combined with the near-total noise pattern indicates a potential obstruction or proximity hazard.
+
+Proximity: Extremely close — the image is dominated by what may be a surface (vegetation/ground/wall) filling the entire frame, suggesting the drone is dangerously near an obstacle.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gpt4o,blocked_lens,hazard,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,47,2623.5,328,62,0.00257,"Description: The image appears to be filled with static or noise, making it difficult to discern any clear objects or features. The CLIP scene label suggests uncertainty, and there are no YOLO detections.
+Proximity: Unable to estimate due to unclear image.
+Risk: Hazard
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,blocked_lens,hazard,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,71,2695.1,3095,90,0.000518,"Description: The image appears to be a static noise pattern, suggesting a lack of clear visual information. The CLIP label indicates uncertainty, which aligns with the absence of YOLO detections, implying that there may be an obstruction or unclear environment. 
+
+Proximity: The visual evidence does not provide any discernible features to estimate proximity accurately, but the unclear nature suggests a close range without identifiable objects.
+
+Risk: hazard
+
+Pilot suggested action: STOP",
+combined_enhanced,gemini,blocked_lens,hazard,3,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,38,1441.2,514,50,5.4e-05,"Description: The image is heavily distorted with static, making it impossible to discern any clear objects or features. The CLIP label suggests a wall, but the image quality prevents verification.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: LAND",
+combined_enhanced,claude,blocked_lens,hazard,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,88,5015.8,418,123,0.003099,"Description: The image shows what appears to be heavy visual noise or static, possibly indicating a severely degraded or lost camera feed; the CLIP label suggesting ""a wall directly blocking"" is concerning and aligns with the possibility that the drone's camera is extremely close to a surface or the feed is corrupted/obstructed.
+Proximity: Indeterminate — the noise pattern and dark vignetting around the edges suggest either extreme proximity to a surface or complete loss of visual data, making reliable proximity assessment impossible.
+Risk: hazard
+
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o,blocked_lens,hazard,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,47,3141.4,328,62,0.00257,"Description: The image appears to be filled with static or noise, making it difficult to discern any clear objects or features. The CLIP scene label suggests uncertainty, and there are no YOLO detections.
+Proximity: Unable to determine due to image quality.
+Risk: Hazard
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,blocked_lens,hazard,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,caution,0,4,1,1,0,1,1,64,2591.0,3095,84,0.000515,"Description: The image appears to be a static noise pattern, suggesting a lack of clear visual information. The CLIP label indicates uncertainty, which aligns with the indistinct nature of the image. There are no YOLO detections, reinforcing the ambiguity of the scene.
+
+Proximity: The visual evidence does not provide any clear indication of proximity to objects or obstacles.
+
+Risk: caution
+
+Pilot suggested action: SLOW_DOWN",
+combined_enhanced,gemini,blocked_lens,hazard,4,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,38,1854.0,514,50,5.4e-05,"Description: The image is heavily distorted with static, making it impossible to discern any clear objects or features. The CLIP label suggests a wall, but the image quality prevents verification.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: LAND",
+combined_enhanced,claude,blocked_lens,hazard,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,80,5384.1,418,121,0.003069,"Description: The image shows heavy visual noise/static with no discernible scene content — this appears to be a camera feed failure, sensor malfunction, or complete signal loss. The CLIP label ""a wall directly blocking"" with very low confidence (0.118) and YOLO detecting nothing are consistent with a non-functional or severely degraded camera feed.
+
+Proximity: Unable to assess — camera feed appears corrupted or failed, making proximity estimation impossible. This itself constitutes a hazard condition.
+
+Risk: hazard
+
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o,blocked_lens,hazard,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,47,2388.8,328,63,0.002585,"Description: The image appears to be filled with static or noise, making it difficult to discern any clear features or objects. The CLIP scene label suggests uncertainty, and there are no YOLO detections.
+Proximity: Indeterminate due to lack of visible features.
+Risk: Hazard
+Pilot suggested action: HOLD",
+combined_enhanced,gpt4o_mini,blocked_lens,hazard,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,caution,0,4,1,1,0,1,1,64,2356.9,3095,82,0.000513,"Description: The image appears to be a static noise pattern, suggesting a lack of clear visual information. The CLIP label indicates uncertainty, which aligns with the indistinct nature of the image. There are no YOLO detections, reinforcing the ambiguity of the scene.
+
+Proximity: The visual evidence does not provide any clear indication of proximity to objects or obstacles.
+
+Risk: caution
+
+Pilot suggested action: HOLD",
+combined_enhanced,gemini,blocked_lens,hazard,5,yolo-world,YOLO detections: none,uncertain (a wall directly blocking and f),unknown,0.1181,hazard,1,5,1,1,1,1,1,42,1946.7,514,54,5.5e-05,"Description: The image is heavily distorted with static, making it impossible to discern any clear objects or features. The CLIP label suggests a wall, but this cannot be confirmed due to the image quality.
+Proximity: Unknown
+Risk: hazard
+Pilot suggested action: LAND",

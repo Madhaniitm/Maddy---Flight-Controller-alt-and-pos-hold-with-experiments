@@ -19,35 +19,39 @@ import numpy as np
 import requests
 
 # ── Config ────────────────────────────────────────────────────────────────────
-ESP32_IP          = os.environ.get("ESP32_IP",  "192.168.1.x")   # set via env
+ESP32_IP          = os.environ.get("ESP32_IP",  "10.186.33.138")
 CAPTURE_URL       = f"http://{ESP32_IP}/capture"
 CAPTURE_TIMEOUT   = 5
 RESULTS_DIR       = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-OPENAI_API_KEY    = os.environ.get("OPENAI_API_KEY",    "")
-GEMINI_API_KEY    = os.environ.get("GEMINI_API_KEY",    "")
+# Keys and endpoints loaded from environment (set by credentials.py — never committed)
+ANTHROPIC_API_KEY     = os.environ.get("ANTHROPIC_API_KEY", "")
+AZURE_CLAUDE_ENDPOINT = os.environ.get("AZURE_CLAUDE_ENDPOINT", "")
+AZURE_CLAUDE_VERSION  = "2023-06-01"
+OPENAI_API_KEY    = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_BASE_URL   = os.environ.get("OPENAI_BASE_URL", "")
+OPENAI_MINI_KEY   = os.environ.get("OPENAI_MINI_KEY", "")
+OPENAI_MINI_URL   = os.environ.get("OPENAI_MINI_URL", "")
+GEMINI_API_KEY    = os.environ.get("GEMINI_API_KEY", "")
 OLLAMA_URL        = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
 # ── Model identifiers ─────────────────────────────────────────────────────────
-CLAUDE_MODEL  = "claude-opus-4-5"
+CLAUDE_MODEL  = "claude-sonnet-4-6"
 GPT4O_MODEL   = "gpt-4o"
-GEMINI_MODEL  = "gemini-1.5-flash"
+GEMINI_MODEL  = "gemini-2.5-flash"
 LLAVA_MODEL   = "llava"               # via Ollama
 
 # ── Canonical scenes ──────────────────────────────────────────────────────────
 SCENES = [
-    {"id": 1,  "label": "clear_open",    "truth": "safe",    "setup": "Empty floor, good lighting. Nothing in camera view."},
-    {"id": 2,  "label": "person_near",   "truth": "hazard",  "setup": "Operator stands ~1m in front of camera."},
-    {"id": 3,  "label": "wall_close",    "truth": "hazard",  "setup": "Point camera at wall from ~25cm away."},
-    {"id": 4,  "label": "object_table",  "truth": "safe",    "setup": "Laptop on table, clear surroundings."},
-    {"id": 5,  "label": "dim_light",     "truth": "caution", "setup": "Room lights off, single dim lamp only."},
-    {"id": 6,  "label": "cluttered",     "truth": "caution", "setup": "Multiple objects scattered on floor."},
-    {"id": 7,  "label": "door_open",     "truth": "safe",    "setup": "Open doorway visible in frame."},
-    {"id": 8,  "label": "person_far",    "truth": "safe",    "setup": "Operator stands ~3m away from camera."},
-    {"id": 9,  "label": "blocked_lens",  "truth": "hazard",  "setup": "Partially cover camera lens with hand."},
-    {"id": 10, "label": "outdoor_bright","truth": "safe",    "setup": "Point camera at bright window / outdoor."},
+    {"id": 1,  "label": "person_near",   "truth": "hazard",  "setup": "Operator stands ~1m in front of camera."},
+    {"id": 2,  "label": "wall_close",    "truth": "hazard",  "setup": "Point camera at wall from ~25cm away."},
+    {"id": 3,  "label": "object_table",  "truth": "caution", "setup": "Laptop close-up on table, fills frame."},
+    {"id": 4,  "label": "dim_light",     "truth": "caution", "setup": "Room lights off, single dim lamp only."},
+    {"id": 5,  "label": "cluttered",     "truth": "caution", "setup": "Multiple objects scattered on floor."},
+    {"id": 6,  "label": "door_open",     "truth": "safe",    "setup": "Open doorway visible in frame."},
+    {"id": 7,  "label": "person_far",    "truth": "caution", "setup": "Operator stands ~3m away from camera in cluttered lab."},
+    {"id": 8,  "label": "blocked_lens",  "truth": "hazard",  "setup": "Partially cover camera lens with hand."},
 ]
 
 HAZARD_LABELS = {"person", "fire", "smoke", "knife", "gun", "scissors",
@@ -114,15 +118,86 @@ def synthetic_jpeg(label: str = "clear_open") -> bytes:
     img.save(buf, format="JPEG")
     return buf.getvalue()
 
+_frame_counters: dict = {}
+
 def get_frame(scene_label: str, allow_synthetic: bool = True) -> bytes:
-    """Fetch real frame; fall back to synthetic if ESP32 unreachable."""
+    """Fetch real frame; fall back to synthetic if ESP32 unreachable.
+    Saves every frame to results/frames/<scene_label>_run<N>.jpg for manual review."""
     data = fetch_jpeg()
-    if data:
-        return data
-    if allow_synthetic:
-        print(f"[CAM] Using synthetic frame for '{scene_label}'")
-        return synthetic_jpeg(scene_label)
-    raise RuntimeError("ESP32 unreachable and synthetic fallback disabled.")
+    is_synthetic = False
+    if not data:
+        if allow_synthetic:
+            print(f"[CAM] Using synthetic frame for '{scene_label}'")
+            data = synthetic_jpeg(scene_label)
+            is_synthetic = True
+        else:
+            raise RuntimeError("ESP32 unreachable and synthetic fallback disabled.")
+
+    # Save frame to disk
+    frames_dir = RESULTS_DIR / "frames"
+    frames_dir.mkdir(exist_ok=True)
+    _frame_counters[scene_label] = _frame_counters.get(scene_label, 0) + 1
+    tag = "syn" if is_synthetic else "real"
+    run_n = _frame_counters[scene_label]
+    frame_path = frames_dir / f"{scene_label}_run{run_n:02d}_{tag}.jpg"
+    frame_path.write_bytes(data)
+
+    return data
+
+FRAMES_DIR = RESULTS_DIR / "frames"
+
+def get_saved_frame(scene_label: str) -> bytes:
+    """Load run03 real hardware frame captured during V1/V2. Always uses run 3."""
+    path = FRAMES_DIR / f"{scene_label}_run03_real.jpg"
+    if path.exists():
+        return path.read_bytes()
+    raise FileNotFoundError(
+        f"No saved frame for '{scene_label}' (expected {path}). Run V1/V2 first.")
+
+# ── YOLO preprocessing ────────────────────────────────────────────────────────
+def run_yolo_on_frame(jpeg_bytes: bytes) -> str:
+    """
+    Run YOLOv8n on a frame and return formatted detection metadata string.
+    This metadata is passed to every LLM call alongside the image.
+    Falls back to a descriptive unavailable message if ultralytics not installed.
+    """
+    try:
+        from ultralytics import YOLO as UltralyticsYOLO
+        import cv2
+
+        yolo   = UltralyticsYOLO("yolov8n.pt")
+        img    = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
+        result = yolo(img, verbose=False, conf=0.25)[0]
+
+        detections = []
+        h_img = img.shape[0] if img is not None else 480
+        for box in result.boxes:
+            x1, y1, x2, y2 = [round(v, 1) for v in box.xyxy[0].tolist()]
+            label    = result.names[int(box.cls[0])]
+            conf     = round(float(box.conf[0]), 2)
+            bbox_h   = max(y2 - y1, 1)
+            est_dist = round(h_img / bbox_h * 0.3, 2)   # rough metres heuristic
+            detections.append(
+                f"{label} (conf={conf}, est_dist~{est_dist}m, "
+                f"bbox=[{x1},{y1},{x2},{y2}])"
+            )
+        if detections:
+            return "YOLO detections: " + "; ".join(detections)
+        return "YOLO detections: none"
+    except Exception as e:
+        return f"YOLO detections: unavailable ({e})"
+
+def build_llm_prompt(yolo_metadata: str, task_prompt: str) -> str:
+    """
+    Prepend YOLO metadata to any LLM prompt and append the pilot action request.
+    Used in every LLM call except G1 (pure isolation experiment).
+    """
+    return (
+        f"{yolo_metadata}\n\n"
+        f"{task_prompt}\n\n"
+        "Pilot suggested action (choose one and state it clearly): "
+        "PROCEED | SLOW_DOWN | STOP | LAND | HOLD"
+    )
 
 # ── Vision LLM calls ──────────────────────────────────────────────────────────
 def call_vision_llm(
@@ -144,6 +219,8 @@ def call_vision_llm(
             r = _call_claude(b64, prompt, max_tokens, temperature, system)
         elif model == "gpt4o":
             r = _call_openai(b64, prompt, max_tokens, temperature)
+        elif model == "gpt4o_mini":
+            r = _call_openai_mini(b64, prompt, max_tokens, temperature)
         elif model == "gemini":
             r = _call_gemini(b64, prompt, max_tokens, temperature)
         elif model in ("llava", "ollama"):
@@ -161,31 +238,47 @@ def call_vision_llm(
         }
 
 def _call_claude(b64, prompt, max_tokens, temperature, system):
-    import anthropic
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    kwargs = dict(
-        model=CLAUDE_MODEL, max_tokens=max_tokens,
-        messages=[{
+    import json, urllib.request
+    body = {
+        "model":      CLAUDE_MODEL,
+        "max_tokens": max_tokens,
+        "messages": [{
             "role": "user",
             "content": [
                 {"type": "image", "source": {"type": "base64",
                  "media_type": "image/jpeg", "data": b64}},
-                {"type": "text",  "text": prompt},
+                {"type": "text", "text": prompt},
             ],
         }],
-    )
+    }
     if system:
-        kwargs["system"] = system
-    resp = client.messages.create(**kwargs)
-    text = resp.content[0].text if resp.content else ""
-    i, o = resp.usage.input_tokens, resp.usage.output_tokens
-    # Claude pricing (claude-opus-4-5): $15/M in, $75/M out
-    cost = round(i*15e-6 + o*75e-6, 6)
+        body["system"] = system
+    data = json.dumps(body).encode("utf-8")
+    req  = urllib.request.Request(
+        AZURE_CLAUDE_ENDPOINT,
+        data=data,
+        headers={
+            "Content-Type":      "application/json",
+            "Authorization":     f"Bearer {ANTHROPIC_API_KEY}",
+            "anthropic-version": AZURE_CLAUDE_VERSION,
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        raw = json.loads(resp.read().decode("utf-8"))
+    text = raw["content"][0]["text"] if raw.get("content") else ""
+    i    = raw.get("usage", {}).get("input_tokens",  0)
+    o    = raw.get("usage", {}).get("output_tokens", 0)
+    # Claude Sonnet pricing: $3/M in, $15/M out
+    cost = round(i*3e-6 + o*15e-6, 6)
     return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
 
 def _call_openai(b64, prompt, max_tokens, temperature):
     import openai
-    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+    kwargs = dict(api_key=OPENAI_API_KEY)
+    if OPENAI_BASE_URL:
+        kwargs["base_url"] = OPENAI_BASE_URL
+    client = openai.OpenAI(**kwargs)
     resp   = client.chat.completions.create(
         model=GPT4O_MODEL, max_tokens=max_tokens, temperature=temperature,
         messages=[{"role": "user", "content": [
@@ -202,24 +295,43 @@ def _call_openai(b64, prompt, max_tokens, temperature):
     return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
 
 def _call_gemini(b64, prompt, max_tokens, temperature):
-    import google.generativeai as genai
-    from PIL import Image as PILImage
-    genai.configure(api_key=GEMINI_API_KEY)
-    model  = genai.GenerativeModel(
-        GEMINI_MODEL,
-        generation_config=genai.GenerationConfig(
-            max_output_tokens=max_tokens, temperature=temperature),
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    img_part = types.Part.from_bytes(data=base64.b64decode(b64), mime_type="image/jpeg")
+    resp   = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=[prompt, img_part],
+        config=types.GenerateContentConfig(
+            max_output_tokens=max_tokens, temperature=temperature,
+            thinking_config=types.ThinkingConfig(thinking_budget=0)),
     )
-    img    = PILImage.open(io.BytesIO(base64.b64decode(b64)))
-    resp   = model.generate_content([prompt, img])
     text   = resp.text or ""
     try:
         i = resp.usage_metadata.prompt_token_count
         o = resp.usage_metadata.candidates_token_count
     except Exception:
         i = o = 0
-    # Gemini 1.5 Flash: $0.075/M in, $0.30/M out
+    # Gemini 2.5 Flash: $0.075/M in, $0.30/M out
     cost = round(i*0.075e-6 + o*0.30e-6, 6)
+    return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
+
+def _call_openai_mini(b64, prompt, max_tokens, temperature):
+    import openai
+    client = openai.OpenAI(api_key=OPENAI_MINI_KEY, base_url=OPENAI_MINI_URL)
+    resp   = client.chat.completions.create(
+        model="gpt-4o-mini", max_tokens=max_tokens, temperature=temperature,
+        messages=[{"role": "user", "content": [
+            {"type": "image_url",
+             "image_url": {"url": f"data:image/jpeg;base64,{b64}", "detail": "low"}},
+            {"type": "text", "text": prompt},
+        ]}],
+    )
+    text = resp.choices[0].message.content or ""
+    i    = resp.usage.prompt_tokens
+    o    = resp.usage.completion_tokens
+    # GPT-4o-mini pricing: $0.15/M in, $0.60/M out
+    cost = round(i*0.15e-6 + o*0.60e-6, 6)
     return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
 
 def _call_ollama(b64, prompt, max_tokens):
@@ -236,14 +348,25 @@ def _call_ollama(b64, prompt, max_tokens):
     return {"reply": text, "input_tokens": n, "output_tokens": n, "cost_usd": 0.0}
 
 # ── Verbalization scoring ─────────────────────────────────────────────────────
+PILOT_ACTION_KEYWORDS = {
+    # Drone control commands (primary vocabulary)
+    "hover", "pitch_forward", "pitch_back", "pitch forward", "pitch back",
+    "roll_left", "roll_right", "roll left", "roll right",
+    "yaw_left", "yaw_right", "yaw left", "yaw right",
+    "ascend", "descend", "land",
+    # Legacy / fallback words still accepted
+    "proceed", "slow_down", "slow down", "slowdown", "stop", "hold",
+}
+
 def score_verbalization(reply: str, true_risk: str) -> dict:
     """
-    4-point rubric:
+    5-point rubric:
       s1 +1 scene content mentioned
       s2 +1 proximity/spatial info
       s3 +1 correct risk classification
       s4 +1 word count 10-100
-    Returns dict with individual scores and total.
+      s5 +1 pilot action suggested (drone control command)
+    Returns dict with individual scores and total (max=5).
     """
     r = reply.lower()
     words = reply.split()
@@ -256,38 +379,49 @@ def score_verbalization(reply: str, true_risk: str) -> dict:
     prox_kw  = {"cm","mm","metre","meter","distance","close","near","far",
                 "proxim","within","away","behind","front","side","left","right",
                 "above","below","approximately","roughly","about","adjacent"}
-    risk_kw  = {"safe","danger","hazard","warning","caution","risk","concern",
-                "obstacle","block","proceed","stop","alert","emergency"}
 
     s1 = int(any(kw in r for kw in scene_kw))
     s2 = int(any(kw in r for kw in prox_kw))
-    s4 = int(10 <= n_words <= 100)
+    s4 = int(10 <= n_words <= 150)
+    s5 = int(any(a in r for a in PILOT_ACTION_KEYWORDS))
 
-    # Risk classification: look for the risk level in the reply
+    # Risk classification
     detected_risk = None
     for lvl in ("hazard","caution","safe"):
         if lvl in r:
             detected_risk = lvl
             break
-    # Also accept synonyms
     if detected_risk is None:
         if any(w in r for w in ("danger","obstacle","block","emergency","covered")):
             detected_risk = "hazard"
         elif any(w in r for w in ("warning","unclear","dim","cluttered","concern")):
             detected_risk = "caution"
-        elif any(w in r for w in ("clear","open","proceed","fine","okay","no obstacle")):
+        elif any(w in r for w in ("clear","open","fine","okay","no obstacle")):
             detected_risk = "safe"
 
     s3 = int(detected_risk == true_risk) if detected_risk else 0
 
+    # Extract pilot action from reply (drone control vocabulary, longest match first)
+    detected_action = None
+    for a in ("pitch_forward", "pitch forward", "pitch_back", "pitch back",
+              "roll_left", "roll left", "roll_right", "roll right",
+              "yaw_left", "yaw left", "yaw_right", "yaw right",
+              "hover", "ascend", "descend", "land",
+              "stop", "slow_down", "slow down", "hold", "proceed"):
+        if a in r:
+            detected_action = a.replace(" ", "_").upper()
+            break
+
     return {
-        "s1_scene":      s1,
-        "s2_proximity":  s2,
-        "s3_risk":       s3,
-        "s4_length":     s4,
-        "quality_score": s1 + s2 + s3 + s4,
-        "detected_risk": detected_risk,
-        "word_count":    n_words,
+        "s1_scene":       s1,
+        "s2_proximity":   s2,
+        "s3_risk":        s3,
+        "s4_length":      s4,
+        "s5_pilot_action": s5,
+        "quality_score":  s1 + s2 + s3 + s4 + s5,
+        "detected_risk":  detected_risk,
+        "detected_action": detected_action,
+        "word_count":     n_words,
     }
 
 def extract_json_risk(reply: str) -> Optional[str]:

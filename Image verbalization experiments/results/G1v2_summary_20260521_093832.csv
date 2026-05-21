@@ -1,0 +1,10 @@
+condition,model,n_trials,risk_accuracy,acc_lo,acc_hi,mean_quality,latency_ms,cost_usd
+yolo_enhanced_only,yolo_enhanced,40,0.625,0.4703,0.7578,0.625,57.04,0.0
+llm_only,claude,33,0.3333,0.1975,0.5039,4.3333,4337.92,0.0031
+llm_only,gpt4o,32,0.75,0.5789,0.8675,4.75,2666.06,0.003
+llm_only,gpt4o_mini,32,0.5,0.3363,0.6637,4.5,3187.79,0.0005
+llm_only,gemini,32,0.3125,0.1795,0.4857,4.3125,2157.81,0.0001
+combined_enhanced,claude,29,0.5862,0.4074,0.7449,4.5862,5820.14,0.0049
+combined_enhanced,gpt4o,30,0.9333,0.7868,0.9815,4.8,2898.74,0.0048
+combined_enhanced,gpt4o_mini,30,0.6,0.4232,0.7541,4.6,3944.1,0.0006
+combined_enhanced,gemini,30,0.5333,0.3614,0.6977,4.5333,2133.9,0.0001
