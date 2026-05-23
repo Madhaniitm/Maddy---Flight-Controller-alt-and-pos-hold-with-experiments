@@ -31,10 +31,19 @@ Output:  results/V7_runs_<timestamp>.csv
 """
 
 import sys, pathlib, datetime, time
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+
+REPO_ROOT = pathlib.Path(__file__).parent.parent
+VIZ_DIR   = pathlib.Path(__file__).parent
+EXP_DIR   = REPO_ROOT / "experiments"
+sys.path.insert(0, str(VIZ_DIR))
+sys.path.insert(0, str(EXP_DIR))
+
 from verbalization_utils import (
     get_saved_frame, call_vision_llm, score_verbalization,
-    run_yolo_on_frame, bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
+    bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
+)
+from enhanced_yolo_pipeline import (
+    load_enhanced_yolo, load_clip, enhanced_yolo_infer
 )
 
 N_SEQUENCES   = 5
@@ -53,13 +62,14 @@ SEQUENCE_DEFINITION = [
 ]
 
 BASE_PROMPT = (
-    "You are an AI copilot for a drone analysing a live sequence of frames.\n"
+    "You are an AI copilot for a small indoor drone flying at ~1m altitude.\n"
     "{context}"
-    "YOLO detections on current frame: {yolo_meta}\n\n"
-    "Using the YOLO metadata and the image:\n"
-    "Describe what you see. Has the scene changed from before? "
+    "YOLO-World detections on current frame: {yolo_meta}\n"
+    "CLIP scene label: {clip_label} (conf={clip_conf:.3f}, risk={clip_risk})\n\n"
+    "Using the YOLO-World metadata, CLIP label, and the image:\n"
+    "Describe what you see. Has the scene changed from before?\n"
     "Classify as: safe | caution | hazard\n"
-    "Pilot suggested action: PROCEED | SLOW_DOWN | STOP | LAND | HOLD"
+    "Pilot suggested action: HOVER | PITCH_FORWARD | PITCH_BACK | ROLL_LEFT | ROLL_RIGHT | ASCEND | DESCEND | LAND"
 )
 
 
@@ -101,6 +111,11 @@ def main():
     print(f"Total trials: {total}")
     print("=" * 65)
 
+    print("\nLoading enhanced YOLO tier…")
+    yolo_model, yolo_type = load_enhanced_yolo()
+    print("Loading CLIP scene screener…")
+    clip_model, clip_preprocess, clip_tokenizer = load_clip()
+
     all_rows = []
 
     for hist_mode in HISTORY_MODES:
@@ -116,8 +131,10 @@ def main():
             histories = {model: [] for model in MODELS}
 
             for frame_num, expected_risk, scene_label in SEQUENCE_DEFINITION:
-                jpeg      = get_frame_for_run(scene_label, run_n)
-                yolo_meta = run_yolo_on_frame(jpeg)
+                jpeg  = get_frame_for_run(scene_label, run_n)
+                tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
+                                            clip_model, clip_preprocess,
+                                            clip_tokenizer, jpeg)
                 change_event = frame_num in (3, 5)
 
                 print(f"\n    Frame {frame_num}/5  scene={scene_label}  "
@@ -125,10 +142,15 @@ def main():
 
                 for model in MODELS:
                     context = build_context(histories[model], hist_mode)
-                    prompt  = BASE_PROMPT.format(context=context, yolo_meta=yolo_meta)
-
+                    prompt  = BASE_PROMPT.format(
+                        context    = context,
+                        yolo_meta  = tier2["yolo_meta"],
+                        clip_label = tier2["clip_label"],
+                        clip_conf  = tier2["clip_conf"],
+                        clip_risk  = tier2["clip_risk"],
+                    )
                     res   = call_vision_llm(jpeg, prompt, model=model,
-                                            max_tokens=200, temperature=0.0)
+                                            max_tokens=300, temperature=0.0)
                     reply = res["reply"]
                     det_risk = extract_risk(reply)
                     risk_correct = int(det_risk == expected_risk)

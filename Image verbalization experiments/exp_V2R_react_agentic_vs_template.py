@@ -38,13 +38,22 @@ Output:  results/V2R_runs_<timestamp>.csv   (Condition B rows)
 """
 
 import sys, os, time, pathlib, datetime, json, glob, csv, base64, urllib.request
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+
+REPO_ROOT = pathlib.Path(__file__).parent.parent
+VIZ_DIR   = pathlib.Path(__file__).parent
+EXP_DIR   = REPO_ROOT / "experiments"
+sys.path.insert(0, str(VIZ_DIR))
+sys.path.insert(0, str(EXP_DIR))
+
 from verbalization_utils import (
-    SCENES, get_frame, call_vision_llm, score_verbalization,
-    run_yolo_on_frame, bootstrap_ci, wilson_ci, write_csv, preflight, RESULTS_DIR,
+    SCENES, get_saved_frame, call_vision_llm, score_verbalization,
+    bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR,
     ANTHROPIC_API_KEY, AZURE_CLAUDE_ENDPOINT, AZURE_CLAUDE_VERSION,
     OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MINI_KEY, OPENAI_MINI_URL,
     GEMINI_API_KEY, GEMINI_MODEL, CLAUDE_MODEL,
+)
+from enhanced_yolo_pipeline import (
+    load_enhanced_yolo, load_clip, enhanced_yolo_infer
 )
 
 N_RUNS = 5
@@ -102,14 +111,15 @@ AGENTIC_OBSERVE_PROMPT = (
     "Be specific about distances and what fills the frame."
 )
 
-def build_act_prompt(observation: str, yolo_meta: str) -> str:
+def build_act_prompt(observation: str, tier2: dict) -> str:
     return (
         f"Your previous visual observation:\n{observation}\n\n"
-        f"YOLO SENSOR CONFIRMATION:\n{yolo_meta}\n\n"
+        f"YOLO-World SENSOR CONFIRMATION:\n{tier2['yolo_meta']}\n"
+        f"CLIP scene label: {tier2['clip_label']} (conf={tier2['clip_conf']:.3f}, risk={tier2['clip_risk']})\n\n"
         "ACT: Based on your observation and the sensor confirmation, "
         "give your final classification.\n"
         "Risk: <safe|caution|hazard>\n"
-        "Pilot suggested action: <PROCEED|SLOW_DOWN|STOP|LAND|HOLD>"
+        "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
     )
 
 # ── Text-only call (no image — Condition B, Call 2) ───────────────────────────
@@ -194,31 +204,31 @@ def main():
     # Load Condition A
     cond_a_rows = load_condition_a()
 
-    if not preflight():
-        ans = input("ESP32 not reachable. Use synthetic frames? [y/N]: ")
-        if ans.strip().lower() != "y":
-            return
+    print("\nLoading enhanced YOLO tier…")
+    yolo_model, yolo_type = load_enhanced_yolo()
+    print("Loading CLIP scene screener…")
+    clip_model, clip_preprocess, clip_tokenizer = load_clip()
 
     # Run Condition B
     cond_b_rows = []
 
     for scene in TARGET_SCENES:
         print(f"\n── Scene {scene['id']:02d}: {scene['label']}  (truth={scene['truth']}) ──")
-        print(f"   Setup: {scene['setup']}")
-        input("   [READY] Press Enter when scene is set up…")
 
         for run in range(1, N_RUNS + 1):
-            jpeg      = get_frame(scene["label"])
-            yolo_meta = run_yolo_on_frame(jpeg)
-            print(f"   run={run}  frame={len(jpeg)}B  yolo={yolo_meta[:60]}")
+            jpeg  = get_saved_frame(scene["label"])
+            tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
+                                        clip_model, clip_preprocess,
+                                        clip_tokenizer, jpeg)
+            print(f"   run={run}  yolo={tier2['yolo_meta'][:60]}")
 
             for model in MODELS:
                 # Call 1: image only — model observes
                 res1 = call_vision_llm(jpeg, AGENTIC_OBSERVE_PROMPT,
-                                       model=model, max_tokens=200)
-                # Call 2: observation + YOLO → final classification
-                res2 = call_text_llm(build_act_prompt(res1["reply"], yolo_meta),
-                                     model=model, max_tokens=100)
+                                       model=model, max_tokens=300)
+                # Call 2: observation + YOLO-World + CLIP → final classification
+                res2 = call_text_llm(build_act_prompt(res1["reply"], tier2),
+                                     model=model, max_tokens=150)
 
                 det   = parse_risk(res2["reply"])
                 sc    = score_verbalization(res2["reply"], scene["truth"])

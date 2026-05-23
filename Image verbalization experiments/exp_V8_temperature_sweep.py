@@ -31,31 +31,26 @@ Output:  results/V8_runs_<timestamp>.csv
 """
 
 import sys, os, time, pathlib, datetime, numpy as np
-sys.path.insert(0, str(pathlib.Path(__file__).parent))
+
+REPO_ROOT = pathlib.Path(__file__).parent.parent
+VIZ_DIR   = pathlib.Path(__file__).parent
+EXP_DIR   = REPO_ROOT / "experiments"
+sys.path.insert(0, str(VIZ_DIR))
+sys.path.insert(0, str(EXP_DIR))
+
 from verbalization_utils import (
     SCENES, get_saved_frame, call_vision_llm, score_verbalization,
-    run_yolo_on_frame, build_llm_prompt,
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR
+)
+from enhanced_yolo_pipeline import (
+    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
+    COMBINED_PROMPT_TEMPLATE
 )
 
 N_RUNS       = 5
 MODELS       = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
 TEMPERATURES = [0.0, 0.2, 0.5, 0.8, 1.0]
-MAX_TOKENS   = 256
-
-TASK_PROMPT = (
-    "You are an AI copilot for a drone. "
-    "The YOLO metadata above shows what the onboard detector found in this frame.\n"
-    "Using both the metadata and the image:\n"
-    "1. Describe what you see (1-2 sentences).\n"
-    "2. Estimate proximity of any object or person to the camera.\n"
-    "3. Classify the scene as exactly one of: safe | caution | hazard\n\n"
-    "Format your response as:\n"
-    "Description: <text>\n"
-    "Proximity: <estimate>\n"
-    "Risk: <safe|caution|hazard>\n"
-    "Pilot suggested action: <PROCEED|SLOW_DOWN|STOP|LAND|HOLD>"
-)
+MAX_TOKENS   = 300
 
 
 def label_flip_rate(risk_labels: list[str]) -> float:
@@ -76,14 +71,26 @@ def main():
     print(f"Total trials: {total}")
     print("=" * 65)
 
+    print("\nLoading enhanced YOLO tier…")
+    yolo_model, yolo_type = load_enhanced_yolo()
+    print("Loading CLIP scene screener…")
+    clip_model, clip_preprocess, clip_tokenizer = load_clip()
+
     all_rows = []
 
     for scene in SCENES:
         print(f"\n── Scene {scene['id']:02d}: {scene['label']}  (truth={scene['truth']}) ──")
-        jpeg      = get_saved_frame(scene["label"])
-        yolo_meta = run_yolo_on_frame(jpeg)
-        prompt    = build_llm_prompt(yolo_meta, TASK_PROMPT)
-        print(f"   frame={len(jpeg)}B  yolo={yolo_meta[:60]}")
+        jpeg  = get_saved_frame(scene["label"])
+        tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
+                                    clip_model, clip_preprocess,
+                                    clip_tokenizer, jpeg)
+        prompt = COMBINED_PROMPT_TEMPLATE.format(
+            yolo_meta  = tier2["yolo_meta"],
+            clip_label = tier2["clip_label"],
+            clip_conf  = tier2["clip_conf"],
+            clip_risk  = tier2["clip_risk"],
+        )
+        print(f"   yolo={tier2['yolo_meta'][:60]}  clip={tier2['clip_label']}")
 
         for run in range(1, N_RUNS + 1):
 
