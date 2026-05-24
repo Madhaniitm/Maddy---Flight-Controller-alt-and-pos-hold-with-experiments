@@ -84,6 +84,19 @@ CLIP_HAZARD_MAP = {
 
 CLIP_CONF_THRESHOLD = 0.204  # just above uniform (0.200 for 5 labels)
 
+# ── Confidence thresholds (Technique 6)  ─────────────────────────────────────
+# YOLO internally letterboxes all input to 640×640 regardless of source size.
+# Pre-upscaling (e.g. 320×240→960×720) adds a redundant downscale step that
+# LOSES features — tested and confirmed to hurt person detection on ESP32 frames.
+# The right fix: lower conf thresholds on the original 320×240 frame directly.
+# conf=0.20 for COCO (trained model, moderate trust);
+# conf=0.15 for YOLO-World (zero-shot text-image alignment, lower scores expected).
+COCO_CONF        = 0.20   # COCO trained — moderate threshold
+WORLD_CONF       = 0.15   # YOLO-World zero-shot — lower threshold needed
+# Legacy: kept for any code that references these
+YOLO_UPSCALE_W   = 320    # no upscale — run at native resolution
+YOLO_UPSCALE_H   = 240
+
 # ── Navigable openings — not treated as obstacles ────────────────────────────
 SAFE_DETECTION_CLASSES = {"door", "window"}
 
@@ -330,7 +343,7 @@ def _iou(box1, box2) -> float:
     return inter / max(a1 + a2 - inter, 1e-6)
 
 
-def _run_single_yolo(model, img: np.ndarray, conf: float = 0.25) -> list[dict]:
+def _run_single_yolo(model, img: np.ndarray, conf: float = COCO_CONF) -> list[dict]:
     """Run one YOLO model, return list of {label, conf, x1,y1,x2,y2}."""
     if model is None:
         return []
@@ -432,13 +445,19 @@ def enhanced_yolo_infer(
             "depth_available": False,
         }
 
+    # ── Technique 6: Lowered conf thresholds (no upscaling) ────────────────
+    # YOLO letterboxes all inputs to 640×640 internally regardless of source.
+    # Pre-upscaling 320×240→960×720 was tested and found to REDUCE person
+    # detection recall (YOLO's 640→640 letterbox path is better than
+    # 960→640 downscale path). Native resolution + lower conf is optimal.
+    # COCO_CONF=0.20, WORLD_CONF=0.15 — both benchmarked on ESP32 frames.
     t0 = time.perf_counter()
 
     # Run COCO YOLOv11n (person + 79 classes) — primary
-    coco_dets = _run_single_yolo(coco_model, img, conf=0.25)
+    coco_dets = _run_single_yolo(coco_model, img, conf=COCO_CONF)
 
     # Run YOLO-World (structural classes: wall, door, wire…) — supplement
-    world_dets = _run_single_yolo(yolo_model, img, conf=0.25)
+    world_dets = _run_single_yolo(yolo_model, img, conf=WORLD_CONF)
 
     yolo_ms = (time.perf_counter() - t0) * 1000.0
 
