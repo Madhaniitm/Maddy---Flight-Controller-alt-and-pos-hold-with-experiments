@@ -168,3 +168,90 @@ results/
 ├── V6_runs.csv / V6_summary.csv
 └── V7_runs.csv / V7_summary.csv
 ```
+
+---
+
+## System Architecture (Tier 2 — updated)
+
+The image verbalization experiments use a three-tier pipeline:
+
+```
+Tier 1  →  PID Controller          (reflexes, 4 kHz, motor corrections)
+Tier 2  →  Perception stack        (~30 fps, passes metadata to LLM)
+            ├─ YOLOv11n (COCO)     — person + 80-class trained detection
+            ├─ YOLO-World          — open-vocab structural hazards (wall, wire…)
+            ├─ DepthAnything v2    — real metric depth per object (metres)
+            │  Metric Indoor
+            └─ CLIP                — scene-level label (5 categories)
+Tier 3  →  LLM (cognitive layer)   (0.1–1 Hz, final safety decision, image-primary)
+```
+
+**Authority rule**: LLM is the cognitive authority. Tier 2 metadata is advisory.
+If the image contradicts YOLO detections, the LLM's visual judgment takes precedence.
+
+---
+
+## References — Image Verbalization Chapter
+
+Papers directly supporting the V-series and G-series experiment design,
+Tier 2 pipeline choices, and LLM evaluation methodology.
+
+**Three-tier architecture & LLM cognitive layer**
+
+- [35] Ahmmad et al. (2025). *Autonomous Navigation of Cloud-Controlled Quadcopters
+  in Confined Spaces Using Multi-Modal Perception and LLM-Driven High Semantic
+  Reasoning.* arXiv:2508.07885.
+  → Peer-reviewed validation of YOLOv11 + Depth Anything V2 + cloud LLM pipeline.
+    Depth MAE = 7.2 cm; end-to-end latency < 1 s; 42 indoor trials.
+
+- [7] Vemprala et al. (2023). *ChatGPT for Robotics: Design Principles and Model
+  Abilities.* Microsoft Autonomous Systems. (Already in paper draft — CLAIM 2 basis.)
+
+**Tier 2 — Object detection**
+
+- [37] Cheng et al. (2024). *YOLO-World: Real-Time Open-Vocabulary Object Detection.*
+  CVPR 2024. arXiv:2401.17270.
+  → Justifies YOLO-World for structural hazard detection (wall, wire, barrier).
+    Used in V2, V5, V6, V7, G1, G2 experiments as part of Tier 2.
+
+- [39] Kim et al. (2024). *YOLO-IHD: Improved Real-Time Human Detection System for
+  Indoor Drones.* Sensors / PMC10857234.
+  → Confirms COCO-trained YOLO (80% precision) outperforms zero-shot YOLO-World for
+    person detection indoors. Justifies dual-YOLO Tier 2 architecture.
+
+- [38] Wang et al. (2024). *YOLOv10: Real-Time End-to-End Object Detection.*
+  arXiv:2405.14458.
+  → Contextual: YOLO model family progression. YOLOv11 (used here) follows this work.
+
+**Tier 2 — Monocular depth estimation**
+
+- [36] Yang et al. (2024). *Depth Anything V2.* NeurIPS 2024. arXiv:2406.09414.
+  → Primary depth model for Tier 2. Metric Indoor variant gives real metre-scale
+    distances per object. Replaces broken geometric heuristic. Validated in G3.
+
+- [42] Bui et al. (2024). *Monocular Depth Estimation for Drone Obstacle Avoidance
+  in Indoor Environments.* IEEE CAI 2024. DOI:10.1109/CAI59483.2024.10802577.
+  → Confirms monocular depth is viable for indoor nano-drone obstacle avoidance at
+    the 0.5–3 m range used in this system's operating zone.
+
+- [40] Piccinelli et al. (2024). *UniDepth: Universal Monocular Metric Depth
+  Estimation.* CVPR 2024.
+  → Alternative metric depth model compared against DA v2 in G3; DA v2 selected
+    for faster CPU inference on the companion computer.
+
+- [41] Ranftl et al. (2022). *Towards Robust Monocular Depth Estimation: Mixing
+  Datasets for Zero-Shot Cross-Dataset Transfer.* IEEE TPAMI, 44(3). (MiDaS)
+  → Baseline monocular depth model; foundational work motivating DA v2's approach.
+
+- [43] Hu et al. (2025). *Survey on Monocular Metric Depth Estimation.*
+  Computers (MDPI) 14(11), 502. arXiv:2501.11841.
+  → Survey establishing why metric depth (absolute metres) is required for LLM
+    distance reporting; benchmarks DA v2 Metric Indoor as top indoor model.
+
+**LLM evaluation methodology**
+
+- [21] Liang et al. (2023). *Holistic Evaluation of Language Models (HELM).* TMLR.
+  (Already in draft — justifies N ≥ 5 per condition across V/G series.)
+
+- [10] Yao et al. (2022). *ReAct: Synergizing Reasoning and Acting in Language
+  Models.* arXiv:2210.03629. (Already in draft — basis for V2R ReAct experiments.)

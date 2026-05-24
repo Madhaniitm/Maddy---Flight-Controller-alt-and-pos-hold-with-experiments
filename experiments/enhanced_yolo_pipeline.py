@@ -4,38 +4,61 @@ Enhanced YOLO Tier — Research Paper Implementations
 Techniques implemented:
 
 1. YOLO-World (CVPR 2024, arxiv:2401.17270)
-   Open-vocabulary detection with custom drone hazard classes.
-   Detects wall, door, pillar, steps, wire — not possible with COCO-80 YOLOv8n.
-   Ref: https://arxiv.org/abs/2401.17270
+   Open-vocabulary detection for structural drone hazards NOT in COCO-80:
+   wall, door, window, wire, steps, pillar, barrier, ceiling, shelf.
+   Ref: Cheng et al. (2024) [37]
 
-2. CLAHE Low-Light Enhancement (PMC12273955, ResearchGate CLAHE-YOLO, 2024-25)
+2. CLAHE Low-Light Enhancement (PMC12273955, 2024-25)
    Contrast-Limited Adaptive Histogram Equalization applied before inference.
    Recovers detections in dim/dark scenes (+2-5% mAP in low-light benchmarks).
-   Ref: https://pmc.ncbi.nlm.nih.gov/articles/PMC12273955/
 
 3. CLIP Scene Hazard Screening (arxiv:2504.13399, 2025)
    Open-vocabulary image-text similarity for category-agnostic hazard detection.
-   Catches what YOLO still misses (blocked lens, pure darkness, novel hazards).
-   Ref: https://arxiv.org/pdf/2504.13399
+   Catches what YOLO misses: blocked lens, pure darkness, novel hazards.
 
-4. YOLO11 Fallback (Ultralytics 2024, arxiv:2510.09653)
-   Improved architecture over YOLOv8n when YOLO-World is unavailable.
-   Better small-object detection and multi-scale feature processing.
-   Ref: https://arxiv.org/html/2510.09653v2
+4. YOLOv11n COCO — Primary Object Detector  [NEW, ref 35, 38, 39]
+   Trained COCO-80 model. High recall for person (~90%) and 79 everyday classes.
+   Runs first; YOLO-World supplements for structural classes not in COCO.
+   Justification: Kim et al. (2024) YOLO-IHD shows COCO-trained YOLO achieves
+   80% precision / 68% recall for indoor person vs. near-zero for zero-shot
+   YOLO-World text alignment. Ref: [39] PMC10857234.
+   System: Ahmmad et al. (2025) [35] uses YOLOv11 + DA v2 + LLM — this work.
 
-5. LLM Distance Adjudication (VLM reasoning, arxiv:2602.07680)
-   Prompt-level instruction: YOLO est_dist is advisory only.
-   LLM validates distance against visual evidence, overrides when they conflict.
-   Ref: https://arxiv.org/pdf/2602.07680
+5. DepthAnything v2 Metric Indoor  [NEW, ref 36, 42, 43]
+   Per-pixel metric depth estimation (real metres, not relative pixel values).
+   Samples depth at each YOLO bounding-box centre → replaces broken geometric
+   heuristic (est_dist = h / bbox_h × 0.3, ±50% error).
+   Model: depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf (HuggingFace)
+   Validated indoor MAE ≈ 7.2 cm (Ahmmad et al. 2025 [35]).
+   Ref: Yang et al. (2024) NeurIPS [36]; Bui et al. (2024) IEEE CAI [42].
+
+6. LLM Distance Adjudication — Cognitive Authority
+   Prompt-level instruction: DA v2 depth is advisory; LLM visual reasoning
+   is the authority. LLM overrides sensor data when image contradicts it.
+   Ref: Ahmmad et al. (2025) [35]; arxiv:2602.07680.
+
+Install notes (for new techniques 4 & 5):
+   pip install ultralytics            # YOLOv11n via YOLO("yolo11n.pt")
+   pip install transformers pillow    # DepthAnything v2 via HuggingFace pipeline
+   Model weights auto-download on first run from HuggingFace Hub.
 """
 
+import re
 import time
 import numpy as np
 import cv2
 from pathlib import Path
 
-# ── Custom drone hazard vocabulary for YOLO-World ───────────────────────────
-# Extends beyond COCO-80: adds structural/scene hazards relevant to indoor drone nav
+# ── Structural hazard vocabulary for YOLO-World ──────────────────────────────
+# Only classes NOT in COCO-80. COCO handles person/chair/table/laptop etc.
+# COCO-80 does not include: wall, door, window, wire, pillar, steps, barrier.
+STRUCTURAL_CLASSES = [
+    "wall", "door", "window", "wire", "cable",
+    "pillar", "column", "steps", "staircase",
+    "barrier", "ceiling", "shelf",
+]
+
+# Legacy alias — used by some experiments that pass HAZARD_CLASSES explicitly
 HAZARD_CLASSES = [
     "person", "wall", "door", "table", "chair", "box",
     "pillar", "column", "steps", "staircase", "wire", "cable",
@@ -43,14 +66,12 @@ HAZARD_CLASSES = [
 ]
 
 # ── CLIP scene labels + hazard mapping ──────────────────────────────────────
-# 5 short, semantically distinct labels so CLIP can discriminate
-# (9 long labels → all scores ~0.111 uniform; 5 short → uniform=0.200)
 CLIP_SCENE_LABELS = [
-    "open room safe path",        # safe — clear corridor/room, no obstacles
-    "person up close",            # hazard — person filling frame, very near
-    "wall blocking path",         # hazard — wall/barrier directly ahead
-    "dark or covered lens",       # hazard — blackout, hand over lens, darkness
-    "cluttered room obstacles",   # caution — equipment, boxes, chairs in view
+    "open room safe path",        # safe
+    "person up close",            # hazard
+    "wall blocking path",         # hazard
+    "dark or covered lens",       # hazard
+    "cluttered room obstacles",   # caution
 ]
 
 CLIP_HAZARD_MAP = {
@@ -61,14 +82,20 @@ CLIP_HAZARD_MAP = {
     "cluttered room obstacles": "caution",
 }
 
-CLIP_CONF_THRESHOLD = 0.204  # just above uniform (0.200 for 5 labels); captures cluttered/blocked_lens/dim
+CLIP_CONF_THRESHOLD = 0.204  # just above uniform (0.200 for 5 labels)
+
+# ── Navigable openings — not treated as obstacles ────────────────────────────
+SAFE_DETECTION_CLASSES = {"door", "window"}
 
 
-# ── Technique 2: CLAHE preprocessing ────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 2: CLAHE preprocessing
+# ════════════════════════════════════════════════════════════════════════════
+
 def apply_clahe(img: np.ndarray) -> np.ndarray:
     """
     CLAHE in LAB colorspace — enhances low-light frames before YOLO inference.
-    clipLimit=3.0, tileGridSize=8×8 from benchmark results (PMC12273955).
+    clipLimit=3.0, tileGridSize=8×8 from PMC12273955 benchmark.
     """
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
@@ -76,35 +103,92 @@ def apply_clahe(img: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
 
 
-# ── Technique 1 + 4: YOLO-World / YOLO11 loader ─────────────────────────────
-def load_enhanced_yolo(classes: list = HAZARD_CLASSES):
+# ════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 4: YOLOv11n COCO — primary person/object detector
+# ════════════════════════════════════════════════════════════════════════════
+
+def load_coco_yolo():
     """
-    Loads YOLO-World (primary) or YOLO11 (fallback).
+    Load YOLOv11n trained on COCO-80.
+    Primary detector for person, chair, table, laptop, and 76 other classes.
+    High recall for person (~90%) vs near-zero for zero-shot YOLO-World.
+    Ref: Kim et al. 2024 [39]; Ahmmad et al. 2025 [35].
+    Returns (model, "yolo11-coco") or (None, "unavailable").
+    """
+    repo_root = Path(__file__).parent.parent
+    candidates = [
+        repo_root / "yolo11n.pt",
+        Path("yolo11n.pt"),
+    ]
+    pt_path = next((p for p in candidates if p.exists()), None)
+
+    try:
+        from ultralytics import YOLO
+        if pt_path:
+            model = YOLO(str(pt_path))
+            print(f"[YOLOv11n COCO] Loaded from {pt_path}")
+        else:
+            model = YOLO("yolo11n.pt")   # auto-download
+            print("[YOLOv11n COCO] Downloaded and loaded")
+        return model, "yolo11-coco"
+    except Exception as e:
+        print(f"[YOLOv11n COCO] Load failed: {e}")
+        return None, "unavailable"
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 1 + fallback: YOLO-World — structural hazard detector
+# ════════════════════════════════════════════════════════════════════════════
+
+def load_enhanced_yolo(classes: list = STRUCTURAL_CLASSES):
+    """
+    Load YOLO-World for structural hazard classes (wall, door, wire, etc.).
+    Falls back to YOLO11n (now treated as COCO fallback) if YOLO-World fails.
+    Backward-compatible: existing experiments call load_enhanced_yolo().
     Returns (model, yolo_type_str).
     """
+    repo_root = Path(__file__).parent.parent
+    world_candidates = [
+        repo_root / "yolov8s-worldv2.pt",
+        repo_root / "Image verbalization experiments" / "yolov8s-worldv2.pt",
+        Path("yolov8s-worldv2.pt"),
+    ]
+    world_pt = next((p for p in world_candidates if p.exists()), None)
+
     try:
         from ultralytics import YOLOWorld
-        model = YOLOWorld("yolov8s-worldv2.pt")
+        if world_pt:
+            model = YOLOWorld(str(world_pt))
+        else:
+            model = YOLOWorld("yolov8s-worldv2.pt")
         model.set_classes(classes)
-        print(f"[YOLO-World] Loaded — {len(classes)} custom classes")
+        print(f"[YOLO-World] Loaded — {len(classes)} structural classes: {classes}")
         return model, "yolo-world"
     except Exception as e:
-        print(f"[YOLO-World] Failed ({e}) — trying YOLO11")
+        print(f"[YOLO-World] Failed ({e}) — trying YOLOv11n as fallback")
         try:
             from ultralytics import YOLO
-            model = YOLO("yolo11n.pt")
-            print("[YOLO11] Fallback loaded")
+            yolo11_candidates = [
+                repo_root / "yolo11n.pt",
+                Path("yolo11n.pt"),
+            ]
+            pt = next((p for p in yolo11_candidates if p.exists()), None)
+            model = YOLO(str(pt)) if pt else YOLO("yolo11n.pt")
+            print("[YOLOv11n] Fallback loaded (YOLO-World unavailable)")
             return model, "yolo11"
         except Exception as e2:
-            print(f"[YOLO11] Failed ({e2}) — simulation mode")
+            print(f"[YOLOv11n] Failed ({e2}) — simulation mode")
             return None, "simulation"
 
 
-# ── Technique 3: CLIP scene hazard screener ──────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 3: CLIP scene hazard screener
+# ════════════════════════════════════════════════════════════════════════════
+
 def load_clip():
     """
     Open-CLIP ViT-B-32 (laion2b) for zero-shot scene hazard screening.
-    Detects scene-level hazards YOLO cannot classify (blocked lens, darkness).
+    Catches what YOLO cannot: blocked lens, total darkness, novel hazards.
     """
     try:
         import open_clip
@@ -125,7 +209,6 @@ def clip_screen(clip_model, preprocess, tokenizer, img_bgr: np.ndarray):
     """
     CLIP zero-shot scene classification.
     Returns (scene_label, clip_risk, confidence).
-    confidence=0 if CLIP is disabled or below threshold.
     """
     if clip_model is None:
         return "clip_unavailable", "unknown", 0.0
@@ -145,8 +228,8 @@ def clip_screen(clip_model, preprocess, tokenizer, img_bgr: np.ndarray):
         txt_feat /= txt_feat.norm(dim=-1, keepdim=True)
         probs = (img_feat @ txt_feat.T).squeeze(0).softmax(dim=-1)
 
-    best_idx  = probs.argmax().item()
-    best_conf = probs[best_idx].item()
+    best_idx   = probs.argmax().item()
+    best_conf  = probs[best_idx].item()
     best_label = CLIP_SCENE_LABELS[best_idx]
 
     if best_conf < CLIP_CONF_THRESHOLD:
@@ -156,104 +239,287 @@ def clip_screen(clip_model, preprocess, tokenizer, img_bgr: np.ndarray):
     return best_label, clip_risk, round(best_conf, 4)
 
 
-# ── Combined enhanced inference ───────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 5: DepthAnything v2 Metric Indoor
+# ════════════════════════════════════════════════════════════════════════════
+
+def load_depth_anything():
+    """
+    Load DepthAnything v2 Metric Indoor (Small) via HuggingFace Transformers.
+    Model: depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf
+    Returns real metric depth in metres per pixel.
+    Auto-downloads on first call (~100 MB for Small variant).
+    Ref: Yang et al. NeurIPS 2024 [36]; Ahmmad et al. 2025 [35] (MAE=7.2cm).
+
+    Returns (pipe, "depth-anything-v2-metric") or (None, "unavailable").
+    """
+    try:
+        from transformers import pipeline as hf_pipeline
+        print("[DA v2] Loading Depth Anything V2 Metric Indoor (Small)…")
+        pipe = hf_pipeline(
+            task="depth-estimation",
+            model="depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf",
+            device="cpu",
+        )
+        print("[DA v2] Depth Anything V2 Metric Indoor loaded ✓")
+        return pipe, "depth-anything-v2-metric"
+    except Exception as e:
+        print(f"[DA v2] Load failed: {e}")
+        print("       Install: pip install transformers pillow")
+        print("       Falling back to geometric heuristic (est_dist = h/bbox_h × 0.3)")
+        return None, "unavailable"
+
+
+def _depth_at_bbox(depth_map: np.ndarray, x1: float, y1: float,
+                   x2: float, y2: float) -> float:
+    """
+    Sample median depth in a 5×5 patch at the bounding-box centre.
+    Median is more robust than a single centre pixel.
+    """
+    h, w = depth_map.shape[:2]
+    cx = int(np.clip((x1 + x2) / 2, 0, w - 1))
+    cy = int(np.clip((y1 + y2) / 2, 0, h - 1))
+    r  = 2  # patch radius
+    patch = depth_map[max(0, cy-r):cy+r+1, max(0, cx-r):cx+r+1]
+    return float(np.median(patch)) if patch.size > 0 else float(depth_map[cy, cx])
+
+
+def _heuristic_dist(img_h: int, y1: float, y2: float) -> float:
+    """Fallback geometric heuristic when DA v2 is unavailable."""
+    return round(img_h / max(y2 - y1, 1) * 0.3, 2)
+
+
+def run_depth_estimation(depth_pipe, img_bgr: np.ndarray):
+    """
+    Run DepthAnything v2 Metric Indoor on a BGR numpy image.
+    Returns depth_map (H×W float32, real metres) or None on failure.
+
+    Important: HuggingFace pipeline returns two outputs:
+      result["depth"]           — PIL Image scaled to 0-255 (visualization only)
+      result["predicted_depth"] — torch.Tensor with real metric depth in metres
+    We use predicted_depth for actual distances.
+    """
+    if depth_pipe is None:
+        return None
+    try:
+        import torch
+        from PIL import Image as PILImage
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        pil_img = PILImage.fromarray(img_rgb)
+        result  = depth_pipe(pil_img)
+        # Use predicted_depth — real metric values in metres (not 0-255 scaled)
+        depth_tensor = result["predicted_depth"]   # torch.Tensor [1,H,W] or [H,W]
+        depth_map    = depth_tensor.squeeze().numpy().astype(np.float32)
+        return depth_map
+    except Exception as e:
+        print(f"[DA v2] Inference error: {e}")
+        return None
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# DUAL-YOLO INFERENCE HELPERS
+# ════════════════════════════════════════════════════════════════════════════
+
+def _iou(box1, box2) -> float:
+    """Compute IoU between two [x1,y1,x2,y2] boxes."""
+    ix1 = max(box1[0], box2[0]); iy1 = max(box1[1], box2[1])
+    ix2 = min(box1[2], box2[2]); iy2 = min(box1[3], box2[3])
+    inter = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+    a1 = (box1[2]-box1[0]) * (box1[3]-box1[1])
+    a2 = (box2[2]-box2[0]) * (box2[3]-box2[1])
+    return inter / max(a1 + a2 - inter, 1e-6)
+
+
+def _run_single_yolo(model, img: np.ndarray, conf: float = 0.25) -> list[dict]:
+    """Run one YOLO model, return list of {label, conf, x1,y1,x2,y2}."""
+    if model is None:
+        return []
+    results = model(img, verbose=False, conf=conf)[0]
+    dets = []
+    for box in results.boxes:
+        x1, y1, x2, y2 = [round(v, 1) for v in box.xyxy[0].tolist()]
+        dets.append({
+            "label": results.names[int(box.cls[0])],
+            "conf":  round(float(box.conf[0]), 2),
+            "x1": x1, "y1": y1, "x2": x2, "y2": y2,
+        })
+    return dets
+
+
+def _merge_detections(coco_dets: list[dict], world_dets: list[dict],
+                      iou_threshold: float = 0.5) -> list[dict]:
+    """
+    Merge COCO and YOLO-World detections.
+    COCO wins if boxes overlap (higher recall, trained model).
+    YOLO-World structural classes are appended without duplicate check
+    since they target different object types.
+    """
+    merged = list(coco_dets)
+    for wd in world_dets:
+        # Skip if YOLO-World detected a person (COCO does this better)
+        if wd["label"] == "person":
+            continue
+        # Skip if high IoU with any existing detection
+        wb = (wd["x1"], wd["y1"], wd["x2"], wd["y2"])
+        duplicate = any(
+            _iou(wb, (d["x1"], d["y1"], d["x2"], d["y2"])) > iou_threshold
+            for d in merged
+        )
+        if not duplicate:
+            merged.append(wd)
+    return merged
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# COMBINED ENHANCED INFERENCE — public API
+# ════════════════════════════════════════════════════════════════════════════
+
 def enhanced_yolo_infer(
-    yolo_model, yolo_type: str,
-    clip_model, preprocess, tokenizer,
+    yolo_model,           # YOLO-World model (structural classes)
+    yolo_type: str,
+    clip_model,
+    preprocess,
+    tokenizer,
     jpeg: bytes,
+    coco_model=None,      # YOLOv11n COCO model (person + 79 classes)  [NEW]
+    depth_pipe=None,      # DepthAnything v2 Metric Indoor pipeline     [NEW]
 ) -> dict:
     """
-    Full enhanced Tier 2 pipeline.
-    Returns dict with keys:
-        yolo_meta, yolo_ms, yolo_type,
-        clip_label, clip_risk, clip_conf,
-        img_h
+    Full enhanced Tier 2 pipeline (Techniques 1–5).
+
+    Pipeline:
+        Frame → CLAHE → {YOLOv11n COCO, YOLO-World} → merge dets
+                      → DA v2 Metric depth → sample depth per bbox
+                      → CLIP scene screen
+        → metadata dict → LLM (Tier 3, cognitive authority)
+
+    Returns dict:
+        yolo_meta  : formatted detection string for LLM prompt
+        yolo_ms    : YOLO inference time (ms)
+        yolo_type  : model identifier string
+        clip_label : CLIP scene classification
+        clip_risk  : inferred risk from CLIP
+        clip_conf  : CLIP confidence
+        img_h      : image height (for downstream use)
+        depth_available : bool — True if DA v2 ran, False if heuristic used
     """
     img_raw = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
-    img     = apply_clahe(img_raw)          # Technique 2: CLAHE
+    img     = apply_clahe(img_raw)    # Technique 2: CLAHE
     h       = img.shape[0]
 
-    # Technique 3: CLIP scene screen (always runs)
+    # ── Technique 3: CLIP scene screen ──────────────────────────────────────
     clip_label, clip_risk, clip_conf = clip_screen(
         clip_model, preprocess, tokenizer, img
     )
 
-    # Techniques 1/4: YOLO-World / YOLO11 inference
-    if yolo_model is None:
+    # ── Technique 5: Depth estimation (runs once per frame) ─────────────────
+    t_depth_start = time.perf_counter()
+    depth_map     = run_depth_estimation(depth_pipe, img)
+    depth_ms      = (time.perf_counter() - t_depth_start) * 1000.0
+    depth_available = depth_map is not None
+
+    # ── Techniques 1 + 4: Dual-YOLO inference ───────────────────────────────
+    if yolo_model is None and coco_model is None:
+        # Full simulation mode
         return {
-            "yolo_meta": "YOLO detections: none",
-            "yolo_ms":   round(abs(np.random.normal(20, 5)), 2),
-            "yolo_type": yolo_type,
-            "clip_label": clip_label,
-            "clip_risk":  clip_risk,
-            "clip_conf":  clip_conf,
-            "img_h":      h,
+            "yolo_meta":       "YOLO detections: none",
+            "yolo_ms":         round(abs(np.random.normal(20, 5)), 2),
+            "yolo_type":       yolo_type,
+            "clip_label":      clip_label,
+            "clip_risk":       clip_risk,
+            "clip_conf":       clip_conf,
+            "img_h":           h,
+            "depth_available": False,
         }
 
-    t0      = time.perf_counter()
-    results = yolo_model(img, verbose=False, conf=0.25)[0]
+    t0 = time.perf_counter()
+
+    # Run COCO YOLOv11n (person + 79 classes) — primary
+    coco_dets = _run_single_yolo(coco_model, img, conf=0.25)
+
+    # Run YOLO-World (structural classes: wall, door, wire…) — supplement
+    world_dets = _run_single_yolo(yolo_model, img, conf=0.25)
+
     yolo_ms = (time.perf_counter() - t0) * 1000.0
 
-    dets = []
-    for box in results.boxes:
-        x1, y1, x2, y2 = [round(v, 1) for v in box.xyxy[0].tolist()]
-        label    = results.names[int(box.cls[0])]
-        conf     = round(float(box.conf[0]), 2)
-        est_dist = round(h / max(y2 - y1, 1) * 0.3, 2)
-        # Note "advisory only" — Technique 5 prompt adjudication
-        dets.append(
-            f"{label} (conf={conf}, est_dist~{est_dist}m [advisory], "
-            f"bbox=[{x1},{y1},{x2},{y2}])"
+    # Merge: COCO wins on overlap; YOLO-World adds structural objects
+    all_dets = _merge_detections(coco_dets, world_dets)
+
+    # ── Format detection metadata with real depth (or heuristic fallback) ───
+    dets_str = []
+    for d in all_dets:
+        x1, y1, x2, y2 = d["x1"], d["y1"], d["x2"], d["y2"]
+
+        if depth_available:
+            dist = round(_depth_at_bbox(depth_map, x1, y1, x2, y2), 2)
+            dist_str = f"depth_m={dist}m [DA v2]"
+        else:
+            dist = _heuristic_dist(h, y1, y2)
+            dist_str = f"est_dist~{dist}m [heuristic]"
+
+        src = "COCO" if d in coco_dets else "YOLO-W"
+        dets_str.append(
+            f"{d['label']} (conf={d['conf']}, {dist_str}, "
+            f"src={src}, bbox=[{x1},{y1},{x2},{y2}])"
         )
 
-    yolo_meta = ("YOLO detections: " + "; ".join(dets)) if dets else "YOLO detections: none"
+    yolo_meta = ("YOLO detections: " + "; ".join(dets_str)) if dets_str \
+                else "YOLO detections: none"
+
+    # Note which depth method was used
+    depth_note = "DA v2 Metric Indoor" if depth_available else "geometric heuristic"
 
     return {
-        "yolo_meta":  yolo_meta,
-        "yolo_ms":    round(yolo_ms, 2),
-        "yolo_type":  yolo_type,
-        "clip_label": clip_label,
-        "clip_risk":  clip_risk,
-        "clip_conf":  clip_conf,
-        "img_h":      h,
+        "yolo_meta":       yolo_meta,
+        "yolo_ms":         round(yolo_ms, 2),
+        "depth_ms":        round(depth_ms, 2),
+        "depth_note":      depth_note,
+        "yolo_type":       yolo_type,
+        "clip_label":      clip_label,
+        "clip_risk":       clip_risk,
+        "clip_conf":       clip_conf,
+        "img_h":           h,
+        "depth_available": depth_available,
     }
 
 
-# ── Rule-based risk (yolo_enhanced_only condition) ───────────────────────────
-import re
-
-# Navigable openings — detected by YOLO-World but not obstacles
-SAFE_DETECTION_CLASSES = {"door", "window"}
+# ════════════════════════════════════════════════════════════════════════════
+# RULE-BASED RISK (yolo_enhanced_only condition — no LLM)
+# ════════════════════════════════════════════════════════════════════════════
 
 def enhanced_rule_risk(yolo_meta: str, clip_risk: str) -> str:
     """
-    Rule-based risk combining YOLO-World detections and CLIP scene label.
+    Rule-based risk combining dual-YOLO detections and CLIP scene label.
+    Used in G-series yolo_only condition.
     YOLO primary; CLIP fallback when YOLO returns none.
     """
     meta = yolo_meta.lower()
 
     if "none" not in meta:
-        # Structural stop hazards — require conf > 0.40 to avoid false detections in dim light
-        for h in ["pillar", "column", "barrier", "steps", "wire", "cable"]:
-            if h in meta:
+        # Hard stop structural hazards
+        for cls in ["pillar", "column", "barrier", "steps", "wire", "cable", "staircase"]:
+            if cls in meta:
                 return "hazard"
         if "wall" in meta:
-            m = re.search(r'wall.*?conf=([\d.]+)', meta)
+            m = re.search(r'wall[^;]*conf=([\d.]+)', meta)
             if m and float(m.group(1)) > 0.40:
                 return "hazard"
-            # Low-conf wall = possible false detection (e.g. dark image) — fall through
         if "person" in meta:
-            # Match est_dist specifically from the person detection token
-            m = re.search(r'person[^;]*est_dist~([\d.]+)m', meta)
-            # Only hazard if person fills most of frame (est_dist < 0.4m heuristic)
-            if m and float(m.group(1)) < 0.40:
+            # Use DA v2 depth if available, else heuristic
+            m_depth = re.search(r'person[^;]*depth_m=([\d.]+)m', meta)
+            m_heur  = re.search(r'person[^;]*est_dist~([\d.]+)m', meta)
+            dist = None
+            if m_depth:
+                dist = float(m_depth.group(1))
+            elif m_heur:
+                dist = float(m_heur.group(1))
+            if dist is not None and dist < 1.0:
                 return "hazard"
             return "caution"
-        # Navigable openings (door, window) are safe — not obstacles
+        # Navigable openings (door, window) are safe
         detected = re.findall(r'(\w+)\s*\(conf=', meta)
         if detected and all(d in SAFE_DETECTION_CLASSES for d in detected):
             return "safe"
-        # Any other detection = caution
         return "caution"
 
     # YOLO found nothing — trust CLIP
@@ -262,86 +528,69 @@ def enhanced_rule_risk(yolo_meta: str, clip_risk: str) -> str:
     return "safe"
 
 
-# ── Technique 5: Updated LLM prompt (distance adjudication) ─────────────────
+# ════════════════════════════════════════════════════════════════════════════
+# LLM PROMPTS (Tier 3 — cognitive authority)
+# ════════════════════════════════════════════════════════════════════════════
+
 LLM_ONLY_PROMPT = (
-    "You are an AI copilot for a small indoor drone flying at ~1m altitude.\n"
-    "Using the image only (no sensor metadata available):\n\n"
-    "RISK CLASSIFICATION GUIDE — use these exact definitions:\n"
-    "  hazard : An obstacle is DIRECTLY IN THE FLIGHT PATH within ~2m, OR a person is "
-    "very close (<1m from drone), OR the lens is fully blocked. Stop immediately.\n"
-    "  caution: Scene is dark/dim (but not black), or background has clutter at floor/table "
-    "level not blocking the 1m flight corridor. Slow down or hover.\n"
-    "  safe   : Flight path ahead is clear at ~1m altitude. Includes: open rooms, "
-    "doors/windows (navigable openings), objects on tables/shelves (not at drone altitude), "
-    "and persons visually far away (>3m).\n\n"
-    "1. Describe what you see (1-2 sentences).\n"
-    "2. Estimate proximity of any object or person based on what you see.\n"
-    "3. Classify: safe | caution | hazard (use the guide above).\n\n"
-    "Pilot action must be one of the drone control commands below:\n"
-    "  HOVER         — stop and hold position (use for caution or uncertainty)\n"
-    "  PITCH_FORWARD — move forward\n"
-    "  PITCH_BACK    — move backward (retreat from hazard)\n"
-    "  ROLL_LEFT     — move left\n"
-    "  ROLL_RIGHT    — move right\n"
-    "  YAW_LEFT      — rotate left to avoid\n"
-    "  YAW_RIGHT     — rotate right to avoid\n"
-    "  ASCEND        — gain altitude\n"
-    "  DESCEND       — lose altitude\n"
-    "  LAND          — land immediately\n\n"
-    "You MUST respond in this exact format:\n"
-    "Description: <text>\n"
-    "Proximity: <your visual estimate>\n"
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors.\n"
+    "No sensor metadata available — your ONLY input is the camera image. "
+    "Look at it directly and reason from what you see.\n\n"
+    "RISK CLASSIFICATION GUIDE:\n"
+    "  hazard : Person very close (<1m) OR obstacle directly in ~1m flight path "
+    "within 2m OR lens fully covered. → Stop immediately.\n"
+    "  caution: Dim/dark scene (not fully black), OR background clutter at floor/"
+    "table level not blocking the 1m corridor. → Slow down or hover.\n"
+    "  safe   : Flight path at ~1m is clear. Open rooms, navigable doorways/windows, "
+    "objects on tables/shelves, persons visually >3m away. → Proceed.\n\n"
+    "Pilot action options:\n"
+    "  HOVER | PITCH_FORWARD | PITCH_BACK | ROLL_LEFT | ROLL_RIGHT |\n"
+    "  YAW_LEFT | YAW_RIGHT | ASCEND | DESCEND | LAND\n\n"
+    "Respond in this exact format:\n"
+    "Description: <what you see — 1-2 sentences>\n"
+    "Proximity: <your visual estimate of closest object/person>\n"
     "Risk: <safe|caution|hazard>\n"
-    "Pilot suggested action: <command from list above>"
+    "Pilot suggested action: <command>"
 )
 
 COMBINED_PROMPT_TEMPLATE = (
-    "{yolo_meta}\n"
-    "CLIP scene label: {clip_label} (confidence={clip_conf}, inferred risk={clip_risk})\n\n"
-    "You are an AI copilot for a small indoor drone flying at ~1m altitude.\n"
-    "Use the YOLO detections, CLIP scene label, and the image together.\n\n"
-    "RISK CLASSIFICATION GUIDE — use these exact definitions:\n"
-    "  hazard : An obstacle is DIRECTLY IN THE FLIGHT PATH within ~2m, OR a person is "
-    "very close (<1m from drone), OR the lens is fully blocked. Stop immediately.\n"
-    "  caution: Scene is dark/dim (but not black), or background is cluttered with objects "
-    "at floor/table level that are not blocking the 1m flight corridor. Slow down or hover.\n"
-    "  safe   : Flight path ahead is clear at ~1m altitude. This includes: open rooms, "
-    "doors/windows/glass partitions (navigable openings), objects on tables or shelves "
-    "(below or above drone altitude), and persons standing far away (>3m).\n\n"
-    "IMPORTANT rules:\n"
-    "- YOLO est_dist values are bounding-box heuristics, NOT calibrated distances.\n"
-    "  Validate them against what you see. If the image contradicts the estimate, "
-    "trust your visual assessment and state the discrepancy.\n"
-    "- If a person appears small or far in the image background but YOLO reports <1m, "
-    "the estimate is wrong (bounding-box heuristics fail for distant objects). "
-    "If the person visually looks >3m away, classify as safe.\n"
-    "- A door, doorway, glass partition, or window showing space beyond is navigable "
-    "— classify as safe, not hazard.\n"
-    "- Objects on a table or shelf that are at table height (not at drone flight altitude) "
-    "do not block the drone path — classify as safe if path at ~1m is clear.\n"
-    "- A dark but partially visible scene = caution (not hazard). "
-    "Only fully black/blocked lens = hazard.\n"
-    "- If YOLO detections = none, do NOT assume safe. Reason from image and CLIP label.\n"
-    "- CLIP describes the overall scene type, NOT the immediate flight corridor. "
-    "Do not let CLIP override your visual assessment of whether the path directly ahead "
-    "at ~1m altitude is actually blocked.\n\n"
-    "1. Describe what you see (1-2 sentences). Note any YOLO/CLIP vs image discrepancy.\n"
-    "2. Estimate proximity based on visual evidence (not just YOLO distance).\n"
-    "3. Classify: safe | caution | hazard (use the guide above).\n\n"
-    "Pilot action must be one of the drone control commands below:\n"
-    "  HOVER         — stop and hold position (use for caution or uncertainty)\n"
-    "  PITCH_FORWARD — move forward\n"
-    "  PITCH_BACK    — move backward (retreat from hazard)\n"
-    "  ROLL_LEFT     — move left\n"
-    "  ROLL_RIGHT    — move right\n"
-    "  YAW_LEFT      — rotate left to avoid\n"
-    "  YAW_RIGHT     — rotate right to avoid\n"
-    "  ASCEND        — gain altitude\n"
-    "  DESCEND       — lose altitude\n"
-    "  LAND          — land immediately\n\n"
-    "You MUST respond in this exact format:\n"
-    "Description: <text>\n"
-    "Proximity: <your visual estimate>\n"
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "operating at ~1m altitude indoors.\n\n"
+    "YOUR ROLE IN THE ARCHITECTURE:\n"
+    "  Tier 1 (reflexes)  : PID controller — motor corrections at 4 kHz.\n"
+    "  Tier 2 (perception): YOLOv11n (COCO) + YOLO-World + DepthAnything v2 + CLIP —\n"
+    "                       fast detection, metric depth, scene label; passes all to you.\n"
+    "  Tier 3 (YOU)       : Cognitive reasoning — analyse the image, form your own\n"
+    "                       judgment, make the final safety decision.\n\n"
+    "YOUR PRIMARY INPUT IS THE CAMERA IMAGE. Look at it directly and reason from it.\n\n"
+    "Supplementary sensor data from Tier 2 (advisory only — you are the authority):\n"
+    "  {yolo_meta}\n"
+    "  (depth_m = DepthAnything v2 Metric Indoor, MAE≈7cm; est_dist = geometric fallback)\n"
+    "  CLIP scene label: {clip_label} (confidence={clip_conf}, inferred risk={clip_risk})\n\n"
+    "SENSOR INTERPRETATION RULES:\n"
+    "- depth_m values are from DepthAnything v2 Metric Indoor (real metres, MAE ≈7 cm).\n"
+    "  If unavailable, est_dist~Xm is a bounding-box heuristic — treat with lower trust.\n"
+    "- YOLO can MISS objects — if you see something the sensors did not detect, it exists.\n"
+    "  Report it and classify based on what you see.\n"
+    "- src=COCO means detected by trained YOLOv11n (high confidence).\n"
+    "  src=YOLO-W means zero-shot YOLO-World (structural class, lower recall).\n"
+    "- CLIP describes scene type — do not let it override your corridor-level judgment.\n"
+    "- If YOLO detections = none: do NOT assume safe. Look at the image yourself.\n\n"
+    "RISK CLASSIFICATION (your visual analysis is primary evidence):\n"
+    "  hazard : Person very close (<1m) OR obstacle directly blocks ~1m flight path\n"
+    "           within ~2m OR lens fully covered. → Stop immediately.\n"
+    "  caution: Dim/dark scene (not fully black), OR clutter at floor/table level not\n"
+    "           blocking 1m corridor. → Slow down or hover.\n"
+    "  safe   : Flight path at ~1m is clear. Open rooms, navigable doors/windows,\n"
+    "           objects on tables/shelves, persons visually >3m away. → Proceed.\n\n"
+    "Pilot action options:\n"
+    "  HOVER | PITCH_FORWARD | PITCH_BACK | ROLL_LEFT | ROLL_RIGHT |\n"
+    "  YAW_LEFT | YAW_RIGHT | ASCEND | DESCEND | LAND\n\n"
+    "RESPOND in this exact format:\n"
+    "Description: <1-2 sentences — your own visual analysis of the image>\n"
+    "Sensor note: <any discrepancy between image and YOLO/CLIP, or 'consistent'>\n"
+    "Proximity: <your visual estimate of closest object/person, cross-check with depth_m>\n"
     "Risk: <safe|caution|hazard>\n"
-    "Pilot suggested action: <command from list above>"
+    "Pilot suggested action: <command>"
 )

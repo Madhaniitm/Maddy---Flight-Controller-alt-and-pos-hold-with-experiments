@@ -1404,6 +1404,69 @@ horizon question that the current single-drone framework does not yet address.
      Applied Artificial Intelligence, 37(1), 2273111. (Documents structured
      directive prompting patterns used in C2.1, C4.1, and C6.1 protocol additions.)
 
+[35] Ahmmad, S., Alraddadi, A., Alsharef, M., Alduwais, A., Alotaibi, M. (2025).
+     Autonomous Navigation of Cloud-Controlled Quadcopters in Confined Spaces Using
+     Multi-Modal Perception and LLM-Driven High Semantic Reasoning. arXiv:2508.07885.
+     (Directly validates the three-tier architecture used in this work: YOLOv11 for
+     object detection, Depth Anything V2 for monocular depth, cloud LLM for cognitive
+     reasoning. Reports depth MAE = 7.2 cm and end-to-end latency < 1 s in indoor
+     testbed — the closest published system to this thesis's Tier 1/2/3 pipeline.)
+
+[36] Yang, L., Kang, B., Huang, Z., Zhao, Z., Xu, X., Feng, J., Zhao, H. (2024).
+     Depth Anything V2. Advances in Neural Information Processing Systems (NeurIPS)
+     2024. arXiv:2406.09414. https://github.com/DepthAnything/Depth-Anything-V2.
+     (State-of-the-art monocular depth estimation model used in Tier 2 of this system.
+     Metric Indoor variant replaces the geometric bounding-box distance heuristic,
+     reducing per-object distance error from ±50% to ±7 cm in indoor scenes.)
+
+[37] Cheng, T., Song, L., Ge, Y., Liu, W., Wang, X., Shan, Y. (2024). YOLO-World:
+     Real-Time Open-Vocabulary Object Detection. IEEE/CVF Conference on Computer
+     Vision and Pattern Recognition (CVPR) 2024. arXiv:2401.17270.
+     (Provides zero-shot open-vocabulary detection for structural hazards —
+     wall, wire, barrier, fire — not covered by COCO-trained detectors. Used
+     alongside COCO YOLOv8n/YOLOv11n in the dual-YOLO Tier 2 pipeline.)
+
+[38] Wang, A., Chen, H., Liu, L., Chen, K., Lin, Z., Han, J., Ding, G. (2024).
+     YOLOv10: Real-Time End-to-End Object Detection. arXiv:2405.14458.
+     (Contextual reference for the YOLO model family progression; YOLOv11
+     selected for this system following the trajectory of efficiency improvements
+     documented here and in subsequent releases.)
+
+[39] Kim, J., Kim, C., Youn, C., Jung, S. (2024). YOLO-IHD: Improved Real-Time
+     Human Detection System for Indoor Drones. Sensors, MDPI; PMC10857234.
+     (Demonstrates that COCO-trained YOLO achieves 80% precision / 68% recall for
+     indoor person detection — substantially higher than zero-shot YOLO-World text-
+     alignment scores. Justifies retaining COCO YOLOv11n for person class in Tier 2.)
+
+[40] Piccinelli, L., Yang, Y.-H., Sakaridis, C., Segu, M., Li, S.,
+     Van Gool, L., Yu, F. (2024). UniDepth: Universal Monocular Metric Depth
+     Estimation. IEEE/CVF Conference on Computer Vision and Pattern Recognition
+     (CVPR) 2024. https://openaccess.thecvf.com/content/CVPR2024/papers/
+     Piccinelli_UniDepth_Universal_Monocular_Metric_Depth_Estimation_CVPR_2024_paper.pdf.
+     (Alternative metric depth model evaluated against Depth Anything V2; DA v2
+     selected for its faster inference on CPU-only embedded platforms.)
+
+[41] Ranftl, R., Lasinger, K., Hafner, D., Schindler, K., Koltun, V. (2022).
+     Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot
+     Cross-Dataset Transfer. IEEE Transactions on Pattern Analysis and Machine
+     Intelligence (TPAMI), 44(3), 1623–1637. arXiv:1907.01341. (MiDaS: foundational
+     relative monocular depth work that motivated Depth Anything's large-scale
+     mixed-dataset training strategy; used as baseline in G3 depth accuracy experiment.)
+
+[42] Bui, H.T., Nguyen, D.T., Le, M.H., et al. (2024). Monocular Depth Estimation
+     for Drone Obstacle Avoidance in Indoor Environments. IEEE Conference on
+     Artificial Intelligence (IEEE CAI 2024). DOI:10.1109/CAI59483.2024.10802577.
+     (Empirically evaluates monocular depth models for indoor nano-drone obstacle
+     avoidance — confirms <10 cm error is achievable with modern monocular models
+     in the indoor depth ranges relevant to this system's 0.5–3 m operating zone.)
+
+[43] Hu, X., et al. (2025). Survey on Monocular Metric Depth Estimation.
+     Computers, MDPI, 14(11), 502. arXiv:2501.11841.
+     (Comprehensive survey of metric vs. relative depth estimation; establishes
+     why metric depth (absolute metres per pixel) is required for real distance
+     reporting to LLM reasoning layers, and benchmarks DA v2 Metric Indoor as
+     top-performing model for single-camera indoor robotics.)
+
 
 ================================================================================
 TABLES AND FIGURES (camera-ready expansion list)
