@@ -36,6 +36,7 @@ Output: Image verbalization experiments/results/G2_runs_<ts>.csv
 
 import sys, pathlib, datetime, time
 import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = REPO_ROOT / "Image verbalization experiments"
@@ -48,8 +49,11 @@ from verbalization_utils import (  # noqa: E402
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
 )
 from enhanced_yolo_pipeline import (  # noqa: E402
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
-    enhanced_rule_risk, COMBINED_PROMPT_TEMPLATE
+    load_enhanced_yolo, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer, enhanced_rule_risk, COMBINED_PROMPT_TEMPLATE
+)
+from robust_local_detector import (  # noqa: E402
+    load_mediapipe_detector, detect_hazard
 )
 
 N_RUNS            = 5
@@ -92,54 +96,72 @@ def is_yolo_hazard(yolo_meta: str, clip_risk: str) -> bool:
 
 
 def run_sequence(strategy: str, model: str, seq: int,
-                 yolo_model, yolo_type, clip_model, clip_preprocess,
-                 clip_tokenizer) -> tuple[dict, list]:
+                 yolo_model, yolo_type, coco_model, depth_pipe,
+                 mp_detector, mp_type) -> tuple[dict, list]:
     """
     Simulate one 10-frame mission sequence.
     Returns (per-sequence stats, per-call rows with reply).
+
+    Tier 1.5 — robust_local_detector runs on every frame (no API, ~14 ms).
+    In hybrid mode the local detector acts as the emergency LLM trigger
+    (person close + wall + darkness checks) instead of raw YOLO flag.
+    YOLO+DA v2 tier always runs for full metadata.
     """
     run_n = SEQ_TO_RUN[seq]
     llm_calls       = 0
     scheduled_calls = 0
-    yolo_calls      = 0
+    local_calls     = 0          # Tier-1.5 triggered LLM calls
     total_cost      = 0.0
     hazard_caught   = False
     hazard_catch_frame = None
-    last_yolo_call_frame = -YOLO_COOLDOWN
+    last_local_call_frame = -YOLO_COOLDOWN
     call_rows       = []
 
     for frame_num, scene_label, expected_risk in SEQUENCE:
         jpeg     = get_frame(scene_label, run_n)
+
+        # Tier 1.5: local emergency detector (no API — runs every frame)
+        img_bgr      = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+        t_local      = time.perf_counter()
+        local_result = detect_hazard(img_bgr, depth_map=None,
+                                     mp_detector=mp_detector, mp_type=mp_type)
+        local_ms     = round((time.perf_counter() - t_local) * 1000.0, 2)
+        local_flag   = local_result["risk"] == "hazard"
+
+        # Tier 2: dual-YOLO + DA v2 (runs every frame, provides LLM metadata)
         tier2    = enhanced_yolo_infer(yolo_model, yolo_type,
-                                       clip_model, clip_preprocess,
-                                       clip_tokenizer, jpeg)
-        yolo_meta = tier2["yolo_meta"]
-        yolo_flag = is_yolo_hazard(yolo_meta, tier2["clip_risk"])
+                                       None, None, None, jpeg,
+                                       coco_model=coco_model,
+                                       depth_pipe=depth_pipe)
+        # Append local detector so LLM sees MediaPipe person detection
+        # even when YOLO-World misclassifies person as wall/structural object
+        yolo_meta = (
+            f"{tier2['yolo_meta']}\n"
+            f"  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+            f"{local_result['metadata']}"
+        )
         in_hazard = HAZARD_FRAME_RANGE[0] <= frame_num <= HAZARD_FRAME_RANGE[1]
 
         should_call  = False
         call_source  = None
 
-        # Scheduled tick
+        # Scheduled tick (both strategies)
         if (frame_num - 1) % SCHEDULE_INTERVAL == 0:
             should_call = True
             call_source = "scheduled"
 
-        # YOLO interrupt (hybrid only)
+        # Local-detector interrupt (hybrid only) — Tier 1.5 emergency trigger
         if (strategy == "hybrid"
                 and not should_call
-                and yolo_flag
+                and local_flag
                 and not hazard_caught
-                and (frame_num - last_yolo_call_frame) >= YOLO_COOLDOWN):
+                and (frame_num - last_local_call_frame) >= YOLO_COOLDOWN):
             should_call = True
-            call_source = "yolo"
+            call_source = "local"
 
         if should_call:
             prompt = COMBINED_PROMPT_TEMPLATE.format(
                 yolo_meta  = yolo_meta,
-                clip_label = tier2["clip_label"],
-                clip_conf  = tier2["clip_conf"],
-                clip_risk  = tier2["clip_risk"],
             )
             res    = call_vision_llm(jpeg, prompt, model=model,
                                      max_tokens=300, temperature=0.0)
@@ -150,8 +172,8 @@ def run_sequence(strategy: str, model: str, seq: int,
             if call_source == "scheduled":
                 scheduled_calls += 1
             else:
-                yolo_calls      += 1
-                last_yolo_call_frame = frame_num
+                local_calls           += 1
+                last_local_call_frame  = frame_num
 
             # Did this call catch the hazard?
             stop_or_hazard = (scores["detected_risk"] in ("hazard", "caution")
@@ -171,6 +193,9 @@ def run_sequence(strategy: str, model: str, seq: int,
                 "expected_risk": expected_risk,
                 "call_source":   call_source,
                 "in_hazard":     int(in_hazard),
+                "local_ms":      local_ms,
+                "local_risk":    local_result["risk"],
+                "local_trigger": int(local_flag),
                 "yolo_meta":     yolo_meta,
                 "clip_label":    tier2["clip_label"],
                 "clip_risk":     tier2["clip_risk"],
@@ -191,7 +216,7 @@ def run_sequence(strategy: str, model: str, seq: int,
         "seq":               seq,
         "llm_calls":         llm_calls,
         "scheduled_calls":   scheduled_calls,
-        "yolo_calls":        yolo_calls,
+        "local_calls":       local_calls,
         "cost_usd":          round(total_cost, 7),
         "hazard_caught":     int(hazard_caught),
         "catch_frame":       hazard_catch_frame if hazard_caught else -1,
@@ -212,10 +237,14 @@ def main():
     print(f"Total runs: {total}  (~15 min)")
     print("=" * 65)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
-    clip_model, clip_preprocess, clip_tokenizer = load_clip()
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
 
     all_rows  = []
     all_calls = []
@@ -229,8 +258,8 @@ def main():
             for seq in range(1, N_RUNS + 1):
                 row, call_rows = run_sequence(
                     strategy, model, seq,
-                    yolo_model, yolo_type,
-                    clip_model, clip_preprocess, clip_tokenizer
+                    yolo_model, yolo_type, coco_model, depth_pipe,
+                    mp_detector, mp_type
                 )
                 all_rows.append(row)
                 all_calls.extend(call_rows)
@@ -242,15 +271,16 @@ def main():
                       f"cost=${row['cost_usd']:.5f}")
 
     # ── Save runs (sequence-level)
-    fields = ["strategy","model","seq","llm_calls","scheduled_calls","yolo_calls",
+    fields = ["strategy","model","seq","llm_calls","scheduled_calls","local_calls",
               "cost_usd","hazard_caught","catch_frame","frames_late"]
     runs_csv = RESULTS_DIR / f"G2_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 
     # ── Save calls (per-LLM-call with reply)
     call_fields = ["strategy","model","seq","frame_num","scene_label","expected_risk",
-                   "call_source","in_hazard","yolo_meta","clip_label","clip_risk",
-                   "clip_conf","detected_risk","risk_correct",
+                   "call_source","in_hazard","local_ms","local_risk","local_trigger",
+                   "yolo_meta","clip_label","clip_risk","clip_conf",
+                   "detected_risk","risk_correct",
                    "latency_ms","cost_usd","reply","error"]
     calls_csv = RESULTS_DIR / f"G2_calls_{ts}.csv"
     write_csv(calls_csv, all_calls, call_fields)
@@ -282,19 +312,21 @@ def main():
                   f"late={late_m:.1f}fr    "
                   f"calls={calls_m:.1f}    ${cost_m:.5f}")
 
+            local_calls_m, _, _ = bootstrap_ci([r["local_calls"] for r in hr])
             summary_rows.append({
                 "strategy": strategy, "model": model, "n_runs": len(hr),
                 "catch_rate": round(catch_rate, 4),
                 "cr_lo": round(cr_lo, 4), "cr_hi": round(cr_hi, 4),
                 "mean_frames_late": round(late_m, 2) if late_data else float("nan"),
                 "mean_llm_calls": round(calls_m, 2),
+                "mean_local_calls": round(local_calls_m, 2),
                 "mean_cost_usd": round(cost_m, 6),
             })
 
     summary_csv = RESULTS_DIR / f"G2_summary_{ts}.csv"
     write_csv(summary_csv, summary_rows,
               ["strategy","model","n_runs","catch_rate","cr_lo","cr_hi",
-               "mean_frames_late","mean_llm_calls","mean_cost_usd"])
+               "mean_frames_late","mean_llm_calls","mean_local_calls","mean_cost_usd"])
 
     print(f"\nRuns    → {runs_csv}")
     print(f"Summary → {summary_csv}")

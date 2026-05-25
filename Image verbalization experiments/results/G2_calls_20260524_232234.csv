@@ -1,0 +1,705 @@
+strategy,model,seq,frame_num,scene_label,expected_risk,call_source,in_hazard,local_ms,local_risk,local_trigger,yolo_meta,clip_label,clip_risk,clip_conf,detected_risk,risk_correct,latency_ms,cost_usd,reply,error
+scheduled,claude,1,1,door_open,safe,scheduled,0,38.1,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,8230.2,0.006243,"Description: The image shows an industrial or warehouse interior with metal-framed glass partitions/walls, ceiling-mounted lights, and open space beyond; the area appears navigable at ~1m altitude with no immediate obstacles in the foreground flight path.
+Sensor note: YOLO-World detected a window at 4.0m depth — consistent with the visible glass partition structure seen in the image; no persons or close obstacles detected by sensors or visually confirmed.
+Proximity: Closest structural element (glass/metal frame partition) appears approximately 1.5–2m ahead, consistent with the 4.0m sensor reading being to the far wall beyond the partition opening.
+Risk: caution
+Pilot suggested action: HOVER — pause to assess the glass partition framing ahead before proceeding; the reflective glass surfaces pose a navigation risk as depth perception through transparent/reflective surfaces may be unreliable; recommend YAW_LEFT or YAW_RIGHT to survey the open corridor before committing to PITCH_FORWARD.",
+scheduled,claude,1,6,person_near,hazard,scheduled,1,12.97,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5697.5,0.005466,"Description: A person is standing very close to the camera/drone, occupying the majority of the frame, appearing to be within approximately 0.5m or less based on their large apparent size filling the field of view.
+Sensor note: The local detector reports a person at est_dist=0.2m (geometric heuristic), which is consistent with my visual analysis — the person is extremely close. YOLO detections of wall/shelf are secondary concerns given the immediate human obstacle.
+Proximity: Person approximately 0.2–0.5m directly in front of the drone — immediate hazard range; consistent with local detector est_dist=0.2m.
+Risk: hazard
+Pilot suggested action: LAND",
+scheduled,claude,2,1,door_open,safe,scheduled,0,14.03,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,hazard,0,7076.4,0.006126,"Description: The image shows a large indoor industrial or warehouse-like space with glass-partitioned office sections, metal shelving/racking, and overhead fluorescent lighting; the immediate foreground shows glass and metal frame structures at roughly drone height, with open space visible deeper into the facility.
+Sensor note: The 'train' detection (conf=0.22, COCO) at 3.6m is likely a misclassification — no train is visible; this is probably a structural element or shelving unit. The 'window' detection at 3.2m is consistent with the glass partitioning visible in the image. Overall sensor confidence is low.
+Proximity: The closest obstacle is the glass/metal partition frame visible in the near foreground, estimated visually at approximately 0.5–1m; this is closer than the sensor-reported depths and represents the primary hazard.
+Risk: caution
+Pilot suggested action: HOVER",
+scheduled,claude,2,6,person_near,hazard,scheduled,1,13.11,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,5998.4,0.005547,"Description: A person is standing directly in front of the drone at close range, arms raised, in what appears to be an indoor workshop or storage room with shelving and clutter in the background.
+Sensor note: The local detector reports est_dist=0.24m which appears to be a geometric heuristic overestimate of closeness, but visually the person is clearly within 1–2m of the drone — consistent with a hazard classification. The wall detection at 0.45m is likely picking up the person or nearby structure.
+Proximity: The person appears to be approximately 1–2m away based on their apparent size filling a large portion of the frame; they are the dominant and closest object — consistent with hazard range.
+Risk: hazard
+Pilot suggested action: HOVER",
+scheduled,claude,3,1,door_open,safe,scheduled,0,13.62,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,hazard,0,10964.7,0.006798,"Description: The image shows a large industrial or warehouse-like interior space with metal-framed glass partitions/walls, open ceiling structure, and good overhead lighting; the flight corridor at ~1m altitude appears open with no immediate obstructions directly ahead.
+Sensor note: YOLO-World detected a 'window' at 3.48m depth with low confidence (0.23), which is consistent with the visible glass partition walls; the wide bounding box covering nearly the full frame suggests it's detecting the structural glass framework rather than a discrete obstacle. Consistent overall.
+Proximity: Closest structural elements are the metal frame columns visible on the right (~1–1.5m lateral), but the forward flight path at 1m altitude appears open to approximately 3–4m before reaching the glass partition wall.
+Risk: caution
+Pilot suggested action: PITCH_FORWARD
+
+**Rationale:** The space is navigable but the glass partitions and metal structural elements on the sides warrant reduced speed. The glass walls detected at ~3.48m give adequate stopping distance, but glass is a hazard for collision if misread — proceeding slowly forward is appropriate while continuously monitoring for the partition wall ahead.",
+scheduled,claude,3,6,person_near,hazard,scheduled,1,12.97,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,5827.5,0.005535,"Description: A person is leaning forward aggressively close to the camera in what appears to be an indoor workspace/lab environment, occupying the majority of the frame and clearly within immediate proximity of the drone.
+Sensor note: Consistent — YOLO detects person at 0.4m depth, local detector estimates 0.21m; both align with visual evidence of an extremely close person filling most of the frame. The 0.21m geometric estimate may actually be more accurate given how large the subject appears.
+Proximity: Person is visually estimated at approximately 0.2–0.5m — critically close, consistent with both depth readings. This is well within the hazard threshold.
+Risk: hazard
+Pilot suggested action: LAND",
+scheduled,claude,4,1,door_open,safe,scheduled,0,13.85,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,caution,0,8160.1,0.006537,"Description: The image shows an industrial or warehouse interior with metal shelving/storage racks and glass partitions or door frames in the foreground at roughly 1m height; the space appears moderately lit with visible ceiling lights, and no persons are detected in the immediate flight path.
+Sensor note: YOLO reports a ""train"" detection at 4.39m with moderate confidence (0.45) — this is almost certainly a misclassification of the industrial shelving or metal framework, which visually resembles structural elements, not a train; overall geometry is consistent with an indoor storage/warehouse environment.
+Proximity: The closest obstacle is the metal frame/glass panel structure in the foreground, visually estimated at approximately 1–2m; the depth reading of 4.39m likely refers to background shelving, not the nearest frame which appears closer.
+Risk: caution
+Pilot suggested action: HOVER — pause to assess the glass partition and metal framing directly ahead before proceeding; consider YAW_LEFT or YAW_RIGHT to find a clearer corridor at ~1m altitude before pitching forward.",
+scheduled,claude,4,6,person_near,hazard,scheduled,1,13.08,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,caution,0,8769.1,0.007566,"Description: A person is standing approximately 2–3 metres away in what appears to be an indoor workshop or storage area, facing the camera directly with arms loosely at their sides; the background shows shelving units, a white chair, and various equipment.
+Sensor note: Local detector estimates person at 0.24m which appears inconsistent with the image — the person visually appears to be roughly 2–3m away, not 0.24m; the bounding-box geometric fallback (est_dist) is unreliable here. YOLO-World wall/column detections at 0.5m are plausible for background structures but the flight corridor at ~1m altitude appears partially obstructed by the person.
+Proximity: Closest object is the person, visually estimated at ~2–2.5m; cross-checking with sensor est_dist of 0.24m — image analysis overrides, person is NOT sub-metre.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The person is present in the flight path but visually not dangerously close (<1m threshold not met). However, they are within the ~2–3m caution zone and facing the drone, creating an unpredictable dynamic. The cluttered workshop environment with shelving and objects adds further navigational uncertainty. Hovering is appropriate while re-",
+scheduled,claude,5,1,door_open,safe,scheduled,0,13.5,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,9596.1,0.007368,"Description: The image shows an indoor industrial or warehouse space with a glass/aluminum partition structure in the foreground, open ceiling with exposed conduits and lighting, and what appears to be a large open area beyond the partitions at approximately 1m flight altitude.
+Sensor note: YOLO-World detected a window at 4.0m depth covering nearly the full frame — this is consistent with the glass partition structure visible in the image; the detection label ""window"" is reasonable for the glazed aluminum framing seen.
+Proximity: The glass partition framework appears to be the closest obstacle, visually estimated at approximately 1–2m ahead; the depth reading of 4.0m likely refers to the space beyond the glass, not the frame itself — the metal frame edges could be closer (~1–1.5m).
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The aluminum/glass partition frames directly ahead pose a structural collision risk if the drone pitches forward without precise lateral alignment. The actual frame edges may be closer than the 4.0m depth estimate (which likely samples through the glass). The scene is adequately lit (brightness 121/255), so low-light is not the concern — rather, the narrow framing and structural obstacles at flight altitude warrant a cautious hover while re-evaluating the safest passage path (potentially YAW_LEFT or YAW",
+scheduled,claude,5,6,person_near,hazard,scheduled,1,13.04,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5893.6,0.005586,"Description: A person is standing very close to the camera/drone, leaning forward with their torso and body filling a large portion of the frame, indicating extremely close proximity — well under 1 metre. The indoor environment shows shelving and furniture in the background.
+
+Sensor note: Consistent — local detector confirms person at est_dist=0.2m, which aligns with the visual evidence of the person dominating the frame at very close range. YOLO missed the person as a COCO class but MediaPipe caught it.
+
+Proximity: Person visually estimated at approximately 0.2–0.4m — extremely close, occupying the majority of the frame and directly in the flight path.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+scheduled,gpt4o,1,1,door_open,safe,scheduled,0,13.88,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,3745.5,0.00521,"Description: The image shows an indoor space with tables arranged in rows, and a partially open door leading into the room. The area appears clear with no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with YOLO detection of a window at 4.0m depth.
+Proximity: Closest object is the door, approximately 2m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o,1,6,person_near,hazard,scheduled,1,13.16,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2503.5,0.005305,"Description: The image shows a person very close to the camera, bending forward, which indicates a potential obstruction to the drone's flight path.
+Sensor note: Consistent with sensor data indicating a person detected at approximately 0.2m.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gpt4o,2,1,door_open,safe,scheduled,0,13.7,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,hazard,0,2550.8,0.005395,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear at ~1m altitude, with no immediate obstacles blocking the flight path.
+Sensor note: Consistent with sensor data; the detected window and train are not immediate hazards.
+Proximity: Closest object is the door at approximately 3.2m, consistent with depth_m.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o,2,6,person_near,hazard,scheduled,1,14.04,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,2620.3,0.005145,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being 0.24m away is consistent with the visual analysis.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gpt4o,3,1,door_open,safe,scheduled,0,13.61,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,2586.9,0.005045,"Description: The image shows an indoor space with tables and chairs, and a partially open door. The area appears clear at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a window at 3.48m depth.
+Proximity: Closest object is the door, visually estimated at over 3m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o,3,6,person_near,hazard,scheduled,1,13.18,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,3994.9,0.005405,"Description: The image shows a person standing close to the camera, with a chair and some furniture in the background. The person appears to be within 1 meter of the drone.
+Sensor note: Consistent with sensor data indicating a person at approximately 0.4 meters.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gpt4o,4,1,door_open,safe,scheduled,0,13.78,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,3203.0,0.00504,"Description: The image shows a room with tables and chairs aligned, and an open door. The area appears clear for navigation at ~1m altitude.
+Sensor note: Consistent with YOLO detection of a train-like object at 4.39m depth.
+Proximity: Closest object visually estimated at approximately 4m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o,4,6,person_near,hazard,scheduled,1,13.0,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,2584.3,0.00547,"Description: The image shows a person standing close to the camera, with indoor furniture and structural elements visible in the background.
+Sensor note: The local detector's identification of a person at 0.24m is consistent with the image, indicating close proximity.
+Proximity: The person is visually estimated to be less than 1 meter away, consistent with the local detector's estimate.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gpt4o,5,1,door_open,safe,scheduled,0,13.63,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,3101.1,0.005165,"Description: The image shows an indoor space with tables arranged in rows, and a partially open door leading into the room. The area appears clear for navigation at ~1m altitude.
+Sensor note: Consistent with YOLO detection of a window at 4.0m depth.
+Proximity: Closest object is the door, visually estimated at approximately 1m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o,5,6,person_near,hazard,scheduled,1,13.29,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2568.6,0.00532,"Description: The image shows a person very close to the camera, bending forward, which suggests proximity within 1 meter. The environment appears cluttered with furniture and objects.
+Sensor note: Consistent with local detector indicating a person at 0.2m.
+Proximity: Person visually estimated at approximately 0.2m.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gpt4o_mini,1,1,door_open,safe,scheduled,0,13.64,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,4435.0,0.000581,"Description: The image shows an indoor space with several tables or workstations arranged in a row. The area appears well-lit, and there are no visible obstacles directly in the flight path at approximately 1m altitude. 
+
+Sensor note: consistent 
+Proximity: The closest object appears to be around 2m away based on visual assessment and depth_m data.
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o_mini,1,6,person_near,hazard,scheduled,1,13.39,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5101.6,0.000604,"Description: The image shows a person crouching down, very close to the camera, with a cluttered environment including a chair and various objects in the background. The person appears to be within 0.2 meters of the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected with high confidence, which is consistent with the visual analysis. 
+
+Proximity: The closest object/person is the individual, estimated at approximately 0.2 meters away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+scheduled,gpt4o_mini,2,1,door_open,safe,scheduled,0,14.16,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,safe,1,4542.2,0.000587,"Description: The image shows an indoor environment with a clear view of a room that appears to have tables and equipment. There are no visible obstacles or people within close proximity, and the path seems unobstructed. 
+
+Sensor note: consistent 
+Proximity: The closest object appears to be more than 3 meters away, consistent with the depth_m readings.
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o_mini,2,6,person_near,hazard,scheduled,1,13.33,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,4929.9,0.000595,"Description: The image shows a person standing in a room with various objects in the background, including furniture. The person appears to be relatively close to the drone's flight path. 
+
+Sensor note: The local detector identified a person with a confidence of 0.455 at an estimated distance of 0.24m, which is consistent with my visual analysis.
+
+Proximity: The closest object/person is the individual detected, approximately 0.24m away.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+scheduled,gpt4o_mini,3,1,door_open,safe,scheduled,0,13.92,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,4577.3,0.00058,"Description: The image shows an indoor environment with a clear view of a room that appears to have tables and some equipment. There are no visible obstacles or people within close proximity. 
+
+Sensor note: consistent 
+Proximity: The closest object appears to be more than 3 meters away, consistent with the depth_m value of 3.48m.
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o_mini,3,6,person_near,hazard,scheduled,1,13.29,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,4889.9,0.000598,"Description: The image shows a person bending forward, positioned in a cluttered indoor environment with furniture visible in the background. The person appears to be approximately 0.4m away based on depth data, which aligns with the visual assessment. 
+
+Sensor note: Consistent with YOLO and local detector data indicating a person detected at a similar distance.
+
+Proximity: The closest object/person is approximately 0.4m away.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+scheduled,gpt4o_mini,4,1,door_open,safe,scheduled,0,13.48,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,4506.4,0.000582,"Description: The image shows an indoor environment with a clear path and no visible obstacles or people within close proximity. The area appears well-lit and spacious, suggesting a navigable space for the drone. 
+
+Sensor note: consistent
+
+Proximity: The closest object appears to be more than 3 meters away, consistent with the depth_m value of 4.39m.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gpt4o_mini,4,6,person_near,hazard,scheduled,1,13.28,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,5534.0,0.000609,"Description: The image shows a person standing in a room with various objects around, including a chair and what appears to be a table. The person is relatively close, estimated to be around 0.24m away based on the local detector's reading. 
+
+Sensor note: The local detector identified a person, but the YOLO detections for walls and columns have low confidence, indicating potential missed detections. 
+
+Proximity: The closest object/person is the detected person, approximately 0.24m away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+scheduled,gpt4o_mini,5,1,door_open,safe,scheduled,0,13.58,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,4424.3,0.000595,"Description: The image shows an indoor space with several tables or workstations visible. The area appears somewhat cluttered, but there are no immediate obstacles blocking the flight path at approximately 1m altitude. The lighting is moderate, indicating a dim scene but not fully dark.
+
+Sensor note: Consistent with YOLO detection of a window and local detector brightness reading.
+
+Proximity: The closest object appears to be around 2m away, based on visual assessment and depth_m data.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+scheduled,gpt4o_mini,5,6,person_near,hazard,scheduled,1,12.99,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,4625.8,0.000604,"Description: The image shows a person crouching down, very close to the camera, with a cluttered environment including furniture and a chair in the background. The person appears to be within 0.2 meters of the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected with high confidence, which is consistent with my visual analysis. 
+
+Proximity: The closest object/person is the individual, estimated at approximately 0.2 meters away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+scheduled,gemini,1,1,door_open,safe,scheduled,0,14.01,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,2681.7,0.000117,"Description: The image shows an indoor industrial-like setting with an open doorway on the right. The drone appears to be facing into a large room or corridor with machinery or equipment visible further down. The lighting is adequate.
+Sensor note: The YOLO detection of a 'window' with a depth of 4.0m is consistent with the open doorway on the right, which appears to lead into a larger space.
+Proximity: The closest visible object is the frame of the open doorway on the right, which is very close, likely within 0.5m. The main flight path ahead appears clear for several meters.
+Risk: caution
+Pilot suggested action: HOVER",
+scheduled,gemini,1,6,person_near,hazard,scheduled,1,13.36,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2544.5,0.000107,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",
+scheduled,gemini,2,1,door_open,safe,scheduled,0,13.62,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,safe,1,3502.7,0.000132,"Description: The image shows an indoor office or industrial space with a partially open glass door on the right. The flight path appears clear at ~1m altitude, with objects visible further back in the room.
+Sensor note: YOLO detected a 'window' which is consistent with the glass door/partition on the right. The 'train' detection is likely a false positive or refers to the general structure in the background, as no actual train is visible. The local detector's brightness assessment is consistent with the image.
+Proximity: The closest visible object is the open glass door frame on the right, visually estimated to be around 1-1.5m away. YOLO's 'window' detection at 3.2m seems to refer to the further glass partition rather than the immediate door.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gemini,2,6,person_near,hazard,scheduled,1,13.43,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,2891.2,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the prominent person in the foreground.
+Proximity: The person is visually very close, estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+scheduled,gemini,3,1,door_open,safe,scheduled,0,13.24,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,2888.1,0.00012,"Description: The image shows an indoor environment with a partially open glass door on the right, leading into what appears to be a workshop or office space with tables and equipment. The flight path at ~1m altitude appears clear through the doorway.
+Sensor note: YOLO detected a ""window"" which is consistent with the glass door and surrounding glass panels. The brightness is adequate.
+Proximity: The closest visible object is the frame of the open glass door on the right, visually estimated to be approximately 1-1.5m away. The YOLO depth for ""window"" (3.48m) refers to the background beyond the door, not the door frame itself.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gemini,3,6,person_near,hazard,scheduled,1,13.5,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,3801.8,0.000123,"Description: A person is directly in front of the drone, appearing to be very close and occupying a significant portion of the frame. The background shows what looks like an indoor workshop or storage area with various objects.
+Sensor note: Consistent. Both YOLO and the local detector identify a person at a very close distance, which aligns with the visual evidence.
+Proximity: The person is visually estimated to be well within 1 meter, possibly around 0.3-0.5 meters. This is consistent with the YOLO depth_m of 0.4m and the local detector's est_dist of 0.21m.
+Risk: hazard
+Pilot suggested action: HOVER",
+scheduled,gemini,4,1,door_open,safe,scheduled,0,13.58,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,3155.7,0.000118,"Description: The image shows an indoor environment with a clear path ahead, bordered by what appear to be office partitions or shelving units. The lighting seems adequate, and no immediate obstacles are visible in the drone's flight path.
+Sensor note: YOLO detected a 'train' at 4.39m, which is inconsistent with the visual evidence. There is no train visible in the image. The local detector reported no brightness issues, which is consistent with the image.
+Proximity: The closest visible objects are the partition frames on either side, visually estimated to be beyond 1m. The background appears to be several meters away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+scheduled,gemini,4,6,person_near,hazard,scheduled,1,13.04,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,3074.0,0.000125,"Description: A person is standing directly in front of the drone, occupying the central portion of the frame. The background appears to be an indoor room with shelves or cabinets.
+Sensor note: The local detector correctly identified a person, but YOLO detections for 'wall' and 'column' at 0.5m are inconsistent with the primary visual evidence of a person much closer. The local detector's estimated distance of 0.24m for the person is more aligned with the visual evidence than the YOLO detections.
+Proximity: The person is visually very close, estimated to be well within 1 meter, likely around 0.2-0.3 meters.
+Risk: hazard
+Pilot suggested action: HOVER",
+scheduled,gemini,5,1,door_open,safe,scheduled,0,13.59,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,hazard,0,2157.2,0.000122,"Description: The image shows an indoor industrial-like setting with an open doorway on the right. The drone appears to be facing into a room with machinery or equipment, and a ceiling fan is visible in the distance. The overall lighting is adequate.
+Sensor note: The YOLO detection of a ""window"" with a depth of 4.0m is inconsistent with the visual evidence, as the prominent feature on the right is an open doorway, not a window. The local detector's brightness reading is consistent with the visual assessment.
+Proximity: The closest object is the open door frame on the right, visually estimated to be within 1 meter. The machinery further inside the room appears to be several meters away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+scheduled,gemini,5,6,person_near,hazard,scheduled,1,13.55,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2023.9,0.000114,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf. The estimated distance of 0.2m from the local detector aligns with my visual assessment of extreme proximity.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,claude,1,1,door_open,safe,scheduled,0,13.62,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,6070.1,0.005298,"Description: The image shows an indoor industrial or warehouse space with glass/aluminum partition walls and an open corridor; the flight path at ~1m altitude appears unobstructed with no persons visible and reasonable ambient lighting.
+Sensor note: YOLO-World detected a window at 4.0m depth — consistent with the visible glass partitions; no persons or close obstacles detected by sensors, which matches visual analysis.
+Proximity: Closest objects are the glass partition frames, visually estimated at ~1–1.5m to the sides but not directly blocking the forward flight path; depth reading of 4.0m for the window is plausible for the far glass wall.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,claude,1,3,person_near,hazard,local,1,12.94,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5156.0,0.005601,"Description: A person is standing very close to the camera/drone, occupying the majority of the frame and appearing to be within arm's reach (~0.5m or less), posing an immediate collision hazard at 1m flight altitude.
+Sensor note: Local detector reports person at est_dist=0.2m which is consistent with visual analysis — the person fills most of the frame confirming extreme proximity; YOLO missed the person entirely, relying only on wall/shelf detections.
+Proximity: Person visually estimated at well under 1m — likely 0.3–0.5m based on how much of the frame they occupy; consistent with local detector's 0.2m estimate.
+Risk: hazard
+Pilot suggested action: LAND",
+hybrid,claude,1,6,person_near,hazard,scheduled,1,13.08,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,8570.4,0.005781,"Description: A person is standing very close to the camera/drone, occupying the majority of the frame, in what appears to be an indoor space (office or store) with shelving and furniture visible in the background.
+Sensor note: Consistent — local detector confirms person at ~0.2m estimated distance, which aligns with the visual dominance of the person in the frame; YOLO missed the person as a COCO class but MediaPipe caught it.
+Proximity: Person is visually estimated at well under 1m — likely 0.3–0.5m based on how large they appear in frame; this is a critical proximity hazard.
+Risk: hazard
+Pilot suggested action: HOVER (immediate stop, do not advance — person is dangerously close to rotor wash and potential collision)",
+hybrid,claude,2,1,door_open,safe,scheduled,0,13.73,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,caution,0,7186.8,0.006276,"Description: The image shows a large indoor industrial or warehouse space with metal-framed glass partitions/walls in the foreground, open ceiling structure visible, and a long open corridor extending into the background with adequate vertical clearance well above 1m.
+Sensor note: The ""train"" detection (conf=0.22, 3.6m) appears to be a false positive — no train is visible; this is likely a misclassification of the industrial shelving or structural elements. The ""window"" detection is consistent with the glass partition frames visible at the left edge.
+Proximity: The closest obstacles are the metal-framed glass partition structures approximately 1.5–2.5m ahead and to the sides; no persons detected visually or by sensors. The open corridor beyond appears navigable.
+Risk: caution
+Pilot suggested action: HOVER — assess lateral clearance relative to the glass partition frames before proceeding; once alignment with the open corridor is confirmed, PITCH_FORWARD slowly.",
+hybrid,claude,2,3,person_near,hazard,local,1,12.99,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,9555.4,0.007422,"Description: A person is standing in what appears to be an indoor workshop or storage area, facing the camera with arms raised, at a moderate distance; the room has shelving, equipment, and a chair visible in the background.
+
+Sensor note: The local detector estimates the person at 0.24m which appears to be a significant underestimate — visually the person looks to be approximately 3–5m away based on their proportional size relative to the room and background elements. The wall detection at 0.45m is plausible for background walls but does not represent an immediate flight-path hazard at this drone's 1m altitude corridor.
+
+Proximity: Person appears visually ~3–4m away; the 0.24m est_dist from the local detector is a bounding-box heuristic fallback and is inconsistent with visual evidence — the person occupies roughly 30% of frame height, consistent with 3m+ range. No objects appear within the immediate 1–2m flight envelope.
+
+Risk: caution
+
+Pilot suggested action: HOVER
+
+**Reasoning:** While the person does not appear dangerously close (overriding the erroneous 0.24m heuristic), the room is cluttered with shelving and equipment, lighting is moderate (brightness 123/255), and the person's raised arms and forward-facing posture warrant a pause",
+hybrid,claude,2,6,person_near,hazard,scheduled,1,12.83,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,6099.2,0.005607,"Description: A person is standing directly in front of the camera at close range (estimated 1–2 metres), arms raised, in what appears to be a workshop or storage room with shelving and clutter in the background.
+Sensor note: Local detector estimates 0.24m which appears too close given the full-body framing, but the person is clearly within the hazard zone visually; YOLO wall depth of 0.45m is likely a misclassification of the person or nearby surface. Overall, sensors are roughly consistent with a close-proximity person being present.
+Proximity: Person estimated visually at approximately 1.5–2m — well within the <1m–2m hazard corridor; closest detected obstacle is this individual.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,claude,3,1,door_open,safe,scheduled,0,13.21,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,caution,0,6564.7,0.005688,"Description: The image shows an industrial or warehouse interior with metal-framed glass partitions/walls, shelving units, and overhead lighting. The flight path at approximately 1m altitude appears structurally complex with vertical metal frames and glass panels in close proximity, though no persons are visible.
+
+Sensor note: YOLO-World detected a window at 3.48m with low confidence (0.23); the image confirms glass-partitioned walls/frames are present and closer than that estimate — the large metal frame structure appears within 1–2m of the camera on the right side.
+
+Proximity: The right-side metal frame/glass partition appears to be within approximately 1–1.5m, consistent with being a direct obstacle. The left-side structures and overhead elements also present navigational constraints.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+hybrid,claude,3,3,person_near,hazard,local,1,13.12,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,5857.2,0.005835,"Description: A person is leaning forward aggressively toward the camera at very close range, occupying the majority of the frame, indicating they are within approximately 0.3–0.5m of the drone at roughly 1m altitude.
+Sensor note: Consistent — YOLO person detection (conf=0.36, depth=0.4m) and local detector (conf=0.625, est_dist=0.21m) both corroborate the extremely close human presence; the low YOLO confidence likely reflects the unusual bent-forward body pose rather than a false positive.
+Proximity: Person is visually estimated at ~0.3–0.5m, consistent with DA v2 depth reading of 0.4m — critically within hazard threshold.
+Risk: hazard
+Pilot suggested action: LAND",
+hybrid,claude,3,6,person_near,hazard,scheduled,1,13.04,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,5798.4,0.006,"Description: A person is leaning forward aggressively close to the camera, filling most of the frame, clearly within less than 1 metre of the drone. The indoor environment shows a room with chairs and shelving in the background, but the immediate foreground is dominated by the very close human figure.
+
+Sensor note: Consistent — YOLO person detection at 0.4m depth and local detector at 0.21m both corroborate the visual evidence of an extremely close person. The wall detection at 0.4m is likely a false positive caused by the person's body occluding the background.
+
+Proximity: Person is visually estimated at well under 1m, likely 0.3–0.5m from the lens, consistent with depth_m=0.4m from DepthAnything v2.
+
+Risk: hazard
+
+Pilot suggested action: LAND",
+hybrid,claude,4,1,door_open,safe,scheduled,0,13.61,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,caution,0,8621.6,0.006237,"Description: The image shows an industrial or warehouse interior with metal shelving/racking units on both sides and an open corridor in the middle; lighting is adequate and no persons are visible in the immediate flight path at ~1m altitude.
+Sensor note: YOLO reports a ""train"" detection at 4.39m with moderate confidence (0.45) — this is almost certainly a misclassification; the detected region likely corresponds to shelving, machinery, or structural elements in the background. No actual train is present. Consistent with an indoor warehouse environment.
+Proximity: Closest obstacles are the metal shelf frames on the left and right sides, visually estimated at ~1–1.5m lateral distance; the forward corridor appears open to at least 4m. Cross-checks with depth_m=4.39m are plausible for the background clutter depth.
+Risk: caution
+Pilot suggested action: PITCH_FORWARD (slow advance down the central corridor, monitoring lateral clearance from shelving on both sides)",
+hybrid,claude,4,3,person_near,hazard,local,1,12.8,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,6477.0,0.006021,"Description: A person is standing in what appears to be an indoor workshop/storage area at close range, directly in the drone's field of view and flight path, with various shelving units and equipment visible in the background.
+Sensor note: Local detector reports person at est_dist=0.24m (geometric heuristic), which aligns with the visual — the person appears to be within 1–2m of the drone; YOLO-World detections of wall/column are low-confidence but consistent with the cluttered background. Person was NOT flagged by YOLO object detection, caught only by local detector.
+Proximity: Person visually estimated at approximately 1–2m away, filling a large portion of the frame — consistent with the local detector's close-range estimate; this is within or on the boundary of the hazard threshold.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,claude,4,6,person_near,hazard,scheduled,1,13.17,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,caution,0,8669.7,0.007506,"Description: A person is standing roughly in the center of the frame in what appears to be an indoor workshop/factory space, facing the camera at relatively close range; background shows shelving units, equipment, and a white chair.
+Sensor note: The local detector estimates the person at 0.24m which appears to be a significant underestimate based on visual analysis — the person appears to be approximately 2–3m away based on their apparent size and body proportions. YOLO missed the person entirely; the wall/column detections are consistent with the visible background structure.
+Proximity: Closest object is the person, visually estimated at approximately 2–3m distance; the sensor est_dist of 0.24m appears to be a bounding-box heuristic overestimate of closeness and is overridden by visual analysis.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The person is present in the flight path but appears to be at a safe margin (~2–3m), not the dangerously close 0.24m the heuristic suggests. However, their exact position and intent are uncertain, the room has clutter, and the image quality is low (grainy, low-res). Hovering is the safest response — do not advance until the person's position is confirmed clear or they move aside.",
+hybrid,claude,5,1,door_open,safe,scheduled,0,13.68,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,7505.6,0.006243,"Description: The image shows an indoor industrial or warehouse space with metal-framed glass partitions/walls, overhead lighting, and what appears to be open corridor space at approximately 1m flight altitude; the area looks navigable with no persons visible and no immediate obstacles blocking the forward path.
+Sensor note: YOLO-World detected a window at 4.0m depth with low confidence (0.32); this is consistent with the glass partition walls visible in the image — these are structural boundaries rather than flight-path obstructions. The detection is plausible and consistent.
+Proximity: The closest obstacle appears to be the glass/metal frame partition structure, visually estimated at approximately 1.5–2m forward, consistent with the 4.0m depth reading which likely references the far wall beyond the frames.
+Risk: caution
+Pilot suggested action: PITCH_FORWARD (slow advance) — the corridor appears navigable but glass partitions and frames require careful navigation; reduce speed and monitor lateral clearance from the metal frames.",
+hybrid,claude,5,3,person_near,hazard,local,1,12.87,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,4335.7,0.004986,"Description: A person is standing very close to the camera/drone, leaning forward with their torso and body dominating the frame at extremely close range, likely less than 0.5m away.
+Sensor note: Consistent — local detector confirms person at ~0.2m; the person clearly fills the majority of the frame confirming immediate close proximity.
+Proximity: Person is visually estimated at under 0.5m, consistent with local detector estimate of 0.2m; this is an immediate hazard.
+Risk: hazard
+Pilot suggested action: LAND",
+hybrid,claude,5,6,person_near,hazard,scheduled,1,13.11,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,6480.3,0.005481,"Description: A person is standing very close to the camera/drone, leaning forward with their body dominating the frame at what appears to be less than 0.5m distance; the indoor environment shows shelving and furniture in the background.
+Sensor note: Consistent — local detector confirms person at ~0.2m; YOLO-W wall/shelf detections are secondary concerns given the immediate human obstacle.
+Proximity: Person is the closest object, visually estimated at well under 0.5m — consistent with local detector's 0.2m estimate and critically within hazard threshold.
+Risk: hazard
+Pilot suggested action: HOVER (immediate stop, then LAND to avoid collision with person at extremely close range)",
+hybrid,gpt4o,1,1,door_open,safe,scheduled,0,13.37,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,2564.6,0.005,"Description: The image shows an indoor space with tables and a partially open door, providing a clear path for navigation.
+Sensor note: Consistent with YOLO detection of a window at 4.0m depth.
+Proximity: Closest object is the door, visually estimated at approximately 3-4 meters away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o,1,3,person_near,hazard,local,1,12.97,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2303.4,0.005245,"Description: The image shows a person very close to the camera, bending forward, which may obstruct the flight path.
+Sensor note: Consistent with the local detector's identification of a person at approximately 0.2m.
+Proximity: Person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,1,6,person_near,hazard,scheduled,1,12.92,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2586.3,0.005365,"Description: The image shows a person very close to the camera, bending forward, which suggests proximity within 1 meter. The environment appears cluttered with furniture and objects.
+Sensor note: Consistent with sensor data indicating a person detected at 0.2m.
+Proximity: Person is visually estimated to be within 0.2 meters.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,2,1,door_open,safe,scheduled,0,14.26,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,safe,1,2875.4,0.005425,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear at ~1m altitude, with no immediate obstacles blocking the flight path.
+Sensor note: Consistent with sensor data; the detected train and window are not obstructing the path.
+Proximity: Closest object is the door at approximately 3.2m, consistent with depth_m.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o,2,3,person_near,hazard,local,1,13.19,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,2306.4,0.00507,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being very close is consistent with the image.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,2,6,person_near,hazard,scheduled,1,13.13,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,2396.4,0.00507,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being very close is consistent with the image.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,3,1,door_open,safe,scheduled,0,13.74,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,2449.4,0.00509,"Description: The image shows an indoor space with tables and chairs, and a partially open glass door. The area appears clear for navigation at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a window at 3.48m depth.
+Proximity: Closest object is the door, visually estimated at over 3m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o,3,3,person_near,hazard,local,1,13.19,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,2508.9,0.00524,"Description: The image shows a person standing close to the camera, with a cluttered indoor environment visible in the background.
+Sensor note: Consistent with sensor data indicating a person at approximately 0.4m depth.
+Proximity: The person appears very close, estimated at less than 1 meter.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,3,6,person_near,hazard,scheduled,1,13.49,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,2516.5,0.005405,"Description: The image shows a person standing close to the camera, with a chair and some furniture in the background. The person appears to be within 1 meter of the drone.
+Sensor note: Consistent with sensor data indicating a person at approximately 0.4 meters.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,4,1,door_open,safe,scheduled,0,13.76,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,3203.3,0.005025,"Description: The image shows a room with tables and chairs, and an open door. The area appears clear for navigation at ~1m altitude.
+Sensor note: Consistent with YOLO detection of a train-like object at 4.39m depth.
+Proximity: Closest object visually estimated at approximately 4m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o,4,3,person_near,hazard,local,1,12.94,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,2936.4,0.00535,"Description: The image shows a person standing close to the camera, with indoor furniture and structural elements visible in the background.
+Sensor note: The local detector's identification of a person at 0.24m is consistent with the image, indicating close proximity.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,4,6,person_near,hazard,scheduled,1,13.14,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,2386.6,0.005485,"Description: The image shows an indoor space with a person standing close to the camera, and various objects like chairs and shelves in the background.
+Sensor note: The local detector's person detection is consistent with the image, but the depth estimation suggests the person is closer than the YOLO depth data indicates.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,5,1,door_open,safe,scheduled,0,13.68,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,safe,1,2760.9,0.00518,"Description: The image shows an indoor space with tables arranged in rows, and a partially open door leading into the room. The area appears clear with no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with YOLO detection of a window at 4m depth.
+Proximity: Closest object is the door, approximately 2m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o,5,3,person_near,hazard,local,1,13.05,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2154.0,0.005305,"Description: The image shows a person very close to the camera, bending forward, which may obstruct the drone's immediate flight path.
+Sensor note: Consistent with the local detector's identification of a person at approximately 0.2m.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o,5,6,person_near,hazard,scheduled,1,13.21,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2123.2,0.005305,"Description: The image shows a person very close to the camera, potentially obstructing the flight path. The environment appears cluttered with furniture and objects.
+Sensor note: Consistent with sensor data indicating a person detected at 0.2m.
+Proximity: Person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,1,1,door_open,safe,scheduled,0,13.63,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,5932.2,0.000602,"Description: The image shows an indoor space with several tables or workstations visible. The area appears somewhat cluttered, but there are no immediate obstacles blocking the flight path at approximately 1m altitude. The lighting is moderate, indicating a dim scene but not fully dark.
+
+Sensor note: Consistent; YOLO detected a window at 4.0m, which aligns with the visual assessment of the space.
+
+Proximity: The closest objects (tables) appear to be more than 2m away based on visual estimation and depth_m.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,1,3,person_near,hazard,local,1,13.27,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5870.4,0.000607,"Description: The image shows a person crouching down, appearing to be very close to the camera. There are also some objects in the background, including a chair and a shelf. The environment seems cluttered, but the person is the most significant concern due to their proximity. 
+
+Sensor note: The local detector indicates a person detected with high confidence, which is consistent with my visual analysis. 
+
+Proximity: The person is approximately 0.2m away from the camera, which is very close.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,1,6,person_near,hazard,scheduled,1,13.03,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,5427.4,0.000606,"Description: The image shows a person kneeling down, very close to the camera, with a cluttered environment including furniture and a chair in the background. The person appears to be within 1 meter of the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected with high confidence, consistent with the visual analysis. 
+
+Proximity: The closest object/person is the individual, estimated to be approximately 0.2 meters away based on the local detector and visual assessment.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,2,1,door_open,safe,scheduled,0,13.78,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,safe,1,4496.9,0.000591,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate for navigation. 
+
+Sensor note: consistent
+
+Proximity: The closest object appears to be more than 2 meters away, based on visual assessment and depth_m data.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o_mini,2,3,person_near,hazard,local,1,12.94,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,4848.4,0.000595,"Description: The image shows a person standing in a room with various objects in the background, including furniture. The person appears to be relatively close to the drone's flight path. 
+
+Sensor note: The local detector identified a person with a confidence of 0.455 at an estimated distance of 0.24m, which is consistent with my visual analysis.
+
+Proximity: The closest object/person is the individual detected, approximately 0.24m away.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,2,6,person_near,hazard,scheduled,1,13.38,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,5684.6,0.000604,"Description: The image shows a person standing in a room with various objects in the background, including furniture. The person appears to be relatively close to the drone's flight path. 
+
+Sensor note: The local detector identified a person with a confidence of 0.455, which aligns with my visual analysis. However, the YOLO detection of a wall has a low confidence of 0.28, indicating potential uncertainty.
+
+Proximity: The closest object/person is the individual detected, estimated to be about 0.24m away.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,3,1,door_open,safe,scheduled,0,13.89,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,4836.0,0.000584,"Description: The image shows an indoor environment with a clear view of a room that appears to be empty, with tables and some equipment visible. There are no obstacles or people within close proximity to the flight path. 
+
+Sensor note: consistent 
+Proximity: The closest object appears to be more than 3 meters away, consistent with the depth_m value of 3.48m.
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o_mini,3,3,person_near,hazard,local,1,12.95,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,5098.8,0.000599,"Description: The image shows a person bending forward, positioned in a cluttered indoor environment with furniture in the background. The person appears to be approximately 0.4m away based on depth data, which aligns with the visual assessment. 
+
+Sensor note: Consistent with YOLO and local detector data indicating a person detected at a similar distance.
+
+Proximity: The closest object/person is the individual detected at approximately 0.4m.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,3,6,person_near,hazard,scheduled,1,13.59,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,4983.9,0.000606,"Description: The image shows a person bending forward, positioned in a cluttered indoor environment with furniture visible in the background. The person appears to be approximately 0.4m away based on the depth data provided. 
+
+Sensor note: The local detector indicates a person at 0.21m, which is consistent with the visual analysis, but the YOLO detection confidence is low (0.36).
+
+Proximity: The closest object/person is the individual detected at approximately 0.4m.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,4,1,door_open,safe,scheduled,0,13.63,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,3940.7,0.000577,"Description: The image shows an indoor environment with a clear path and no visible obstacles or people within close proximity. The area appears well-lit and spacious, suggesting a navigable space for the drone. 
+
+Sensor note: consistent
+
+Proximity: The closest object appears to be more than 3 meters away, based on visual assessment.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gpt4o_mini,4,3,person_near,hazard,local,1,13.12,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,4633.4,0.000609,"Description: The image shows a person standing in a room with various objects around, including a chair and what appears to be a table. The person is relatively close, estimated to be around 0.24m away based on the local detector's reading. 
+
+Sensor note: The local detector identified a person, but the YOLO detections for walls and columns have low confidence, indicating potential missed detections. 
+
+Proximity: The closest object/person is the detected person, approximately 0.24m away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,4,6,person_near,hazard,scheduled,1,13.13,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,4214.7,0.000609,"Description: The image shows a person standing in a room with various objects around, including a chair and what appears to be a table. The person is relatively close, estimated to be around 0.24m away based on the local detector's reading. 
+
+Sensor note: The local detector identified a person, but the YOLO detections for walls and columns have low confidence, indicating potential missed detections. 
+
+Proximity: The closest object/person is the detected person at approximately 0.24m away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,5,1,door_open,safe,scheduled,0,13.5,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,caution,0,4684.7,0.000595,"Description: The image shows an indoor space with several tables or workstations visible. The area appears somewhat cluttered, but there are no immediate obstacles blocking the flight path at approximately 1m altitude. The lighting is moderate, indicating a dim scene but not fully dark.
+
+Sensor note: Consistent with YOLO detection of a window and local detector brightness reading.
+
+Proximity: The closest object appears to be around 2m away, based on visual assessment and depth_m data.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,5,3,person_near,hazard,local,1,13.01,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,4320.1,0.000599,"Description: The image shows a person crouching down, appearing to be very close to the camera. There are also some objects in the background, including a chair and a shelf, but the person is the most prominent feature.  
+Sensor note: The local detector indicates a person detected with high confidence, which is consistent with the visual analysis.  
+Proximity: The person is approximately 0.2m away from the camera.  
+Risk: hazard  
+Pilot suggested action: HOVER",
+hybrid,gpt4o_mini,5,6,person_near,hazard,scheduled,1,13.0,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,4359.4,0.000601,"Description: The image shows a person crouching down, appearing to be very close to the camera, with a cluttered environment including a chair and various objects in the background. The person is within 1 meter of the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected with high confidence, which is consistent with the visual analysis. 
+
+Proximity: The closest object/person is approximately 0.2 meters away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+hybrid,gemini,1,1,door_open,safe,scheduled,0,13.59,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,hazard,0,3104.7,0.000122,"Description: The image shows an indoor industrial-like setting with an open doorway on the right. The drone appears to be facing into a room with machinery or equipment, and a ceiling fan is visible in the distance. The overall lighting is adequate.
+Sensor note: The YOLO detection of a ""window"" with a depth of 4.0m is inconsistent with the visual evidence, as the prominent feature on the right is an open doorway, not a window. The local detector's brightness reading is consistent with the visual assessment.
+Proximity: The closest object is the open door frame on the right, visually estimated to be within 1 meter. The machinery further inside the room appears to be several meters away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,1,3,person_near,hazard,local,1,13.44,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2287.5,0.000107,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,1,6,person_near,hazard,scheduled,1,13.22,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,1914.6,0.000114,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf. The estimated distance of 0.2m from the local detector aligns with my visual assessment of extreme proximity.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,2,1,door_open,safe,scheduled,0,13.57,safe,0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=119/255 (none)",disabled,disabled,0.0,safe,1,2697.1,0.000132,"Description: The image shows an indoor office or industrial space with a partially open glass door on the right. The flight path appears clear at ~1m altitude, with objects visible further back in the room.
+Sensor note: YOLO detected a 'window' which is consistent with the glass door/partition on the right. The 'train' detection is likely a false positive or refers to the general structure in the background, as no actual train is visible. The local detector's brightness assessment is consistent with the image.
+Proximity: The closest visible object is the open glass door frame on the right, visually estimated to be around 1-1.5m away. YOLO's 'window' detection at 3.2m seems to refer to the further glass partition rather than the immediate door.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gemini,2,3,person_near,hazard,local,1,13.0,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,2209.8,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the prominent person in the foreground.
+Proximity: The person is visually very close, estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,2,6,person_near,hazard,scheduled,1,13.15,hazard,1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.455, est_dist=0.24m); brightness=123/255 (none)",disabled,disabled,0.0,hazard,1,1859.2,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the prominent person in the foreground.
+Proximity: The person is visually very close, estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,3,1,door_open,safe,scheduled,0,13.18,safe,0,"YOLO detections: window (conf=0.23, depth_m=3.48m [DA v2], src=YOLO-W, bbox=[0.3,0.1,319.4,239.9])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,1995.6,0.00012,"Description: The image shows an indoor environment with a partially open glass door on the right, leading into what appears to be a workshop or office space with tables and equipment. The flight path at ~1m altitude appears clear through the doorway.
+Sensor note: YOLO detected a ""window"" which is consistent with the glass door and surrounding glass panels. The brightness is adequate.
+Proximity: The closest visible object is the frame of the open glass door on the right, visually estimated to be approximately 1-1.5m away. The YOLO depth for ""window"" (3.48m) refers to the background beyond the door, not the door frame itself.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gemini,3,3,person_near,hazard,local,1,12.98,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,1981.7,0.000115,"Description: A person is directly in front of the drone, appearing to be very close and occupying a significant portion of the frame. The background shows what looks like an indoor room with various objects.
+Sensor note: Consistent. Both YOLO and the local detector identify a person at a very close distance, which aligns with the visual evidence.
+Proximity: The person is visually estimated to be well within 1 meter, possibly around 0.2-0.4 meters, consistent with the sensor readings.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,3,6,person_near,hazard,scheduled,1,13.48,hazard,1,"YOLO detections: person (conf=0.36, depth_m=0.4m [DA v2], src=COCO, bbox=[133.2,6.2,244.7,238.2]); wall (conf=0.16, depth_m=0.4m [DA v2], src=YOLO-W, bbox=[0.2,0.2,319.2,232.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.625, est_dist=0.21m); brightness=130/255 (none)",disabled,disabled,0.0,hazard,1,2016.5,0.000123,"Description: A person is directly in front of the drone, appearing to be very close and occupying a significant portion of the frame. The background shows what looks like an indoor workshop or storage area with various objects.
+Sensor note: Consistent. Both YOLO and the local detector identify a person at a very close distance, which aligns with the visual evidence.
+Proximity: The person is visually estimated to be well within 1 meter, possibly around 0.3-0.5 meters. This is consistent with the YOLO depth_m of 0.4m and the local detector's est_dist of 0.21m.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,4,1,door_open,safe,scheduled,0,14.13,safe,0,"YOLO detections: train (conf=0.45, depth_m=4.39m [DA v2], src=COCO, bbox=[0.6,0.3,318.7,237.8])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=120/255 (none)",disabled,disabled,0.0,safe,1,2181.8,0.000118,"Description: The image shows an indoor environment with a clear path ahead, bordered by what appears to be office partitions or shelving units. The lighting is adequate, and no immediate obstacles are visible in the drone's flight path.
+Sensor note: The YOLO detection of 'train' at 4.39m is inconsistent with the visual evidence; there is no train visible in the image. The local detector's brightness reading is consistent with the visual assessment of adequate lighting.
+Proximity: The closest visible objects are the partition frames on either side, visually estimated to be beyond 1m. The background appears to be several meters away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+hybrid,gemini,4,3,person_near,hazard,local,1,13.17,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,2378.5,0.000125,"Description: A person is standing directly in front of the drone, occupying the central portion of the frame. The background appears to be an indoor room with shelves or cabinets.
+Sensor note: The local detector correctly identified a person, but YOLO detections for 'wall' and 'column' at 0.5m are inconsistent with the primary visual evidence of a person much closer. The local detector's estimated distance of 0.24m for the person is more aligned with the visual evidence than the YOLO detections.
+Proximity: The person is visually very close, estimated to be well within 1 meter, likely around 0.2-0.3 meters.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,4,6,person_near,hazard,scheduled,1,13.15,hazard,1,"YOLO detections: wall (conf=0.22, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[0.3,0.4,319.6,236.0]); column (conf=0.16, depth_m=0.5m [DA v2], src=YOLO-W, bbox=[144.9,10.7,219.3,234.2])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.315, est_dist=0.24m); brightness=125/255 (none)",disabled,disabled,0.0,hazard,1,1942.2,0.000125,"Description: A person is standing directly in front of the drone, occupying the central portion of the frame. The background appears to be an indoor room with shelves or cabinets.
+Sensor note: The local detector correctly identified a person, but YOLO detections for 'wall' and 'column' at 0.5m are inconsistent with the primary visual evidence of a person much closer. The local detector's estimated distance of 0.24m for the person is more aligned with the visual evidence than the YOLO detections.
+Proximity: The person is visually very close, estimated to be well within 1 meter, likely around 0.2-0.3 meters.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,5,1,door_open,safe,scheduled,0,13.56,safe,0,"YOLO detections: window (conf=0.32, depth_m=4.0m [DA v2], src=YOLO-W, bbox=[0.7,0.1,319.5,239.5])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): brightness=121/255 (none)",disabled,disabled,0.0,hazard,0,2327.7,0.000122,"Description: The image shows an indoor industrial-like setting with an open doorway on the right. The drone appears to be facing into a room with machinery or equipment, and a ceiling fan is visible in the distance. The overall lighting is adequate.
+Sensor note: The YOLO detection of a ""window"" with a depth of 4.0m is inconsistent with the visual evidence, as the prominent feature on the right is an open doorway, not a window. The local detector's brightness reading is consistent with the visual assessment.
+Proximity: The closest object is the open door frame on the right, visually estimated to be within 1 meter. The machinery further inside the room appears to be several meters away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,5,3,person_near,hazard,local,1,12.99,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,1869.6,0.000107,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",
+hybrid,gemini,5,6,person_near,hazard,scheduled,1,13.21,hazard,1,"YOLO detections: wall (conf=0.25, depth_m=0.6m [DA v2], src=YOLO-W, bbox=[0.5,0.4,319.6,232.9]); shelf (conf=0.17, depth_m=0.57m [DA v2], src=YOLO-W, bbox=[288.8,61.4,320.0,214.3])
+  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): person detected (conf=0.797, est_dist=0.2m); brightness=122/255 (none)",disabled,disabled,0.0,hazard,1,2203.2,0.000114,"Description: A person is directly in front of the drone, appearing to be very close and bending over. The background shows a cluttered indoor environment with furniture.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms they are much closer than the YOLO-World detections of a wall and shelf. The estimated distance of 0.2m from the local detector aligns with my visual assessment of extreme proximity.
+Proximity: Person visually <0.5m.
+Risk: hazard
+Pilot suggested action: HOVER",

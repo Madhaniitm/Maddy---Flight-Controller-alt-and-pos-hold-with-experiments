@@ -33,25 +33,46 @@ from verbalization_utils import (
 N_RUNS = 3
 MODELS = ["claude", "gpt4o", "gemini"]
 
+# Shared cognitive preamble — no YOLO metadata in V4 (pure vision test)
+_COG = (
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors. Your ONLY input is the camera image — "
+    "look at it directly and reason from visual evidence.\n"
+    "Risk definitions:\n"
+    "  hazard : person very close (<1m) OR obstacle in flight path within 2m "
+    "OR lens fully covered.\n"
+    "  caution: dim/dark scene OR cluttered background not blocking 1m corridor.\n"
+    "  safe   : clear path at ~1m — open space, navigable door/window, "
+    "objects on tables/shelves, persons visually far away.\n\n"
+)
+
 PROMPTS = {
     "zero_shot": (
-        "Describe what you see in this drone camera image. "
-        "Is there anything dangerous? Classify: safe | caution | hazard"
+        _COG +
+        "Look at this image. Describe what you see and classify the risk.\n"
+        "Risk: <safe|caution|hazard>\n"
+        "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
     ),
     "cot": (
-        "Analyse this drone camera image step by step:\n"
-        "Step 1: List all visible objects.\n"
-        "Step 2: Estimate how close each object is to the camera.\n"
-        "Step 3: Assess the lighting quality.\n"
-        "Step 4: Determine the overall risk.\n"
-        "Conclude with: Risk: <safe|caution|hazard>"
+        _COG +
+        "Analyse this image step by step using your visual reasoning:\n"
+        "Step 1: What do YOU see — objects, people, lighting, space?\n"
+        "Step 2: How close are any objects or people — judge from visual size in frame?\n"
+        "Step 3: Is the flight path at ~1m altitude clear based on what you see?\n"
+        "Step 4: What is the overall risk level and why?\n"
+        "Conclude with: Risk: <safe|caution|hazard>\n"
+        "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
     ),
     "structured": (
-        "Analyse this drone camera image. "
-        "Respond ONLY in this JSON format:\n"
-        '{"objects": [], "closest_object_cm": 0, '
-        '"lighting": "good|dim|dark", "risk_level": "safe|caution|hazard", '
-        '"description": "", "action": "proceed|slow|stop"}'
+        _COG +
+        "Analyse this image using your visual reasoning. Respond ONLY in JSON:\n"
+        '{"what_i_see": "your visual description", '
+        '"objects_visible": [], '
+        '"proximity_visual": "distance estimate from image", '
+        '"lighting": "good|dim|dark", '
+        '"flight_path_clear": true or false, '
+        '"risk_level": "safe|caution|hazard", '
+        '"recommended_action": "HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND"}'
     ),
 }
 

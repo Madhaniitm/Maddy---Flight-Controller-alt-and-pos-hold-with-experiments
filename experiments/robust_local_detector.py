@@ -11,11 +11,12 @@ Problem with YOLO+CLIP on 320×240 ESP32 frames:
 Solution: three lightweight, purpose-built checks that each target one hazard
 type independently. All run locally at ~30fps, zero API calls, deterministic.
 
-Check 1 — MediaPipe Person Detector
-    Designed for mobile/embedded, works on 320×240 at 30fps CPU.
-    Detects person presence regardless of pose or partial occlusion.
+Check 1 — MediaPipe EfficientDet-Lite0 Person Detector
+    Designed for mobile/embedded, works on 320×240 at 30fps CPU (~14 ms).
+    EfficientDet-Lite0 (~13 MB) deployed via MediaPipe inference runtime.
+    Substantially higher recall than zero-shot YOLO-World on low-res frames.
     Proximity estimated from bounding-box height as fraction of frame.
-    Ref: MediaPipe BlazeFace + Object Detection pipeline (Google 2019-2024)
+    Ref: Tan et al. CVPR 2020 EfficientDet [44]; Lugaresi et al. 2019 MediaPipe [45]
 
 Check 2 — DepthAnything v2 Minimum Depth (proximity alarm)
     Samples minimum depth in the centre ROI (middle 50% of frame).
@@ -397,8 +398,18 @@ def detect_hazard(
     # ── Human-readable metadata for LLM prompt ───────────────────────────────
     parts = []
     if person["found"]:
-        dist_str = f"{person_dist_m}m" if person_dist_m else "unknown dist"
+        if person_dist_m and person["confidence"] >= 0.42:
+            dist_str = f"{person_dist_m}m"
+        elif person_dist_m:
+            dist_str = f"~{person_dist_m}m [low-conf estimate — verify visually]"
+        else:
+            dist_str = "unknown dist"
         parts.append(f"person detected (conf={person['confidence']}, est_dist={dist_str})")
+    if texture["wall_close"]:
+        parts.append(
+            f"wall/obstacle fills entire frame (grad_std={texture['grad_std']:.1f} — "
+            f"depth_m unreliable here, trust your visual analysis)"
+        )
     if depth["min_depth_m"] is not None:
         parts.append(f"nearest obstacle {depth['min_depth_m']}m [DA v2 centre ROI]")
     parts.append(f"brightness={bright['brightness']:.0f}/255 ({bright['bright_trigger']})")

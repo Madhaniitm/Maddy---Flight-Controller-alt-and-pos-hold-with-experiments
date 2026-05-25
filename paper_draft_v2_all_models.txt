@@ -1467,6 +1467,26 @@ horizon question that the current single-drone framework does not yet address.
      reporting to LLM reasoning layers, and benchmarks DA v2 Metric Indoor as
      top-performing model for single-camera indoor robotics.)
 
+[44] Tan, M., Pang, R., Le, Q.V. (2020). EfficientDet: Scalable and Efficient
+     Object Detection. Proceedings of IEEE/CVF CVPR, 10781–10790.
+     arXiv:1911.09070.
+     (Introduced the EfficientDet family of object detectors; EfficientDet-Lite0
+     (the smallest variant, ~13 MB) is used here as the mobile-optimised person
+     detector in the robust_local_detector emergency layer, achieving ~14 ms
+     CPU inference on 320×240 ESP32 frames with substantially higher recall
+     than zero-shot YOLO-World for person detection.)
+
+[45] Lugaresi, C., Tang, J., Nash, H., McClanahan, C., Uboweja, E., Hays, M.,
+     Zhang, F., Chang, C.-L., Yong, M.G., Lee, J., Chang, W.-T., Hua, W.,
+     Georg, M., Grundmann, M. (2019). MediaPipe: A Framework for Building
+     Perception Pipelines. Workshop on Computer Vision and Pattern Recognition
+     for the Real World, CVPR 2019. arXiv:1906.08172.
+     (MediaPipe provides the inference runtime used to deploy EfficientDet-Lite0
+     for person detection in the Tier 2 robust_local_detector. The framework
+     manages model loading, preprocessing, and CPU execution; enabling 14 ms
+     end-to-end detection latency without a GPU on the companion computer.
+     Ref: robust_local_detector.py — load_mediapipe_detector().)
+
 
 ================================================================================
 TABLES AND FIGURES (camera-ready expansion list)

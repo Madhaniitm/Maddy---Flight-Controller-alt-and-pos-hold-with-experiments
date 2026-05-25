@@ -2,9 +2,9 @@
 EXP-G5: End-to-End Vision Pipeline Validation
 ===============================================
 Goal:
-    Validate the full pipeline on saved real hardware frames:
+    Validate the full four-tier pipeline on saved real hardware frames:
 
-        frame load → YOLO inference → LLM call → pilot action suggestion
+        frame load → local detector → YOLO+depth → LLM → pilot action
 
     Each stage is timed independently (Bootstrap CI). The pipeline uses
     the same saved run03 frames from real ESP32-S3-Sense hardware captures.
@@ -12,9 +12,10 @@ Goal:
 
     Stages measured per frame:
         load_ms   : time to read JPEG from disk (simulates camera capture)
-        yolo_ms   : YOLOv8n inference time (model loaded once)
-        llm_ms    : LLM API round-trip (YOLO metadata + image → reply)
-        total_ms  : load + yolo + llm end-to-end
+        local_ms  : Tier 1.5 robust_local_detector (MediaPipe + texture + brightness)
+        yolo_ms   : Tier 2 dual-YOLO + DepthAnything v2 (model loaded once)
+        llm_ms    : Tier 3 LLM API round-trip (YOLO metadata + image → reply)
+        total_ms  : load + local + yolo + llm end-to-end
 
     Models: claude, gpt4o, gpt4o_mini, gemini
     Scenes: all 8 (run03 saved frames)
@@ -28,6 +29,7 @@ Output: Image verbalization experiments/results/G5_runs_<ts>.csv
 
 import sys, pathlib, datetime, time
 import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = REPO_ROOT / "Image verbalization experiments"
@@ -40,8 +42,11 @@ from verbalization_utils import (  # noqa: E402
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, SCENES
 )
 from enhanced_yolo_pipeline import (  # noqa: E402
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
-    COMBINED_PROMPT_TEMPLATE
+    load_enhanced_yolo, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer, COMBINED_PROMPT_TEMPLATE
+)
+from robust_local_detector import (  # noqa: E402
+    load_mediapipe_detector, detect_hazard
 )
 
 N_RUNS  = 5
@@ -58,10 +63,14 @@ def main():
     print(f"Estimated time: ~{total * 5 // 60} min")
     print("=" * 65)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
-    clip_model, clip_preprocess, clip_tokenizer = load_clip()
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
 
     all_rows = []
 
@@ -76,20 +85,32 @@ def main():
             jpeg = get_saved_frame(label)
             load_ms = round((time.perf_counter() - t0) * 1000.0, 2)
 
-            # Stage 2: Enhanced YOLO full pipeline (CLAHE + YOLO-World + CLIP)
+            # Stage 1.5: Tier 1.5 — local emergency detector (no API, ~14 ms)
+            img_bgr      = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+            t_local      = time.perf_counter()
+            local_result = detect_hazard(img_bgr, depth_map=None,
+                                         mp_detector=mp_detector, mp_type=mp_type)
+            local_ms     = round((time.perf_counter() - t_local) * 1000.0, 2)
+            local_risk   = local_result["risk"]
+
+            # Stage 2: Tier 2 pipeline (CLAHE + dual-YOLO + DA v2, no CLIP)
             t_tier2 = time.perf_counter()
             tier2   = enhanced_yolo_infer(yolo_model, yolo_type,
-                                          clip_model, clip_preprocess,
-                                          clip_tokenizer, jpeg)
+                                          None, None, None, jpeg,
+                                          coco_model=coco_model,
+                                          depth_pipe=depth_pipe)
             yolo_ms   = round((time.perf_counter() - t_tier2) * 1000.0, 2)
-            yolo_meta = tier2["yolo_meta"]
+            # Append local detector so LLM sees MediaPipe person detection
+            # even when YOLO-World misclassifies person as wall/structural object
+            yolo_meta = (
+                f"{tier2['yolo_meta']}\n"
+                f"  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+                f"{local_result['metadata']}"
+            )
 
             # Stage 3: LLM call (all models)
             prompt = COMBINED_PROMPT_TEMPLATE.format(
                 yolo_meta  = yolo_meta,
-                clip_label = tier2["clip_label"],
-                clip_conf  = tier2["clip_conf"],
-                clip_risk  = tier2["clip_risk"],
             )
 
             for model in MODELS:
@@ -104,9 +125,11 @@ def main():
                     "truth":         truth,
                     "run":           run,
                     "load_ms":       load_ms,
+                    "local_ms":      local_ms,
+                    "local_risk":    local_risk,
                     "yolo_ms":       yolo_ms,
                     "llm_ms":        llm_ms,
-                    "total_ms":      round(load_ms + yolo_ms + llm_ms, 1),
+                    "total_ms":      round(load_ms + local_ms + yolo_ms + llm_ms, 1),
                     "yolo_objects":  0 if "none" in yolo_meta else yolo_meta.count(";") + 1,
                     "yolo_type":     tier2["yolo_type"],
                     "clip_label":    tier2["clip_label"],
@@ -124,15 +147,16 @@ def main():
 
                 status = "✓" if scores["s3_risk"] else "✗"
                 print(f"   run={run}  {model:12s}  "
-                      f"load={load_ms:.0f}ms  yolo={yolo_ms:.0f}ms  "
-                      f"llm={llm_ms:.0f}ms  total={load_ms+yolo_ms+llm_ms:.0f}ms  {status}")
+                      f"load={load_ms:.0f}ms  local={local_ms:.0f}ms({local_risk})  "
+                      f"yolo={yolo_ms:.0f}ms  llm={llm_ms:.0f}ms  "
+                      f"total={load_ms+local_ms+yolo_ms+llm_ms:.0f}ms  {status}")
 
             time.sleep(0.3)
 
     # ── Save runs
     fields = ["model","scene_label","truth","run",
-              "load_ms","yolo_ms","llm_ms","total_ms","yolo_objects",
-              "yolo_type","clip_label","clip_risk","clip_conf",
+              "load_ms","local_ms","local_risk","yolo_ms","llm_ms","total_ms",
+              "yolo_objects","yolo_type","clip_label","clip_risk","clip_conf",
               "detected_risk","risk_correct","quality_score",
               "input_tokens","output_tokens","cost_usd","reply","error"]
     runs_csv = RESULTS_DIR / f"G5_runs_{ts}.csv"
@@ -140,43 +164,47 @@ def main():
 
     # ── Summary per model
     print(f"\n── G5 Summary ──────────────────────────────────────────────────")
-    print(f"  {'model':12s}  {'load_ms':>8s}  {'yolo_ms':>8s}  "
+    print(f"  {'model':12s}  {'load_ms':>8s}  {'local_ms':>9s}  {'yolo_ms':>8s}  "
           f"{'llm_ms':>8s}  {'total_ms':>9s}  {'risk_acc':>8s}")
-    print("-" * 68)
+    print("-" * 78)
 
     summary_rows = []
     for model in MODELS:
         hr = [r for r in all_rows if r["model"] == model and not r["error"]]
         if not hr:
             continue
-        lom, _, _  = bootstrap_ci([r["load_ms"]  for r in hr])
-        yom, _, _  = bootstrap_ci([r["yolo_ms"]  for r in hr])
+        lom, _, _       = bootstrap_ci([r["load_ms"]  for r in hr])
+        locm, _, _      = bootstrap_ci([r["local_ms"] for r in hr])
+        yom, _, _       = bootstrap_ci([r["yolo_ms"]  for r in hr])
         lmm, lm_lo, lm_hi = bootstrap_ci([r["llm_ms"]   for r in hr])
-        tom, _, _  = bootstrap_ci([r["total_ms"] for r in hr])
-        acc, alo, ahi = wilson_ci(sum(r["risk_correct"] for r in hr), len(hr))
+        tom, _, _       = bootstrap_ci([r["total_ms"] for r in hr])
+        acc, alo, ahi   = wilson_ci(sum(r["risk_correct"] for r in hr), len(hr))
 
-        print(f"  {model:12s}  {lom:>8.1f}  {yom:>8.1f}  "
+        print(f"  {model:12s}  {lom:>8.1f}  {locm:>9.1f}  {yom:>8.1f}  "
               f"{lmm:>8.0f}  {tom:>9.0f}  "
               f"{acc:.3f}[{alo:.3f},{ahi:.3f}]")
 
         summary_rows.append({
             "model": model, "n_trials": len(hr),
-            "load_ms": round(lom, 2), "yolo_ms": round(yom, 2),
+            "load_ms": round(lom, 2), "local_ms": round(locm, 2),
+            "yolo_ms": round(yom, 2),
             "llm_ms": round(lmm, 1), "llm_lo": round(lm_lo, 1),
             "llm_hi": round(lm_hi, 1), "total_ms": round(tom, 1),
             "risk_accuracy": round(acc, 4), "acc_lo": round(alo, 4),
             "acc_hi": round(ahi, 4),
         })
 
-    # YOLO timing (shared across all models)
-    yolo_all = list({r["yolo_ms"] for r in all_rows})  # unique per scene×run
-    yom_all, yo_lo, yo_hi = bootstrap_ci([r["yolo_ms"] for r in all_rows])
-    print(f"\n  YOLO inference (all scenes, N={len(SCENES)*N_RUNS}): "
+    # YOLO + local timing (shared across all models)
+    yom_all, yo_lo, yo_hi = bootstrap_ci([r["yolo_ms"]  for r in all_rows])
+    locm_all, lo_lo, lo_hi = bootstrap_ci([r["local_ms"] for r in all_rows])
+    print(f"\n  Local detector (all scenes, N={len(SCENES)*N_RUNS}): "
+          f"{locm_all:.1f}ms [{lo_lo:.1f},{lo_hi:.1f}]")
+    print(f"  YOLO+DA v2    (all scenes, N={len(SCENES)*N_RUNS}): "
           f"{yom_all:.1f}ms [{yo_lo:.1f},{yo_hi:.1f}]")
 
     summary_csv = RESULTS_DIR / f"G5_summary_{ts}.csv"
     write_csv(summary_csv, summary_rows,
-              ["model","n_trials","load_ms","yolo_ms",
+              ["model","n_trials","load_ms","local_ms","yolo_ms",
                "llm_ms","llm_lo","llm_hi","total_ms",
                "risk_accuracy","acc_lo","acc_hi"])
 

@@ -1,0 +1,9 @@
+condition,model,n_trials,accuracy,acc_lo,acc_hi,quality,latency_ms,cost_usd
+react_template,claude,15,0.3333,0.1518,0.5829,2.4,9778.9733,0.0066
+react_template,gpt4o,15,1.0,0.7961,1.0,5.0,3586.34,0.0053
+react_template,gpt4o_mini,15,0.4667,0.2481,0.6988,4.4667,7183.4533,0.0006
+react_template,gemini,15,1.0,0.7961,1.0,3.9333,3048.9133,0.0001
+react_agentic,claude,14,0.0,0.0,0.2153,2.8571,15460.8,0.0093
+react_agentic,gpt4o,15,0.3333,0.1518,0.5829,3.4,8650.2533,0.009
+react_agentic,gpt4o_mini,15,0.0,0.0,0.2039,3.0,14264.6067,0.0007
+react_agentic,gemini,15,0.0,0.0,0.2039,3.0,5801.7733,0.0002

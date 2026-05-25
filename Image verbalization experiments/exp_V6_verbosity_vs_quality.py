@@ -31,6 +31,7 @@ Output:  results/V6_runs_<timestamp>.csv
 
 import sys, pathlib, datetime, time
 import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = pathlib.Path(__file__).parent
@@ -43,9 +44,14 @@ from verbalization_utils import (
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR
 )
 from enhanced_yolo_pipeline import (
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
-    COMBINED_PROMPT_TEMPLATE
+    load_enhanced_yolo, load_clip, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer, COMBINED_PROMPT_TEMPLATE_CLIP, COMBINED_PROMPT_TEMPLATE
 )
+
+# ── Toggle: set to False to run WITHOUT CLIP (ablation) ──────────────────────
+USE_CLIP = False   # True → with CLIP (results: V6_runs_20260525_185304.csv)
+                   # False → without CLIP (current run)
+from robust_local_detector import load_mediapipe_detector, detect_hazard
 
 N_RUNS     = 5
 MODELS     = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
@@ -61,35 +67,62 @@ def is_truncated(reply: str) -> int:
 
 
 def main():
+    clip_tag = "clip" if USE_CLIP else "noclip"
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     total = len(MAX_TOKENS) * len(MODELS) * len(SCENES) * N_RUNS
     print("=" * 65)
-    print("EXP-V6: Verbosity vs Quality Tradeoff")
+    print(f"EXP-V6: Verbosity vs Quality Tradeoff  [{clip_tag}]")
     print(f"max_tokens={MAX_TOKENS}")
     print(f"Models={MODELS}  Scenes={len(SCENES)}  N={N_RUNS}")
     print(f"Total trials: {total}")
     print("=" * 65)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
-    clip_model, clip_preprocess, clip_tokenizer = load_clip()
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
+    if USE_CLIP:
+        print("Loading CLIP scene screener…")
+        clip_model, clip_preprocess, clip_tokenizer = load_clip()
+    else:
+        clip_model = clip_preprocess = clip_tokenizer = None
+        print("CLIP disabled (USE_CLIP=False)")
 
     all_rows = []
 
     for scene in SCENES:
         print(f"\n── Scene {scene['id']:02d}: {scene['label']}  (truth={scene['truth']}) ──")
-        jpeg  = get_saved_frame(scene["label"])
+        jpeg     = get_saved_frame(scene["label"])
+        img_bgr  = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+        t_local  = time.perf_counter()
+        local_r  = detect_hazard(img_bgr, depth_map=None,
+                                 mp_detector=mp_detector, mp_type=mp_type)
+        local_ms = round((time.perf_counter() - t_local) * 1000.0, 2)
+
         tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
                                     clip_model, clip_preprocess,
-                                    clip_tokenizer, jpeg)
-        prompt = COMBINED_PROMPT_TEMPLATE.format(
-            yolo_meta  = tier2["yolo_meta"],
-            clip_label = tier2["clip_label"],
-            clip_conf  = tier2["clip_conf"],
-            clip_risk  = tier2["clip_risk"],
+                                    clip_tokenizer, jpeg,
+                                    coco_model=coco_model,
+                                    depth_pipe=depth_pipe)
+        tier2["yolo_meta"] += (
+            f"\n  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+            f"{local_r['metadata']}"
         )
-        print(f"   yolo={tier2['yolo_meta'][:60]}  clip={tier2['clip_label']}")
+        if USE_CLIP:
+            prompt = COMBINED_PROMPT_TEMPLATE_CLIP.format(
+                yolo_meta  = tier2["yolo_meta"],
+                clip_label = tier2["clip_label"],
+                clip_conf  = tier2["clip_conf"],
+                clip_risk  = tier2["clip_risk"],
+            )
+            print(f"   local={local_ms:.0f}ms({local_r['risk']})  yolo={tier2['yolo_meta'][:50]}  clip={tier2['clip_label']}")
+        else:
+            prompt = COMBINED_PROMPT_TEMPLATE.format(yolo_meta=tier2["yolo_meta"])
+            print(f"   local={local_ms:.0f}ms({local_r['risk']})  yolo={tier2['yolo_meta'][:50]}  (no CLIP)")
 
         for run in range(1, N_RUNS + 1):
             for model in MODELS:
@@ -107,6 +140,8 @@ def main():
                         "model":           model,
                         "max_tokens":      max_tok,
                         "run":             run,
+                        "local_ms":        local_ms,
+                        "local_risk":      local_r["risk"],
                         "quality_score":   scores["quality_score"],
                         "s1_scene":        scores["s1_scene"],
                         "s2_proximity":    scores["s2_proximity"],
@@ -133,10 +168,11 @@ def main():
 
     # ── Save runs CSV
     fields = ["scene_id","scene_label","truth","model","max_tokens","run",
+              "local_ms","local_risk",
               "quality_score","s1_scene","s2_proximity","s3_risk","s4_length",
               "s5_pilot_action","detected_risk","word_count","truncated",
               "latency_ms","input_tokens","output_tokens","cost_usd","efficiency","error"]
-    runs_csv = RESULTS_DIR / f"V6_runs_{ts}.csv"
+    runs_csv = RESULTS_DIR / f"V6_runs_{clip_tag}_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 
     # ── Summary by max_tokens (all models avg)
@@ -206,7 +242,7 @@ def main():
         print(f"\n  Efficiency sweet spot: max_tokens={sweet['max_tokens']}  "
               f"(quality={sweet['quality']:.2f}/5, q/USD={sweet['efficiency']:.0f})")
 
-    summary_csv = RESULTS_DIR / f"V6_summary_{ts}.csv"
+    summary_csv = RESULTS_DIR / f"V6_summary_{clip_tag}_{ts}.csv"
     write_csv(summary_csv, summary_rows,
               ["model","max_tokens","n_trials","accuracy","acc_lo","acc_hi",
                "quality","q_lo","q_hi","word_count","truncation_rate",

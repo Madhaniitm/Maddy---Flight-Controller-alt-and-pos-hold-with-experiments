@@ -1,0 +1,960 @@
+model,scene_label,truth,run,load_ms,local_ms,local_risk,yolo_ms,llm_ms,total_ms,yolo_objects,yolo_type,clip_label,clip_risk,clip_conf,detected_risk,risk_correct,quality_score,input_tokens,output_tokens,cost_usd,reply,error
+claude,person_near,hazard,1,0.12,29.9,hazard,462.34,8513.2,9005.6,0,yolo-world,disabled,disabled,0.0,caution,0,3,974,279,0.007107,"Description: A person is standing in what appears to be an indoor workshop or storage room, with their arms raised, at what appears to be a moderate distance from the camera; shelving and equipment are visible in the background.
+
+Sensor note: The local detector estimates the person at 0.24m which appears inconsistent with visual analysis — the person looks to be approximately 2–3m away based on their apparent size and the room context. The 0.24m estimate is likely a geometric heuristic error (est_dist, not DepthAnything v2), and my visual analysis overrides this reading.
+
+Proximity: Closest object is the person, visually estimated at ~2–3m; the wall detection at 0.45m (DepthAnything v2) may reflect side walls or shelving within the room rather than a direct forward obstacle at 1m flight height.
+
+Risk: caution
+
+Pilot suggested action: HOVER
+
+**Reasoning:** The person is not dangerously close based on visual analysis, but their raised arms and presence in the flight corridor at ~1m altitude warrant caution. Hovering is appropriate until the person's intent is clear and a safe path is confirmed. The room also shows clutter and shelving that reduce navigable space.",
+gpt4o,person_near,hazard,1,0.12,29.9,hazard,462.34,3077.2,3569.6,0,yolo-world,disabled,disabled,0.0,hazard,1,5,789,75,0.00507,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being very close is consistent with the image.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_near,hazard,1,0.12,29.9,hazard,462.34,4445.3,4937.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3556,115,0.000602,"Description: The image shows a person standing in a room with various objects around, including a chair and what appears to be furniture in the background. The person is relatively close to the camera, likely within 1 meter. 
+
+Sensor note: The local detector indicates a person detected with a confidence of 0.455 at an estimated distance of 0.24m, which is consistent with my visual analysis.
+
+Proximity: The closest object/person is the individual, estimated to be about 0.5m away.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,1,0.12,29.9,hazard,462.34,1964.6,2457.0,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1026,124,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the primary object being a person.
+Proximity: The person is visually very close, estimated to be less than 1 meter away.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_near,hazard,2,0.57,41.33,hazard,280.04,7703.0,8024.9,0,yolo-world,disabled,disabled,0.0,hazard,1,5,974,170,0.005472,"Description: A person is standing in the foreground of what appears to be an indoor workshop/storage room, with both arms raised, positioned close to the camera/drone at an estimated distance of under 2 meters.
+Sensor note: The local detector estimates 0.24m which seems too close given the full-body visibility, but the person is clearly within 1-2m range; the wall depth of 0.45m from YOLO-W is likely a misclassification of the person or nearby surface.
+Proximity: Person visually estimated at approximately 1.0–1.5m from the drone, well within the hazard threshold of <1m to 2m blocking the flight path.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,person_near,hazard,2,0.57,41.33,hazard,280.04,2874.4,3196.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,789,75,0.00507,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being very close is consistent with the image.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_near,hazard,2,0.57,41.33,hazard,280.04,3778.5,4100.4,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3556,96,0.000591,"Description: The image shows a person standing in a room with various objects around, including a chair and what appears to be furniture in the background. The person is relatively close to the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected at 0.24m, which is consistent with my visual analysis. 
+
+Proximity: The closest object/person is approximately 0.24m away. 
+
+Risk: hazard  
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,2,0.57,41.33,hazard,280.04,2257.1,2579.0,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1026,123,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the prominent person in the foreground.
+Proximity: The person is visually very close, estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_near,hazard,3,0.52,28.04,hazard,263.78,5919.6,6211.9,0,yolo-world,disabled,disabled,0.0,hazard,1,5,974,185,0.005697,"Description: A person is standing in what appears to be an indoor workshop or storage area, facing the camera with arms raised, positioned centrally in the frame and appearing to be relatively close to the camera/drone.
+Sensor note: Local detector estimates 0.24m distance which seems too close given the full-body visibility, but the person is clearly within 1-2m range; the wall detection at 0.45m is plausible for background clutter. Person presence is confirmed visually.
+Proximity: Person appears to be approximately 1.5-2.5m away visually (full body visible, moderate frame fill), though sensor est_dist of 0.24m via geometric fallback is likely an overestimate of closeness — still within hazard-relevant range.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,person_near,hazard,3,0.52,28.04,hazard,263.78,2284.1,2576.4,0,yolo-world,disabled,disabled,0.0,hazard,1,5,789,80,0.005145,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being 0.24m away is consistent with the visual analysis.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_near,hazard,3,0.52,28.04,hazard,263.78,3786.4,4078.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3556,89,0.000587,"Description: The image shows a person standing in a room with various objects in the background, including furniture. The person appears to be relatively close to the drone's flight path. 
+Sensor note: Consistent with local detector indicating a person detected at approximately 0.24m.
+Proximity: The closest object/person is the detected person, estimated at about 0.24m away.
+Risk: hazard
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,3,0.52,28.04,hazard,263.78,2156.4,2448.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1026,123,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the prominent person in the foreground.
+Proximity: The person is visually very close, estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_near,hazard,4,0.51,41.32,hazard,262.03,5841.4,6145.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,974,178,0.005592,"Description: A person is standing directly in front of the drone with both arms raised, appearing to be in close proximity within what looks like a workshop or storage room with shelving and equipment in the background.
+Sensor note: The local detector estimates person at 0.24m which seems like an underestimate based on visual appearance, but the person is clearly within 1-2m range; the wall detection at 0.45m is consistent with the cluttered background visible behind the person.
+Proximity: Person appears approximately 1.5–2.5m away visually, though sensor est_dist=0.24m (geometric fallback, lower trust); treating visual estimate as primary — still within hazard-caution boundary given raised arms extending toward camera.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,person_near,hazard,4,0.51,41.32,hazard,262.03,2453.2,2757.1,0,yolo-world,disabled,disabled,0.0,hazard,1,5,789,80,0.005145,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being 0.24m away is consistent with the visual analysis.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_near,hazard,4,0.51,41.32,hazard,262.03,4198.4,4502.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3556,94,0.00059,"Description: The image shows a person standing in a room with various objects in the background, including furniture. The person appears to be relatively close to the drone's flight path. 
+
+Sensor note: The local detector indicates a person detected at 0.24m, which is consistent with my visual analysis. 
+
+Proximity: The closest object/person is approximately 0.24m away. 
+
+Risk: hazard  
+Pilot suggested action: STOP IMMEDIATELY",
+gemini,person_near,hazard,4,0.51,41.32,hazard,262.03,1744.3,2048.2,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1026,124,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the primary object being a person.
+Proximity: The person is visually very close, estimated to be less than 1 meter away.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_near,hazard,5,0.58,29.22,hazard,260.26,5842.8,6132.9,0,yolo-world,disabled,disabled,0.0,hazard,1,5,974,174,0.005532,"Description: A person is standing directly in front of the camera at close range in what appears to be an indoor workspace/warehouse, with their arms raised, occupying a large portion of the frame and clearly within the drone's immediate flight path.
+Sensor note: The local detector estimates 0.24m which is a geometric heuristic fallback — visually the person appears closer than 1m but likely 1–2m given frame coverage; the wall detection at 0.45m is likely a background misread. Overall broadly consistent with a close-person scenario.
+Proximity: Person is the closest object, visually estimated at approximately 1–2m directly ahead, well within the hazard threshold for a ~1m altitude flight path.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,person_near,hazard,5,0.58,29.22,hazard,260.26,2160.5,2450.6,0,yolo-world,disabled,disabled,0.0,hazard,1,5,789,80,0.005145,"Description: The image shows a person standing indoors, with various objects and furniture around. The person appears to be close to the camera.
+Sensor note: The local detector's estimation of the person being 0.24m away is consistent with the visual analysis.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_near,hazard,5,0.58,29.22,hazard,260.26,3627.2,3917.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3556,86,0.000585,"Description: The image shows a person standing in a room with various objects around, including furniture. The person appears to be relatively close to the drone's flight path. 
+Sensor note: The local detector indicates a person detected at 0.24m, which is consistent with my visual analysis.
+Proximity: The closest object/person is approximately 0.24m away.
+Risk: hazard
+Pilot suggested action: HOVER",
+gemini,person_near,hazard,5,0.58,29.22,hazard,260.26,2212.6,2502.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1026,124,0.000114,"Description: A person is standing directly in front of the drone, occupying the majority of the frame. The background appears to be an indoor room with some furniture and shelves.
+Sensor note: The local detector correctly identified a person, but its estimated distance of 0.24m is too close given the visual evidence. YOLO-World detected a ""wall"" at 0.45m, which is inconsistent with the primary object being a person.
+Proximity: The person is visually very close, estimated to be less than 1 meter away.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,wall_close,hazard,1,0.56,35.97,hazard,276.65,5626.1,5939.3,0,yolo-world,disabled,disabled,0.0,safe,0,4,956,138,0.004938,"Description: The image shows a nearly featureless, evenly lit light grey/white wall or ceiling surface with no visible obstacles, persons, or clutter in the flight path at approximately 1m altitude.
+Sensor note: Consistent — YOLO-World detected a wall at 2.09m, which aligns with the large uniform surface visible; no discrepancies noted.
+Proximity: Closest object is the wall, visually estimated at ~2m, consistent with depth_m=2.09m from DepthAnything v2.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,wall_close,hazard,1,0.56,35.97,hazard,276.65,2250.7,2563.9,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,69,0.004895,"Description: The image shows a blank wall with no visible obstacles or objects in the immediate vicinity.
+Sensor note: Consistent with YOLO detection of a wall at approximately 2.09 meters.
+Proximity: Closest object is the wall, visually estimated at around 2 meters.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,1,0.56,35.97,hazard,276.65,3379.2,3692.4,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,77,0.000577,"Description: The image appears to show a plain, featureless wall with no visible obstacles or persons nearby. The surface is well-lit, indicating a clear environment.  
+Sensor note: consistent  
+Proximity: The closest object (the wall) is approximately 2.09m away, as indicated by the depth_m value.  
+Risk: safe  
+Pilot suggested action: ASCEND",
+gemini,wall_close,hazard,1,0.56,35.97,hazard,276.65,2307.1,2620.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1005,141,0.000118,"Description: The image shows a uniformly light grey surface, likely a wall, filling the entire frame. There are no discernible features or objects.
+Sensor note: Consistent. YOLO-World detected a wall, which aligns with the visual evidence.
+Proximity: Visually, the wall appears to be very close, filling the entire field of view. The depth_m of 2.09m seems inconsistent with the visual evidence of the wall filling the frame, suggesting it might be closer than reported or the drone is facing a very large, close wall. Given the lack of other features, I estimate it to be within 1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,wall_close,hazard,2,0.46,29.98,hazard,276.3,5274.8,5581.5,0,yolo-world,disabled,disabled,0.0,safe,0,4,956,148,0.005088,"Description: The image shows a plain, uniformly lit interior wall with no visible obstacles, persons, or clutter in the flight path at ~1m altitude. The scene is open and unobstructed.
+
+Sensor note: Consistent — YOLO-World detected a wall at 2.09m depth, which aligns with the visible flat wall surface filling the frame; no unexpected discrepancies.
+
+Proximity: Closest object is the wall, visually estimated at approximately 2m, consistent with the DepthAnything v2 reading of 2.09m — no immediate collision risk.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,wall_close,hazard,2,0.46,29.98,hazard,276.3,2352.3,2659.0,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,69,0.004895,"Description: The image shows a blank wall with no visible obstacles or objects in the immediate vicinity.
+Sensor note: Consistent with YOLO detection of a wall at approximately 2.09 meters.
+Proximity: Closest object is the wall, visually estimated at around 2 meters.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,2,0.46,29.98,hazard,276.3,2948.4,3255.1,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,72,0.000574,"Description: The image appears to show a plain, featureless wall with no visible obstacles or persons nearby. The surface is well-lit, indicating a clear environment.  
+Sensor note: consistent  
+Proximity: The closest object is the wall, approximately 2.09m away based on depth_m.  
+Risk: safe  
+Pilot suggested action: ASCEND",
+gemini,wall_close,hazard,2,0.46,29.98,hazard,276.3,2175.0,2481.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1005,110,0.000108,"Description: The image shows a uniformly light grey surface, likely a wall, filling the entire frame. There are no discernible features or objects.
+Sensor note: Consistent. YOLO-World detected a wall, which aligns with the visual evidence.
+Proximity: Visually, the wall appears to be very close, filling the entire field of view. The depth_m of 2.09m seems plausible for a wall filling the frame, but it feels closer than 2m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,wall_close,hazard,3,0.57,38.32,hazard,277.84,5168.9,5485.6,0,yolo-world,disabled,disabled,0.0,safe,0,4,956,155,0.005193,"Description: The image shows a plain, nearly featureless light-grey wall filling most of the frame, with a thin dark strip visible at the top edge suggesting a ceiling/wall junction; the flight path at ~1m altitude appears unobstructed with no persons or obstacles visible.
+Sensor note: Consistent — YOLO-World detected a wall at 2.09m depth, which aligns with the visually dominant wall surface; no discrepancies noted.
+Proximity: Closest object is the wall, visually estimated at ~2m, consistent with DepthAnything v2 reading of 2.09m.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,wall_close,hazard,3,0.57,38.32,hazard,277.84,2295.2,2611.9,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,69,0.004895,"Description: The image shows a plain wall with no visible obstacles or objects in the immediate vicinity.
+Sensor note: Consistent with YOLO detection of a wall at approximately 2.09 meters.
+Proximity: Closest object is the wall, visually estimated at around 2 meters.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,3,0.57,38.32,hazard,277.84,3380.4,3697.1,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,77,0.000577,"Description: The image appears to show a plain, featureless wall with no visible obstacles or persons nearby. The surface is well-lit, indicating a clear environment.  
+Sensor note: consistent  
+Proximity: The closest object (the wall) is approximately 2.09m away, as indicated by the depth_m value.  
+Risk: safe  
+Pilot suggested action: ASCEND",
+gemini,wall_close,hazard,3,0.57,38.32,hazard,277.84,1846.0,2162.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1005,110,0.000108,"Description: The image shows a uniformly light grey surface, likely a wall, filling the entire frame. There are no discernible features or objects.
+Sensor note: Consistent. YOLO-World detected a wall, which aligns with the visual evidence.
+Proximity: Visually, the wall appears to be very close, filling the entire field of view. The depth_m of 2.09m seems plausible for a wall filling the frame, but it feels closer than 2m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,wall_close,hazard,4,0.55,37.87,hazard,279.93,5898.9,6217.2,0,yolo-world,disabled,disabled,0.0,safe,0,4,956,151,0.005133,"Description: The image shows a plain, largely featureless light grey/white wall or ceiling surface with no visible obstacles, persons, or clutter in the flight path at ~1m altitude.
+Sensor note: Consistent — YOLO-World detected a wall at 2.09m depth, which aligns with the flat, uniform surface visible in the image; no unexpected objects missed by sensors.
+Proximity: Closest surface appears to be the wall at approximately 2m, consistent with the DepthAnything v2 reading of 2.09m; no objects or persons detected visually closer than that.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,wall_close,hazard,4,0.55,37.87,hazard,279.93,2497.8,2816.2,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,67,0.004865,"Description: The image shows a plain wall with no visible obstacles or objects in the immediate vicinity.
+Sensor note: Consistent with sensor data indicating a wall at approximately 2.09 meters.
+Proximity: Closest object is the wall at about 2.09 meters.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,4,0.55,37.87,hazard,279.93,3059.0,3377.3,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,77,0.000577,"Description: The image appears to show a plain, featureless wall with no visible obstacles or persons nearby. The surface is well-lit, indicating a clear environment.  
+Sensor note: consistent  
+Proximity: The closest object (the wall) is approximately 2.09m away, as indicated by the depth_m value.  
+Risk: safe  
+Pilot suggested action: ASCEND",
+gemini,wall_close,hazard,4,0.55,37.87,hazard,279.93,1643.8,1962.2,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1005,110,0.000108,"Description: The image shows a uniformly light grey surface, likely a wall, filling the entire frame. There are no discernible features or objects.
+Sensor note: Consistent. YOLO-World detected a wall, which aligns with the visual evidence.
+Proximity: Visually, the wall appears to be very close, filling the entire field of view. The depth_m of 2.09m seems plausible for a wall filling the frame, but it feels closer than 2m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,wall_close,hazard,5,0.5,39.0,hazard,280.8,6555.5,6875.8,0,yolo-world,disabled,disabled,0.0,hazard,1,5,956,146,0.005058,"Description: The image shows a plain, featureless light-colored wall/ceiling area with no obstacles, people, or objects visible in the flight path at approximately 1m altitude. The scene is very open and uniformly lit with adequate brightness.
+
+Sensor note: Consistent — YOLO-World detected a wall at 2.09m depth, which aligns with the visible plain wall surface in the image. No discrepancies noted.
+
+Proximity: Closest object is the wall, visually consistent with the sensor-reported ~2.09m distance — well outside the immediate hazard zone.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,wall_close,hazard,5,0.5,39.0,hazard,280.8,2233.6,2553.9,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,65,0.004835,"Description: The image shows a blank wall with no visible obstacles or objects.
+Sensor note: Consistent with YOLO detection of a wall at approximately 2.09 meters.
+Proximity: Closest object is the wall, visually estimated at around 2 meters.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,wall_close,hazard,5,0.5,39.0,hazard,280.8,3278.6,3598.9,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,74,0.000575,"Description: The image appears to show a blank, featureless wall with no visible obstacles or persons nearby. The surface is uniformly lit, indicating a well-lit environment.  
+Sensor note: consistent  
+Proximity: The closest object (the wall) is approximately 2.09m away based on depth_m.  
+Risk: safe  
+Pilot suggested action: ASCEND",
+gemini,wall_close,hazard,5,0.5,39.0,hazard,280.8,2051.0,2371.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,1005,141,0.000118,"Description: The image shows a uniformly light grey surface, likely a wall, filling the entire frame. There are no discernible features or objects.
+Sensor note: Consistent. YOLO-World detected a wall, which aligns with the visual evidence.
+Proximity: Visually, the wall appears to be very close, filling the entire field of view. The depth_m of 2.09m seems inconsistent with the visual evidence of the wall filling the frame, suggesting it might be closer than reported or the drone is facing a very large, close wall. Given the lack of other features, I estimate it to be within 1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,object_table,caution,1,0.44,39.78,safe,278.19,60575.3,60893.7,0,yolo-world,disabled,disabled,0.0,,0,0,0,0,0.0,,The read operation timed out
+gpt4o,object_table,caution,1,0.44,39.78,safe,278.19,2440.2,2758.6,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,83,0.005105,"Description: The image shows a laptop on a table in a room with shelves and other furniture in the background. The area appears clear at the ~1m flight path level.
+Sensor note: Consistent with YOLO detection of a shelf at 2.53m depth.
+Proximity: Closest object is the laptop, approximately 1m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,1,0.44,39.78,safe,278.19,4758.4,5076.8,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,111,0.000597,"Description: The image shows a laptop on a table with a cluttered background, including shelves and other objects. The scene appears well-lit, but there are several items in the vicinity that could pose a risk to flight. 
+
+Sensor note: Consistent with YOLO detection of a shelf, but the clutter is not fully accounted for by the sensors. 
+
+Proximity: The closest object appears to be the edge of the table, approximately 0.5m away based on visual estimation. 
+
+Risk: Caution  
+Pilot suggested action: HOVER",
+gemini,object_table,caution,1,0.44,39.78,safe,278.19,2497.7,2816.1,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1008,110,0.000109,"Description: The drone is facing a laptop on a table, which is a significant obstacle directly in the flight path. The background shows what appears to be shelves or furniture.
+Sensor note: YOLO detected a ""shelf"" at 2.53m, which is inconsistent with the prominent laptop directly in front of the drone. The local detector's brightness reading is consistent with the image.
+Proximity: The laptop is very close, visually estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,object_table,caution,2,0.58,34.77,safe,282.28,8247.3,8564.9,0,yolo-world,disabled,disabled,0.0,hazard,0,3,956,254,0.006678,"Description: The image shows an indoor environment with a laptop on a table displaying code/IDE, with shelving units visible in the background; the scene is moderately lit but somewhat dim due to low ambient lighting.
+Sensor note: YOLO-World detected a shelf at 2.53m with low confidence (0.19); the laptop on the table is clearly visible but undetected by sensors — it exists and is a real obstacle at table level. No persons detected or visually confirmed.
+Proximity: The laptop/table appears to be the closest object, visually estimated at approximately 1.5–2m forward; shelving units are visible further back (~2.5m consistent with depth_m reading).
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The scene is navigable at ~1m altitude since the table/laptop obstacle is at table height (below the ~1m flight corridor), but the dim lighting and cluttered shelving environment warrant caution rather than free forward flight. No immediate hazard blocks the 1m corridor directly, but limited visibility and undetected objects (laptop) justify holding position until the path is better assessed.",
+gpt4o,object_table,caution,2,0.58,34.77,safe,282.28,2833.2,3150.8,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,93,0.005255,"Description: The image shows a laptop on a table in a room with shelves and other furniture in the background. The scene appears well-lit and there is no immediate obstruction in the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data; the shelf detection aligns with the background.
+Proximity: Closest object is the laptop on the table, visually estimated at ~1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,object_table,caution,2,0.58,34.77,safe,282.28,4741.0,5058.6,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,127,0.000607,"Description: The image shows a laptop on a table with a cluttered background, including shelves and other objects. The scene appears well-lit, but there are various items that could pose a risk if the drone were to navigate close to the table. 
+
+Sensor note: The YOLO detection indicates a shelf at a distance of 2.53m, which is consistent with the visual analysis, but there may be additional clutter not detected.
+
+Proximity: The closest object appears to be the edge of the table, approximately 0.5m away from the drone's flight path.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,2,0.58,34.77,safe,282.28,1949.1,2266.7,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1008,110,0.000109,"Description: The drone is facing a laptop on a table, which is a significant obstacle directly in the flight path. The background shows what appears to be shelves or furniture.
+Sensor note: YOLO detected a ""shelf"" at 2.53m, which is inconsistent with the prominent laptop directly in front of the drone. The local detector's brightness reading is consistent with the image.
+Proximity: The laptop is very close, visually estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,object_table,caution,3,0.51,38.7,safe,283.47,7050.2,7372.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,223,0.006213,"Description: The scene shows an indoor environment with a laptop on a desk/table displaying code, with bookshelves or storage units visible in the background at moderate distance. The space appears to be a cluttered indoor room with objects at various heights, but no person is immediately visible in the frame.
+
+Sensor note: YOLO-World detected a shelf at 2.53m with low confidence (0.19); the laptop and desk are not detected by sensors but are clearly visible in the image — these represent undetected obstacles at roughly table height (~0.7–0.9m), below the ~1m flight corridor but worth noting. The desk surface with laptop is the dominant undetected hazard.
+
+Proximity: Closest object is the laptop/desk surface, visually estimated at approximately 1–1.5m from the camera. The shelf/storage units in background appear consistent with the 2.53m depth reading from DepthAnything v2.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,3,0.51,38.7,safe,283.47,2735.7,3058.4,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,90,0.00521,"Description: The image shows a laptop on a table in a room with shelves and other furniture in the background. The area appears to be clear at the ~1m flight path level.
+Sensor note: Consistent with YOLO detection of a shelf at 2.53m depth.
+Proximity: Closest object is the laptop on the table, visually estimated at ~1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,object_table,caution,3,0.51,38.7,safe,283.47,4737.8,5060.5,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,113,0.000599,"Description: The image shows a laptop on a table with a cluttered background, including shelves and other objects. The scene appears well-lit, but there are several items in the vicinity that could pose a risk to flight. 
+
+Sensor note: Consistent; the YOLO detection indicates a shelf at a distance of 2.53m, which aligns with the visual assessment of the environment.
+
+Proximity: The closest object appears to be the laptop itself, which is approximately 0.5m away.
+
+Risk: Caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,3,0.51,38.7,safe,283.47,2153.0,2475.7,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1008,110,0.000109,"Description: The drone is facing a laptop on a table, which is a significant obstacle directly in the flight path. The background shows what appears to be shelves or furniture.
+Sensor note: YOLO detected a ""shelf"" at 2.53m, which is inconsistent with the prominent laptop directly in front of the drone. The local detector's brightness reading is consistent with the image.
+Proximity: The laptop is very close, visually estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,object_table,caution,4,0.56,37.92,safe,279.07,7783.8,8101.4,0,yolo-world,disabled,disabled,0.0,hazard,0,3,956,241,0.006483,"Description: The image shows an indoor environment with a laptop on a table displaying code/IDE, with bookshelves or storage units visible in the background; the scene is moderately lit but somewhat dim with clutter at table level.
+Sensor note: YOLO-World detected a shelf at 2.53m with low confidence (0.19); the laptop and table are prominent in the foreground but were not detected — these are real obstacles the sensors missed.
+Proximity: The table surface with the laptop appears to be within approximately 0.5–1m of the drone's camera, representing a close obstacle not flagged by Tier 2 sensors.
+Risk: hazard
+Pilot suggested action: HOVER
+
+**Reasoning:** The undetected laptop and table are directly in the camera's field of view at very close range (~0.5–1m), blocking the forward flight path at ~1m altitude. The drone must not pitch forward. HOVER immediately while the situation is reassessed; consider ASCEND to clear the table obstacle or PITCH_BACK to retreat from the clutter zone.",
+gpt4o,object_table,caution,4,0.56,37.92,safe,279.07,2544.7,2862.2,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,83,0.005105,"Description: The image shows a laptop on a table in a room with shelves and other furniture in the background. The area appears to be clear at the ~1m flight path level.
+Sensor note: Consistent with sensor data; the shelf detection aligns with the visual scene.
+Proximity: Closest object is the laptop, approximately 1m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,object_table,caution,4,0.56,37.92,safe,279.07,4640.3,4957.9,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,122,0.000604,"Description: The image shows a laptop on a table with a cluttered background, including shelves and other objects. The scene appears well-lit, but there are items on the table that could pose a risk if the drone were to fly at this height. 
+
+Sensor note: The YOLO detection indicates a shelf at a distance of 2.53m, which is consistent with the visual analysis, but there may be additional clutter not detected.
+
+Proximity: The closest object appears to be the laptop itself, which is approximately 0.5m away.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,4,0.56,37.92,safe,279.07,2122.3,2439.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1008,110,0.000109,"Description: The drone is facing a laptop on a table, which is a significant obstacle directly in the flight path. The background shows what appears to be shelves or furniture.
+Sensor note: YOLO detected a ""shelf"" at 2.53m, which is inconsistent with the prominent laptop directly in front of the drone. The local detector's brightness reading is consistent with the image.
+Proximity: The laptop is very close, visually estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,object_table,caution,5,0.57,30.95,safe,281.68,6444.4,6757.6,0,yolo-world,disabled,disabled,0.0,caution,1,5,956,202,0.005898,"Description: The image shows an indoor environment with a laptop open on a table displaying code/development software, with bookshelves or storage units visible in the background. The scene is dimly lit and somewhat cluttered, but no persons are visible in the immediate flight path.
+
+Sensor note: YOLO-World detected a shelf at 2.53m with low confidence (0.19); visually consistent — shelving/storage structures are visible in the background. The laptop on the table is an undetected obstacle not flagged by any sensor. Brightness reading of 126/255 is consistent with the moderately dim scene observed.
+
+Proximity: The laptop/table surface appears to be the closest obstacle, estimated at roughly 1–1.5m forward. Background shelving appears consistent with the ~2.5m depth reading from DepthAnything v2.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,object_table,caution,5,0.57,30.95,safe,281.68,3273.7,3586.9,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,78,0.00503,"Description: The image shows a laptop on a table in a room with shelves and other furniture in the background. The scene appears well-lit and organized.
+Sensor note: Consistent with YOLO detection of a shelf at 2.53m depth.
+Proximity: Closest object is the laptop, approximately 1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,object_table,caution,5,0.57,30.95,safe,281.68,4095.8,4409.0,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,116,0.0006,"Description: The image shows a laptop on a table with a cluttered background, including shelves and other objects. The scene appears well-lit, but there are several items in the vicinity that could pose a risk to flight. 
+
+Sensor note: Consistent; the YOLO detection indicates a shelf at a distance of 2.53m, which aligns with the visual assessment of the environment.
+
+Proximity: The closest object appears to be the laptop itself, which is approximately 0.5m away from the camera.
+
+Risk: Caution
+
+Pilot suggested action: HOVER",
+gemini,object_table,caution,5,0.57,30.95,safe,281.68,2154.5,2467.7,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1008,110,0.000109,"Description: The drone is facing a laptop on a table, which is a significant obstacle directly in the flight path. The background shows what appears to be shelves or furniture.
+Sensor note: YOLO detected a ""shelf"" at 2.53m, which is inconsistent with the prominent laptop directly in front of the drone. The local detector's brightness reading is consistent with the image.
+Proximity: The laptop is very close, visually estimated to be well within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,dim_light,caution,1,0.57,28.85,safe,281.41,6856.8,7167.6,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,207,0.005973,"Description: The image shows a dimly lit indoor room with heavy green/teal noise artifacts, revealing what appears to be a couch or sofa on the left, a cushion/pillow on the right foreground, and shelving or furniture in the background — the scene is cluttered and visibility is significantly degraded by noise and color distortion.
+Sensor note: YOLO detects a wall at 0.42m depth covering nearly the full frame bbox, which is consistent with close obstacles being present; the cushion/furniture on the right appears within ~0.5–1m, aligning with the 0.42m depth reading.
+Proximity: Closest object (cushion/furniture right foreground) visually estimated at ~0.4–0.6m, consistent with DA v2 depth of 0.42m — this is within the hazard threshold.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,1,0.57,28.85,safe,281.41,3888.8,4199.6,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,108,0.00548,"Description: The image is very grainy and dark, making it difficult to discern specific objects or details clearly. There appears to be clutter at floor level, but no obvious obstacles blocking the immediate flight path.
+Sensor note: The sensor detection of a wall at 0.42m depth is consistent with the visible clutter, though the image is too unclear to confirm specific objects.
+Proximity: Closest object visually estimated at approximately 0.4m, consistent with depth_m.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,1,0.57,28.85,safe,281.41,4812.3,5123.1,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,107,0.000595,"Description: The image appears dimly lit with some indistinct shapes in the background, suggesting potential obstacles or clutter. The overall visibility is low, making it difficult to assess the environment clearly. 
+
+Sensor note: Consistent; YOLO detected a wall at 0.42m, but the scene's darkness may obscure other objects. 
+
+Proximity: The closest object appears to be around 0.5m away, based on the YOLO detection and visual assessment. 
+
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,1,0.57,28.85,safe,281.41,2562.5,2873.3,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,168,0.000126,"Description: The image is extremely noisy and dark, making it very difficult to discern any clear objects or features. There appears to be some indistinct green and yellow shapes, possibly indicating foliage or a room with poor lighting.
+Sensor note: The local detector reports brightness=124/255, which is inconsistent with the visually very dark and noisy image. YOLO-World detected a ""wall"" at 0.42m, but the image quality makes it impossible to confirm this visually or assess its true proximity.
+Proximity: Due to the severe noise and darkness, it's impossible to visually estimate the proximity of any objects with confidence. The YOLO-W ""wall"" detection at 0.42m, if accurate, would be a hazard.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,dim_light,caution,2,0.54,30.21,safe,280.48,6147.0,6458.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,182,0.005598,"Description: The image shows a heavily noise-affected, greenish-tinted indoor scene revealing what appears to be a couch/sofa and cushion on the right side, with walls and furniture cluttered in the background at close range; the overall scene is dim and visually degraded with significant sensor noise.
+Sensor note: YOLO-World detected a wall at 0.42m depth — this is consistent with my visual analysis showing objects (furniture/wall surfaces) very close to the drone's forward path within roughly 0.5m.
+Proximity: Closest object (wall or furniture surface) estimated at approximately 0.4–0.6m forward, consistent with the DA v2 depth reading of 0.42m — well within hazard threshold.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,2,0.54,30.21,safe,280.48,2658.1,2969.3,0,yolo-world,disabled,disabled,0.0,hazard,0,4,772,102,0.00539,"Description: The image appears to be dim and grainy, with limited visibility. There is a large object on the right side, possibly close to the camera, and general clutter in the environment.
+Sensor note: The image suggests a cluttered environment, consistent with the YOLO detection of a wall at 0.42m depth.
+Proximity: The closest object visually appears to be less than 1 meter away, consistent with the depth_m reading.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,2,0.54,30.21,safe,280.48,3712.0,4023.2,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,101,0.000591,"Description: The image appears dimly lit with some indistinct shapes, suggesting potential obstacles or clutter in the environment. The visibility is low, making it difficult to ascertain the exact layout of the space.
+
+Sensor note: The YOLO detection indicates a wall at a distance of 0.42m, which is consistent with the visual analysis of potential obstacles.
+
+Proximity: The closest object appears to be the wall at approximately 0.42m.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,2,0.54,30.21,safe,280.48,2329.2,2640.4,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,153,0.000121,"Description: The image is extremely noisy and dark, making it very difficult to discern any clear objects or features. There appears to be some indistinct shapes, possibly a wall or large object on the right, but no clear flight path can be confirmed.
+Sensor note: The YOLO detection of 'wall' at 0.42m is plausible given the indistinct shape on the right, but the overall scene is much darker and noisier than indicated by the local detector's brightness reading of 124/255.
+Proximity: Visually, the closest indistinct object appears to be within 1 meter, consistent with the YOLO detection of a wall at 0.42m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,dim_light,caution,3,0.57,38.76,safe,287.07,8790.8,9117.2,0,yolo-world,disabled,disabled,0.0,hazard,0,3,956,290,0.007218,"Description: The image shows a heavily noise-corrupted, green-tinted indoor scene revealing what appears to be a room with a sofa/couch on the left, a cushion or chair on the right, and what looks like furniture/shelving in the background — the drone is at approximately 1m altitude in a cluttered living space.
+Sensor note: YOLO detected a wall at 0.42m depth covering nearly the full frame bbox, which is consistent with close obstacles being present; however the detection likely encompasses the sofa/furniture rather than a bare wall. The scene is moderately bright (124/255), consistent with local detector report.
+Proximity: The closest obstacle appears to be the sofa/couch on the left and the cushioned chair/object on the right, both visually estimated within ~0.5–1m, consistent with the 0.42m depth reading from DepthAnything v2.
+Risk: hazard
+Pilot suggested action: HOVER
+
+**Reasoning:** Objects (furniture) appear to be directly within or immediately adjacent to the ~1m flight corridor on multiple sides. The 0.42m depth reading corroborates close obstacle proximity. Immediate hover is warranted to prevent collision while the environment is assessed. Do not pitch in any direction until a clear path is confirmed.",
+gpt4o,dim_light,caution,3,0.57,38.76,safe,287.07,2966.4,3292.8,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,90,0.00521,"Description: The image is grainy and dimly lit, making it difficult to clearly identify objects. There appears to be clutter at floor level, but no immediate obstacles blocking the flight path.
+Sensor note: Consistent with sensor data indicating a wall at 0.42m depth.
+Proximity: Closest object visually estimated at approximately 0.4m, consistent with depth_m.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,3,0.57,38.76,safe,287.07,4198.5,4524.9,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,107,0.000595,"Description: The image appears dimly lit with indistinct shapes, suggesting potential obstacles or clutter in the environment. The visibility is low, making it difficult to ascertain the exact layout or presence of objects within the flight path.
+
+Sensor note: Consistent with YOLO detection of a wall at 0.42m, but the overall scene is too unclear to confirm safety.
+
+Proximity: The closest object appears to be within 1 meter, likely the wall detected by the sensors.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,3,0.57,38.76,safe,287.07,2461.7,2788.1,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,168,0.000126,"Description: The image is extremely noisy and dark, making it very difficult to discern any clear objects or features. There appears to be some indistinct green and yellow shapes, possibly indicating foliage or a room with poor lighting.
+Sensor note: The local detector reports brightness=124/255, which is inconsistent with the visually very dark and noisy image. YOLO-World detected a ""wall"" at 0.42m, but the image quality makes it impossible to confirm this visually or assess its true proximity.
+Proximity: Due to the severe noise and darkness, it's impossible to visually estimate the proximity of any objects with confidence. The YOLO-W ""wall"" detection at 0.42m, if accurate, would be a hazard.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,dim_light,caution,4,0.52,34.87,safe,279.27,8184.1,8498.8,0,yolo-world,disabled,disabled,0.0,hazard,0,3,956,229,0.006303,"Description: The image shows an indoor room scene captured with significant noise/grain and a green-tinted color cast (likely night vision or low-light camera mode), revealing what appears to be a couch/sofa on the left, a bright window or light source at the back, and a large light-colored object (possibly a pillow or chair back) on the right foreground at approximately 1m distance.
+Sensor note: YOLO detects only a 'wall' at 0.42m depth covering nearly the full frame — this likely reflects the dense clutter/furniture filling the scene rather than a literal wall; the large bright object on the right foreground is not separately labeled but is visually prominent and close.
+Proximity: Closest object appears to be the large light-colored object on the right at roughly 0.5–1m, consistent with the DA v2 depth reading of 0.42m; furniture fills much of the forward flight path within 2m.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,4,0.52,34.87,safe,279.27,3068.8,3383.5,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,75,0.004985,"Description: The image appears to be dim and grainy, with indistinct objects and potential clutter at floor level.
+Sensor note: The image suggests a dim scene, consistent with the local detector's brightness reading.
+Proximity: Closest object visually estimated at approximately 0.4 meters, consistent with depth_m.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,4,0.52,34.87,safe,279.27,3788.2,4102.9,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,109,0.000596,"Description: The image appears dimly lit with indistinct shapes, suggesting potential obstacles or clutter in the environment. The visibility is low, making it difficult to ascertain the exact layout or presence of objects within the flight path.
+
+Sensor note: Consistent; YOLO detected a wall at a distance of 0.42m, but the overall scene is too unclear to confirm safety.
+
+Proximity: The closest object appears to be within 0.5m based on the YOLO detection.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,4,0.52,34.87,safe,279.27,2256.2,2570.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,153,0.000121,"Description: The image is extremely noisy and dark, making it very difficult to discern any clear objects or features. There appears to be some indistinct shapes, possibly a wall or large object on the right, but no clear flight path can be confirmed.
+Sensor note: The YOLO detection of 'wall' at 0.42m is plausible given the indistinct shape on the right, but the overall scene is much darker and noisier than indicated by the local detector's brightness reading of 124/255.
+Proximity: Visually, the closest indistinct object appears to be within 1 meter, consistent with the YOLO detection of a wall at 0.42m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,dim_light,caution,5,0.54,42.84,safe,286.26,6326.7,6656.3,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,188,0.005688,"Description: The image shows a heavily noise-corrupted, green-tinted indoor scene revealing what appears to be a couch/sofa on the left and a large pillow or cushion on the right at approximately drone height, with furniture and clutter visible throughout the room.
+Sensor note: YOLO detects a wall at 0.42m depth covering nearly the full frame — this is plausible given the cushion/furniture mass visible on the right side occupying significant foreground space; depth reading is consistent with close obstacles.
+Proximity: Closest object appears to be the large cushion/pillow on the right at roughly 0.4–0.6m, consistent with the 0.42m depth reading from DepthAnything v2 — within hazard threshold.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,dim_light,caution,5,0.54,42.84,safe,286.26,2966.5,3296.1,0,yolo-world,disabled,disabled,0.0,hazard,0,4,772,100,0.00536,"Description: The image appears to be dim and grainy, with limited visibility. There is a large object on the right side, potentially obstructing the view, and the scene seems cluttered.
+Sensor note: The sensor detection of a wall at 0.42m depth is consistent with the visible clutter and potential obstruction.
+Proximity: The closest object visually appears to be less than 1 meter away, consistent with the sensor depth reading.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,dim_light,caution,5,0.54,42.84,safe,286.26,4395.2,4724.8,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,113,0.000599,"Description: The image appears dimly lit with indistinct shapes, suggesting potential obstacles or clutter in the environment. The visibility is low, making it difficult to ascertain the exact layout or presence of objects within the flight path. 
+
+Sensor note: The YOLO detection indicates a wall at a distance of 0.42m, which is consistent with the visual analysis of potential obstacles.
+
+Proximity: The closest object appears to be the wall detected by the sensors, estimated at approximately 0.42m away.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,dim_light,caution,5,0.54,42.84,safe,286.26,3084.0,3413.6,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,153,0.000121,"Description: The image is extremely noisy and dark, making it very difficult to discern any clear objects or features. There appears to be some indistinct shapes, possibly a wall or large object on the right, but no clear flight path can be confirmed.
+Sensor note: The YOLO detection of 'wall' at 0.42m is plausible given the indistinct shape on the right, but the overall scene is much darker and noisier than indicated by the local detector's brightness reading of 124/255.
+Proximity: Visually, the closest indistinct object appears to be within 1 meter, consistent with the YOLO detection of a wall at 0.42m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,1,0.55,28.53,safe,280.47,6884.4,7193.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,223,0.006213,"Description: The image shows an indoor industrial or warehouse-like environment at low altitude (~1m), with large white panels/walls close on the right side, a conveyor belt or ramp structure visible on the left, and overhead ceiling infrastructure. The flight path appears partially obstructed by the nearby white panel/wall on the right and the dark ramp structure on the left.
+
+Sensor note: YOLO reports a wall at 4.03m depth, but visually the white panel on the right appears significantly closer than 4m — likely within 1-2m. The depth estimate seems inconsistent with the visual proximity of the right-side surface.
+
+Proximity: The closest object appears to be the white wall/panel to the right, visually estimated at approximately 0.5–1.5m. The dark conveyor/ramp structure on the left is also within ~1–2m. Both are closer than the 4.03m sensor reading suggests.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,1,0.55,28.53,safe,280.47,2121.0,2430.6,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,79,0.005045,"Description: The image shows a cluttered indoor environment with various objects on a table or shelf, but no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a wall at 4.03m depth.
+Proximity: Closest object visually estimated at approximately 1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,1,0.55,28.53,safe,280.47,3685.5,3995.1,0,yolo-world,disabled,disabled,0.0,caution,1,5,3539,101,0.000591,"Description: The image shows a workspace with a stapler and some boxes, but the area appears cluttered. There are no visible people or obstacles directly in the flight path. 
+Sensor note: Consistent; YOLO detected a wall at a distance of 4.03m, which aligns with the visual assessment. 
+Proximity: The closest object appears to be the stapler, which is approximately 0.5m away. 
+Risk: Caution 
+Pilot suggested action: HOVER",
+gemini,cluttered,caution,1,0.55,28.53,safe,280.47,2121.9,2431.5,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,145,0.000119,"Description: The image shows a cluttered foreground with various objects on a surface, including a white rectangular object, a brown box, and a dark object. A large white panel is visible in the background on the left.
+Sensor note: YOLO detection of 'wall' at 4.03m is inconsistent with the visual evidence of a large white panel much closer, likely within 1-2m, and other foreground objects. The local detector's brightness reading is consistent with the somewhat dim lighting.
+Proximity: The closest objects (white rectangular object, brown box, dark object) appear to be within 0.5m to 1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,2,0.45,28.79,safe,285.01,6803.9,7118.1,0,yolo-world,disabled,disabled,0.0,caution,1,5,956,208,0.005988,"Description: The image shows an indoor industrial or warehouse-like space at low altitude, with visible structural elements including walls, ceiling fixtures, and what appears to be equipment or boxes on a surface at roughly drone level — a dark angled object (possibly a conveyor or ramp) is prominent in the foreground-left, and white surfaces/equipment occupy the right side.
+Sensor note: YOLO detected a wall at 4.03m depth, which is broadly consistent with the background walls visible in the image. However, the dark angled object and white surface/equipment in the foreground were not detected by YOLO — these appear closer than 4m and represent undetected obstacles.
+Proximity: The dark angled object in the lower-left and the white surface on the right appear to be within approximately 1–2m of the drone, potentially within the flight corridor at ~1m altitude.
+Risk: caution
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,2,0.45,28.79,safe,285.01,2435.6,2749.8,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,79,0.005045,"Description: The image shows a cluttered indoor environment with objects on a table, but no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a wall at 4.03m depth.
+Proximity: Closest object visually estimated at ~1m, consistent with sensor data.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,2,0.45,28.79,safe,285.01,3814.4,4128.6,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,98,0.00059,"Description: The image shows a workspace with a stapler and some boxes, but the area appears cluttered. There are no visible people or obstacles directly in the flight path. 
+Sensor note: Consistent with YOLO detection of a wall at 4.03m, but no other objects detected. 
+Proximity: The closest object appears to be the stapler, estimated to be more than 1m away. 
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+gemini,cluttered,caution,2,0.45,28.79,safe,285.01,2539.7,2853.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,124,0.000113,"Description: The image shows a cluttered foreground with various objects on a surface, including a white container, a stapler-like object, and a cardboard box. A large white panel is visible in the background.
+Sensor note: The YOLO detection of 'wall' at 4.03m is inconsistent with the visual evidence of a large white panel much closer, and the foreground clutter is completely missed.
+Proximity: The closest objects (white container, stapler, box) are visually estimated to be within 0.5m-1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,3,0.48,32.58,safe,280.39,5993.4,6306.8,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,179,0.005553,"Description: The image shows an indoor industrial or warehouse environment at low altitude, with large white equipment/machinery panels visible at close range directly ahead, along with what appears to be conveyor belt equipment or machinery to the left at roughly the same level as the drone.
+Sensor note: YOLO detected a wall at 4.03m depth, but the white machinery/panel directly ahead appears significantly closer than 4m — likely within 1-2m, suggesting the depth estimate may be unreliable or referencing the far wall rather than the nearest obstacle.
+Proximity: Closest object (white panel/machinery face) visually estimated at approximately 1–1.5m directly ahead; conveyor-like structure to the left also appears within 1–2m.
+Risk: hazard
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,3,0.48,32.58,safe,280.39,2395.1,2708.5,0,yolo-world,disabled,disabled,0.0,safe,0,4,772,78,0.00503,"Description: The image shows a cluttered indoor environment with objects on a table or shelf, but no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a wall at 4.03m depth.
+Proximity: Closest object visually estimated at over 3m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,cluttered,caution,3,0.48,32.58,safe,280.39,3176.0,3489.4,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,76,0.000576,"Description: The image shows a workspace with a white wall in the background, a box, and a stapler on a table. There are no visible obstacles or persons within close proximity. 
+
+Sensor note: consistent 
+Proximity: Closest object (the stapler) is approximately 0.5m away. 
+Risk: safe 
+Pilot suggested action: PROCEED",
+gemini,cluttered,caution,3,0.48,32.58,safe,280.39,1947.8,2261.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,124,0.000113,"Description: The image shows a cluttered foreground with various objects on a surface, including a white container, a stapler-like object, and a cardboard box. A large white panel is visible in the background.
+Sensor note: The YOLO detection of 'wall' at 4.03m is inconsistent with the visual evidence of a large white panel much closer, and the foreground clutter is completely missed.
+Proximity: The closest objects (white container, stapler, box) are visually estimated to be within 0.5m-1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,4,0.57,30.1,safe,282.66,6347.1,6660.4,0,yolo-world,disabled,disabled,0.0,caution,1,5,956,197,0.005823,"Description: The image shows an indoor industrial or warehouse environment with white walls/panels, some cardboard boxes, and what appears to be equipment or machinery at roughly table height; the scene is somewhat cluttered at lower levels but the upper corridor appears partially open.
+Sensor note: YOLO detected a wall at 4.03m which is plausible given the visible wall structures; however, the closer foreground clutter (boxes, dark object/conveyor-like structure at ~1-2m) was not detected by YOLO — these objects exist and represent a closer obstacle than the reported 4.03m wall.
+Proximity: Closest objects appear to be the dark angled structure and boxes in the foreground, visually estimated at approximately 1–2m from the drone, which is closer than the YOLO-reported wall depth.
+Risk: caution
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,4,0.57,30.1,safe,282.66,2459.2,2772.5,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,78,0.00503,"Description: The image shows a cluttered indoor environment with objects on a table or shelf, but no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a wall at 4.03m depth.
+Proximity: Closest object visually estimated at approximately 1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,4,0.57,30.1,safe,282.66,3477.0,3790.3,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,75,0.000576,"Description: The image shows a workspace with a white wall in the background, a box, and a stapler on a table. There are no visible obstacles or persons within close proximity. 
+
+Sensor note: consistent
+Proximity: Closest object (the stapler) is approximately 0.5m away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,cluttered,caution,4,0.57,30.1,safe,282.66,2256.3,2569.6,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,124,0.000113,"Description: The image shows a cluttered foreground with various objects on a surface, including a white container, a stapler-like object, and a cardboard box. A large white panel is visible in the background.
+Sensor note: The YOLO detection of 'wall' at 4.03m is inconsistent with the visual evidence of a large white panel much closer, and the foreground clutter is completely missed.
+Proximity: The closest objects (white container, stapler, box) are visually estimated to be within 0.5m-1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,cluttered,caution,5,0.5,30.49,safe,281.42,7435.4,7747.8,0,yolo-world,disabled,disabled,0.0,hazard,0,4,956,215,0.006093,"Description: The image shows an indoor industrial or warehouse-like environment at low altitude, with white surfaces, a conveyor or shelf structure, cardboard boxes, and overhead lighting — no persons visible. The flight path at ~1m appears partially obstructed by nearby structural elements and objects at close range.
+
+Sensor note: YOLO detected a wall at 4.03m depth, which appears consistent with the far wall visible in the image; however, closer foreground objects (conveyor belt/shelf edge, boxes) within ~1–2m were NOT detected by YOLO — these are visually evident and represent an undetected hazard.
+
+Proximity: Closest objects (shelf edge or conveyor structure, cardboard box) appear to be within approximately 1–1.5m directly in the flight path, consistent with or closer than the sensor data suggests for the wall; foreground clutter is significantly closer than 4m.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gpt4o,cluttered,caution,5,0.5,30.49,safe,281.42,2456.8,2769.2,0,yolo-world,disabled,disabled,0.0,caution,1,5,772,76,0.005,"Description: The image shows a cluttered indoor environment with objects on a table, but no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a wall at 4.03m depth.
+Proximity: Closest object visually estimated at approximately 1m away.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,cluttered,caution,5,0.5,30.49,safe,281.42,3923.3,4235.7,0,yolo-world,disabled,disabled,0.0,safe,0,4,3539,78,0.000578,"Description: The image shows a workspace with a white surface, a stapler, and a box in the background. The area appears well-lit and there are no visible obstacles directly in the flight path. 
+
+Sensor note: consistent 
+Proximity: The closest object is the stapler, approximately 0.5m away. 
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+gemini,cluttered,caution,5,0.5,30.49,safe,281.42,2092.5,2404.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,1005,124,0.000113,"Description: The image shows a cluttered foreground with various objects on a surface, including a white container, a stapler-like object, and a cardboard box. A large white panel is visible in the background.
+Sensor note: The YOLO detection of 'wall' at 4.03m is inconsistent with the visual evidence of a large white panel much closer, and the foreground clutter is completely missed.
+Proximity: The closest objects (white container, stapler, box) are visually estimated to be within 0.5m-1m.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,door_open,safe,1,0.57,41.2,safe,285.02,9565.2,9892.0,0,yolo-world,disabled,disabled,0.0,caution,0,3,1002,295,0.007431,"Description: The image shows a large indoor industrial or warehouse-like space with metal shelving/racking structures, glass partitions, and fluorescent lighting overhead at approximately 3-5m height; the immediate foreground shows open floor space with structural frames, and no persons are visible in the near field.
+Sensor note: YOLO reports a ""train"" detection at 3.6m with low confidence (0.22) — this is likely a misclassification of the shelving/rack structure; the ""window"" detection at 3.2m is plausible given the visible glass partition frames. Neither detection indicates an imminent obstacle, consistent with the visual scene.
+Proximity: Closest obstacle appears to be the metal frame/shelving structure visible at roughly 2-3m forward and to the sides; depth readings of 3.2-3.6m are consistent with this visual estimate.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** While the path appears largely open at ~1m altitude, the cluttered shelving infrastructure, structural columns, and glass partitions create a complex environment with potential hidden obstacles. The low-confidence YOLO detections and somewhat grainy/dim image quality (brightness 119/255) warrant a cautious hold before proceeding. Recommend hovering to allow further sensor confirmation before advancing.",
+gpt4o,door_open,safe,1,0.57,41.2,safe,285.02,2353.9,2680.7,0,yolo-world,disabled,disabled,0.0,safe,1,5,815,71,0.00514,"Description: The image shows an indoor space with tables and a partially open door, suggesting a clear path at ~1m altitude.
+Sensor note: Consistent with sensor data indicating a window and a train at a distance.
+Proximity: Closest object visually estimated at approximately 3 meters away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,1,0.57,41.2,safe,285.02,3900.7,4227.5,0,yolo-world,disabled,disabled,0.0,safe,1,5,3582,87,0.000589,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate for navigation.
+
+Sensor note: consistent
+Proximity: The closest object appears to be more than 2 meters away based on visual assessment and depth_m data.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,1,0.57,41.2,safe,285.02,2256.5,2583.3,0,yolo-world,disabled,disabled,0.0,safe,1,5,1054,180,0.000133,"Description: The image shows an indoor environment with a partially open door or partition on the right, and a long corridor or room extending into the distance on the left. The flight path at ~1m appears clear directly ahead, though there are structures and furniture further back.
+Sensor note: The YOLO detections of 'train' and 'window' are not visually apparent as direct obstacles in the immediate flight path. The 'window' detection might refer to the glass partition on the right. The local detector's brightness assessment seems consistent with the image.
+Proximity: The closest significant structure appears to be the open door/partition on the right, visually estimated to be around 1-1.5m away. The YOLO 'window' detection at 3.2m seems to refer to a further part of this structure.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,2,0.53,31.54,safe,282.64,8670.3,8985.0,0,yolo-world,disabled,disabled,0.0,caution,0,3,1002,288,0.007326,"Description: The image shows a large indoor industrial or warehouse-like space with metal shelving/racking structures, glass partitions, and high ceilings; the flight path at approximately 1m altitude appears open with no immediate obstructions directly ahead, though structural elements are present throughout the space.
+Sensor note: The YOLO ""train"" detection (conf=0.22, depth 3.6m) is likely a misclassification of the shelving/racking structures — no actual train is visible. The ""window"" detection (conf=0.34) is plausible given the glass partition visible at the left edge. No persons detected, consistent with visual analysis.
+Proximity: Closest structural elements (shelving frames, glass partitions) appear to be approximately 2–3m away, broadly consistent with sensor depth readings of 3.2–3.6m.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** While the central corridor appears navigable, the cluttered shelving environment, moderate lighting (brightness 119/255), and numerous structural obstacles at varying depths warrant a cautious hover to allow better situational assessment before proceeding. The low-confidence YOLO detections suggest sensor uncertainty in this complex structural environment, reinforcing a conservative hold before committing to forward flight.",
+gpt4o,door_open,safe,2,0.53,31.54,safe,282.64,2982.8,3297.5,0,yolo-world,disabled,disabled,0.0,safe,1,5,815,92,0.005455,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear at ~1m altitude, with no immediate obstacles blocking the flight path.
+Sensor note: Consistent with sensor data; detected objects (train, window) are not obstructing the path.
+Proximity: Closest object is the door at approximately 3.2m, consistent with depth_m.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,2,0.53,31.54,safe,282.64,3582.5,3897.2,0,yolo-world,disabled,disabled,0.0,safe,1,5,3582,79,0.000585,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate for navigation.
+
+Sensor note: consistent
+Proximity: The closest object appears to be more than 2 meters away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,2,0.53,31.54,safe,282.64,2240.0,2554.7,0,yolo-world,disabled,disabled,0.0,safe,1,5,1054,176,0.000132,"Description: The image shows an indoor office or industrial space with a partially open glass door on the right. The flight path appears clear at ~1m altitude, with objects visible further back in the room.
+Sensor note: YOLO detected a 'window' which is consistent with the glass door/partition on the right. The 'train' detection is likely a false positive or refers to the general structure in the background, as no actual train is visible. The local detector's brightness assessment is consistent with the image.
+Proximity: The closest visible object is the open glass door frame on the right, visually estimated to be around 1-1.5m away. YOLO's 'window' detection at 3.2m seems to refer to the further glass partition rather than the immediate door.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,3,0.55,38.27,safe,281.32,7992.2,8312.3,0,yolo-world,disabled,disabled,0.0,caution,0,4,1002,240,0.006606,"Description: The image shows a large indoor industrial or warehouse-like space with metal-framed glass partitions/walls in the foreground and an open area extending beyond; the space appears well-lit with fluorescent lighting and no persons or immediate obstacles visible at ~1m flight altitude.
+Sensor note: YOLO reports a 'train' detection (conf=0.22, likely a false positive or misclassification of industrial shelving/equipment at 3.6m) and a 'window' detection consistent with the visible glass partition frames; no persons detected, consistent with visual analysis.
+Proximity: The closest structural element is the glass/metal partition framework, visually estimated at approximately 1.5–2m ahead and to the sides; depth sensor reports 3.2–3.6m for detected objects, slightly farther than my visual estimate of the framing but broadly consistent.
+Risk: caution
+Pilot suggested action: HOVER — pause to assess clearance through the glass partition opening before proceeding; the narrow framed corridor ahead warrants careful navigation before committing to forward movement.",
+gpt4o,door_open,safe,3,0.55,38.27,safe,281.32,2730.7,3050.8,0,yolo-world,disabled,disabled,0.0,safe,1,5,815,87,0.00538,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear with no immediate obstacles blocking the flight path at ~1m altitude.
+Sensor note: Consistent with sensor data; the detected train and window do not pose immediate risks.
+Proximity: Closest object is approximately 3.2m away, consistent with depth_m readings.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,3,0.55,38.27,safe,281.32,3758.7,4078.8,0,yolo-world,disabled,disabled,0.0,safe,1,5,3582,91,0.000592,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate, and there are no persons nearby. 
+
+Sensor note: consistent 
+Proximity: Closest object is approximately 2m away (based on visual assessment and depth_m data).
+Risk: safe 
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,3,0.55,38.27,safe,281.32,2520.2,2840.3,0,yolo-world,disabled,disabled,0.0,safe,1,5,1054,180,0.000133,"Description: The image shows an indoor environment with a partially open door or partition on the right, and a long corridor or room extending into the distance on the left. The flight path at ~1m appears clear directly ahead, though there are structures and furniture further back.
+Sensor note: The YOLO detections of 'train' and 'window' are not visually apparent as direct obstacles in the immediate flight path. The 'window' detection might refer to the glass partition on the right. The local detector's brightness assessment seems consistent with the image.
+Proximity: The closest significant structure appears to be the open door/partition on the right, visually estimated to be around 1-1.5m away. The YOLO 'window' detection at 3.2m seems to refer to a further part of this structure.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,4,0.48,39.21,safe,291.24,9327.4,9658.3,0,yolo-world,disabled,disabled,0.0,caution,0,3,1002,299,0.007491,"Description: The image shows a large indoor industrial or warehouse-like space with metal-framed glass partitions/shelving structures in the foreground at approximately 1m altitude; the space beyond appears open with ceiling lights visible, but the immediate foreground has structural framing elements close to the camera.
+Sensor note: YOLO reports a ""train"" detection (conf=0.22, likely a false positive or misclassification of industrial shelving/racking) and a ""window"" detection consistent with the glass partition structures visible; the depth readings of 3.2–3.6m seem plausible for the background space, but the metal framing visible in the immediate foreground appears closer than reported.
+Proximity: The metal frame/partition structure visible at the edges of the frame appears to be within ~0.5–1m of the drone; background space is open at ~3m+.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The drone appears to be positioned very close to metal-framed glass partition structures — these are visible at the frame edges suggesting near-proximity obstacle risk. The background is open and navigable, but immediate lateral obstacles warrant pausing to assess clearance before proceeding. The scene brightness (119/255) is adequate. Recommend HOVER to stabilize and reassess heading before committing to forward flight through the structural framework.",
+gpt4o,door_open,safe,4,0.48,39.21,safe,291.24,3244.6,3575.5,0,yolo-world,disabled,disabled,0.0,safe,1,5,815,78,0.005245,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear at the ~1m flight altitude.
+Sensor note: Consistent with sensor data; detected objects are correctly identified as a train and window.
+Proximity: Closest object is the door at approximately 3.2m away.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,4,0.48,39.21,safe,291.24,3378.1,3709.0,0,yolo-world,disabled,disabled,0.0,safe,1,5,3582,88,0.00059,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate for navigation. 
+
+Sensor note: consistent
+
+Proximity: The closest object appears to be more than 2 meters away based on visual assessment and depth_m data.
+
+Risk: safe
+
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,4,0.48,39.21,safe,291.24,2668.8,2999.7,0,yolo-world,disabled,disabled,0.0,safe,1,5,1054,176,0.000132,"Description: The image shows an indoor office or industrial space with a partially open glass door on the right. The flight path appears clear at ~1m altitude, with objects visible further back in the room.
+Sensor note: YOLO detected a 'window' which is consistent with the glass door/partition on the right. The 'train' detection is likely a false positive or refers to the general structure in the background, as no actual train is visible. The local detector's brightness assessment is consistent with the image.
+Proximity: The closest visible object is the open glass door frame on the right, visually estimated to be around 1-1.5m away. YOLO's 'window' detection at 3.2m seems to refer to the further glass partition rather than the immediate door.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,door_open,safe,5,0.6,30.45,safe,280.85,6955.8,7267.7,0,yolo-world,disabled,disabled,0.0,caution,0,4,1002,201,0.006021,"Description: The image shows a large indoor industrial or warehouse-like space with glass/metal partition walls and shelving units; the flight path at ~1m altitude appears relatively open with no immediate obstacles blocking the corridor directly ahead.
+Sensor note: The YOLO ""train"" detection (conf=0.22) is low-confidence and likely a misclassification — no train is visible; the ""window"" detection is consistent with the glass partition frames visible in the image. The scene is moderately lit (brightness 119/255), consistent with the image appearance.
+Proximity: Closest structural elements are the glass partition frames and shelving visible at roughly 1–2m to the sides and ahead; the open corridor extends several metres forward. Cross-check with depth_m=3.2–3.6m is broadly consistent with mid-range structures.
+Risk: caution
+Pilot suggested action: PITCH_FORWARD",
+gpt4o,door_open,safe,5,0.6,30.45,safe,280.85,2659.5,2971.4,0,yolo-world,disabled,disabled,0.0,hazard,0,4,815,89,0.00541,"Description: The image shows an indoor space with tables and a partially open door. The area appears clear at the ~1m altitude level, with no immediate obstacles blocking the flight path.
+Sensor note: Consistent with sensor data; the detected train and window are not immediate hazards.
+Proximity: Closest object is approximately 3.2m away, consistent with depth_m readings.
+Risk: Safe
+Pilot suggested action: PITCH_FORWARD",
+gpt4o_mini,door_open,safe,5,0.6,30.45,safe,280.85,3481.1,3793.0,0,yolo-world,disabled,disabled,0.0,safe,1,5,3582,79,0.000585,"Description: The image shows an indoor environment with a clear path and no visible obstacles directly in the flight path. There are tables and equipment in the background, but they do not obstruct the corridor. The lighting appears adequate for navigation.
+
+Sensor note: consistent
+Proximity: The closest object appears to be more than 2 meters away.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+gemini,door_open,safe,5,0.6,30.45,safe,280.85,2514.1,2826.0,0,yolo-world,disabled,disabled,0.0,safe,1,5,1054,176,0.000132,"Description: The image shows an indoor office or industrial space with a partially open glass door on the right. The flight path appears clear at ~1m altitude, with objects visible further back in the room.
+Sensor note: YOLO detected a 'window' which is consistent with the glass door/partition on the right. The 'train' detection is likely a false positive or refers to the general structure in the background, as no actual train is visible. The local detector's brightness assessment is consistent with the image.
+Proximity: The closest visible object is the open glass door frame on the right, visually estimated to be around 1-1.5m away. YOLO's 'window' detection at 3.2m seems to refer to the further glass partition rather than the immediate door.
+Risk: safe
+Pilot suggested action: PITCH_FORWARD",
+claude,person_far,caution,1,1.54,35.53,hazard,276.2,9261.1,9574.4,0,yolo-world,disabled,disabled,0.0,caution,1,4,928,289,0.007119,"Description: The image shows an indoor workshop/factory space with a person standing roughly in the center-background of the frame, approximately 4–6 meters away, surrounded by shelving units, machinery, and general industrial clutter at floor level.
+Sensor note: YOLO detected nothing, but the local detector flagged a person at est_dist=0.45m — this geometric fallback distance appears significantly overestimated in closeness; visually the person appears much farther away (~4–6m), not 0.45m. The local detector confidence is also low (0.391). Image overrides the 0.45m estimate.
+Proximity: Closest significant object appears to be general floor-level clutter/furniture (chairs, tables) at roughly 2–3m; the person is visually estimated at ~4–6m — no immediate close obstacle blocking the ~1m flight corridor.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The scene is somewhat dim and cluttered at floor/table level with industrial equipment and furniture. While no object or person appears critically close, the low-light conditions, dense background clutter, and sensor inconsistency (spurious 0.45m person estimate) warrant a cautious hover while the environment is re-assessed before proceeding.",
+gpt4o,person_far,caution,1,1.54,35.53,hazard,276.2,2657.9,2971.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,747,88,0.005055,"Description: The image shows an indoor environment with a person standing in the center, surrounded by furniture and equipment. The scene appears moderately cluttered but not overly obstructed.
+Sensor note: The local detector identified a person at approximately 0.45m, which is consistent with the visual analysis.
+Proximity: The person is visually estimated to be around 0.5m away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,1,1.54,35.53,hazard,276.2,3993.4,4306.7,0,yolo-world,disabled,disabled,0.0,hazard,0,4,3514,104,0.000589,"Description: The image shows a person standing in a room with various objects and furniture around. The person appears to be approximately 0.45 meters away from the camera, and there are no significant obstacles directly in the flight path. 
+
+Sensor note: Consistent with local detector indicating a person detected at 0.45m, but no YOLO detections reported.
+
+Proximity: The closest object/person is the detected person at approximately 0.45 meters.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gemini,person_far,caution,1,1.54,35.53,hazard,276.2,1898.2,2211.5,0,yolo-world,disabled,disabled,0.0,hazard,0,4,975,80,9.7e-05,"Description: A person is standing directly in front of the drone, appearing to block the immediate flight path. The background shows an indoor room with various objects and a door.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms this.
+Proximity: The person is visually estimated to be within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_far,caution,2,0.58,29.81,hazard,282.96,11308.6,11622.0,0,yolo-world,disabled,disabled,0.0,hazard,0,3,928,300,0.007284,"Description: The image shows an indoor workshop/factory space with a person standing roughly in the center-background of the frame, appearing to be several meters away; the scene is moderately dim with ceiling lighting, and there is general clutter including chairs, tables, and equipment at floor level.
+
+Sensor note: YOLO detections returned none, but the local detector flagged a person (conf=0.391, est_dist=0.45m) — my visual analysis confirms a person IS present but they appear to be approximately 3–5m away, not 0.45m; the local detector's distance estimate appears to be a significant overestimate of proximity (geometric fallback heuristic unreliable here).
+
+Proximity: Closest person is visually estimated at ~3–5m (center-background); nearest floor-level clutter (chair on left) is closer but below the ~1m flight corridor.
+
+Risk: caution
+
+Pilot suggested action: HOVER
+
+**Reasoning:** The person is visually well beyond the 1m hazard threshold, so no immediate stop is required. However, the dim lighting, cluttered floor environment, and sensor inconsistencies (YOLO missing the person entirely, local detector giving an implausible distance) reduce confidence. Hovering in place is the prudent choice until the scene can be re-evaluated or the person's movement/intent is",
+gpt4o,person_far,caution,2,0.58,29.81,hazard,282.96,2761.9,3075.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,747,90,0.005085,"Description: The image shows an indoor environment with a person standing in the center, surrounded by furniture and equipment. The scene appears moderately cluttered but not obstructive to a ~1m flight path.
+Sensor note: Consistent with the local detector's identification of a person at approximately 0.45m.
+Proximity: The person is visually estimated to be less than 1m away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,2,0.58,29.81,hazard,282.96,3698.5,4011.8,0,yolo-world,disabled,disabled,0.0,hazard,0,4,3514,104,0.000589,"Description: The image shows a person standing in a room with various objects and furniture around. The person appears to be approximately 0.45 meters away from the camera, and there are no significant obstacles directly in the flight path. 
+
+Sensor note: Consistent with local detector indicating a person detected at 0.45m, but no YOLO detections reported.
+
+Proximity: The closest object/person is the detected person at approximately 0.45 meters.
+
+Risk: Hazard
+
+Pilot suggested action: HOVER",
+gemini,person_far,caution,2,0.58,29.81,hazard,282.96,2142.1,2455.4,0,yolo-world,disabled,disabled,0.0,hazard,0,4,975,80,9.7e-05,"Description: A person is standing directly in front of the drone, appearing to block the immediate flight path. The background shows an indoor room with various objects and a door.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms this.
+Proximity: The person is visually estimated to be within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_far,caution,3,0.5,40.48,hazard,280.71,6951.0,7272.7,0,yolo-world,disabled,disabled,0.0,caution,1,5,928,214,0.005994,"Description: A person is standing in the center of the image inside what appears to be an industrial or workshop space, at an estimated moderate distance from the camera; the scene is dimly lit with visible clutter, shelving, and machinery in the background.
+Sensor note: YOLO detections returned none, but the local detector flagged a person (conf=0.391, est_dist=0.45m) — visually the person appears farther than 0.45m (estimated ~3-5m based on apparent size and scene context), so the est_dist heuristic appears to be overestimating proximity; however, the person is clearly present and YOLO missed them entirely.
+Proximity: Person visually estimated at approximately 3–5m away, centered in frame; no objects appear within the immediate ~1–2m flight corridor at ~1m altitude, though low-light conditions reduce confidence.
+Risk: caution
+Pilot suggested action: HOVER",
+gpt4o,person_far,caution,3,0.5,40.48,hazard,280.71,2503.4,2825.1,0,yolo-world,disabled,disabled,0.0,hazard,0,4,747,91,0.0051,"Description: The image shows an indoor environment with a person standing in the center, surrounded by furniture and equipment. The scene appears moderately cluttered but not obstructed at the 1m flight path level.
+Sensor note: Consistent with the local detector's identification of a person at approximately 0.45m.
+Proximity: The person is visually estimated to be less than 1m away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,3,0.5,40.48,hazard,280.71,3590.9,3912.6,0,yolo-world,disabled,disabled,0.0,hazard,0,4,3514,104,0.000589,"Description: The image shows a person standing in a room with various objects and furniture around. The person appears to be approximately 0.45 meters away from the camera, and there are no significant obstacles directly in the flight path. 
+
+Sensor note: Consistent with local detector indicating a person detected at 0.45m, but no YOLO detections present.
+
+Proximity: The closest object/person is the detected person at approximately 0.45 meters.
+
+Risk: Hazard
+
+Pilot suggested action: HOVER",
+gemini,person_far,caution,3,0.5,40.48,hazard,280.71,1686.1,2007.8,0,yolo-world,disabled,disabled,0.0,hazard,0,4,975,102,0.000104,"Description: A person is standing directly in front of the drone, appearing to block the immediate flight path. The background shows an indoor room with various objects and a door.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms this.
+Proximity: The person is visually estimated to be very close, well within 1 meter. The local detector's estimate of 0.45m is consistent with this.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_far,caution,4,0.59,38.72,hazard,284.09,8176.7,8500.1,0,yolo-world,disabled,disabled,0.0,hazard,0,3,928,285,0.007059,"Description: A person is standing in the middle of an indoor industrial/workshop space at what appears to be moderate distance, with shelving units, machinery, and equipment visible in the background; the scene is somewhat dim but navigable.
+Sensor note: YOLO detections returned none, but the local detector flagged a person (conf=0.391, est_dist=0.45m) — visually the person appears significantly farther than 0.45m, likely 3–5m away, so the est_dist geometric fallback is likely unreliable here. Person is confirmed present visually.
+Proximity: Closest object is the person, visually estimated at approximately 3–5m away; the 0.45m est_dist from the local detector appears to be a geometric heuristic error and is overridden by visual analysis.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** The room is moderately dim (brightness 129/255) and contains floor-level clutter, chairs, and equipment that could interfere with a ~1m flight path. The person appears well beyond the 1m hazard threshold visually, but the cluttered environment and low lighting warrant caution rather than free forward flight. Hovering allows reassessment before proceeding.",
+gpt4o,person_far,caution,4,0.59,38.72,hazard,284.09,2557.5,2880.9,0,yolo-world,disabled,disabled,0.0,hazard,0,4,747,87,0.00504,"Description: The image shows an indoor environment with a person standing in the center, surrounded by furniture and equipment. The scene appears moderately cluttered but not overly obstructed.
+Sensor note: The local detector identified a person at approximately 0.45m, which is consistent with the visual analysis.
+Proximity: The person is visually estimated to be less than 1 meter away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,4,0.59,38.72,hazard,284.09,3996.2,4319.6,0,yolo-world,disabled,disabled,0.0,hazard,0,4,3514,104,0.000589,"Description: The image shows a person standing in a room with various objects and furniture around. The person appears to be approximately 0.45 meters away from the camera, and there are no significant obstacles directly in the flight path. 
+
+Sensor note: Consistent with local detector indicating a person detected at 0.45m, but YOLO detections show none.
+
+Proximity: The closest object/person is the detected person at approximately 0.45 meters.
+
+Risk: hazard
+
+Pilot suggested action: HOVER",
+gemini,person_far,caution,4,0.59,38.72,hazard,284.09,2151.8,2475.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,975,102,0.000104,"Description: A person is standing directly in front of the drone, appearing to block the immediate flight path. The background shows an indoor room with various objects and a door.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms this.
+Proximity: The person is visually estimated to be very close, well within 1 meter. The local detector's estimate of 0.45m is consistent with this.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,person_far,caution,5,0.54,40.11,hazard,286.78,8378.6,8706.0,0,yolo-world,disabled,disabled,0.0,caution,1,4,928,291,0.007149,"Description: The image shows an indoor industrial/workshop space with a person standing roughly in the center-background of the frame, approximately 3–5 meters away, surrounded by shelving units, machinery, and general workshop clutter at floor and table level.
+Sensor note: YOLO detections report none, but the local detector (EfficientDet-Lite0) flagged a person at conf=0.391 with est_dist=0.45m — this distance estimate appears to be a bounding-box heuristic fallback and is inconsistent with the visual evidence; the person appears significantly farther than 0.45m. Visual analysis overrides the proximity estimate.
+Proximity: Closest significant object visually estimated at ~2–3m (shelving/structures); the person appears ~3–5m away in the background. No obstacles appear to be within ~1–2m of the drone's likely position.
+Risk: caution
+Pilot suggested action: HOVER
+
+**Reasoning:** While the person is not dangerously close and the ~1m flight corridor appears largely open, the cluttered workshop environment with shelving, machinery, and general floor-level obstacles warrants a cautious hold. The drone should hover and allow Tier 2/3 systems to refine the scene assessment before proceeding.",
+gpt4o,person_far,caution,5,0.54,40.11,hazard,286.78,2142.0,2469.4,0,yolo-world,disabled,disabled,0.0,hazard,0,4,747,92,0.005115,"Description: The image shows an indoor environment with a person standing in the center, surrounded by furniture and equipment. The scene appears moderately cluttered but not obstructive to a ~1m flight path.
+Sensor note: The local detector identified a person at 0.45m, which is consistent with the visual proximity.
+Proximity: The person is visually estimated to be less than 1m away.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,person_far,caution,5,0.54,40.11,hazard,286.78,3894.8,4222.2,0,yolo-world,disabled,disabled,0.0,hazard,0,4,3514,96,0.000585,"Description: The image shows a person standing in a room with various objects and furniture around. The person appears to be approximately 0.45 meters away from the camera, and there are no significant obstacles directly in the flight path. 
+
+Sensor note: Consistent with local detector indicating a person detected at 0.45m.
+
+Proximity: The closest object/person is the detected person at approximately 0.45 meters.
+
+Risk: Hazard
+
+Pilot suggested action: HOVER",
+gemini,person_far,caution,5,0.54,40.11,hazard,286.78,1849.4,2176.8,0,yolo-world,disabled,disabled,0.0,hazard,0,4,975,80,9.7e-05,"Description: A person is standing directly in front of the drone, appearing to block the immediate flight path. The background shows an indoor room with various objects and a door.
+Sensor note: The local detector correctly identified a person, and my visual analysis confirms this.
+Proximity: The person is visually estimated to be within 1 meter.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,1,1.55,39.44,hazard,284.93,7864.8,8190.7,0,yolo-world,disabled,disabled,0.0,hazard,1,4,910,245,0.006405,"Description: The image shows heavy visual noise/static — the camera feed appears to be corrupted or the lens may be covered/obstructed, with a dark vignette around the edges and random green/red/blue pixel noise filling the frame. No discernible scene content, objects, or persons are visible.
+
+Sensor note: YOLO detects nothing, consistent with an unreadable image; local detector reports low brightness (35/255), also consistent. However, the noise pattern suggests camera malfunction or lens obstruction rather than simply a dark scene.
+
+Proximity: Unable to determine — visual feed is unreadable; no depth data available; closest obstacle distance unknown and therefore must be treated as potentially immediate.
+
+Risk: hazard
+
+Pilot suggested action: LAND
+
+**Reasoning:** A corrupted or obstructed camera feed means Tier 3 cognitive reasoning has lost its primary sensory input. Operating a drone at ~1m indoors without reliable vision is a direct safety hazard — the system cannot guarantee the flight path is clear. Immediate controlled landing is the safest response until the camera feed is restored and verified.",
+gpt4o,blocked_lens,hazard,1,1.55,39.44,hazard,284.93,2455.1,2781.0,0,yolo-world,disabled,disabled,0.0,caution,0,4,730,68,0.00467,"Description: The image appears to be very dark with significant noise, making it difficult to discern any objects or details.
+Sensor note: Consistent with the local detector's advisory of low brightness.
+Proximity: Unable to visually estimate proximity due to darkness; no depth_m data available.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,1,1.55,39.44,hazard,284.93,4199.6,4525.5,0,yolo-world,disabled,disabled,0.0,caution,0,4,3497,99,0.000584,"Description: The image appears to be dark and grainy, with no discernible objects or features visible. The low brightness suggests a lack of clear visual information, making it difficult to assess the environment accurately. 
+
+Sensor note: consistent, as the local detector indicates low brightness and no YOLO detections were made. 
+
+Proximity: Estimated closest object/person is likely beyond 1m, but visibility is too poor to confirm accurately. 
+
+Risk: caution 
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,1,1.55,39.44,hazard,284.93,1742.1,2068.0,0,yolo-world,disabled,disabled,0.0,hazard,1,5,953,91,9.9e-05,"Description: The image is completely obscured by heavy visual noise, appearing as static or a heavily pixelated, dark green and red pattern. No discernible objects or features are visible.
+Sensor note: Consistent with local detector's low brightness reading, but the image quality is so poor that no objects can be detected visually, despite YOLO reporting none.
+Proximity: Indeterminate due to image quality.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,2,0.52,38.93,hazard,289.37,9297.2,9626.0,0,yolo-world,disabled,disabled,0.0,hazard,1,4,910,228,0.00615,"Description: The image shows severe visual noise/static — the entire frame is filled with random green, blue, and red pixel noise with no discernible scene content, suggesting the camera feed is corrupted, the lens is obscured, or the sensor is malfunctioning.
+Sensor note: YOLO detects nothing, consistent with a corrupted/occluded feed; local detector reports low brightness (35/255), which partially aligns, but the noise pattern suggests active camera failure rather than simply a dark scene.
+Proximity: Cannot be determined — no visual information is available; closest obstacle is unknown and potentially immediate.
+Risk: hazard
+Pilot suggested action: HOVER
+
+**Rationale:** A fully corrupted or occluded camera feed is functionally equivalent to a covered lens — the drone has lost visual situational awareness entirely. Continuing flight without valid visual input risks collision with undetected obstacles or persons. The system should HOVER immediately and await camera restoration or initiate a controlled LAND if the feed does not recover within a defined timeout.",
+gpt4o,blocked_lens,hazard,2,0.52,38.93,hazard,289.37,2518.4,2847.2,0,yolo-world,disabled,disabled,0.0,hazard,1,5,730,67,0.004655,"Description: The image appears to be filled with static noise, making it difficult to discern any objects or features.
+Sensor note: Consistent with the local detector's report of low brightness; no YOLO detections.
+Proximity: Unable to visually estimate proximity due to image noise.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,2,0.52,38.93,hazard,289.37,3520.5,3849.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3497,74,0.000569,"Description: The image appears to be dark and grainy, with no discernible objects or features visible. The lack of clarity suggests a low-light environment, which may obscure potential hazards.  
+Sensor note: consistent  
+Proximity: Estimated closest object/person is likely beyond 1m due to the dark conditions.  
+Risk: caution  
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,2,0.52,38.93,hazard,289.37,2257.2,2586.0,0,yolo-world,disabled,disabled,0.0,hazard,1,5,953,105,0.000103,"Description: The image is completely obscured by heavy visual noise, appearing as static or a heavily pixelated, dark green and red pattern. No discernible objects or features are visible.
+Sensor note: The local detector reports a dark scene (brightness=35/255), which is consistent with the visually obscured and dark image. YOLO detections are none, which is also consistent as nothing is visible.
+Proximity: Cannot determine proximity due to complete visual obstruction.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,3,0.61,37.28,hazard,288.05,7967.7,8293.6,0,yolo-world,disabled,disabled,0.0,hazard,1,4,910,224,0.00609,"Description: The image shows pure video noise/static — a randomized green-dominated pixel pattern with no discernible scene content, suggesting the camera feed is corrupted, disconnected, or the lens is fully obscured/covered.
+Sensor note: YOLO detections return none, consistent with an unintelligible feed; local detector flags low brightness (35/255), partially consistent, but the noise pattern indicates camera failure rather than merely a dark scene — this is more severe than simple darkness.
+Proximity: Unable to determine — no spatial information is retrievable from this corrupted feed; closest object distance is unknown and potentially zero (lens obstruction cannot be ruled out).
+Risk: hazard
+Pilot suggested action: LAND
+
+**Reasoning:** A fully corrupted/static camera feed is classified as a lens-covered or sensor-failed condition under the hazard rule. With zero reliable visual data, the drone cannot navigate safely at any altitude. Immediate controlled landing is the only safe response to prevent collision with undetected obstacles or persons.",
+gpt4o,blocked_lens,hazard,3,0.61,37.28,hazard,288.05,2351.7,2677.6,0,yolo-world,disabled,disabled,0.0,caution,0,4,730,68,0.00467,"Description: The image appears to be very dark with significant noise, making it difficult to discern any objects or details.
+Sensor note: Consistent with the local detector's advisory of low brightness.
+Proximity: Unable to visually estimate proximity due to darkness; no depth_m data available.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,3,0.61,37.28,hazard,288.05,3794.3,4120.2,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3497,97,0.000583,"Description: The image appears to be dark and grainy, with no discernible objects or features visible. The lack of clarity suggests a low-light environment, which may obscure potential hazards. 
+
+Sensor note: consistent; local detector indicates low brightness, and no YOLO detections were made.
+
+Proximity: Based on the low brightness and lack of visible objects, I estimate that there are no objects or persons within 1 meter.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,3,0.61,37.28,hazard,288.05,1878.6,2204.5,0,yolo-world,disabled,disabled,0.0,hazard,1,5,953,105,0.000103,"Description: The image is completely obscured by heavy visual noise, appearing as static or a heavily pixelated, dark green and red pattern. No discernible objects or features are visible.
+Sensor note: The local detector reports a dark scene (brightness=35/255), which is consistent with the visually obscured and dark image. YOLO detections are none, which is also consistent as nothing is visible.
+Proximity: Cannot determine proximity due to complete visual obstruction.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,4,0.61,30.59,hazard,287.02,8661.3,8979.5,0,yolo-world,disabled,disabled,0.0,hazard,1,4,910,248,0.00645,"Description: The image shows severe visual noise/static — the camera feed appears to be completely corrupted, displaying only random green, blue, and red pixel noise with no discernible scene content. This is consistent with a lens obstruction, camera hardware failure, or complete signal loss.
+Sensor note: YOLO detections report none, which is consistent with an unreadable/corrupted image. Local detector reports low brightness (35/255), consistent with possible obstruction. However, the noise pattern suggests camera failure rather than simply a dark scene.
+Proximity: Unable to determine — camera feed is non-functional; no depth or spatial information can be extracted from this image. Closest object distance is unknown and unverifiable.
+Risk: hazard
+Pilot suggested action: LAND
+
+**Reasoning:** A corrupted or obstructed camera feed constitutes a critical safety hazard. With no usable visual input, Tier 3 cognitive reasoning cannot perform its safety function. The drone is effectively ""blind"" — any forward motion risks collision with undetected obstacles or persons. Immediate controlled landing is the safest response to preserve hardware and human safety.",
+gpt4o,blocked_lens,hazard,4,0.61,30.59,hazard,287.02,3577.3,3895.5,0,yolo-world,disabled,disabled,0.0,caution,0,4,730,68,0.00467,"Description: The image appears to be very dark with significant noise, making it difficult to discern any objects or details.
+Sensor note: Consistent with the local detector's advisory of low brightness.
+Proximity: Unable to visually estimate proximity due to darkness; no depth_m data available.
+Risk: Caution
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,4,0.61,30.59,hazard,287.02,3791.5,4109.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3497,106,0.000588,"Description: The image appears to be dark and grainy, with no discernible objects or features visible. The lack of clarity suggests a low-light environment, which may obscure potential hazards. 
+
+Sensor note: consistent; local detector indicates low brightness, and no YOLO detections were made.
+
+Proximity: Given the dark conditions, I cannot visually estimate the proximity of any objects or persons, but the depth data suggests potential obstacles could be present within 1-2 meters.
+
+Risk: caution
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,4,0.61,30.59,hazard,287.02,2088.1,2406.3,0,yolo-world,disabled,disabled,0.0,hazard,1,5,953,105,0.000103,"Description: The image is completely obscured by heavy visual noise, appearing as static or a heavily pixelated, dark green and red pattern. No discernible objects or features are visible.
+Sensor note: The local detector reports a dark scene (brightness=35/255), which is consistent with the visually obscured and dark image. YOLO detections are none, which is also consistent as nothing is visible.
+Proximity: Cannot determine proximity due to complete visual obstruction.
+Risk: hazard
+Pilot suggested action: HOVER",
+claude,blocked_lens,hazard,5,0.57,31.04,hazard,288.44,7289.7,7609.8,0,yolo-world,disabled,disabled,0.0,hazard,1,5,910,208,0.00585,"Description: The image shows heavy visual noise/static — a green-dominant randomized pixel pattern with dark vignetting at the edges, suggesting the camera feed is corrupted, obscured, or the lens is fully covered/malfunctioning.
+Sensor note: YOLO detections return none, consistent with a corrupted/blocked feed. Local detector reports low brightness (35/255), consistent with dark edges observed, but the core issue is the noisy static pattern indicating a non-functional camera feed rather than a normal dark scene.
+Proximity: Cannot determine — camera feed is corrupted or lens is fully occluded; no reliable spatial information available.
+Risk: hazard
+Pilot suggested action: LAND
+
+**Reasoning:** A fully corrupted or covered camera feed eliminates Tier 3 cognitive oversight entirely. Operating blind at altitude violates the fundamental safety contract of this architecture. The correct response is immediate controlled landing to prevent unmonitored flight.",
+gpt4o,blocked_lens,hazard,5,0.57,31.04,hazard,288.44,2900.6,3220.7,0,yolo-world,disabled,disabled,0.0,hazard,1,5,730,67,0.004655,"Description: The image appears to be filled with static noise, making it difficult to discern any objects or features.
+Sensor note: Consistent with the local detector's report of low brightness; no YOLO detections.
+Proximity: Unable to visually estimate proximity due to image noise.
+Risk: Hazard
+Pilot suggested action: HOVER",
+gpt4o_mini,blocked_lens,hazard,5,0.57,31.04,hazard,288.44,3584.0,3904.1,0,yolo-world,disabled,disabled,0.0,hazard,1,5,3497,92,0.00058,"Description: The image appears to be dark and grainy, with no discernible objects or features visible. The low brightness suggests a lack of clear visual information, making it difficult to assess the environment accurately. 
+
+Sensor note: consistent, but the low brightness indicates potential hazards not detected by sensors. 
+
+Proximity: Unable to visually estimate proximity due to darkness; depth_m is unreliable in this condition. 
+
+Risk: caution 
+
+Pilot suggested action: HOVER",
+gemini,blocked_lens,hazard,5,0.57,31.04,hazard,288.44,2154.1,2474.2,0,yolo-world,disabled,disabled,0.0,hazard,1,5,953,105,0.000103,"Description: The image is completely obscured by heavy visual noise, appearing as static or a heavily pixelated, dark green and red pattern. No discernible objects or features are visible.
+Sensor note: The local detector reports a dark scene (brightness=35/255), which is consistent with the visually obscured and dark image. YOLO detections are none, which is also consistent as nothing is visible.
+Proximity: Cannot determine proximity due to complete visual obstruction.
+Risk: hazard
+Pilot suggested action: HOVER",

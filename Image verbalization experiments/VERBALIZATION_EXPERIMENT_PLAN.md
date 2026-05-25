@@ -176,18 +176,85 @@ results/
 The image verbalization experiments use a three-tier pipeline:
 
 ```
-Tier 1  →  PID Controller          (reflexes, 4 kHz, motor corrections)
-Tier 2  →  Perception stack        (~30 fps, passes metadata to LLM)
-            ├─ YOLOv11n (COCO)     — person + 80-class trained detection
-            ├─ YOLO-World          — open-vocab structural hazards (wall, wire…)
-            ├─ DepthAnything v2    — real metric depth per object (metres)
+Tier 1  →  PID Controller              (reflexes, 4 kHz, motor corrections)
+Tier 2  →  Perception stack            (~30 fps, passes metadata to LLM)
+            ├─ robust_local_detector   — EMERGENCY trigger (14 ms, no API)
+            │   ├─ MediaPipe           — EfficientDet-Lite0 person detection [44,45]
+            │   ├─ Texture uniformity  — Sobel gradient → wall fills frame
+            │   └─ Brightness gate     — blocked lens / total darkness
+            ├─ YOLOv11n (COCO)         — person + 80-class trained detection [35,39]
+            ├─ YOLO-World              — open-vocab hazards: structural + threat vocab [37]
+            │   ├─ Structural classes  — wall, wire, pillar, steps, barrier, ceiling…
+            │   └─ Threat classes      — gun, pistol, rifle, explosive, knife, bomb…
+            │       (zero-shot, ~30–50% recall on 320×240; demo-validated, no experiment)
+            │       Fine-tuned YOLOv11n on Open Images V7 weapons = future extension
+            ├─ DepthAnything v2        — real metric depth per object (metres) [36,42,43]
             │  Metric Indoor
-            └─ CLIP                — scene-level label (5 categories)
-Tier 3  →  LLM (cognitive layer)   (0.1–1 Hz, final safety decision, image-primary)
+            └─ CLIP [experimental]     — scene-level label (5 categories)
+                NOTE: CLIP removed from production pipeline. Retained for V-series
+                thesis experiments only. Proved unreliable on 320×240 ESP32 frames
+                (scores within ±0.013 of 0.200 uniform baseline = effectively random).
+                This failure result motivates the LLM cognitive authority claim.
+Tier 3  →  LLM (cognitive layer)       (every 1–10 s scheduled + emergency trigger)
+            PRIMARY threat classifier — identifies weapons, gestures, semantic threats
+            that have no COCO label. Only layer that understands intent and context.
 ```
 
 **Authority rule**: LLM is the cognitive authority. Tier 2 metadata is advisory.
 If the image contradicts YOLO detections, the LLM's visual judgment takes precedence.
+
+**Emergency trigger**: `robust_local_detector` runs at 14 ms (no API call) and triggers
+the LLM immediately when a local hazard is detected (person close, wall fills frame,
+or darkness/blocked lens). Scheduled LLM calls handle caution scenes.
+
+**CLIP status**: Disabled in production (`use_clip=False` default in `enhanced_yolo_infer()`).
+The CLIP code and experimental results are retained in `enhanced_yolo_pipeline.py`
+and used in V-series experiments to demonstrate *why* a vision-capable LLM is needed
+as the cognitive authority — CLIP's failure on real hardware is the evidence.
+
+---
+
+## Observation — Threat Detection Capability (Demo-Validated)
+
+> **No formal experiment run. Validated by demo video. Suitable for thesis discussion section.**
+
+### YOLO-World vocabulary extension for threats
+
+`YOLO-World` supports open-vocabulary detection via `model.set_classes()`. The
+`THREAT_CLASSES` list (`enhanced_yolo_pipeline.py`) extends the structural vocabulary
+to include security threats:
+
+```
+gun, pistol, rifle, firearm, weapon,
+knife, machete, axe,
+explosive, bomb, grenade, suspicious package
+```
+
+**Observed behaviour on ESP32 frames (demo video):**
+- YOLO-World zero-shot recalls the weapon shape ~30–50% of attempts at 320×240
+- False positives on dark cylindrical objects (water bottle ↔ pistol)
+- Useful as supplementary metadata but NOT a reliable hard trigger
+- `enhanced_rule_risk()` maps any THREAT_RISK_CLASS detection → immediate hazard
+
+### Fine-tuned YOLOv11n on weapons (future extension)
+
+Fine-tuning YOLOv11n on [Open Images V7](https://storage.googleapis.com/openimages/web/index.html)
+(which has `Firearm`, `Gun`, `Handgun`, `Rifle`, `Knife` labels, ~2000 images) would
+push recall to ~75–85% on indoor frames — comparable to COCO-trained person detection.
+Stub function `load_threat_yolo(weights_path)` is ready in `enhanced_yolo_pipeline.py`.
+Not done in this thesis work — left as future work.
+
+### Why the LLM is still the primary threat layer
+
+Demo observation: even when YOLO-World **misses** the weapon entirely
+(`YOLO detections: none`), the LLM correctly describes the scene as:
+
+> *"A person is standing with their arm extended, holding what appears to be a handgun
+> pointed toward the camera. Risk: hazard. Pilot suggested action: LAND"*
+
+This confirms the architectural principle: **Tier 3 LLM is the only layer capable of
+open-ended semantic threat classification.** YOLO-World threat vocabulary is a
+best-effort early signal that reduces LLM reasoning time; it does not replace the LLM.
 
 ---
 
@@ -222,6 +289,23 @@ Tier 2 pipeline choices, and LLM evaluation methodology.
 - [38] Wang et al. (2024). *YOLOv10: Real-Time End-to-End Object Detection.*
   arXiv:2405.14458.
   → Contextual: YOLO model family progression. YOLOv11 (used here) follows this work.
+
+**Tier 2 — Emergency local detector (robust_local_detector)**
+
+- [44] Tan, M., Pang, R., Le, Q.V. (2020). *EfficientDet: Scalable and Efficient
+  Object Detection.* CVPR 2020. arXiv:1911.09070.
+  → EfficientDet-Lite0 (the smallest EfficientDet variant, ~13 MB) is used in
+    `robust_local_detector` for person detection on 320×240 ESP32 frames.
+    Achieves ~14 ms CPU inference with substantially higher recall than zero-shot
+    YOLO-World on low-resolution indoor frames. No GPU required.
+
+- [45] Lugaresi, C., et al. (2019). *MediaPipe: A Framework for Building Perception
+  Pipelines.* CVPR Workshop on CV for the Real World. arXiv:1906.08172.
+  → MediaPipe provides the inference runtime for EfficientDet-Lite0 in the
+    emergency local detector. The framework handles model loading, pre/post-
+    processing, and CPU execution, enabling 14 ms end-to-end person detection
+    latency on the companion computer without a GPU.
+    Ref: `robust_local_detector.py` — `load_mediapipe_detector()`.
 
 **Tier 2 — Monocular depth estimation**
 

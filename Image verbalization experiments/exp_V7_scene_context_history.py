@@ -31,6 +31,8 @@ Output:  results/V7_runs_<timestamp>.csv
 """
 
 import sys, pathlib, datetime, time
+import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = pathlib.Path(__file__).parent
@@ -43,8 +45,10 @@ from verbalization_utils import (
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR, FRAMES_DIR
 )
 from enhanced_yolo_pipeline import (
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer
+    load_enhanced_yolo, load_clip, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer
 )
+from robust_local_detector import load_mediapipe_detector, detect_hazard
 
 N_SEQUENCES   = 5
 HISTORY_MODES = ["stateless", "short", "full"]
@@ -62,12 +66,16 @@ SEQUENCE_DEFINITION = [
 ]
 
 BASE_PROMPT = (
-    "You are an AI copilot for a small indoor drone flying at ~1m altitude.\n"
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors.\n"
+    "YOUR PRIMARY INPUT IS THE CAMERA IMAGE — look at it directly.\n\n"
     "{context}"
-    "YOLO-World detections on current frame: {yolo_meta}\n"
-    "CLIP scene label: {clip_label} (conf={clip_conf:.3f}, risk={clip_risk})\n\n"
-    "Using the YOLO-World metadata, CLIP label, and the image:\n"
-    "Describe what you see. Has the scene changed from before?\n"
+    "Supplementary sensor data for current frame (advisory — verify against the image):\n"
+    "  YOLO-World: {yolo_meta}\n"
+    "  CLIP: {clip_label} (conf={clip_conf:.3f}, risk={clip_risk})\n\n"
+    "YOLO can miss objects — if you see something YOLO did not detect, it exists. "
+    "If sensor data contradicts the image, trust what you see.\n\n"
+    "Describe what you see in the image. If history is provided, note any scene change.\n"
     "Classify as: safe | caution | hazard\n"
     "Pilot suggested action: HOVER | PITCH_FORWARD | PITCH_BACK | ROLL_LEFT | ROLL_RIGHT | ASCEND | DESCEND | LAND"
 )
@@ -111,9 +119,15 @@ def main():
     print(f"Total trials: {total}")
     print("=" * 65)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
+    print("Loading CLIP scene screener (V-series — retained for thesis evidence)…")
     clip_model, clip_preprocess, clip_tokenizer = load_clip()
 
     all_rows = []
@@ -131,10 +145,22 @@ def main():
             histories = {model: [] for model in MODELS}
 
             for frame_num, expected_risk, scene_label in SEQUENCE_DEFINITION:
-                jpeg  = get_frame_for_run(scene_label, run_n)
+                jpeg     = get_frame_for_run(scene_label, run_n)
+                img_bgr  = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+                t_local  = time.perf_counter()
+                local_r  = detect_hazard(img_bgr, depth_map=None,
+                                         mp_detector=mp_detector, mp_type=mp_type)
+                local_ms = round((time.perf_counter() - t_local) * 1000.0, 2)
+
                 tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
                                             clip_model, clip_preprocess,
-                                            clip_tokenizer, jpeg)
+                                            clip_tokenizer, jpeg,
+                                            coco_model=coco_model,
+                                            depth_pipe=depth_pipe)
+                tier2["yolo_meta"] += (
+                    f"\n  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+                    f"{local_r['metadata']}"
+                )
                 change_event = frame_num in (3, 5)
 
                 print(f"\n    Frame {frame_num}/5  scene={scene_label}  "
@@ -171,6 +197,8 @@ def main():
                         "scene_label":     scene_label,
                         "expected_risk":   expected_risk,
                         "model":           model,
+                        "local_ms":        local_ms,
+                        "local_risk":      local_r["risk"],
                         "detected_risk":   det_risk,
                         "risk_correct":    risk_correct,
                         "change_event":    int(change_event),
@@ -180,6 +208,7 @@ def main():
                         "latency_ms":      res["latency_ms"],
                         "cost_usd":        res["cost_usd"],
                         "reply_snippet":   reply[:120].replace("\n", " "),
+                        "reply":           reply,
                         "error":           res["error"][:80] if res["error"] else "",
                     }
                     all_rows.append(row)
@@ -199,8 +228,9 @@ def main():
 
     # ── Save runs CSV
     fields = ["history_mode","sequence","frame_num","scene_label","expected_risk",
-              "model","detected_risk","risk_correct","change_event","change_detected",
-              "input_tokens","output_tokens","latency_ms","cost_usd","reply_snippet","error"]
+              "model","local_ms","local_risk",
+              "detected_risk","risk_correct","change_event","change_detected",
+              "input_tokens","output_tokens","latency_ms","cost_usd","reply_snippet","reply","error"]
     runs_csv = RESULTS_DIR / f"V7_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 

@@ -11,12 +11,27 @@ All experiments import from here:
 """
 
 from __future__ import annotations
-import os, time, base64, io, math, csv
+import os, sys, time, base64, io, math, csv
+
+# Disable MediaPipe telemetry BEFORE any mediapipe/cv2 import
+# Prevents clearcut upload attempts that cause periodic latency spikes
+os.environ["GLOG_minloglevel"]             = "3"
+os.environ["MEDIAPIPE_DISABLE_USAGE_STATS"] = "1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"]         = "3"  # suppress TF/TFLITE logs too
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import requests
+
+# ── Load API credentials from experiments/credentials.py (gitignored) ─────────
+try:
+    _exp_dir = str(Path(__file__).parent.parent / "experiments")
+    if _exp_dir not in sys.path:
+        sys.path.insert(0, _exp_dir)
+    import credentials  # noqa: F401 — calls _load_credentials() at import time
+except ImportError:
+    pass  # credentials.py absent — keys must come from shell environment
 
 # ── Config ────────────────────────────────────────────────────────────────────
 ESP32_IP          = os.environ.get("ESP32_IP",  "10.186.33.138")
@@ -295,24 +310,45 @@ def _call_openai(b64, prompt, max_tokens, temperature):
     return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
 
 def _call_gemini(b64, prompt, max_tokens, temperature):
-    from google import genai
-    from google.genai import types
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    img_part = types.Part.from_bytes(data=base64.b64decode(b64), mime_type="image/jpeg")
-    resp   = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=[prompt, img_part],
-        config=types.GenerateContentConfig(
-            max_output_tokens=max_tokens, temperature=temperature,
-            thinking_config=types.ThinkingConfig(thinking_budget=0)),
+    """
+    Calls Gemini via REST API directly — same approach as G-series GeminiProvider
+    in multi_llm_provider.py (avoids google.genai SDK version issues).
+    thinkingBudget=0 disables thinking so all max_tokens go to the reply.
+    """
+    import json, urllib.request
+    url  = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}")
+    body = {
+        "contents": [{
+            "parts": [
+                {"text": prompt},
+                {"inline_data": {"mime_type": "image/jpeg", "data": b64}},
+            ],
+        }],
+        "generationConfig": {
+            "maxOutputTokens": max_tokens,
+            "temperature":     temperature,
+            "thinkingConfig":  {"thinkingBudget": 0},   # disable thinking — saves tokens
+        },
+    }
+    data = json.dumps(body).encode("utf-8")
+    req  = urllib.request.Request(
+        url, data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
     )
-    text   = resp.text or ""
-    try:
-        i = resp.usage_metadata.prompt_token_count
-        o = resp.usage_metadata.candidates_token_count
-    except Exception:
-        i = o = 0
-    # Gemini 2.5 Flash: $0.075/M in, $0.30/M out
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        raw = json.loads(resp.read().decode("utf-8"))
+
+    # Parse — same logic as GeminiProvider._parse in multi_llm_provider.py
+    candidate = raw.get("candidates", [{}])[0]
+    parts     = candidate.get("content", {}).get("parts", [])
+    text = "".join(p.get("text", "") for p in parts if "text" in p)
+
+    usage = raw.get("usageMetadata", {})
+    i = usage.get("promptTokenCount",     0)
+    o = usage.get("candidatesTokenCount", 0)
+    # Gemini 2.5 Flash pricing: $0.075/M in, $0.30/M out
     cost = round(i*0.075e-6 + o*0.30e-6, 6)
     return {"reply": text, "input_tokens": i, "output_tokens": o, "cost_usd": cost}
 

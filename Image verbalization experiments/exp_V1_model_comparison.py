@@ -21,6 +21,7 @@ Output: results/V1_runs_<ts>.csv, results/V1_summary_<ts>.csv
 
 import sys, time, pathlib, datetime
 import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = pathlib.Path(__file__).parent
@@ -33,9 +34,10 @@ from verbalization_utils import (
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR
 )
 from enhanced_yolo_pipeline import (
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer,
-    COMBINED_PROMPT_TEMPLATE
+    load_enhanced_yolo, load_clip, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer, COMBINED_PROMPT_TEMPLATE_CLIP
 )
+from robust_local_detector import load_mediapipe_detector, detect_hazard
 
 N_RUNS  = 5
 MODELS  = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
@@ -49,9 +51,15 @@ def main():
     print(f"Total LLM calls: {len(MODELS) * len(SCENES) * N_RUNS}")
     print("=" * 60)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
+    print("Loading CLIP scene screener (V-series — retained for thesis evidence)…")
     clip_model, clip_preprocess, clip_tokenizer = load_clip()
 
     all_rows = []
@@ -60,17 +68,31 @@ def main():
         print(f"\n── Scene {scene['id']:02d}: {scene['label']}  (truth={scene['truth']}) ──")
 
         for run in range(1, N_RUNS + 1):
-            jpeg  = get_saved_frame(scene["label"])
+            jpeg     = get_saved_frame(scene["label"])
+            img_bgr  = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+            t_local  = time.perf_counter()
+            local_r  = detect_hazard(img_bgr, depth_map=None,
+                                     mp_detector=mp_detector, mp_type=mp_type)
+            local_ms = round((time.perf_counter() - t_local) * 1000.0, 2)
+
             tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
                                         clip_model, clip_preprocess,
-                                        clip_tokenizer, jpeg)
-            prompt = COMBINED_PROMPT_TEMPLATE.format(
+                                        clip_tokenizer, jpeg,
+                                        coco_model=coco_model,
+                                        depth_pipe=depth_pipe)
+            # Append local detector result so LLM sees MediaPipe person detection
+            # even when YOLO-World misclassifies person as wall/structural object
+            tier2["yolo_meta"] += (
+                f"\n  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+                f"{local_r['metadata']}"
+            )
+            prompt = COMBINED_PROMPT_TEMPLATE_CLIP.format(
                 yolo_meta  = tier2["yolo_meta"],
                 clip_label = tier2["clip_label"],
                 clip_conf  = tier2["clip_conf"],
                 clip_risk  = tier2["clip_risk"],
             )
-            print(f"   run={run}  yolo={tier2['yolo_meta'][:70]}")
+            print(f"   run={run}  local={local_ms:.0f}ms({local_r['risk']})  yolo={tier2['yolo_meta'][:60]}")
 
             for model in MODELS:
                 res    = call_vision_llm(jpeg, prompt, model=model,
@@ -83,6 +105,8 @@ def main():
                     "truth":           scene["truth"],
                     "model":           model,
                     "run":             run,
+                    "local_ms":        local_ms,
+                    "local_risk":      local_r["risk"],
                     "quality_score":   scores["quality_score"],
                     "s1_scene":        scores["s1_scene"],
                     "s2_proximity":    scores["s2_proximity"],
@@ -110,6 +134,7 @@ def main():
 
     # ── Save runs CSV
     fields = ["scene_id","scene_label","truth","model","run",
+              "local_ms","local_risk",
               "quality_score","s1_scene","s2_proximity","s3_risk","s4_length",
               "s5_pilot_action","detected_risk","detected_action","word_count",
               "yolo_meta","clip_label","clip_risk",

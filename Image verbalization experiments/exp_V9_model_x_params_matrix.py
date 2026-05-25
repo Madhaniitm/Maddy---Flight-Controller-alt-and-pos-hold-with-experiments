@@ -67,9 +67,10 @@ TEMPERATURES = [0.0, 0.5, 1.0]
 MAX_TOKENS_L = [128, 256, 512]
 
 PROMPT = (
-    "You are a drone camera monitor. "
-    "Look at the image and describe what you see. "
-    "Estimate proximity of objects. "
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors. Your primary input is the camera image — "
+    "look at it directly and reason from what you see.\n"
+    "Describe what you see. Estimate proximity of any objects or people from visual evidence. "
     "Classify the scene as exactly one of: safe | caution | hazard"
 )
 

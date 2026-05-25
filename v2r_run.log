@@ -1,0 +1,192 @@
+I0000 00:00:1779704690.103619 3177782 init-domain.cc:128] Fiber init: default domain = pthread, concurrency = 11, prefix = pthread-default
+I0000 00:00:1779704690.158862 3177782 gl_context.cc:407] GL version: 2.1 (2.1 Metal - 89.3), renderer: Apple M4
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+=================================================================
+EXP-V2R: ReAct Agentic vs ReAct Template
+Condition A: loaded from V2 (react technique, N=5)
+Condition B: running now  (react_agentic, N=5)
+Models=['claude', 'gpt4o', 'gpt4o_mini', 'gemini']  Scenes=8
+New trials=60  (Scenes=['person_near', 'dim_light', 'door_open'])
+=================================================================
+[V2R] Loaded 60 react_template rows from V2_runs_20260525_035756.csv
+
+Loading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…
+[MediaPipe] EfficientDet-Lite0 object detector loaded ✓
+Loading YOLO-World (structural hazards)…
+[YOLO-World] Loaded — 12 structural classes: ['wall', 'door', 'window', 'wire', 'cable', 'pillar', 'column', 'steps', 'staircase', 'barrier', 'ceiling', 'shelf']
+Loading YOLOv11n COCO (person + 80 classes)…
+[YOLOv11n COCO] Loaded from /Users/madhankumarb/Desktop/Maddy - Flight Controller alt and pos hold/yolo11n.pt
+Loading DepthAnything v2 Metric Indoor…
+[DA v2] Loading Depth Anything V2 Metric Indoor (Small)…
+Loading weights:   0%|          | 0/287 [00:00<?, ?it/s]Loading weights: 100%|██████████| 287/287 [00:00<00:00, 19998.43it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+E0000 00:00:1779704810.270809 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779704870.276190 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779704930.281536 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779704990.286132 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705050.291424 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705110.296722 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705170.302011 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705230.307285 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705290.312905 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705350.315202 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705410.320469 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705470.325620 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705530.329253 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779705590.334515 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:10:50.26515+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706190.540142 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:25:50.48951+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706250.545433 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:25:50.48951+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706310.550361 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:25:50.48951+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706370.555645 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:25:50.48951+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706430.559035 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:25:50.48951+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706E0000 00:00:1779706522.729219 3176333 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:39:22.723838+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearE0000 00:00:1779706610.714767 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:40:50.713952+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+E0000 00:00:1779706613.777409 3177783 portable_clearcut_uploader.cc:90] Failed to send to clearcut: FAILED_PRECONDITION: Not valid for uploading until: 2026-05-25T16:40:50.713952+05:30
+=== Source Location Trace: ===
+wireless/android/play/playlog/cplusplus/portable_clearcut_uploader.cc:180
+[DA v2] Depth Anything V2 Metric Indoor loaded ✓
+Loading CLIP scene screener (V-series — retained for thesis evidence)…
+[CLIP] ViT-B-32 (laion2b) loaded
+
+── Scene 01: person_near  (truth=hazard) ──
+   run=1  local=16ms(hazard)  yolo=YOLO detections: wall (conf=0.28, depth_m=0.45m [D
+     claude        risk=?         correct=0  lat=18698ms (obs=11742+act=6956ms)
+     gpt4o         risk=caution   correct=0  lat=11450ms (obs=7838+act=3611ms)
+     gpt4o_mini    risk=hazard    correct=1  lat=14440ms (obs=7074+act=7366ms)
+     gemini        risk=safe      correct=0  lat=5174ms (obs=3718+act=1456ms)
+   run=2  local=30ms(hazard)  yolo=YOLO detections: wall (conf=0.28, depth_m=0.45m [D
+     claude        risk=?         correct=0  lat=14774ms (obs=10045+act=4729ms)
+     gpt4o         risk=?         correct=0  lat=8667ms (obs=5820+act=2847ms)
+     gpt4o_mini    risk=?         correct=0  lat=14664ms (obs=8786+act=5878ms)
+     gemini        risk=safe      correct=0  lat=4303ms (obs=3177+act=1126ms)
+   run=3  local=28ms(hazard)  yolo=YOLO detections: wall (conf=0.28, depth_m=0.45m [D
+     claude        risk=?         correct=0  lat=14975ms (obs=9301+act=5674ms)
+     gpt4o         risk=?         correct=0  lat=7472ms (obs=4854+act=2618ms)
+     gpt4o_mini    risk=caution   correct=0  lat=11392ms (obs=6760+act=4632ms)
+     gemini        risk=safe      correct=0  lat=6020ms (obs=4850+act=1170ms)
+   run=4  local=30ms(hazard)  yolo=YOLO detections: wall (conf=0.28, depth_m=0.45m [D
+     claude        risk=?         correct=0  lat=15894ms (obs=9858+act=6036ms)
+     gpt4o         risk=?         correct=0  lat=7882ms (obs=4810+act=3072ms)
+     gpt4o_mini    risk=?         correct=0  lat=9636ms (obs=5392+act=4244ms)
+     gemini        risk=?         correct=0  lat=5010ms (obs=3127+act=1882ms)
+   run=5  local=30ms(hazard)  yolo=YOLO detections: wall (conf=0.28, depth_m=0.45m [D
+     claude        risk=?         correct=0  lat=15269ms (obs=10566+act=4703ms)
+     gpt4o         risk=?         correct=0  lat=7268ms (obs=4298+act=2970ms)
+     gpt4o_mini    risk=hazard    correct=1  lat=10854ms (obs=5940+act=4914ms)
+     gemini        risk=?         correct=0  lat=5323ms (obs=3390+act=1934ms)
+
+── Scene 04: dim_light  (truth=caution) ──
+   run=1  local=40ms(safe)  yolo=YOLO detections: wall (conf=0.33, depth_m=0.42m [D
+     claude        risk=?         correct=0  lat=14211ms (obs=9829+act=4382ms)
+     gpt4o         risk=?         correct=0  lat=8085ms (obs=4909+act=3176ms)
+     gpt4o_mini    risk=?         correct=0  lat=1224022ms (obs=1213886+act=10137ms)
+     gemini        risk=?         correct=0  lat=4718ms (obs=3102+act=1615ms)
+   run=2  local=32ms(safe)  yolo=YOLO detections: wall (conf=0.33, depth_m=0.42m [D
+     claude        risk=?         correct=0  lat=14360ms (obs=9136+act=5224ms)
+     gpt4o         risk=caution   correct=1  lat=7369ms (obs=4913+act=2455ms)
+     gpt4o_mini    risk=?         correct=0  lat=16628ms (obs=9932+act=6696ms)
+     gemini        risk=?         correct=0  lat=5262ms (obs=3480+act=1782ms)
+   run=3  local=30ms(safe)  yolo=YOLO detections: wall (conf=0.33, depth_m=0.42m [D
+     claude        risk=?         correct=0  lat=16565ms (obs=11174+act=5390ms)
+     gpt4o         risk=caution   correct=1  lat=8081ms (obs=5117+act=2964ms)
+     gpt4o_mini    risk=?         correct=0  lat=15974ms (obs=9522+act=6451ms)
+     gemini        risk=?         correct=0  lat=4683ms (obs=3076+act=1607ms)
+   run=4  local=31ms(safe)  yolo=YOLO detections: wall (conf=0.33, depth_m=0.42m [D
+     claude        risk=?         correct=0  lat=66220ms (obs=60595+act=5625ms)
+     gpt4o         risk=?         correct=0  lat=7723ms (obs=5143+act=2580ms)
+     gpt4o_mini    risk=?         correct=0  lat=16235ms (obs=11943+act=4292ms)
+     gemini        risk=?         correct=0  lat=4889ms (obs=3162+act=1728ms)
+   run=5  local=37ms(safe)  yolo=YOLO detections: wall (conf=0.33, depth_m=0.42m [D
+     claude        risk=?         correct=0  lat=15425ms (obs=10081+act=5344ms)
+     gpt4o         risk=caution   correct=1  lat=8293ms (obs=5020+act=3274ms)
+     gpt4o_mini    risk=?         correct=0  lat=15032ms (obs=10416+act=4616ms)
+     gemini        risk=?         correct=0  lat=4631ms (obs=3033+act=1598ms)
+
+── Scene 06: door_open  (truth=safe) ──
+   run=1  local=40ms(safe)  yolo=YOLO detections: train (conf=0.22, depth_m=3.6m [D
+     claude        risk=hazard    correct=0  lat=14518ms (obs=9350+act=5168ms)
+     gpt4o         risk=?         correct=0  lat=7629ms (obs=4648+act=2981ms)
+     gpt4o_mini    risk=?         correct=0  lat=15155ms (obs=9011+act=6144ms)
+     gemini        risk=?         correct=0  lat=4816ms (obs=3078+act=1738ms)
+   run=2  local=37ms(safe)  yolo=YOLO detections: train (conf=0.22, depth_m=3.6m [D
+     claude        risk=hazard    correct=0  lat=14882ms (obs=9429+act=5453ms)
+     gpt4o         risk=safe      correct=1  lat=6425ms (obs=4268+act=2157ms)
+     gpt4o_mini    risk=?         correct=0  lat=14359ms (obs=10404+act=3955ms)
+     gemini        risk=?         correct=0  lat=4917ms (obs=3176+act=1741ms)
+   run=3  local=35ms(safe)  yolo=YOLO detections: train (conf=0.22, depth_m=3.6m [D
+     claude        risk=hazard    correct=0  lat=14986ms (obs=9540+act=5446ms)
+     gpt4o         risk=?         correct=0  lat=8522ms (obs=5836+act=2686ms)
+     gpt4o_mini    risk=?         correct=0  lat=14207ms (obs=8884+act=5323ms)
+     gemini        risk=?         correct=0  lat=5227ms (obs=3382+act=1844ms)
+   run=4  local=41ms(safe)  yolo=YOLO detections: train (conf=0.22, depth_m=3.6m [D
+     claude        risk=?         correct=0  lat=17839ms (obs=11797+act=6042ms)
+     gpt4o         risk=?         correct=0  lat=6956ms (obs=3785+act=3172ms)
+     gpt4o_mini    risk=?         correct=0  lat=12525ms (obs=8092+act=4433ms)
+     gemini        risk=?         correct=0  lat=6552ms (obs=5191+act=1361ms)
+   run=5  local=39ms(safe)  yolo=YOLO detections: train (conf=0.22, depth_m=3.6m [D
+     claude        risk=?         correct=0  lat=14921ms (obs=9738+act=5182ms)
+     gpt4o         risk=caution   correct=0  lat=7207ms (obs=4158+act=3050ms)
+     gpt4o_mini    risk=?         correct=0  lat=12639ms (obs=7781+act=4858ms)
+     gemini        risk=?         correct=0  lat=5205ms (obs=3338+act=1867ms)
+
+── V2R Summary — A vs B per model ─────────────────────────────────
+  condition         model            acc  [lo,  hi ]    lat_ms
+----------------------------------------------------------------------
+  react_template    claude        0.333  [0.152,0.583]  9779ms
+  react_template    gpt4o         1.000  [0.796,1.000]  3586ms
+  react_template    gpt4o_mini    0.467  [0.248,0.699]  7183ms
+  react_template    gemini        1.000  [0.796,1.000]  3049ms
+  react_agentic     claude        0.000  [0.000,0.215]  15523ms
+  react_agentic     gpt4o         0.267  [0.109,0.519]  7935ms
+  react_agentic     gpt4o_mini    0.133  [0.037,0.379]  94518ms
+  react_agentic     gemini        0.000  [0.000,0.204]  5115ms
+
+── V2R Per-Scene Delta: agentic − template (all models avg) ────────
+  scene                 truth    template   agentic    delta
+  person_near           hazard       0.90      0.10  -0.80
+  dim_light             caution      0.60      0.15  -0.45
+  door_open             safe         0.60      0.05  -0.55
+
+Condition B data → /Users/madhankumarb/Desktop/Maddy - Flight Controller alt and pos hold/Image verbalization experiments/results/V2R_runs_20260525_155449.csv
+Summary (A+B)    → /Users/madhankumarb/Desktop/Maddy - Flight Controller alt and pos hold/Image verbalization experiments/results/V2R_summary_20260525_155449.csv

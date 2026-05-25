@@ -13,8 +13,13 @@ Techniques implemented:
    Recovers detections in dim/dark scenes (+2-5% mAP in low-light benchmarks).
 
 3. CLIP Scene Hazard Screening (arxiv:2504.13399, 2025)
-   Open-vocabulary image-text similarity for category-agnostic hazard detection.
-   Catches what YOLO misses: blocked lens, pure darkness, novel hazards.
+   *** EXPERIMENTAL USE ONLY — not in production Tier 2 pipeline ***
+   CLIP is retained here for V-series experiment results (V1, V2, V4, V5).
+   It proved unreliable on 320×240 ESP32 frames: scores within ±0.013 of
+   the uniform (random) baseline of 0.200 across all 5 labels. This failure
+   itself is a thesis result — it motivates the LLM cognitive authority claim.
+   Use enhanced_yolo_infer(use_clip=False) in production (the default).
+   Ref: Clip results used in thesis section on "why LLM is needed as Tier 3".
 
 4. YOLOv11n COCO — Primary Object Detector  [NEW, ref 35, 38, 39]
    Trained COCO-80 model. High recall for person (~90%) and 79 everyday classes.
@@ -37,7 +42,12 @@ Techniques implemented:
    is the authority. LLM overrides sensor data when image contradicts it.
    Ref: Ahmmad et al. (2025) [35]; arxiv:2602.07680.
 
-Install notes (for new techniques 4 & 5):
+Production Tier 2 pipeline (current):
+   Frame → CLAHE → YOLOv11n COCO + YOLO-World → merge → DA v2 depth → LLM
+   robust_local_detector (14 ms) runs in parallel for emergency triggering.
+   CLIP: disabled in production (use_clip=False in enhanced_yolo_infer).
+
+Install notes (for techniques 4 & 5):
    pip install ultralytics            # YOLOv11n via YOLO("yolo11n.pt")
    pip install transformers pillow    # DepthAnything v2 via HuggingFace pipeline
    Model weights auto-download on first run from HuggingFace Hub.
@@ -57,6 +67,45 @@ STRUCTURAL_CLASSES = [
     "pillar", "column", "steps", "staircase",
     "barrier", "ceiling", "shelf",
 ]
+
+# ── Threat / security vocabulary for YOLO-World (zero-shot) ──────────────────
+# These extend YOLO-World's open-vocab capability to semantic security threats
+# that are absent from COCO-80.
+#
+# Approach A — YOLO-World zero-shot (no training needed):
+#   Pass THREAT_CLASSES to model.set_classes(). Works out-of-box but recall is
+#   LOW on small/blurry 320×240 objects (expect 30–50% recall at best).
+#   Use THREAT_WORLD_CONF = 0.15 (same as structural classes).
+#   Validated via demo video — not a formal experiment.
+#
+# Approach B — Fine-tuned YOLOv11n on weapons dataset (higher recall):
+#   Open Images V7 has: "Firearm", "Gun", "Handgun", "Rifle", "Knife".
+#   Fine-tune YOLOv11n on ~2000 labelled weapon images → ~75-85% recall
+#   on typical indoor frames. Load via load_threat_yolo().
+#   Weights not bundled — see load_threat_yolo() stub below.
+#
+# Current system status: demo-video validated, no formal experiment needed.
+# The LLM (Tier 3) remains the primary threat-semantic layer; YOLO threat
+# classes are supplementary metadata that help the LLM reason faster.
+THREAT_CLASSES = [
+    "gun", "pistol", "rifle", "firearm", "weapon",
+    "knife", "machete", "axe",
+    "explosive", "bomb", "grenade",
+    "suspicious package",
+]
+
+THREAT_WORLD_CONF = 0.15   # zero-shot — same as structural classes
+
+# Combined YOLO-World vocabulary (structural + threat in one set_classes call)
+STRUCTURAL_AND_THREAT_CLASSES = STRUCTURAL_CLASSES + THREAT_CLASSES
+
+# ── Threat risk mapping ───────────────────────────────────────────────────────
+# Any detected threat class → immediate hazard regardless of distance.
+THREAT_RISK_CLASSES = {
+    "gun", "pistol", "rifle", "firearm", "weapon",
+    "knife", "machete", "axe",
+    "explosive", "bomb", "grenade", "suspicious package",
+}
 
 # Legacy alias — used by some experiments that pass HAZARD_CLASSES explicitly
 HAZARD_CLASSES = [
@@ -195,13 +244,113 @@ def load_enhanced_yolo(classes: list = STRUCTURAL_CLASSES):
 
 
 # ════════════════════════════════════════════════════════════════════════════
+# THREAT DETECTION — YOLO-World vocab extension + fine-tuned YOLOv11 stub
+# ════════════════════════════════════════════════════════════════════════════
+
+def load_world_with_threats(include_structural: bool = True):
+    """
+    Load YOLO-World with THREAT_CLASSES (+ optionally STRUCTURAL_CLASSES).
+
+    Zero-shot threat detection: gun, pistol, rifle, explosive, knife, etc.
+    No training required — YOLO-World uses open-vocabulary text-image alignment.
+
+    Limitations on 320×240 ESP32 frames:
+      - Recall ~30–50% for small weapon objects (blurry at low resolution)
+      - False positive rate is non-negligible — use THREAT_WORLD_CONF=0.15
+      - Best treated as supplementary metadata for the LLM, not a hard trigger
+      - The LLM (Tier 3) is still the authoritative threat classifier
+
+    Validated: demo video (not a formal experiment).
+    The LLM correctly identifies "person pointing gun" from image alone even
+    when YOLO-World misses the weapon — confirming Tier 3 cognitive authority.
+
+    Returns (model, "yolo-world-threat") or (None, "unavailable").
+    """
+    classes = (STRUCTURAL_AND_THREAT_CLASSES if include_structural
+               else THREAT_CLASSES)
+    repo_root = Path(__file__).parent.parent
+    world_candidates = [
+        repo_root / "yolov8s-worldv2.pt",
+        repo_root / "Image verbalization experiments" / "yolov8s-worldv2.pt",
+        Path("yolov8s-worldv2.pt"),
+    ]
+    world_pt = next((p for p in world_candidates if p.exists()), None)
+
+    try:
+        from ultralytics import YOLOWorld
+        if world_pt:
+            model = YOLOWorld(str(world_pt))
+        else:
+            model = YOLOWorld("yolov8s-worldv2.pt")
+        model.set_classes(classes)
+        print(f"[YOLO-World+Threat] Loaded — {len(classes)} classes "
+              f"({len(STRUCTURAL_CLASSES)} structural + {len(THREAT_CLASSES)} threat)")
+        return model, "yolo-world-threat"
+    except Exception as e:
+        print(f"[YOLO-World+Threat] Failed: {e}")
+        return None, "unavailable"
+
+
+def load_threat_yolo(weights_path: str = None):
+    """
+    Load a fine-tuned YOLOv11n model for weapon/threat detection.
+
+    This is higher recall than zero-shot YOLO-World on low-res frames.
+    Fine-tune recipe (not done in this work — listed for future extension):
+      Dataset : Open Images V7 — classes: Firearm, Gun, Handgun, Rifle, Knife
+      Base    : yolo11n.pt (same COCO backbone as primary detector)
+      Training: ~50 epochs, ~2000 labelled images → expect ~75–85% recall
+      Tool    : ultralytics train data=openimages_weapons.yaml model=yolo11n.pt
+
+    Current status: WEIGHTS NOT AVAILABLE — function returns (None, "unavailable").
+    The LLM (Tier 3) serves as the primary threat classifier until weights exist.
+    Validated via demo video: LLM correctly describes "gun pointed at camera"
+    from raw image without any YOLO assistance.
+
+    Args:
+        weights_path: path to fine-tuned .pt file. If None, returns unavailable.
+
+    Returns (model, "yolo11-threat") or (None, "unavailable").
+    """
+    if weights_path is None:
+        print("[YOLOv11-Threat] No weights path provided — fine-tuned model unavailable.")
+        print("                 LLM (Tier 3) handles threat classification from image.")
+        return None, "unavailable"
+
+    try:
+        from ultralytics import YOLO
+        model = YOLO(weights_path)
+        print(f"[YOLOv11-Threat] Fine-tuned model loaded from {weights_path}")
+        return model, "yolo11-threat"
+    except Exception as e:
+        print(f"[YOLOv11-Threat] Load failed: {e}")
+        return None, "unavailable"
+
+
+def is_threat_detection(label: str) -> bool:
+    """Return True if the detection label is a security threat class."""
+    return label.lower().strip() in THREAT_RISK_CLASSES
+
+
+# ════════════════════════════════════════════════════════════════════════════
 # TECHNIQUE 3: CLIP scene hazard screener
 # ════════════════════════════════════════════════════════════════════════════
 
 def load_clip():
     """
     Open-CLIP ViT-B-32 (laion2b) for zero-shot scene hazard screening.
-    Catches what YOLO cannot: blocked lens, total darkness, novel hazards.
+
+    *** EXPERIMENTAL USE ONLY — not in production Tier 2 pipeline ***
+    Retained for V-series experiments (V1, V2, V4, V5) which compare CLIP
+    against LLM baselines. CLIP was found to be unreliable on 320×240
+    ESP32 frames: all 5 scene-label scores within ±0.013 of the 0.200
+    uniform baseline — effectively random. This failure result motivates
+    the LLM cognitive authority claim in the thesis.
+
+    In production, call enhanced_yolo_infer(use_clip=False) and pass
+    clip_model=None, preprocess=None, tokenizer=None.
+    Ref: [45] Lugaresi et al. 2019 (MediaPipe) — EfficientDet-Lite0 replaces
+         CLIP as the local person-detection emergency trigger.
     """
     try:
         import open_clip
@@ -396,6 +545,7 @@ def enhanced_yolo_infer(
     jpeg: bytes,
     coco_model=None,      # YOLOv11n COCO model (person + 79 classes)  [NEW]
     depth_pipe=None,      # DepthAnything v2 Metric Indoor pipeline     [NEW]
+    use_clip: bool = False,  # CLIP disabled by default in production pipeline
 ) -> dict:
     """
     Full enhanced Tier 2 pipeline (Techniques 1–5).
@@ -403,16 +553,26 @@ def enhanced_yolo_infer(
     Pipeline:
         Frame → CLAHE → {YOLOv11n COCO, YOLO-World} → merge dets
                       → DA v2 Metric depth → sample depth per bbox
-                      → CLIP scene screen
+                      → CLIP scene screen (experimental only, disabled by default)
         → metadata dict → LLM (Tier 3, cognitive authority)
+
+    Production use (use_clip=False, the default):
+        CLIP is bypassed; clip_label="disabled", clip_risk="disabled", clip_conf=0.0.
+        Pass clip_model=None, preprocess=None, tokenizer=None.
+
+    Experimental use (use_clip=True):
+        CLIP runs and its fields are populated. Used for V-series experiments
+        (V1, V2, V4, V5) that compare CLIP against LLM-only baselines.
+        Note: CLIP proved unreliable on 320×240 ESP32 frames (scores within
+        ±0.013 of the 0.200 uniform-baseline). Kept for thesis evidence.
 
     Returns dict:
         yolo_meta  : formatted detection string for LLM prompt
         yolo_ms    : YOLO inference time (ms)
         yolo_type  : model identifier string
-        clip_label : CLIP scene classification
-        clip_risk  : inferred risk from CLIP
-        clip_conf  : CLIP confidence
+        clip_label : CLIP scene classification (or "disabled" if use_clip=False)
+        clip_risk  : inferred risk from CLIP (or "disabled" if use_clip=False)
+        clip_conf  : CLIP confidence (or 0.0 if use_clip=False)
         img_h      : image height (for downstream use)
         depth_available : bool — True if DA v2 ran, False if heuristic used
     """
@@ -420,10 +580,18 @@ def enhanced_yolo_infer(
     img     = apply_clahe(img_raw)    # Technique 2: CLAHE
     h       = img.shape[0]
 
-    # ── Technique 3: CLIP scene screen ──────────────────────────────────────
-    clip_label, clip_risk, clip_conf = clip_screen(
-        clip_model, preprocess, tokenizer, img
-    )
+    # ── Technique 3: CLIP scene screen (experimental only) ──────────────────
+    # CLIP is disabled in production (use_clip=False by default).
+    # Results from CLIP experiments show scores within ±0.013 of the 0.200
+    # uniform baseline on 320×240 ESP32 frames — effectively random.
+    # These results are retained as thesis evidence motivating the LLM layer.
+    # Ref: [45] Lugaresi et al. 2019; V-series experiment files.
+    if use_clip:
+        clip_label, clip_risk, clip_conf = clip_screen(
+            clip_model, preprocess, tokenizer, img
+        )
+    else:
+        clip_label, clip_risk, clip_conf = "disabled", "disabled", 0.0
 
     # ── Technique 5: Depth estimation (runs once per frame) ─────────────────
     t_depth_start = time.perf_counter()
@@ -438,7 +606,7 @@ def enhanced_yolo_infer(
             "yolo_meta":       "YOLO detections: none",
             "yolo_ms":         round(abs(np.random.normal(20, 5)), 2),
             "yolo_type":       yolo_type,
-            "clip_label":      clip_label,
+            "clip_label":      clip_label,   # "disabled" if use_clip=False
             "clip_risk":       clip_risk,
             "clip_conf":       clip_conf,
             "img_h":           h,
@@ -511,11 +679,24 @@ def enhanced_rule_risk(yolo_meta: str, clip_risk: str) -> str:
     Rule-based risk combining dual-YOLO detections and CLIP scene label.
     Used in G-series yolo_only condition.
     YOLO primary; CLIP fallback when YOLO returns none.
+
+    Threat class handling (gun, pistol, explosive, etc.):
+        Any detection from THREAT_RISK_CLASSES → immediate hazard, no distance check.
+        YOLO-World zero-shot recall for threats on 320×240 is ~30–50%; the LLM
+        (Tier 3) is the primary threat classifier — this rule is a best-effort
+        supplementary signal. Validated via demo video.
     """
     meta = yolo_meta.lower()
 
     if "none" not in meta:
-        # Hard stop structural hazards
+        # ── Threat classes → immediate hazard (no distance required) ─────────
+        # gun, pistol, rifle, firearm, weapon, knife, explosive, bomb, grenade…
+        for cls in THREAT_RISK_CLASSES:
+            if cls in meta:
+                print(f"[rule_risk] Threat detected: '{cls}' → hazard")
+                return "hazard"
+
+        # ── Hard stop structural hazards ──────────────────────────────────────
         for cls in ["pillar", "column", "barrier", "steps", "wire", "cable", "staircase"]:
             if cls in meta:
                 return "hazard"
@@ -523,6 +704,8 @@ def enhanced_rule_risk(yolo_meta: str, clip_risk: str) -> str:
             m = re.search(r'wall[^;]*conf=([\d.]+)', meta)
             if m and float(m.group(1)) > 0.40:
                 return "hazard"
+
+        # ── Person proximity check ────────────────────────────────────────────
         if "person" in meta:
             # Use DA v2 depth if available, else heuristic
             m_depth = re.search(r'person[^;]*depth_m=([\d.]+)m', meta)
@@ -535,6 +718,7 @@ def enhanced_rule_risk(yolo_meta: str, clip_risk: str) -> str:
             if dist is not None and dist < 1.0:
                 return "hazard"
             return "caution"
+
         # Navigable openings (door, window) are safe
         detected = re.findall(r'(\w+)\s*\(conf=', meta)
         if detected and all(d in SAFE_DETECTION_CLASSES for d in detected):
@@ -573,7 +757,56 @@ LLM_ONLY_PROMPT = (
     "Pilot suggested action: <command>"
 )
 
+# ── Production prompt (no CLIP — default) ───────────────────────────────────
+# Use this for all production runs. CLIP is removed from Tier 2 because it
+# produced near-random scores on 320×240 ESP32 frames (±0.013 of 0.200 baseline).
+# Fill only: {yolo_meta}
 COMBINED_PROMPT_TEMPLATE = (
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "operating at ~1m altitude indoors.\n\n"
+    "YOUR ROLE IN THE ARCHITECTURE:\n"
+    "  Tier 1 (reflexes)  : PID controller — motor corrections at 4 kHz.\n"
+    "  Tier 2 (perception): YOLOv11n (COCO) + YOLO-World + DepthAnything v2 —\n"
+    "                       fast object detection with metric depth; passes metadata to you.\n"
+    "                       Emergency triggers: robust_local_detector (14 ms, no API).\n"
+    "  Tier 3 (YOU)       : Cognitive reasoning — analyse the image, form your own\n"
+    "                       judgment, make the final safety decision.\n\n"
+    "YOUR PRIMARY INPUT IS THE CAMERA IMAGE. Look at it directly and reason from it.\n\n"
+    "Supplementary sensor data from Tier 2 (advisory only — you are the authority):\n"
+    "  {yolo_meta}\n"
+    "  (depth_m = DepthAnything v2 Metric Indoor, MAE≈7cm; est_dist = geometric fallback)\n\n"
+    "SENSOR INTERPRETATION RULES:\n"
+    "- depth_m values are from DepthAnything v2 Metric Indoor (real metres, MAE ≈7 cm).\n"
+    "  If unavailable, est_dist~Xm is a bounding-box heuristic — treat with lower trust.\n"
+    "- YOLO can MISS objects — if you see something the sensors did not detect, it exists.\n"
+    "  Report it and classify based on what you see.\n"
+    "- src=COCO means detected by trained YOLOv11n (high confidence).\n"
+    "  src=YOLO-W means zero-shot YOLO-World (structural class, lower recall).\n"
+    "- If YOLO detections = none: do NOT assume safe. Look at the image yourself.\n"
+    "- Local detector (Tier 1.5) can false-positive or miss — treat as a hint, not a command.\n"
+    "  YOUR VISUAL ANALYSIS OF THE IMAGE overrides all sensor data including local detector.\n\n"
+    "RISK CLASSIFICATION (your visual analysis is primary evidence):\n"
+    "  hazard : Person very close (<1m) OR obstacle directly blocks ~1m flight path\n"
+    "           within ~2m OR lens fully covered. → Stop immediately.\n"
+    "  caution: Dim/dark scene (not fully black), OR clutter at floor/table level not\n"
+    "           blocking 1m corridor. → Slow down or hover.\n"
+    "  safe   : Flight path at ~1m is clear. Open rooms, navigable doors/windows,\n"
+    "           objects on tables/shelves, persons visually >3m away. → Proceed.\n\n"
+    "Pilot action options:\n"
+    "  HOVER | PITCH_FORWARD | PITCH_BACK | ROLL_LEFT | ROLL_RIGHT |\n"
+    "  YAW_LEFT | YAW_RIGHT | ASCEND | DESCEND | LAND\n\n"
+    "RESPOND in this exact format:\n"
+    "Description: <1-2 sentences — your own visual analysis of the image>\n"
+    "Sensor note: <discrepancy between image and sensors (YOLO/local detector), or 'consistent'>\n"
+    "Proximity: <your visual estimate of closest object/person, cross-check with depth_m>\n"
+    "Risk: <safe|caution|hazard>\n"
+    "Pilot suggested action: <command>"
+)
+
+# ── Experimental prompt (CLIP included) — for V-series experiments only ──────
+# Fill: {yolo_meta}, {clip_label}, {clip_conf}, {clip_risk}
+# Use enhanced_yolo_infer(use_clip=True) to populate these fields.
+COMBINED_PROMPT_TEMPLATE_CLIP = (
     "You are the cognitive reasoning layer of a three-tier drone safety system "
     "operating at ~1m altitude indoors.\n\n"
     "YOUR ROLE IN THE ARCHITECTURE:\n"
@@ -595,6 +828,9 @@ COMBINED_PROMPT_TEMPLATE = (
     "- src=COCO means detected by trained YOLOv11n (high confidence).\n"
     "  src=YOLO-W means zero-shot YOLO-World (structural class, lower recall).\n"
     "- CLIP describes scene type — do not let it override your corridor-level judgment.\n"
+    "  Note: CLIP was found unreliable on 320×240 frames (scores ≈ uniform baseline).\n"
+    "- Local detector (Tier 1.5) can false-positive or miss — treat as a hint, not a command.\n"
+    "  YOUR VISUAL ANALYSIS OF THE IMAGE overrides all sensor data including local detector.\n"
     "- If YOLO detections = none: do NOT assume safe. Look at the image yourself.\n\n"
     "RISK CLASSIFICATION (your visual analysis is primary evidence):\n"
     "  hazard : Person very close (<1m) OR obstacle directly blocks ~1m flight path\n"
@@ -608,7 +844,7 @@ COMBINED_PROMPT_TEMPLATE = (
     "  YAW_LEFT | YAW_RIGHT | ASCEND | DESCEND | LAND\n\n"
     "RESPOND in this exact format:\n"
     "Description: <1-2 sentences — your own visual analysis of the image>\n"
-    "Sensor note: <any discrepancy between image and YOLO/CLIP, or 'consistent'>\n"
+    "Sensor note: <discrepancy between image and sensors (YOLO/CLIP/local detector), or 'consistent'>\n"
     "Proximity: <your visual estimate of closest object/person, cross-check with depth_m>\n"
     "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <command>"

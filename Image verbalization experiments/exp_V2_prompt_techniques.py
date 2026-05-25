@@ -28,6 +28,7 @@ Output: results/V2_runs_<timestamp>.csv, results/V2_summary_<timestamp>.csv
 
 import sys, time, pathlib, datetime
 import numpy as np
+import cv2
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 VIZ_DIR   = pathlib.Path(__file__).parent
@@ -40,77 +41,102 @@ from verbalization_utils import (
     bootstrap_ci, wilson_ci, write_csv, RESULTS_DIR
 )
 from enhanced_yolo_pipeline import (
-    load_enhanced_yolo, load_clip, enhanced_yolo_infer
+    load_enhanced_yolo, load_clip, load_coco_yolo, load_depth_anything,
+    enhanced_yolo_infer
 )
+from robust_local_detector import load_mediapipe_detector, detect_hazard
 
 N_RUNS  = 5
 MODELS  = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
 
-# ── Prompt technique bodies (injected after YOLO-World + CLIP metadata header) ─
+# ── Shared cognitive framing — prepended to every technique ──────────────────
+# LLM is the cognitive reasoning layer. Image is primary. YOLO/CLIP are supplementary.
+COGNITIVE_PREAMBLE = (
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors.\n"
+    "YOUR PRIMARY INPUT IS THE CAMERA IMAGE — look at it directly and reason from it.\n"
+    "The YOLO-World and CLIP data above are supplementary sensor hints: YOLO measures "
+    "distances and detects specific classes; CLIP labels the overall scene. "
+    "Both can be wrong or incomplete. If you see something in the image that YOLO "
+    "did not detect, it still exists — use it. If the image contradicts sensor data, "
+    "trust the image and note the discrepancy.\n\n"
+    "Risk definitions (judge from what YOU see, not just sensor output):\n"
+    "  hazard : Person very close (<1m) OR obstacle directly in ~1m flight path "
+    "within 2m OR lens fully covered. Stop immediately.\n"
+    "  caution: Dim/dark scene (not fully black), OR background clutter at floor/"
+    "table level not blocking the 1m corridor. Slow down or hover.\n"
+    "  safe   : Flight path at ~1m is clear — open space, navigable door/window, "
+    "objects on tables/shelves (not at drone altitude), persons visually >3m away.\n\n"
+)
+
+# ── Prompt technique bodies (injected after cognitive preamble + sensor header) ─
 PROMPTS = {
 
 "zero_shot": (
-    "Describe what you see in this drone camera image. "
-    "Is there anything dangerous or blocking the path?\n"
-    "End with: Risk: <safe|caution|hazard>\n"
+    "Look at this image. Describe what you see and classify the risk.\n"
+    "End with:\n"
+    "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
 ),
 
 "few_shot_3": (
-    "You are a drone camera safety monitor. Here are 3 examples of good responses:\n\n"
+    "Here are 3 examples of correct cognitive analysis:\n\n"
     "Example 1:\n"
-    "Image: empty corridor, YOLO detections: none\n"
-    "Response: Clear corridor with no obstacles. Safe to proceed. "
+    "Image: empty corridor ahead, YOLO: none detected\n"
+    "Analysis: I see a clear open corridor with no obstacles at drone altitude. "
+    "YOLO found nothing — consistent with what I see. "
     "Risk: safe. Pilot suggested action: PITCH_FORWARD\n\n"
     "Example 2:\n"
-    "Image: wall 20cm away, YOLO detections: wall (conf=0.82, est_dist~0.2m)\n"
-    "Response: Wall extremely close, immediate collision risk. "
+    "Image: wall fills the frame, YOLO: wall (conf=0.82, est_dist~0.2m)\n"
+    "Analysis: Solid wall extremely close, occupies the full frame. "
+    "YOLO distance estimate is consistent with what I see — immediate collision risk. "
     "Risk: hazard. Pilot suggested action: PITCH_BACK\n\n"
     "Example 3:\n"
-    "Image: dim room with boxes, YOLO detections: none\n"
-    "Response: Low-light environment, reduced visibility. "
+    "Image: dim room, YOLO: none detected\n"
+    "Analysis: Room is dark with poor visibility. YOLO found nothing but the dim "
+    "lighting itself is a caution condition regardless of detections. "
     "Risk: caution. Pilot suggested action: HOVER\n\n"
-    "Now describe this new image using the YOLO-World detections and CLIP label above:\n"
-    "What do you see? Estimate proximity. Classify as safe | caution | hazard.\n"
-    "End with: Risk: <safe|caution|hazard>\n"
+    "Now analyse this image. Use your visual judgment first, then cross-check sensor data.\n"
+    "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
 ),
 
 "cot": (
-    "Look at this drone camera image and think step by step:\n"
-    "Step 1: What objects or people are visible? Use the YOLO-World detections above.\n"
-    "Step 2: How close are they to the camera? Cross-check YOLO est_dist with visual size.\n"
-    "Step 3: Does the CLIP scene label match the visual content?\n"
-    "Step 4: Is the lighting adequate for safe navigation?\n"
-    "Step 5: Based on steps 1-4, what is the overall risk level?\n\n"
-    "Answer each step, then conclude with:\n"
+    "Analyse this image step by step using your visual reasoning:\n"
+    "Step 1: What do YOU see in the image? Describe objects, people, lighting, space.\n"
+    "Step 2: How close are any objects or people — judge from visual size and position "
+    "in the frame, not just YOLO est_dist.\n"
+    "Step 3: Does YOLO/CLIP confirm or contradict what you see? Note any discrepancy.\n"
+    "Step 4: Is the flight path at ~1m altitude actually clear based on what you see?\n"
+    "Step 5: What is the overall risk level and why?\n\n"
+    "Conclude with:\n"
     "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
 ),
 
 "structured": (
-    "Analyse this drone camera image and YOLO-World metadata above. "
-    "Respond ONLY with valid JSON in this exact format:\n"
+    "Analyse this image using your visual reasoning, then output ONLY valid JSON:\n"
     "{\n"
-    '  "objects_visible": ["list", "of", "objects"],\n'
-    '  "proximity_estimate": "distance description",\n'
+    '  "what_i_see": "your direct visual description of the image",\n'
+    '  "objects_detected_visually": ["list from YOUR observation"],\n'
+    '  "sensor_agreement": "consistent|yolo_missed_X|image_contradicts_sensor",\n'
+    '  "proximity_visual_estimate": "your distance judgment from image",\n'
     '  "lighting_quality": "good|dim|dark",\n'
-    '  "clip_scene_match": true or false,\n'
+    '  "flight_path_clear": true or false,\n'
     '  "risk_level": "safe|caution|hazard",\n'
-    '  "description": "one sentence summary",\n'
     '  "recommended_action": "HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND"\n'
     "}\n"
-    "Respond with JSON only, no other text."
+    "JSON only, no other text."
 ),
 
 "react": (
-    "You are a drone vision agent. Use the Reason-Observe-Act framework:\n\n"
-    "REASON: What question do I need to answer? "
-    "(Is this scene safe for drone navigation at ~1m altitude?)\n\n"
-    "OBSERVE: Look carefully at the image and the YOLO-World + CLIP metadata above. "
-    "Describe exactly what you see — objects, people, proximity, lighting, obstructions.\n\n"
-    "ACT: Based on your observation, classify the scene and state what the drone should do.\n"
-    "Final answer must include:\n"
+    "Use the Reason-Observe-Act framework as a cognitive agent:\n\n"
+    "REASON: I need to determine if this scene is safe for drone navigation at ~1m altitude.\n\n"
+    "OBSERVE: Look at the image directly. Describe what you see — space, lighting, people, "
+    "obstacles, and how the sensor data (YOLO/CLIP above) compares to your visual analysis. "
+    "If YOLO missed something visible, note it.\n\n"
+    "ACT: Based on YOUR visual observation (with sensor data as a reference), "
+    "give your final risk classification and pilot action.\n"
     "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <HOVER|PITCH_FORWARD|PITCH_BACK|ROLL_LEFT|ROLL_RIGHT|ASCEND|DESCEND|LAND>"
 ),
@@ -120,13 +146,15 @@ TECHNIQUES = list(PROMPTS.keys())
 
 
 def build_enhanced_prompt(tier2: dict, technique_body: str) -> str:
-    """Prepend YOLO-World + CLIP metadata header to the technique prompt."""
-    header = (
-        f"YOLO-World detections: {tier2['yolo_meta']}\n"
-        f"CLIP scene label: {tier2['clip_label']} "
+    """Build prompt: cognitive preamble → sensor metadata → technique body.
+    Cognitive framing comes FIRST so LLM reads its role before seeing sensor data."""
+    sensor_header = (
+        f"Supplementary sensor data (advisory — verify against the image):\n"
+        f"  YOLO-World: {tier2['yolo_meta']}\n"
+        f"  CLIP: {tier2['clip_label']} "
         f"(conf={tier2['clip_conf']:.3f}, risk={tier2['clip_risk']})\n\n"
     )
-    return header + technique_body
+    return COGNITIVE_PREAMBLE + sensor_header + technique_body
 
 
 def parse_risk(reply: str, technique: str) -> str | None:
@@ -155,9 +183,15 @@ def main():
     print(f"Scenes={len(SCENES)}  N={N_RUNS}  → {total} trials")
     print("=" * 65)
 
-    print("\nLoading enhanced YOLO tier…")
+    print("\nLoading MediaPipe EfficientDet-Lite0 (Tier 1.5 — local emergency detector)…")
+    mp_detector, mp_type = load_mediapipe_detector()
+    print("Loading YOLO-World (structural hazards)…")
     yolo_model, yolo_type = load_enhanced_yolo()
-    print("Loading CLIP scene screener…")
+    print("Loading YOLOv11n COCO (person + 80 classes)…")
+    coco_model, _ = load_coco_yolo()
+    print("Loading DepthAnything v2 Metric Indoor…")
+    depth_pipe, _ = load_depth_anything()
+    print("Loading CLIP scene screener (V-series — retained for thesis evidence)…")
     clip_model, clip_preprocess, clip_tokenizer = load_clip()
 
     all_rows = []
@@ -166,11 +200,23 @@ def main():
         print(f"\n── Scene {scene['id']:02d}: {scene['label']}  (truth={scene['truth']}) ──")
 
         for run in range(1, N_RUNS + 1):
-            jpeg  = get_saved_frame(scene["label"])
+            jpeg     = get_saved_frame(scene["label"])
+            img_bgr  = cv2.imdecode(np.frombuffer(jpeg, np.uint8), cv2.IMREAD_COLOR)
+            t_local  = time.perf_counter()
+            local_r  = detect_hazard(img_bgr, depth_map=None,
+                                     mp_detector=mp_detector, mp_type=mp_type)
+            local_ms = round((time.perf_counter() - t_local) * 1000.0, 2)
+
             tier2 = enhanced_yolo_infer(yolo_model, yolo_type,
                                         clip_model, clip_preprocess,
-                                        clip_tokenizer, jpeg)
-            print(f"   run={run}  yolo={tier2['yolo_meta'][:60]}  clip={tier2['clip_label']}")
+                                        clip_tokenizer, jpeg,
+                                        coco_model=coco_model,
+                                        depth_pipe=depth_pipe)
+            tier2["yolo_meta"] += (
+                f"\n  Local detector (Tier 1.5 — MediaPipe EfficientDet-Lite0, advisory — image overrides): "
+                f"{local_r['metadata']}"
+            )
+            print(f"   run={run}  local={local_ms:.0f}ms({local_r['risk']})  yolo={tier2['yolo_meta'][:50]}  clip={tier2['clip_label']}")
 
             for tech, technique_body in PROMPTS.items():
                 prompt = build_enhanced_prompt(tier2, technique_body)
@@ -182,6 +228,11 @@ def main():
                     scores   = score_verbalization(res["reply"], scene["truth"])
                     s3       = int(detected == scene["truth"]) if detected else 0
 
+                    _action  = (scores["detected_action"] or "").upper()
+                    _truth   = scene["truth"]
+                    _danger  = int(_truth == "hazard" and _action == "PITCH_FORWARD")
+                    _safe    = int(not _danger)
+
                     row = {
                         "scene_id":        scene["id"],
                         "scene_label":     scene["label"],
@@ -189,6 +240,8 @@ def main():
                         "model":           model,
                         "technique":       tech,
                         "run":             run,
+                        "local_ms":        local_ms,
+                        "local_risk":      local_r["risk"],
                         "quality_score":   (scores["s1_scene"] + scores["s2_proximity"]
                                             + s3 + scores["s4_length"] + scores["s5_pilot_action"]),
                         "s1_scene":        scores["s1_scene"],
@@ -198,6 +251,8 @@ def main():
                         "s5_pilot_action": scores["s5_pilot_action"],
                         "detected_risk":   detected or "",
                         "detected_action": scores["detected_action"] or "",
+                        "action_safe":     _safe,
+                        "action_dangerous": _danger,
                         "word_count":      scores["word_count"],
                         "yolo_meta":       tier2["yolo_meta"],
                         "clip_label":      tier2["clip_label"],
@@ -206,6 +261,7 @@ def main():
                         "input_tokens":    res["input_tokens"],
                         "output_tokens":   res["output_tokens"],
                         "cost_usd":        res["cost_usd"],
+                        "reply":           res["reply"],
                         "error":           res["error"][:80] if res["error"] else "",
                     }
                     all_rows.append(row)
@@ -216,10 +272,12 @@ def main():
 
     # ── Save runs CSV
     fields = ["scene_id","scene_label","truth","model","technique","run",
+              "local_ms","local_risk",
               "quality_score","s1_scene","s2_proximity","s3_risk","s4_length",
-              "s5_pilot_action","detected_risk","detected_action","word_count",
+              "s5_pilot_action","detected_risk","detected_action",
+              "action_safe","action_dangerous","word_count",
               "yolo_meta","clip_label","clip_risk",
-              "latency_ms","input_tokens","output_tokens","cost_usd","error"]
+              "latency_ms","input_tokens","output_tokens","cost_usd","reply","error"]
     runs_csv = RESULTS_DIR / f"V2_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)
 

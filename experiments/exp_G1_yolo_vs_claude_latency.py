@@ -47,28 +47,34 @@ N_RUNS   = 5
 MODELS   = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
 
 LLM_ONLY_PROMPT = (
-    "You are an AI copilot for a drone.\n"
-    "Using the image only (no sensor metadata available):\n"
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors.\n"
+    "No sensor metadata available — your ONLY input is the camera image. "
+    "Look at it directly and reason from what you see.\n\n"
     "1. Describe what you see (1-2 sentences).\n"
-    "2. Estimate proximity of any object or person to the camera.\n"
+    "2. Estimate proximity of any object or person from visual evidence.\n"
     "3. Classify the scene as exactly one of: safe | caution | hazard\n\n"
     "Format your response as:\n"
     "Description: <text>\n"
-    "Proximity: <estimate>\n"
+    "Proximity: <your visual estimate>\n"
     "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <PROCEED|SLOW_DOWN|STOP|LAND|HOLD>"
 )
 
 COMBINED_PROMPT = (
-    "You are an AI copilot for a drone. "
-    "The YOLO metadata above shows what the onboard detector found in this frame.\n"
-    "Using both the metadata and the image:\n"
+    "You are the cognitive reasoning layer of a three-tier drone safety system "
+    "flying at ~1m altitude indoors.\n"
+    "YOUR PRIMARY INPUT IS THE CAMERA IMAGE — look at it directly.\n"
+    "The YOLO sensor metadata above is supplementary — it can miss objects or "
+    "give imprecise distances. If you see something YOLO did not detect, it exists. "
+    "If the image contradicts YOLO, trust the image.\n\n"
     "1. Describe what you see (1-2 sentences).\n"
-    "2. Estimate proximity of any object or person to the camera.\n"
+    "2. Estimate proximity of any object or person from visual evidence "
+    "(cross-check with YOLO if helpful).\n"
     "3. Classify the scene as exactly one of: safe | caution | hazard\n\n"
     "Format your response as:\n"
     "Description: <text>\n"
-    "Proximity: <estimate>\n"
+    "Proximity: <your visual estimate>\n"
     "Risk: <safe|caution|hazard>\n"
     "Pilot suggested action: <PROCEED|SLOW_DOWN|STOP|LAND|HOLD>"
 )
