@@ -721,8 +721,8 @@ def plot_altitude_mean_std(wf_rows: list[dict], out_dir: pathlib.Path, ts: str):
                 d = _extract_run_data(orch_rows, run)
                 if d["actual"]:
                     all_actual.append([p["actual_z"] for p in d["actual"]])
-                if d["drifted"]:
-                    all_drifted.append([p["drifted_z"] for p in d["drifted"]])
+                if d["imu_only"]:
+                    all_drifted.append([p["drifted_z"] for p in d["imu_only"]])
 
             if not all_actual:
                 continue
@@ -791,10 +791,11 @@ def plot_waypoint_map(wf_rows: list[dict], out_dir: pathlib.Path, ts: str):
             ay   = [p["actual_y"] for p in d["actual"]]
             ax.plot(ax_x, ay, "-", color=color, linewidth=2.0, alpha=0.85, zorder=4)
 
-            # Drifted path
-            dx_x = [p["drifted_x"] for p in d["drifted"]]
-            dy_y = [p["drifted_y"] for p in d["drifted"]]
-            ax.plot(dx_x, dy_y, ":", color=color, linewidth=1.5, alpha=0.7, zorder=3)
+            # Drifted path (IMU-only worst case)
+            dx_x = [p["drifted_x"] for p in d["imu_only"]]
+            dy_y = [p["drifted_y"] for p in d["imu_only"]]
+            if dx_x:
+                ax.plot(dx_x, dy_y, ":", color=color, linewidth=1.5, alpha=0.7, zorder=3)
 
             # Commanded waypoints (navigate_to_waypoint only)
             nav_pts = [p for p in d["commanded"]
