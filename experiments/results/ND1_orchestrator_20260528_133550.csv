@@ -1,0 +1,5 @@
+orchestrator,overall_acc,acc_lo,acc_hi,tool_call_rate,mean_pipeline_ms,mean_total_cost_usd,total_cost_usd,n_runs
+claude,0.0,0.0,0.0876,1.0,263.5,0.044255,1.7702,40
+gpt4o,0.0,0.0,0.0876,1.0,249.5,0.02452,0.9808,40
+gpt4o_mini,0.0,0.0,0.0876,1.0,252.1,0.001583,0.0633,40
+gemini,0.0,0.0,0.0876,1.0,246.8,0.000425,0.017,40

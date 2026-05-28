@@ -183,6 +183,7 @@ def main():
                         "risk_correct":  scores["s3_risk"],
                         "detected_risk": scores["detected_risk"] or "",
                         "quality_score": scores["quality_score"],
+                        "reply":         res["reply"],
                         "latency_ms":    res["latency_ms"],
                         "input_tokens":  res["input_tokens"],
                         "output_tokens": res["output_tokens"],
@@ -203,7 +204,7 @@ def main():
     run_fields = ["condition","model","scene_label","truth","run",
                   "local_ms","local_risk","yolo_ms",
                   "clip_label","clip_conf","clip_risk","clip_correct",
-                  "yolo_meta","risk_correct","detected_risk","quality_score",
+                  "yolo_meta","risk_correct","detected_risk","quality_score","reply",
                   "latency_ms","input_tokens","output_tokens","cost_usd","error"]
     runs_csv = RESULTS_DIR / f"V_clip_ablation_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, run_fields)

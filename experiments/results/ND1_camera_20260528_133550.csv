@@ -1,0 +1,161 @@
+run,call_num,context,mp_risk,mp_full_response,mp_ms,yolo_full_response,yolo_ms,total_pipeline_ms,error,orchestrator,scene_label,truth
+1,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,41.3,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",352.9,394.2,,claude,person_near,hazard
+2,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,37.3,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",205.8,243.1,,claude,person_near,hazard
+3,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,27.6,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",251.6,279.2,,claude,person_near,hazard
+4,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,29.6,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",212.9,242.5,,claude,person_near,hazard
+5,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,26.6,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",217.1,243.7,,claude,person_near,hazard
+1,0,patrol,hazard,no person detected; risk=hazard,35.3,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",215.6,250.9,,claude,wall_close,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,35.2,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",227.4,262.6,,claude,wall_close,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,39.5,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",228.8,268.3,,claude,wall_close,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,30.6,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",221.0,251.6,,claude,wall_close,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,33.1,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",212.3,245.4,,claude,wall_close,hazard
+1,0,patrol,safe,no person detected; risk=safe,35.5,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",224.7,260.2,,claude,object_table,caution
+2,0,patrol,safe,no person detected; risk=safe,31.7,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",219.6,251.3,,claude,object_table,caution
+3,0,patrol,safe,no person detected; risk=safe,34.2,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",212.0,246.2,,claude,object_table,caution
+4,0,patrol,safe,no person detected; risk=safe,35.0,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",226.4,261.4,,claude,object_table,caution
+5,0,patrol,safe,no person detected; risk=safe,37.8,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",216.2,254.0,,claude,object_table,caution
+1,0,patrol,safe,no person detected; risk=safe,34.7,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",234.4,269.1,,claude,dim_light,caution
+2,0,patrol,safe,no person detected; risk=safe,36.9,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",231.0,267.9,,claude,dim_light,caution
+3,0,patrol,safe,no person detected; risk=safe,39.2,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",210.9,250.1,,claude,dim_light,caution
+4,0,patrol,safe,no person detected; risk=safe,37.7,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",236.4,274.1,,claude,dim_light,caution
+5,0,patrol,safe,no person detected; risk=safe,30.9,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",222.6,253.5,,claude,dim_light,caution
+1,0,patrol,safe,no person detected; risk=safe,34.9,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",224.4,259.3,,claude,cluttered,caution
+2,0,patrol,safe,no person detected; risk=safe,29.7,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",214.1,243.8,,claude,cluttered,caution
+3,0,patrol,safe,no person detected; risk=safe,37.8,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",209.8,247.6,,claude,cluttered,caution
+4,0,patrol,safe,no person detected; risk=safe,27.5,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",228.1,255.6,,claude,cluttered,caution
+5,0,patrol,safe,no person detected; risk=safe,38.5,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",210.7,249.2,,claude,cluttered,caution
+1,0,patrol,safe,no person detected; risk=safe,28.2,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",223.4,251.6,,claude,door_open,safe
+2,0,patrol,safe,no person detected; risk=safe,32.2,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",220.7,252.9,,claude,door_open,safe
+3,0,patrol,safe,no person detected; risk=safe,38.3,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",288.4,326.7,,claude,door_open,safe
+4,0,patrol,safe,no person detected; risk=safe,27.4,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",215.2,242.6,,claude,door_open,safe
+5,0,patrol,safe,no person detected; risk=safe,39.9,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",227.2,267.1,,claude,door_open,safe
+1,0,patrol,hazard,person detected; conf=0.391; risk=hazard,35.6,YOLO detections: none,232.8,268.4,,claude,person_far,caution
+2,0,patrol,hazard,person detected; conf=0.391; risk=hazard,25.3,YOLO detections: none,228.5,253.8,,claude,person_far,caution
+3,0,patrol,hazard,person detected; conf=0.391; risk=hazard,35.9,YOLO detections: none,227.5,263.4,,claude,person_far,caution
+4,0,patrol,hazard,person detected; conf=0.391; risk=hazard,37.4,YOLO detections: none,228.1,265.5,,claude,person_far,caution
+5,0,patrol,hazard,person detected; conf=0.391; risk=hazard,34.6,YOLO detections: none,232.3,266.9,,claude,person_far,caution
+1,0,patrol,hazard,no person detected; risk=hazard,38.1,YOLO detections: none,232.0,270.1,,claude,blocked_lens,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,27.4,YOLO detections: none,232.0,259.4,,claude,blocked_lens,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,36.4,YOLO detections: none,225.4,261.8,,claude,blocked_lens,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,34.4,YOLO detections: none,283.7,318.1,,claude,blocked_lens,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,36.5,YOLO detections: none,211.6,248.1,,claude,blocked_lens,hazard
+1,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,29.2,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",218.0,247.2,,gpt4o,person_near,hazard
+2,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,36.4,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",217.9,254.3,,gpt4o,person_near,hazard
+3,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,29.0,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",221.5,250.5,,gpt4o,person_near,hazard
+4,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,27.5,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",224.6,252.1,,gpt4o,person_near,hazard
+5,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,36.8,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",199.5,236.3,,gpt4o,person_near,hazard
+1,0,patrol,hazard,no person detected; risk=hazard,32.4,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",209.5,241.9,,gpt4o,wall_close,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,38.0,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",227.5,265.5,,gpt4o,wall_close,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,36.1,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",214.4,250.5,,gpt4o,wall_close,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,26.5,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",203.9,230.4,,gpt4o,wall_close,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,35.6,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",220.1,255.7,,gpt4o,wall_close,hazard
+1,0,patrol,safe,no person detected; risk=safe,38.0,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",228.8,266.8,,gpt4o,object_table,caution
+2,0,patrol,safe,no person detected; risk=safe,38.0,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",205.5,243.5,,gpt4o,object_table,caution
+3,0,patrol,safe,no person detected; risk=safe,39.1,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",202.9,242.0,,gpt4o,object_table,caution
+4,0,patrol,safe,no person detected; risk=safe,37.7,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",208.6,246.3,,gpt4o,object_table,caution
+5,0,patrol,safe,no person detected; risk=safe,30.6,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",218.5,249.1,,gpt4o,object_table,caution
+1,0,patrol,safe,no person detected; risk=safe,38.5,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",207.2,245.7,,gpt4o,dim_light,caution
+2,0,patrol,safe,no person detected; risk=safe,29.1,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",209.2,238.3,,gpt4o,dim_light,caution
+3,0,patrol,safe,no person detected; risk=safe,35.9,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",210.8,246.7,,gpt4o,dim_light,caution
+4,0,patrol,safe,no person detected; risk=safe,40.9,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",209.6,250.5,,gpt4o,dim_light,caution
+5,0,patrol,safe,no person detected; risk=safe,38.5,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",213.5,252.0,,gpt4o,dim_light,caution
+1,0,patrol,safe,no person detected; risk=safe,33.9,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",214.0,247.9,,gpt4o,cluttered,caution
+2,0,patrol,safe,no person detected; risk=safe,45.5,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",202.4,247.9,,gpt4o,cluttered,caution
+3,0,patrol,safe,no person detected; risk=safe,38.6,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",217.9,256.5,,gpt4o,cluttered,caution
+4,0,patrol,safe,no person detected; risk=safe,40.8,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",215.1,255.9,,gpt4o,cluttered,caution
+5,0,patrol,safe,no person detected; risk=safe,29.7,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",211.6,241.3,,gpt4o,cluttered,caution
+1,0,patrol,safe,no person detected; risk=safe,37.8,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",216.2,254.0,,gpt4o,door_open,safe
+2,0,patrol,safe,no person detected; risk=safe,28.6,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",194.6,223.2,,gpt4o,door_open,safe
+3,0,patrol,safe,no person detected; risk=safe,31.4,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",219.1,250.5,,gpt4o,door_open,safe
+4,0,patrol,safe,no person detected; risk=safe,29.2,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",208.3,237.5,,gpt4o,door_open,safe
+5,0,patrol,safe,no person detected; risk=safe,38.7,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",221.4,260.1,,gpt4o,door_open,safe
+1,0,patrol,hazard,person detected; conf=0.391; risk=hazard,36.0,YOLO detections: none,216.2,252.2,,gpt4o,person_far,caution
+2,0,patrol,hazard,person detected; conf=0.391; risk=hazard,31.2,YOLO detections: none,217.2,248.4,,gpt4o,person_far,caution
+3,0,patrol,hazard,person detected; conf=0.391; risk=hazard,35.0,YOLO detections: none,219.6,254.6,,gpt4o,person_far,caution
+4,0,patrol,hazard,person detected; conf=0.391; risk=hazard,38.8,YOLO detections: none,226.1,264.9,,gpt4o,person_far,caution
+5,0,patrol,hazard,person detected; conf=0.391; risk=hazard,26.5,YOLO detections: none,220.9,247.4,,gpt4o,person_far,caution
+1,0,patrol,hazard,no person detected; risk=hazard,36.4,YOLO detections: none,215.8,252.2,,gpt4o,blocked_lens,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,16.8,YOLO detections: none,215.1,231.9,,gpt4o,blocked_lens,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,38.8,YOLO detections: none,242.8,281.6,,gpt4o,blocked_lens,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,31.1,YOLO detections: none,210.2,241.3,,gpt4o,blocked_lens,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,39.3,YOLO detections: none,224.5,263.8,,gpt4o,blocked_lens,hazard
+1,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,30.0,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",224.7,254.7,,gpt4o_mini,person_near,hazard
+2,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,37.6,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",213.6,251.2,,gpt4o_mini,person_near,hazard
+3,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,39.3,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",232.0,271.3,,gpt4o_mini,person_near,hazard
+4,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,36.5,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",229.1,265.6,,gpt4o_mini,person_near,hazard
+5,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,40.1,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",218.4,258.5,,gpt4o_mini,person_near,hazard
+1,0,patrol,hazard,no person detected; risk=hazard,33.9,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",216.6,250.5,,gpt4o_mini,wall_close,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,36.6,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",255.9,292.5,,gpt4o_mini,wall_close,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,40.6,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",234.5,275.1,,gpt4o_mini,wall_close,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,30.6,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",221.2,251.8,,gpt4o_mini,wall_close,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,35.8,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",227.1,262.9,,gpt4o_mini,wall_close,hazard
+1,0,patrol,safe,no person detected; risk=safe,29.3,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",225.9,255.2,,gpt4o_mini,object_table,caution
+2,0,patrol,safe,no person detected; risk=safe,31.0,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",205.9,236.9,,gpt4o_mini,object_table,caution
+3,0,patrol,safe,no person detected; risk=safe,30.1,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",211.6,241.7,,gpt4o_mini,object_table,caution
+4,0,patrol,safe,no person detected; risk=safe,38.2,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",233.5,271.7,,gpt4o_mini,object_table,caution
+5,0,patrol,safe,no person detected; risk=safe,31.8,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",213.5,245.3,,gpt4o_mini,object_table,caution
+1,0,patrol,safe,no person detected; risk=safe,34.4,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",216.5,250.9,,gpt4o_mini,dim_light,caution
+2,0,patrol,safe,no person detected; risk=safe,29.2,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",230.2,259.4,,gpt4o_mini,dim_light,caution
+3,0,patrol,safe,no person detected; risk=safe,16.1,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",208.2,224.3,,gpt4o_mini,dim_light,caution
+4,0,patrol,safe,no person detected; risk=safe,38.4,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",215.4,253.8,,gpt4o_mini,dim_light,caution
+5,0,patrol,safe,no person detected; risk=safe,38.0,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",235.9,273.9,,gpt4o_mini,dim_light,caution
+1,0,patrol,safe,no person detected; risk=safe,35.7,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",220.3,256.0,,gpt4o_mini,cluttered,caution
+2,0,patrol,safe,no person detected; risk=safe,37.5,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",208.8,246.3,,gpt4o_mini,cluttered,caution
+3,0,patrol,safe,no person detected; risk=safe,32.7,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",204.0,236.7,,gpt4o_mini,cluttered,caution
+4,0,patrol,safe,no person detected; risk=safe,36.8,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",217.1,253.9,,gpt4o_mini,cluttered,caution
+5,0,patrol,safe,no person detected; risk=safe,36.3,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",218.3,254.6,,gpt4o_mini,cluttered,caution
+1,0,patrol,safe,no person detected; risk=safe,30.4,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",201.5,231.9,,gpt4o_mini,door_open,safe
+2,0,patrol,safe,no person detected; risk=safe,38.5,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",214.7,253.2,,gpt4o_mini,door_open,safe
+3,0,patrol,safe,no person detected; risk=safe,36.9,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",216.8,253.7,,gpt4o_mini,door_open,safe
+4,0,patrol,safe,no person detected; risk=safe,32.7,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",200.3,233.0,,gpt4o_mini,door_open,safe
+5,0,patrol,safe,no person detected; risk=safe,37.5,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",205.7,243.2,,gpt4o_mini,door_open,safe
+1,0,patrol,hazard,person detected; conf=0.391; risk=hazard,32.6,YOLO detections: none,203.1,235.7,,gpt4o_mini,person_far,caution
+2,0,patrol,hazard,person detected; conf=0.391; risk=hazard,33.2,YOLO detections: none,212.2,245.4,,gpt4o_mini,person_far,caution
+3,0,patrol,hazard,person detected; conf=0.391; risk=hazard,35.1,YOLO detections: none,217.0,252.1,,gpt4o_mini,person_far,caution
+4,0,patrol,hazard,person detected; conf=0.391; risk=hazard,36.3,YOLO detections: none,225.7,262.0,,gpt4o_mini,person_far,caution
+5,0,patrol,hazard,person detected; conf=0.391; risk=hazard,28.7,YOLO detections: none,206.0,234.7,,gpt4o_mini,person_far,caution
+1,0,patrol,hazard,no person detected; risk=hazard,38.1,YOLO detections: none,212.4,250.5,,gpt4o_mini,blocked_lens,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,35.4,YOLO detections: none,208.5,243.9,,gpt4o_mini,blocked_lens,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,29.5,YOLO detections: none,206.6,236.1,,gpt4o_mini,blocked_lens,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,37.2,YOLO detections: none,204.4,241.6,,gpt4o_mini,blocked_lens,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,38.5,YOLO detections: none,235.5,274.0,,gpt4o_mini,blocked_lens,hazard
+1,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,31.9,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",206.8,238.7,,gemini,person_near,hazard
+2,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,38.5,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",215.5,254.0,,gemini,person_near,hazard
+3,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,33.7,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",197.8,231.5,,gemini,person_near,hazard
+4,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,32.5,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",206.0,238.5,,gemini,person_near,hazard
+5,0,patrol,hazard,person detected; conf=0.455; est_dist=0.24m; risk=hazard,36.2,"YOLO detections: wall (conf=0.28, depth_m=0.45m [DA v2], src=YOLO-W, bbox=[0.3,0.7,319.0,236.4])",208.4,244.6,,gemini,person_near,hazard
+1,0,patrol,hazard,no person detected; risk=hazard,36.9,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",211.7,248.6,,gemini,wall_close,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,36.7,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",219.3,256.0,,gemini,wall_close,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,31.4,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",213.9,245.3,,gemini,wall_close,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,19.5,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",198.0,217.5,,gemini,wall_close,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,37.9,"YOLO detections: wall (conf=0.54, depth_m=2.09m [DA v2], src=YOLO-W, bbox=[0.4,0.1,319.8,239.7])",215.5,253.4,,gemini,wall_close,hazard
+1,0,patrol,safe,no person detected; risk=safe,30.6,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",228.1,258.7,,gemini,object_table,caution
+2,0,patrol,safe,no person detected; risk=safe,35.8,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",200.6,236.4,,gemini,object_table,caution
+3,0,patrol,safe,no person detected; risk=safe,36.2,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",213.3,249.5,,gemini,object_table,caution
+4,0,patrol,safe,no person detected; risk=safe,26.5,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",207.4,233.9,,gemini,object_table,caution
+5,0,patrol,safe,no person detected; risk=safe,27.2,"YOLO detections: shelf (conf=0.19, depth_m=2.53m [DA v2], src=YOLO-W, bbox=[276.2,49.1,320.0,176.3])",204.1,231.3,,gemini,object_table,caution
+1,0,patrol,safe,no person detected; risk=safe,31.9,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",219.8,251.7,,gemini,dim_light,caution
+2,0,patrol,safe,no person detected; risk=safe,18.7,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",203.1,221.8,,gemini,dim_light,caution
+3,0,patrol,safe,no person detected; risk=safe,32.4,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",216.3,248.7,,gemini,dim_light,caution
+4,0,patrol,safe,no person detected; risk=safe,35.7,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",226.0,261.7,,gemini,dim_light,caution
+5,0,patrol,safe,no person detected; risk=safe,35.8,"YOLO detections: wall (conf=0.33, depth_m=0.42m [DA v2], src=YOLO-W, bbox=[0.5,0.2,319.7,239.9])",231.7,267.5,,gemini,dim_light,caution
+1,0,patrol,safe,no person detected; risk=safe,35.4,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",206.6,242.0,,gemini,cluttered,caution
+2,0,patrol,safe,no person detected; risk=safe,26.3,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",216.7,243.0,,gemini,cluttered,caution
+3,0,patrol,safe,no person detected; risk=safe,36.6,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",217.8,254.4,,gemini,cluttered,caution
+4,0,patrol,safe,no person detected; risk=safe,36.7,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",204.7,241.4,,gemini,cluttered,caution
+5,0,patrol,safe,no person detected; risk=safe,36.1,"YOLO detections: wall (conf=0.23, depth_m=4.03m [DA v2], src=YOLO-W, bbox=[0.2,0.8,319.4,237.4])",225.3,261.4,,gemini,cluttered,caution
+1,0,patrol,safe,no person detected; risk=safe,36.0,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",207.5,243.5,,gemini,door_open,safe
+2,0,patrol,safe,no person detected; risk=safe,37.9,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",205.2,243.1,,gemini,door_open,safe
+3,0,patrol,safe,no person detected; risk=safe,38.9,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",236.4,275.3,,gemini,door_open,safe
+4,0,patrol,safe,no person detected; risk=safe,36.8,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",215.6,252.4,,gemini,door_open,safe
+5,0,patrol,safe,no person detected; risk=safe,23.8,"YOLO detections: train (conf=0.22, depth_m=3.6m [DA v2], src=COCO, bbox=[0.5,0.4,317.9,238.1]); window (conf=0.34, depth_m=3.2m [DA v2], src=YOLO-W, bbox=[0.0,120.2,16.8,149.5])",220.0,243.8,,gemini,door_open,safe
+1,0,patrol,hazard,person detected; conf=0.391; risk=hazard,35.5,YOLO detections: none,220.2,255.7,,gemini,person_far,caution
+2,0,patrol,hazard,person detected; conf=0.391; risk=hazard,36.9,YOLO detections: none,201.6,238.5,,gemini,person_far,caution
+3,0,patrol,hazard,person detected; conf=0.391; risk=hazard,37.2,YOLO detections: none,210.9,248.1,,gemini,person_far,caution
+4,0,patrol,hazard,person detected; conf=0.391; risk=hazard,36.1,YOLO detections: none,212.7,248.8,,gemini,person_far,caution
+5,0,patrol,hazard,person detected; conf=0.391; risk=hazard,36.3,YOLO detections: none,213.5,249.8,,gemini,person_far,caution
+1,0,patrol,hazard,no person detected; risk=hazard,35.9,YOLO detections: none,209.7,245.6,,gemini,blocked_lens,hazard
+2,0,patrol,hazard,no person detected; risk=hazard,23.0,YOLO detections: none,203.2,226.2,,gemini,blocked_lens,hazard
+3,0,patrol,hazard,no person detected; risk=hazard,33.1,YOLO detections: none,208.1,241.2,,gemini,blocked_lens,hazard
+4,0,patrol,hazard,no person detected; risk=hazard,36.7,YOLO detections: none,247.1,283.8,,gemini,blocked_lens,hazard
+5,0,patrol,hazard,no person detected; risk=hazard,36.5,YOLO detections: none,208.5,245.0,,gemini,blocked_lens,hazard

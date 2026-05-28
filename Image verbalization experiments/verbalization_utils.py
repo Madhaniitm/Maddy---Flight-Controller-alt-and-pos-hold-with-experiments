@@ -15,9 +15,8 @@ import os, sys, time, base64, io, math, csv
 
 # Disable MediaPipe telemetry BEFORE any mediapipe/cv2 import
 # Prevents clearcut upload attempts that cause periodic latency spikes
-os.environ["GLOG_minloglevel"]             = "3"
-os.environ["MEDIAPIPE_DISABLE_USAGE_STATS"] = "1"
-os.environ["TF_CPP_MIN_LOG_LEVEL"]         = "3"  # suppress TF/TFLITE logs too
+os.environ["GLOG_minloglevel"]   = "3"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # suppress TF/TFLITE logs too
 from pathlib import Path
 from typing import Optional
 

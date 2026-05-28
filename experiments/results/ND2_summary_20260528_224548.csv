@@ -1,0 +1,9 @@
+orchestrator,scenario,scene_label,truth,n_runs,patrol_rate,correct_rate,correct_lo,correct_hi,mean_quality,mean_s3_risk,mean_scene_calls,mean_drone_cmds,mean_pipeline_ms,mean_total_cost_usd
+claude,clear_room,door_open,CLEAR,5,0.0,0.0,0.0,0.434,3.8,0.6,2.2,8.2,213.7,0.6883
+claude,alert_room,person_near,ALERT,5,1.0,1.0,0.566,1.0,3.0,0.0,7.0,15.6,252.6,2.6302
+gpt4o,clear_room,door_open,CLEAR,5,1.0,1.0,0.566,1.0,3.8,0.6,0.8,8.0,50.7,0.3783
+gpt4o,alert_room,person_near,ALERT,5,0.4,0.8,0.376,0.964,4.0,0.2,2.0,4.0,251.2,0.2827
+gpt4o_mini,clear_room,door_open,CLEAR,5,1.0,1.0,0.566,1.0,4.0,1.0,4.0,12.0,253.3,0.039
+gpt4o_mini,alert_room,person_near,ALERT,5,0.0,1.0,0.566,1.0,0.0,0.0,18.2,17.4,252.4,0.6148
+gemini,clear_room,door_open,CLEAR,5,0.6,0.6,0.231,0.882,3.8,0.4,3.2,10.8,257.3,0.0235
+gemini,alert_room,person_near,ALERT,5,0.4,1.0,0.566,1.0,3.6,0.2,2.0,8.4,259.2,0.0237

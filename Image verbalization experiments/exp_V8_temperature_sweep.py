@@ -137,6 +137,7 @@ def main():
                         "s5_pilot_action": scores["s5_pilot_action"],
                         "detected_risk":   scores["detected_risk"] or "",
                         "word_count":      scores["word_count"],
+                        "reply":           res["reply"],
                         "latency_ms":      res["latency_ms"],
                         "input_tokens":    res["input_tokens"],
                         "output_tokens":   res["output_tokens"],
@@ -153,7 +154,7 @@ def main():
     fields = ["scene_id","scene_label","truth","model","temperature","run",
               "local_ms","local_risk",
               "quality_score","s1_scene","s2_proximity","s3_risk","s4_length",
-              "s5_pilot_action","detected_risk","word_count",
+              "s5_pilot_action","detected_risk","word_count","reply",
               "latency_ms","input_tokens","output_tokens","cost_usd","error"]
     runs_csv = RESULTS_DIR / f"V8_runs_{ts}.csv"
     write_csv(runs_csv, all_rows, fields)

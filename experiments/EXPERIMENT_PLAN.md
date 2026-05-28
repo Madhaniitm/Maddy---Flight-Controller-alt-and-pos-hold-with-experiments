@@ -631,6 +631,47 @@ Real camera experiments: G3, G5 (laptop webcam), H2 (face recognition via webcam
 | exp_H2_face_recognition_auth.py | H2 | TODO (webcam+face_recognition) |
 | exp_H3_blockchain_integrity.py | H3 | TODO |
 | exp_H4_decision_verbalization.py | H4 | TODO |
+| exp_H5_live_flight_verbalization.py | H5 | ✓ DONE (script, hardware pending) |
+| nd_series_agent.py | ND infra | ✓ DONE |
+| exp_ND1_camera_as_tool.py | ND1 | ✓ DONE (script) |
+| exp_ND2_agentic_vision_control.py | ND2 | ✓ DONE (script) |
+| exp_ND3_human_in_loop_vision_control.py | ND3 | ✓ DONE (script) |
+
+---
+
+## SECTION ND — Camera-as-Tool Agentic Vision Control (3 experiments)
+Purpose: Combine G/V-series real camera pipeline with C-series agentic drone
+         workflow. Camera pipeline runs as a single LLM-callable tool (analyze_scene).
+         LLM plans and executes drone workflows driven by visual evidence.
+
+Infrastructure: nd_series_agent.py (NDAgent extends DAgent)
+  • analyze_scene() tool: MediaPipe → YOLO-World+DepthAnything → LLM vision → JSON
+  • Emergency monitor: background MediaPipe thread, hazard → stop + new workflow
+  • Telemetry logging: every drone command logs telem_before + telem_after
+  • Human gate (ND3): approve_callback blocks drone commands, not camera/telemetry
+
+### EXP-ND1: Camera Pipeline as Tool Call — Validation
+**What:** Call analyze_scene once per scene (8 scenes × 5 runs). LLM receives
+  full JSON back and reports risk + recommended action. No drone movement.
+**Measure:** Tool risk accuracy vs ground truth, pipeline latency, LLM cost.
+**Expected:** ≥70% risk accuracy (V-series pipeline baseline: 87%)
+**Script:** exp_ND1_camera_as_tool.py
+
+### EXP-ND2: Agentic Vision-Guided Drone Control
+**What:** Full autonomous mission using C-series workflow protocol + analyze_scene
+  before every move. Two scenarios: safe (door_open) and hazard (person_near).
+  Background emergency monitor active. N=5 runs × 2 scenarios.
+**Measure:** Correct mission response rate, analyze_scene call count, cost.
+**Expected:** Hazard → abort, safe → complete mission (100% in each scenario)
+**Script:** exp_ND2_agentic_vision_control.py
+
+### EXP-ND3: Human-in-the-Loop Vision-Guided Control
+**What:** Same as ND2 with mandatory terminal approval before every drone command.
+  Camera reads and sensor reads run automatically. Operator prompts logged.
+  N=3 runs × 2 scenarios (shorter — human interactive).
+**Measure:** Approval rate, operator response time, mission outcome.
+**Expected:** Operator can override any hazardous command; approval adds ~5s/command.
+**Script:** exp_ND3_human_in_loop_vision_control.py
 
 ---
 

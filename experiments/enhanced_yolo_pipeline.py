@@ -418,10 +418,13 @@ def load_depth_anything():
     try:
         from transformers import pipeline as hf_pipeline
         print("[DA v2] Loading Depth Anything V2 Metric Indoor (Small)…")
+        import torch
+        device = "mps" if torch.backends.mps.is_available() else "cpu"
+        print(f"[DA v2] Using device: {device}")
         pipe = hf_pipeline(
             task="depth-estimation",
             model="depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf",
-            device="cpu",
+            device=device,
         )
         print("[DA v2] Depth Anything V2 Metric Indoor loaded ✓")
         return pipe, "depth-anything-v2-metric"

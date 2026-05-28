@@ -1,0 +1,41 @@
+scene_label,truth,run,clip_label,clip_conf,clip_risk,clip_correct,yolo_ms_with_clip,yolo_ms_no_clip,clip_overhead_ms
+person_near,hazard,1,cluttered room obstacles,0.2065,caution,0,380.5,170.5,210.0
+person_near,hazard,2,cluttered room obstacles,0.2065,caution,0,277.5,179.6,97.9
+person_near,hazard,3,cluttered room obstacles,0.2065,caution,0,266.4,156.5,109.9
+person_near,hazard,4,cluttered room obstacles,0.2065,caution,0,271.7,158.3,113.4
+person_near,hazard,5,cluttered room obstacles,0.2065,caution,0,254.6,158.8,95.8
+wall_close,hazard,1,person up close,0.2082,hazard,1,265.4,153.7,111.7
+wall_close,hazard,2,person up close,0.2082,hazard,1,261.0,158.9,102.1
+wall_close,hazard,3,person up close,0.2082,hazard,1,262.5,158.6,103.9
+wall_close,hazard,4,person up close,0.2082,hazard,1,264.5,158.4,106.1
+wall_close,hazard,5,person up close,0.2082,hazard,1,267.1,159.0,108.1
+object_table,caution,1,cluttered room obstacles,0.2068,caution,1,268.4,156.9,111.5
+object_table,caution,2,cluttered room obstacles,0.2068,caution,1,265.7,158.9,106.8
+object_table,caution,3,cluttered room obstacles,0.2068,caution,1,266.4,161.3,105.1
+object_table,caution,4,cluttered room obstacles,0.2068,caution,1,260.4,159.6,100.8
+object_table,caution,5,cluttered room obstacles,0.2068,caution,1,262.8,160.9,101.9
+dim_light,caution,1,uncertain (cluttered room obstacles),0.2027,unknown,0,258.8,153.6,105.2
+dim_light,caution,2,uncertain (cluttered room obstacles),0.2027,unknown,0,264.8,159.9,104.9
+dim_light,caution,3,uncertain (cluttered room obstacles),0.2027,unknown,0,257.5,159.5,98.0
+dim_light,caution,4,uncertain (cluttered room obstacles),0.2027,unknown,0,269.5,159.9,109.6
+dim_light,caution,5,uncertain (cluttered room obstacles),0.2027,unknown,0,262.8,156.3,106.5
+cluttered,caution,1,cluttered room obstacles,0.2044,caution,1,260.6,157.3,103.3
+cluttered,caution,2,cluttered room obstacles,0.2044,caution,1,271.4,157.8,113.6
+cluttered,caution,3,cluttered room obstacles,0.2044,caution,1,269.9,159.5,110.4
+cluttered,caution,4,cluttered room obstacles,0.2044,caution,1,269.7,159.2,110.5
+cluttered,caution,5,cluttered room obstacles,0.2044,caution,1,263.3,156.2,107.1
+door_open,safe,1,open room safe path,0.2052,safe,1,262.0,155.9,106.1
+door_open,safe,2,open room safe path,0.2052,safe,1,257.0,160.2,96.8
+door_open,safe,3,open room safe path,0.2052,safe,1,278.9,159.5,119.4
+door_open,safe,4,open room safe path,0.2052,safe,1,260.5,157.0,103.5
+door_open,safe,5,open room safe path,0.2052,safe,1,257.2,155.2,102.0
+person_far,caution,1,cluttered room obstacles,0.2133,caution,1,265.2,156.6,108.6
+person_far,caution,2,cluttered room obstacles,0.2133,caution,1,259.7,158.0,101.7
+person_far,caution,3,cluttered room obstacles,0.2133,caution,1,270.8,155.7,115.1
+person_far,caution,4,cluttered room obstacles,0.2133,caution,1,259.7,154.8,104.9
+person_far,caution,5,cluttered room obstacles,0.2133,caution,1,263.5,155.5,108.0
+blocked_lens,hazard,1,uncertain (dark or covered lens),0.2035,unknown,0,262.5,155.4,107.1
+blocked_lens,hazard,2,uncertain (dark or covered lens),0.2035,unknown,0,262.7,156.6,106.1
+blocked_lens,hazard,3,uncertain (dark or covered lens),0.2035,unknown,0,291.6,176.6,115.0
+blocked_lens,hazard,4,uncertain (dark or covered lens),0.2035,unknown,0,266.6,157.3,109.3
+blocked_lens,hazard,5,uncertain (dark or covered lens),0.2035,unknown,0,262.3,154.7,107.6
