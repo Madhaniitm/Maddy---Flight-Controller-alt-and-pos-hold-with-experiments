@@ -951,8 +951,7 @@ class NDAgent(DAgent):
         if b64:
             first_content = [
                 {"type": "image_url",
-                 "image_url": {"url": f"data:image/jpeg;base64,{b64}",
-                               "detail": "low"}},
+                 "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
                 {"type": "text", "text": user_prompt},
             ]
         else:
@@ -973,8 +972,7 @@ class NDAgent(DAgent):
                 if emg_b64:
                     messages.append({"role": "user", "content": [
                         {"type": "image_url",
-                         "image_url": {"url": f"data:image/jpeg;base64,{emg_b64}",
-                                       "detail": "low"}},
+                         "image_url": {"url": f"data:image/jpeg;base64,{emg_b64}"}},
                         {"type": "text", "text": emg_msg},
                     ]})
                 else:
@@ -1046,8 +1044,7 @@ class NDAgent(DAgent):
                 if new_b64:
                     messages.append({"role": "user", "content": [
                         {"type": "image_url",
-                         "image_url": {"url": f"data:image/jpeg;base64,{new_b64}",
-                                       "detail": "low"}},
+                         "image_url": {"url": f"data:image/jpeg;base64,{new_b64}"}},
                         {"type": "text", "text": "Updated camera view after movement."},
                     ]})
 
