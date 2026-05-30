@@ -1,0 +1,2 @@
+orchestrator,scenario,scene_label,truth,n_runs,patrol_rate,correct_rate,correct_lo,correct_hi,mean_quality,mean_s3_risk,mean_scene_calls,mean_drone_cmds,mean_pipeline_ms,mean_total_cost_usd,mean_n_proposed,mean_approval_rate,mean_operator_response_s,total_approvals,total_denials
+gpt4o_mini,alert_room,person_near,ALERT,5,1.0,1.0,0.566,1.0,4.6,0.8,3.0,5.6,268.2,0.0158,2.8,1.0,1.36,14,0

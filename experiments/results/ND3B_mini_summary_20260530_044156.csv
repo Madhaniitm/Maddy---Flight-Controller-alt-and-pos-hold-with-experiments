@@ -1,0 +1,3 @@
+orchestrator,scenario,scene_label,truth,n_runs,patrol_rate,correct_rate,correct_lo,correct_hi,mean_quality,mean_s3_risk,mean_scene_calls,mean_drone_cmds,mean_pipeline_ms,mean_total_cost_usd,mean_n_proposed,mean_approval_rate,mean_operator_response_s,total_approvals,total_denials
+gpt4o_mini,clear_room,door_open,CLEAR,5,1.0,1.0,0.566,1.0,4.0,1.0,4.0,24.0,252.6,0.0654,12.0,1.0,1.21,60,0
+gpt4o_mini,alert_room,person_near,ALERT,5,0.0,1.0,0.566,1.0,0.0,0.0,13.0,36.0,241.3,1.6996,23.0,0.5652,1.25,65,50

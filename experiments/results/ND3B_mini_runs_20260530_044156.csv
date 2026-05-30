@@ -1,0 +1,165 @@
+orchestrator,global_run,scenario,scene_label,truth,patrol_complete,correct_room_report,n_scene_calls,n_drone_commands,n_room_events,quality_score,s1_scene,s2_proximity,s3_risk,s4_length,s5_pilot_action,detected_risk,detected_action,word_count,truncated,risk,confidence,description,sensor_note,proximity,all_turns_text,final_text,total_pipeline_ms,mean_pipeline_ms,loop_cost_usd,total_cost_usd,wall_time_s,error,n_drone_commands_proposed,n_approved,n_denied,approval_rate,mean_operator_response_s,total_operator_time_s
+gpt4o_mini,1,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,1,0,CLEAR,unknown,80,0,CLEAR,-1.0,,,,"### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0):** No person detected; risk is safe.
+  2. **Waypoint (1, 0):** No person detected; risk is safe.
+  3. **Waypoint (1, 1):** No person detected; risk is safe.
+  4. **Waypoint (0, 1):** No person detected; risk is safe.
+
+- **Recommended Actions for Human Operator:**
+  - Continue regular monitoring of the area.
+  - No immediate actions required as the room is clear of emergencies.","### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0):** No person detected; risk is safe.
+  2. **Waypoint (1, 0):** No person detected; risk is safe.
+  3. **Waypoint (1, 1):** No person detected; risk is safe.
+  4. **Waypoint (0, 1):** No person detected; risk is safe.
+
+- **Recommended Actions for Human Operator:**
+  - Continue regular monitoring of the area.
+  - No immediate actions required as the room is clear of emergencies.",1124.9,281.2,0.065444,0.065444,59.97,,12,12,0,1.0,1.46,17.53
+gpt4o_mini,2,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,1,0,CLEAR,unknown,104,0,CLEAR,-1.0,,,,"### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  2. **Waypoint (1, 0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  3. **Waypoint (1, 1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  4. **Waypoint (0, 1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate actions required. 
+
+The surveillance mission has been completed successfully with no emergencies detected.","### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  2. **Waypoint (1, 0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  3. **Waypoint (1, 1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+  4. **Waypoint (0, 1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: Safe
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate actions required. 
+
+The surveillance mission has been completed successfully with no emergencies detected.",1002.7,250.7,0.065419,0.065419,60.73,,12,12,0,1.0,1.3,15.58
+gpt4o_mini,3,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,1,0,CLEAR,unknown,73,0,CLEAR,-1.0,,,,"### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** No person detected; risk is safe.
+  2. **Waypoint (1, 0, 1):** No person detected; risk is safe.
+  3. **Waypoint (0, 1, 1):** No person detected; risk is safe.
+  4. **Waypoint (-1, 0, 1):** No person detected; risk is safe.
+
+- **Recommended Actions for Human Operator:**
+  - Continue regular monitoring; no immediate action required.","### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** No person detected; risk is safe.
+  2. **Waypoint (1, 0, 1):** No person detected; risk is safe.
+  3. **Waypoint (0, 1, 1):** No person detected; risk is safe.
+  4. **Waypoint (-1, 0, 1):** No person detected; risk is safe.
+
+- **Recommended Actions for Human Operator:**
+  - Continue regular monitoring; no immediate action required.",1000.3,250.1,0.065386,0.065386,57.33,,12,12,0,1.0,1.05,12.58
+gpt4o_mini,4,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,1,0,CLEAR,unknown,92,0,CLEAR,-1.0,,,,"### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  2. **Waypoint (1, 0, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  3. **Waypoint (1, 1, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  4. **Waypoint (0, 1, 1):** 
+     - **Description:** No persons detected; room appears safe.
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate action required. 
+
+The surveillance mission has been completed successfully with no emergencies detected.","### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  2. **Waypoint (1, 0, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  3. **Waypoint (1, 1, 1):** 
+     - **Description:** No persons detected; room appears safe.
+  4. **Waypoint (0, 1, 1):** 
+     - **Description:** No persons detected; room appears safe.
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate action required. 
+
+The surveillance mission has been completed successfully with no emergencies detected.",970.1,242.5,0.065407,0.065407,57.03,,12,12,0,1.0,1.19,14.28
+gpt4o_mini,5,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,1,0,CLEAR,unknown,100,0,CLEAR,-1.0,,,,"### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  2. **Waypoint (1, 0):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  3. **Waypoint (1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  4. **Waypoint (0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate actions required. 
+
+The surveillance mission has been successfully completed with no emergencies detected.","### Final Room Safety Report
+
+- **Overall Room Status:** CLEAR
+- **Findings from Each Waypoint:**
+  1. **Waypoint (0, 0):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  2. **Waypoint (1, 0):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  3. **Waypoint (1, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+  4. **Waypoint (0, 1):** 
+     - Description: No persons detected; room appears safe.
+     - Risk: SAFE
+
+- **Recommended Actions for Human Operator:** 
+  - Continue regular monitoring; no immediate actions required. 
+
+The surveillance mission has been successfully completed with no emergencies detected.",953.3,238.3,0.065471,0.065471,91.44,,12,12,0,1.0,1.03,12.39
+gpt4o_mini,6,alert_room,person_near,ALERT,0,1,13,36,1,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,3119.7,240.0,1.69956,1.69956,920.43,,23,13,10,0.5652,1.25,28.72
+gpt4o_mini,7,alert_room,person_near,ALERT,0,1,13,36,1,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,3120.0,240.0,1.699568,1.699568,244.63,,23,13,10,0.5652,1.37,31.61
+gpt4o_mini,8,alert_room,person_near,ALERT,0,1,13,36,1,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,3130.6,240.8,1.699557,1.699557,239.92,,23,13,10,0.5652,1.27,29.28
+gpt4o_mini,9,alert_room,person_near,ALERT,0,1,13,36,1,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,3169.0,243.8,1.699557,1.699557,284.06,,23,13,10,0.5652,1.12,25.7
+gpt4o_mini,10,alert_room,person_near,ALERT,0,1,13,36,1,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,3147.7,242.1,1.699555,1.699555,222.92,,23,13,10,0.5652,1.22,27.99

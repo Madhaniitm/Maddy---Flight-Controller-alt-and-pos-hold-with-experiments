@@ -1,0 +1,191 @@
+orchestrator,global_run,scenario,scene_label,turn,latency_s,input_tokens,output_tokens,cost_usd,text
+gpt4o_mini,1,alert_room,person_near,1,3.335,10272,17,0.001551,
+gpt4o_mini,1,alert_room,person_near,2,2.164,10514,10,0.001583,
+gpt4o_mini,1,alert_room,person_near,3,2.25,10685,14,0.001611,
+gpt4o_mini,1,alert_room,person_near,4,1.304,10880,17,0.001642,
+gpt4o_mini,1,alert_room,person_near,5,2.125,11133,10,0.001676,
+gpt4o_mini,1,alert_room,person_near,6,2.355,14293,17,0.002154,
+gpt4o_mini,1,alert_room,person_near,7,2.517,14618,10,0.002199,
+gpt4o_mini,1,alert_room,person_near,8,3.608,14899,185,0.002346,"### Final Room Safety Report
+
+**Overall Room Status:** EMERGENCY
+
+**Findings from Each Waypoint:**
+1. **Waypoint 1:** 
+   - **Description:** Person detected with a confidence of 0.455 at an estimated distance of 0.24m.
+   - **Risk:** Hazard detected.
+
+2. **Waypoint 2:**
+   - **Description:** Reassessment confirmed the presence of the same person with similar confidence and distance.
+   - **Risk:** Hazard confirmed.
+
+3. **Waypoint 3:**
+   - **Description:** Consistent detection of the person with no changes in risk assessment.
+   - **Risk:** Hazard confirmed.
+
+**Recommended Actions for Human Operator:**
+- Immediate investigation of the detected individual due to the consistent hazard risk.
+- Ensure the safety of the person and assess the situation further.
+
+The drone has successfully completed its mission and is now landed."
+gpt4o_mini,2,alert_room,person_near,1,3.886,7291,216,0.001223,
+gpt4o_mini,2,alert_room,person_near,2,2.353,10593,17,0.001599,
+gpt4o_mini,2,alert_room,person_near,3,1.464,10839,28,0.001643,
+gpt4o_mini,2,alert_room,person_near,4,2.663,11065,14,0.001668,
+gpt4o_mini,2,alert_room,person_near,5,1.228,11267,17,0.0017,
+gpt4o_mini,2,alert_room,person_near,6,2.181,11523,14,0.001737,
+gpt4o_mini,2,alert_room,person_near,7,1.741,14708,17,0.002216,
+gpt4o_mini,2,alert_room,person_near,8,1.405,15037,10,0.002262,
+gpt4o_mini,2,alert_room,person_near,9,3.361,15322,231,0.002437,"### Final Room Safety Report
+
+**Overall Room Status:** ALERT
+
+**Findings from Each Waypoint:**
+1. **Waypoint 1 (0, 0, 1):**
+   - **Description:** Person detected at a distance of approximately 0.24m.
+   - **Risk:** Hazard detected.
+
+2. **Waypoint 2 (1, 0, 1):**
+   - **Description:** Person detected again at the same distance.
+   - **Risk:** Hazard detected.
+
+3. **Waypoint 3 (0, 1, 1):**
+   - **Description:** Consistent detection of a person at 0.24m.
+   - **Risk:** Hazard detected.
+
+4. **Waypoint 4 (-1, 0, 1):**
+   - **Description:** Repeated detection of the same person.
+   - **Risk:** Hazard detected.
+
+**Recommended Actions for Human Operator:**
+- Investigate the individual detected in the room, as the repeated alerts indicate a potential hazard.
+- Ensure the safety of the person and assess the situation further.
+
+**Mission Status:** Completed and landed safely."
+gpt4o_mini,3,alert_room,person_near,1,3.878,7291,261,0.00125,
+gpt4o_mini,3,alert_room,person_near,2,1.26,10638,17,0.001606,
+gpt4o_mini,3,alert_room,person_near,3,1.455,10884,59,0.001668,
+gpt4o_mini,3,alert_room,person_near,4,1.34,11173,46,0.001704,
+gpt4o_mini,3,alert_room,person_near,5,2.2,11582,59,0.001773,
+gpt4o_mini,3,alert_room,person_near,6,2.583,11871,46,0.001808,
+gpt4o_mini,3,alert_room,person_near,7,4.768,15333,250,0.00245,"### Final Room Safety Report
+
+**Overall Room Status:** ALERT
+
+**Findings from Each Waypoint:**
+1. **Waypoint (0, 0, 1.0):**
+   - **Description:** Person detected with a confidence of 0.455 at an estimated distance of 0.24m.
+   - **Risk:** Hazard detected.
+   
+2. **Waypoint (1, 0, 1.0):**
+   - **Description:** Person detected again with similar confidence and distance.
+   - **Risk:** Hazard detected.
+
+3. **Waypoint (0, 1, 1.0):**
+   - **Description:** Person detected with consistent readings.
+   - **Risk:** Hazard detected.
+
+4. **Waypoint (0, -1, 1.0):**
+   - **Description:** Person detected with the same confidence and distance.
+   - **Risk:** Hazard detected.
+
+**Recommended Actions for Human Operator:**
+- Investigate the individual detected in the room as there is a consistent risk of hazard.
+- Ensure the safety of the person and assess the situation further.
+
+### Next Steps
+- Initiating landing procedure now. 
+
+Calling land()."
+gpt4o_mini,3,alert_room,person_near,8,3.056,15861,243,0.002525,"### Final Room Safety Report
+
+**Overall Room Status:** ALERT
+
+**Findings from Each Waypoint:**
+1. **Waypoint (0, 0, 1.0):**
+   - **Description:** Person detected with a confidence of 0.455 at an estimated distance of 0.24m.
+   - **Risk:** Hazard detected.
+   
+2. **Waypoint (1, 0, 1.0):**
+   - **Description:** Person detected again with similar confidence and distance.
+   - **Risk:** Hazard detected.
+
+3. **Waypoint (0, 1, 1.0):**
+   - **Description:** Person detected with consistent readings.
+   - **Risk:** Hazard detected.
+
+4. **Waypoint (0, -1, 1.0):**
+   - **Description:** Person detected with the same confidence and distance.
+   - **Risk:** Hazard detected.
+
+**Recommended Actions for Human Operator:**
+- Investigate the individual detected in the room as there is a consistent risk of hazard.
+- Ensure the safety of the person and assess the situation further.
+
+### Next Steps
+- The drone has successfully landed and disarmed. 
+
+Mission complete."
+gpt4o_mini,4,alert_room,person_near,1,3.189,7291,216,0.001223,
+gpt4o_mini,4,alert_room,person_near,2,2.766,10593,17,0.001599,
+gpt4o_mini,4,alert_room,person_near,3,1.358,10839,28,0.001643,
+gpt4o_mini,4,alert_room,person_near,4,1.333,11065,14,0.001668,
+gpt4o_mini,4,alert_room,person_near,5,2.0,11267,17,0.0017,
+gpt4o_mini,4,alert_room,person_near,6,1.438,11523,28,0.001745,
+gpt4o_mini,4,alert_room,person_near,7,2.349,14737,17,0.002221,
+gpt4o_mini,4,alert_room,person_near,8,2.313,15065,10,0.002266,
+gpt4o_mini,4,alert_room,person_near,9,2.782,15349,226,0.002438,"### Final Room Safety Report
+
+**Overall Room Status:** ALERT
+
+**Findings from Each Waypoint:**
+1. **Waypoint 1 (0, 0, 1):**
+   - **Description:** Person detected at a close distance.
+   - **Risk:** Hazard detected.
+
+2. **Waypoint 2 (1, 0, 1):**
+   - **Description:** Person detected again, consistent with previous findings.
+   - **Risk:** Hazard detected.
+
+3. **Waypoint 3 (0, 1, 1):**
+   - **Description:** Person detected, confirming ongoing risk.
+   - **Risk:** Hazard detected.
+
+4. **Waypoint 4 (0, -1, 1):**
+   - **Description:** Person detected, consistent with earlier assessments.
+   - **Risk:** Hazard detected.
+
+**Recommended Actions for Human Operator:**
+- Investigate the individual detected in the room, as the risk level is classified as ALERT due to repeated detections of a person in a potentially hazardous situation.
+
+The drone has successfully completed its patrol and is now landed and disarmed."
+gpt4o_mini,5,alert_room,person_near,1,4.185,7291,224,0.001228,
+gpt4o_mini,5,alert_room,person_near,2,1.334,10601,17,0.0016,
+gpt4o_mini,5,alert_room,person_near,3,2.092,10847,28,0.001644,
+gpt4o_mini,5,alert_room,person_near,4,1.123,11073,14,0.001669,
+gpt4o_mini,5,alert_room,person_near,5,2.151,11275,17,0.001701,
+gpt4o_mini,5,alert_room,person_near,6,1.38,11531,28,0.001746,
+gpt4o_mini,5,alert_room,person_near,7,2.651,14745,17,0.002222,
+gpt4o_mini,5,alert_room,person_near,8,2.915,15073,10,0.002267,
+gpt4o_mini,5,alert_room,person_near,9,3.522,15357,212,0.002431,"### Final Room Safety Report
+
+**Overall Room Status:** ALERT
+
+**Findings from Each Waypoint:**
+1. **Waypoint 1 (0, 0, 1.0):**
+   - **Description:** Person detected with a confidence of 0.455 at an estimated distance of 0.24m.
+   - **Risk:** Hazard detected.
+
+2. **Waypoint 2 (1, 0, 1.0):**
+   - **Description:** Person detected again with similar confidence and distance.
+   - **Risk:** Hazard detected.
+
+3. **Waypoint 3 (0, 1, 1.0):**
+   - **Description:** Consistent detection of a person with the same confidence and distance.
+   - **Risk:** Hazard detected.
+
+**Recommended Actions for Human Operator:**
+- Investigate the presence of the individual detected in the room.
+- Ensure the safety of the person and assess the situation for any potential hazards.
+
+The drone has successfully completed its patrol and is now landed and disarmed."

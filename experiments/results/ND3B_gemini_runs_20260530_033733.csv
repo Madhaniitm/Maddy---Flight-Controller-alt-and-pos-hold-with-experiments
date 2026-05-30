@@ -1,0 +1,328 @@
+orchestrator,global_run,scenario,scene_label,truth,patrol_complete,correct_room_report,n_scene_calls,n_drone_commands,n_room_events,quality_score,s1_scene,s2_proximity,s3_risk,s4_length,s5_pilot_action,detected_risk,detected_action,word_count,truncated,risk,confidence,description,sensor_note,proximity,all_turns_text,final_text,total_pipeline_ms,mean_pipeline_ms,loop_cost_usd,total_cost_usd,wall_time_s,error,n_drone_commands_proposed,n_approved,n_denied,approval_rate,mean_operator_response_s,total_operator_time_s
+gemini,1,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,1,0,1,CLEAR,unknown,211,0,CLEAR,-1.0,,,,"Description: The room appears to be an office or workshop space with cubicle-like structures or partitions. There are no visible people or immediate hazards.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The drone is now facing a different section of the room, still appearing to be an office or workshop. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The drone is now at another corner of the room. The scene still shows an empty office or workshop environment. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The drone has completed its patrol of the room. The scene continues to show an empty office or workshop. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: RETURN_TO_BASE
+Confidence: 0.8
+ |TURN| Overall room status: CLEAR
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or workshop space with cubicle-like structures or partitions. No visible people or immediate hazards. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The drone is now facing a different section of the room, still appearing to be an office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The drone is now at another corner of the room. The scene still shows an empty office or workshop environment. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The drone has completed its patrol of the room. The scene continues to show an empty office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+
+Recommended actions for human operator:
+*   No immediate action required. The room appears clear of emergencies.
+*   Further investigation may be warranted regarding the consistent MediaPipe person detections without YOLO-World corroboration. This could indicate a false positive or a person partially obscured from the YOLO model's view.","Overall room status: CLEAR
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or workshop space with cubicle-like structures or partitions. No visible people or immediate hazards. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The drone is now facing a different section of the room, still appearing to be an office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The drone is now at another corner of the room. The scene still shows an empty office or workshop environment. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The drone has completed its patrol of the room. The scene continues to show an empty office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+
+Recommended actions for human operator:
+*   No immediate action required. The room appears clear of emergencies.
+*   Further investigation may be warranted regarding the consistent MediaPipe person detections without YOLO-World corroboration. This could indicate a false positive or a person partially obscured from the YOLO model's view.",1109.6,277.4,0.027449,0.027449,96.96,,12,12,0,1.0,1.36,16.31
+gemini,2,clear_room,door_open,CLEAR,1,1,4,22,0,4,1,1,1,1,0,CLEAR,unknown,90,0,CLEAR,-1.0,,,,"Description: The room appears empty and clear. No objects or persons are detected by YOLO.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+ |TURN| Description: The room remains clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+ |TURN| Description: The room continues to be clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+ |TURN| Description: The room is still clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+ |TURN| Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty and clear. No objects or persons detected.
+- Waypoint 2 (0.5, -0.5, 1.0): Room remains clear. No objects or persons detected.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room continues to be clear. No objects or persons detected.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room is still clear. No objects or persons detected.
+
+Recommended actions for human operator:
+The room appears safe and clear based on the surveillance mission. No immediate action is required.
+","Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty and clear. No objects or persons detected.
+- Waypoint 2 (0.5, -0.5, 1.0): Room remains clear. No objects or persons detected.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room continues to be clear. No objects or persons detected.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room is still clear. No objects or persons detected.
+
+Recommended actions for human operator:
+The room appears safe and clear based on the surveillance mission. No immediate action is required.
+",973.3,243.3,0.02593,0.02593,97.79,,11,11,0,1.0,1.28,14.12
+gemini,3,clear_room,door_open,CLEAR,0,0,0,12,0,0,0,0,0,0,0,unknown,unknown,0,1,unknown,-1.0,,,,,,0,0.0,0.008151,0.008151,33.58,,6,6,0,1.0,1.42,8.51
+gemini,4,clear_room,door_open,CLEAR,1,1,4,24,0,4,1,1,0,1,1,ALERT,unknown,149,0,ALERT,-1.0,,,,"Description: The room appears empty, with no visible objects or people in the camera frame. The lighting is consistent throughout the visible area.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The room remains empty, with no visible objects or people. The view shows more of the far wall and ceiling.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The room still appears empty. The view is now focused on a different section of the room, showing more of the wall and what looks like a doorway or opening.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Description: The room appears empty from this vantage point. The camera shows a corner of the room with a wall and part of the ceiling.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+ |TURN| Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 2 (0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+
+Recommended actions for human operator:
+- No immediate action required. The room appears clear of any emergencies or alerts.
+- Further investigation may be warranted if the MediaPipe discrepancies persist in future patrols, to rule out false negatives or sensor issues.
+","Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 2 (0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+
+Recommended actions for human operator:
+- No immediate action required. The room appears clear of any emergencies or alerts.
+- Further investigation may be warranted if the MediaPipe discrepancies persist in future patrols, to rule out false negatives or sensor issues.
+",977.0,244.2,0.02745,0.02745,102.4,,12,12,0,1.0,1.08,12.97
+gemini,5,clear_room,door_open,CLEAR,1,1,4,24,0,3,1,1,0,0,1,EMERGENCY,unknown,207,0,EMERGENCY,-1.0,,,,"Description: The room appears to be an office or industrial space with cubicle-like structures or partitions. There are no immediate signs of distress or emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+ |TURN| Description: The drone is now facing a different section of the room, showing more of the interior structure. No visible signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+ |TURN| Description: The drone is now positioned in another corner of the room. The view shows more of the room's structure and what appears to be a table or counter. No signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+ |TURN| Description: The drone is now at the final patrol waypoint, completing the sweep of the room. The view shows a similar industrial or office setting with no visible signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+ |TURN| Overall room status: CLEAR
+
+Findings from each waypoint:
+- **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or industrial space with cubicle-like structures or partitions. No immediate signs of distress or emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 2 (0.5, -0.5, 1.0):** A different section of the room was visible, showing more of the interior structure. No visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 3 (-0.5, -0.5, 1.0):** Another corner of the room was surveyed, showing more of the room's structure and what appeared to be a table or counter. No signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 4 (-0.5, 0.5, 1.0):** The final patrol waypoint showed a similar industrial or office setting with no visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+
+Recommended actions for human operator:
+The room appears clear of any immediate emergencies or alerts. No further action is required at this time.
+","Overall room status: CLEAR
+
+Findings from each waypoint:
+- **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or industrial space with cubicle-like structures or partitions. No immediate signs of distress or emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 2 (0.5, -0.5, 1.0):** A different section of the room was visible, showing more of the interior structure. No visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 3 (-0.5, -0.5, 1.0):** Another corner of the room was surveyed, showing more of the room's structure and what appeared to be a table or counter. No signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 4 (-0.5, 0.5, 1.0):** The final patrol waypoint showed a similar industrial or office setting with no visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+
+Recommended actions for human operator:
+The room appears clear of any immediate emergencies or alerts. No further action is required at this time.
+",978.4,244.6,0.027443,0.027443,94.62,,12,12,0,1.0,1.3,15.58
+gemini,6,alert_room,person_near,ALERT,1,1,2,18,1,3,1,1,0,1,0,EMERGENCY,unknown,91,0,EMERGENCY,-1.0,,,,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+ |TURN| Description: The person is still standing with their arms raised, indicating a potential distress signal. The environment remains consistent with a workshop or storage area.
+Sensor note: Consistent. MediaPipe continues to detect a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.95
+ |TURN| The mission is interrupted due to an EMERGENCY. The drone has detected a person in distress. The operator has been alerted.
+
+Final Room Safety Report:
+Overall room status: EMERGENCY
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m): A person is standing with their arms raised, indicating distress. MediaPipe detected a person at 0.24m with a hazard risk.
+Recommended actions for human operator: Immediate human intervention is required to assess the situation and provide assistance to the person in distress. The drone is currently hovering at the location of the detected emergency.
+ |TURN| The mission is interrupted due to an EMERGENCY. The drone has detected a person in distress. The operator has been alerted.
+
+Final Room Safety Report:
+Overall room status: EMERGENCY
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m): A person is standing with their arms raised, indicating distress. MediaPipe detected a person at 0.24m with a hazard risk.
+Recommended actions for human operator: Immediate human intervention is required to assess the situation and provide assistance to the person in distress. The drone is currently on the ground after landing due to the emergency.","The mission is interrupted due to an EMERGENCY. The drone has detected a person in distress. The operator has been alerted.
+
+Final Room Safety Report:
+Overall room status: EMERGENCY
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m): A person is standing with their arms raised, indicating distress. MediaPipe detected a person at 0.24m with a hazard risk.
+Recommended actions for human operator: Immediate human intervention is required to assess the situation and provide assistance to the person in distress. The drone is currently on the ground after landing due to the emergency.",479.0,239.5,0.022599,0.022599,63.02,,9,9,0,1.0,1.05,9.44
+gemini,7,alert_room,person_near,ALERT,0,1,1,14,1,5,1,1,1,1,1,ALERT,INVESTIGATE_CLOSER,49,1,ALERT,0.8,"The camera shows a person standing in the center of the frame, facing the drone, with their arms raised. The room appears to be a workshop or storage area with various items in the background.",consistent,0.24m,"Description: The camera shows a person standing in the center of the frame, facing the drone, with their arms raised. The room appears to be a workshop or storage area with various items in the background.
+Sensor note: consistent
+Proximity: 0.24m
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8
+","Description: The camera shows a person standing in the center of the frame, facing the drone, with their arms raised. The room appears to be a workshop or storage area with various items in the background.
+Sensor note: consistent
+Proximity: 0.24m
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8
+",242.5,242.5,0.018678,0.018678,75.06,,7,7,0,1.0,1.39,9.74
+gemini,8,alert_room,person_near,ALERT,1,1,2,20,1,4,1,1,0,1,1,EMERGENCY,INVESTIGATE_CLOSER,102,0,EMERGENCY,0.9,"The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.",Consistent. MediaPipe detected a person at 0.24m with a hazard risk.,0.24m,"Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+ |TURN| Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+ |TURN| The drone has detected an emergency. The person in the room has their arms raised, which could indicate distress. The drone will now land and report the emergency to the operator.
+ |TURN| Overall room status: EMERGENCY
+
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m):
+Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+
+Recommended actions for human operator:
+An emergency has been detected. A person in the room has their arms raised, indicating a possible distress signal. Immediate human intervention is required to assess the situation and provide assistance.","Overall room status: EMERGENCY
+
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m):
+Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+
+Recommended actions for human operator:
+An emergency has been detected. A person in the room has their arms raised, indicating a possible distress signal. Immediate human intervention is required to assess the situation and provide assistance.",505.8,252.9,0.023908,0.023908,70.04,,10,10,0,1.0,1.23,12.33
+gemini,9,alert_room,person_near,ALERT,0,1,1,16,1,4,1,1,0,1,1,EMERGENCY,INVESTIGATE_CLOSER,69,1,EMERGENCY,0.9,"The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.",Consistent. MediaPipe detected a person at 0.24m with a hazard risk.,0.24m,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+","Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+",245.5,245.5,0.019928,0.019928,60.31,,8,8,0,1.0,1.25,9.96
+gemini,10,alert_room,person_near,ALERT,1,1,6,28,1,4,1,1,1,0,1,ALERT,unknown,193,0,ALERT,-1.0,,,,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, suggesting they might be stretching or signaling. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8 |TURN| Description: The person is still standing in the same position with arms raised. The scene remains consistent with the previous observation.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8 |TURN| Description: The person is still in the same position with arms raised. The drone is now closer, providing a clearer view. The person appears to be actively signaling or stretching.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.9 |TURN| Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8 |TURN| Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8 |TURN| Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8 |TURN| Overall room status: ALERT
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** A person was detected standing in the center of the room with arms raised. MediaPipe indicated a ""hazard"" risk. The drone moved closer to investigate.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+
+Recommended actions for human operator:
+*   Investigate the person in the room to determine the nature of their actions and the ""hazard"" risk indicated by MediaPipe.
+*   Assess if the person requires assistance or if their presence poses any safety concerns.
+*   Consider if the drone's proximity to the person (0.24m) is appropriate or if further distance is needed for safety.","Overall room status: ALERT
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** A person was detected standing in the center of the room with arms raised. MediaPipe indicated a ""hazard"" risk. The drone moved closer to investigate.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+
+Recommended actions for human operator:
+*   Investigate the person in the room to determine the nature of their actions and the ""hazard"" risk indicated by MediaPipe.
+*   Assess if the person requires assistance or if their presence poses any safety concerns.
+*   Consider if the drone's proximity to the person (0.24m) is appropriate or if further distance is needed for safety.",1472.7,245.4,0.069232,0.069232,153.81,,14,14,0,1.0,1.32,18.51

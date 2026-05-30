@@ -1,0 +1,9 @@
+orchestrator,scenario,scene_label,truth,n_runs,patrol_rate,correct_rate,correct_lo,correct_hi,mean_quality,mean_s3_risk,mean_scene_calls,mean_drone_cmds,mean_pipeline_ms,mean_total_cost_usd,mean_n_proposed,mean_approval_rate,mean_operator_response_s,total_approvals,total_denials
+claude,clear_room,door_open,CLEAR,5,0.6,0.6,0.231,0.882,3.6,0.2,6.2,29.6,251.7,1.6885,14.8,1.0,1.2,74,0
+claude,alert_room,person_near,ALERT,5,0.8,0.8,0.376,0.964,2.8,0.0,6.4,28.8,248.9,2.1317,14.4,1.0,1.25,72,0
+gpt4o,clear_room,door_open,CLEAR,5,1.0,1.0,0.566,1.0,4.0,0.4,0.0,14.0,0.0,0.2764,7.0,1.0,1.17,35,0
+gpt4o,alert_room,person_near,ALERT,5,0.2,0.6,0.231,0.882,4.2,0.2,2.4,6.0,249.9,0.3672,3.0,1.0,0.96,15,0
+gpt4o_mini,clear_room,door_open,CLEAR,5,0.0,0.0,0.0,0.434,0.0,0.0,0.0,0.0,0.0,0.0008,0.0,1.0,0.0,0,0
+gpt4o_mini,alert_room,person_near,ALERT,5,0.0,0.8,0.376,0.964,0.0,0.0,8.2,22.4,199.9,1.028,14.2,0.7391,1.02,41,30
+gemini,clear_room,door_open,CLEAR,5,0.0,0.0,0.0,0.434,0.0,0.0,0.0,0.0,0.0,0.0005,0.0,1.0,0.0,0,0
+gemini,alert_room,person_near,ALERT,5,0.0,0.0,0.0,0.434,0.0,0.0,0.0,0.0,0.0,0.0005,0.0,1.0,0.0,0,0

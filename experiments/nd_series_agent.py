@@ -131,6 +131,61 @@ def _nd_tools_to_gemini(tools):
         })
     return [{"functionDeclarations": decls}]
 
+
+# ── Retry helpers (shared by all three orchestrator loops) ────────────────────
+
+_MAX_RETRIES   = 3
+_RETRY_CODES   = {429, 500, 502, 503, 504}   # transient HTTP errors worth retrying
+
+
+def _urlopen_with_retry(req: "urllib.request.Request") -> dict:
+    """
+    urllib.request.urlopen with up to _MAX_RETRIES retries on transient errors.
+    Returns parsed JSON dict. Raises on permanent failure.
+    Used by Claude and Gemini loops (raw urllib).
+    """
+    for attempt in range(_MAX_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            transient = e.code in _RETRY_CODES
+            if transient and attempt < _MAX_RETRIES:
+                wait = 5 * (2 ** attempt)          # 5 → 10 → 20 s
+                print(f"  [RETRY {attempt+1}/{_MAX_RETRIES}] HTTP {e.code} — wait {wait}s")
+                time.sleep(wait)
+            else:
+                raise
+        except urllib.error.URLError as e:
+            # Network-level error (DNS, connection refused, timeout) — always transient
+            if attempt < _MAX_RETRIES:
+                wait = 5 * (2 ** attempt)
+                print(f"  [RETRY {attempt+1}/{_MAX_RETRIES}] Network error ({e.reason}) — wait {wait}s")
+                time.sleep(wait)
+            else:
+                raise
+
+
+def _oai_call_with_retry(client, **kwargs):
+    """
+    openai SDK chat.completions.create with up to _MAX_RETRIES retries on
+    transient errors (RateLimit, Connection, InternalServer).
+    Used by OpenAI loop only.
+    """
+    import openai
+    _TRANSIENT = (openai.RateLimitError, openai.APIConnectionError, openai.InternalServerError)
+    for attempt in range(_MAX_RETRIES + 1):
+        try:
+            return client.chat.completions.create(**kwargs)
+        except _TRANSIENT as e:
+            if attempt < _MAX_RETRIES:
+                wait = 5 * (2 ** attempt)
+                print(f"  [RETRY {attempt+1}/{_MAX_RETRIES}] {type(e).__name__} — wait {wait}s")
+                time.sleep(wait)
+            else:
+                raise
+
+
 # Orchestrators supported for tool-calling agentic loop
 ORCHESTRATORS = ["claude", "gpt4o", "gpt4o_mini", "gemini"]
 
@@ -796,14 +851,13 @@ class NDAgent(DAgent):
 
             t0 = time.time()
             try:
-                req = urllib.request.Request(
+                req  = urllib.request.Request(
                     _ENDPOINT,
                     data=json.dumps(payload).encode(),
                     headers=headers,
                     method="POST",
                 )
-                with urllib.request.urlopen(req, timeout=120) as r:
-                    resp = json.loads(r.read().decode())
+                resp = _urlopen_with_retry(req)
             except Exception as e:
                 print(f"[ND API ERROR turn {turn}] {e}")
                 break
@@ -914,7 +968,8 @@ class NDAgent(DAgent):
     def _run_openai_orchestrator_loop(self, orchestrator: str,
                                        user_prompt: str,
                                        max_turns: int,
-                                       max_tokens: int) -> tuple:
+                                       max_tokens: int,
+                                       approve_callback=None) -> tuple:
         """
         Agentic loop using OpenAI function-calling API as the orchestrator.
         analyze_scene is registered as a function; the model calls it and we
@@ -980,7 +1035,8 @@ class NDAgent(DAgent):
 
             t0 = time.time()
             try:
-                resp = client.chat.completions.create(
+                resp = _oai_call_with_retry(
+                    client,
                     model       = oai_model,
                     messages    = messages,
                     tools       = oai_tools,
@@ -990,7 +1046,7 @@ class NDAgent(DAgent):
                 )
             except Exception as e:
                 print(f"[OpenAI API ERROR turn {turn}] {e}")
-                break
+                raise  # propagate so outer run-level handler sets error_msg
 
             latency = time.time() - t0
             usage   = resp.usage
@@ -999,7 +1055,8 @@ class NDAgent(DAgent):
             msg        = resp.choices[0].message
             finish     = resp.choices[0].finish_reason
             turn_text  = msg.content or ""
-            final_text = turn_text
+            if turn_text:                          # guard: don't overwrite with "" on tool-calling turns
+                final_text = turn_text
 
             api_stats.append({
                 "turn":         turn,
@@ -1022,12 +1079,44 @@ class NDAgent(DAgent):
                     t_args = json.loads(tc.function.arguments)
                 except Exception:
                     t_args = {}
-                print(f"  [TOOL OAI t{turn}] {t_name}({json.dumps(t_args)[:60]})")
-                result = self.execute_tool(t_name, t_args)
+
+                # ── Human approval gate (ND3 only, drone commands only) ──────────
+                approved    = True
+                deny_reason = ""
+                if approve_callback is not None and t_name in DRONE_CONTROL_TOOLS:
+                    tel = self._get_telemetry_snapshot()
+                    context_str = (
+                        f"alt={tel.get('altitude_m','?')}m  "
+                        f"pos={tel.get('position','?')}  "
+                        f"status={tel.get('flight_status','?')}"
+                    )
+                    approved, deny_reason = approve_callback(t_name, t_args, context_str)
+                    self._workflow_rows.append({
+                        "run":               self._current_run,
+                        "action_num":        self._action_num,
+                        "tool_name":         t_name,
+                        "tool_args":         json.dumps(t_args),
+                        "telemetry_before":  json.dumps(tel),
+                        "telemetry_after":   "",
+                        "execution_result":  "REJECTED" if not approved else "PENDING",
+                        "execution_ms":      0,
+                        "is_drone_command":  1,
+                        "approved":          int(approved),
+                    })
+                    self._action_num += 1
+
+                if not approved:
+                    result = (f"[Human rejected '{t_name}': {deny_reason}. "
+                              f"Choose a different action.]")
+                    print(f"  ❌ [REJECTED OAI t{turn}] {t_name} — {deny_reason}")
+                else:
+                    print(f"  [TOOL OAI t{turn}] {t_name}({json.dumps(t_args)[:60]})")
+                    result = self.execute_tool(t_name, t_args)
+
                 tool_trace.append({
                     "turn": turn, "name": t_name, "args": t_args,
-                    "result": result,   # full result — no truncation
-                    "approved": 1,
+                    "result": result,
+                    "approved": int(approved),
                     "sim_time_s": round(self.sim_time, 2),
                 })
                 messages.append({
@@ -1054,7 +1143,8 @@ class NDAgent(DAgent):
 
     def _run_gemini_orchestrator_loop(self, user_prompt: str,
                                        max_turns: int,
-                                       max_tokens: int) -> tuple:
+                                       max_tokens: int,
+                                       approve_callback=None) -> tuple:
         """
         Agentic loop using Gemini REST API as the orchestrator.
         Uses function declarations + functionCall / functionResponse pattern.
@@ -1123,18 +1213,18 @@ class NDAgent(DAgent):
                     headers = {"Content-Type": "application/json"},
                     method  = "POST",
                 )
-                with urllib.request.urlopen(req, timeout=120) as r:
-                    raw = json.loads(r.read().decode())
+                raw = _urlopen_with_retry(req)
             except Exception as e:
                 print(f"[Gemini API ERROR turn {turn}] {e}")
-                break
+                raise  # propagate so outer run-level handler sets error_msg
 
             latency = time.time() - t0
             usage   = raw.get("usageMetadata", {})
             in_tok  = usage.get("promptTokenCount",     0)
             out_tok = usage.get("candidatesTokenCount", 0)
-            candidate  = raw.get("candidates", [{}])[0]
-            parts      = candidate.get("content", {}).get("parts", [])
+            candidate    = raw.get("candidates", [{}])[0]
+            finish_reason = candidate.get("finishReason", "")   # "STOP" | "MAX_TOKENS" | "SAFETY" | "RECITATION" | ""
+            parts        = candidate.get("content", {}).get("parts", [])
             text_parts = [p["text"] for p in parts if "text" in p]
             turn_text  = " ".join(text_parts) if text_parts else ""
             if turn_text:
@@ -1149,10 +1239,16 @@ class NDAgent(DAgent):
                 "text":         turn_text,
             })
 
-            # Check for function call
+            # Check for function call.
+            # NOTE: Gemini returns finishReason="STOP" alongside function calls — this is
+            # normal Gemini behaviour and must NOT trigger a break while fn_calls exist.
+            # Only break on hard-stop conditions (MAX_TOKENS / SAFETY / RECITATION / OTHER)
+            # when fn_calls are present; always break when there are no fn_calls.
             fn_calls = [p["functionCall"] for p in parts if "functionCall" in p]
             if not fn_calls:
-                break  # Gemini is done
+                break  # No function calls → model finished writing, exit loop
+            if finish_reason in ("MAX_TOKENS", "SAFETY", "RECITATION", "OTHER"):
+                break  # Hard stop — don't attempt to process potentially incomplete fn_calls
 
             # Append model turn to contents
             contents.append({"role": "model", "parts": parts})
@@ -1162,12 +1258,44 @@ class NDAgent(DAgent):
             for fc in fn_calls:
                 t_name = fc.get("name", "")
                 t_args = dict(fc.get("args", {}))
-                print(f"  [TOOL GEMINI t{turn}] {t_name}({json.dumps(t_args)[:60]})")
-                result = self.execute_tool(t_name, t_args)
+
+                # ── Human approval gate (ND3 only, drone commands only) ──────────
+                approved    = True
+                deny_reason = ""
+                if approve_callback is not None and t_name in DRONE_CONTROL_TOOLS:
+                    tel = self._get_telemetry_snapshot()
+                    context_str = (
+                        f"alt={tel.get('altitude_m','?')}m  "
+                        f"pos={tel.get('position','?')}  "
+                        f"status={tel.get('flight_status','?')}"
+                    )
+                    approved, deny_reason = approve_callback(t_name, t_args, context_str)
+                    self._workflow_rows.append({
+                        "run":               self._current_run,
+                        "action_num":        self._action_num,
+                        "tool_name":         t_name,
+                        "tool_args":         json.dumps(t_args),
+                        "telemetry_before":  json.dumps(tel),
+                        "telemetry_after":   "",
+                        "execution_result":  "REJECTED" if not approved else "PENDING",
+                        "execution_ms":      0,
+                        "is_drone_command":  1,
+                        "approved":          int(approved),
+                    })
+                    self._action_num += 1
+
+                if not approved:
+                    result = (f"[Human rejected '{t_name}': {deny_reason}. "
+                              f"Choose a different action.]")
+                    print(f"  ❌ [REJECTED GEMINI t{turn}] {t_name} — {deny_reason}")
+                else:
+                    print(f"  [TOOL GEMINI t{turn}] {t_name}({json.dumps(t_args)[:60]})")
+                    result = self.execute_tool(t_name, t_args)
+
                 tool_trace.append({
                     "turn": turn, "name": t_name, "args": t_args,
-                    "result": result,   # full result — no truncation
-                    "approved": 1,
+                    "result": result,
+                    "approved": int(approved),
                     "sim_time_s": round(self.sim_time, 2),
                 })
                 fn_responses.append({
@@ -1220,16 +1348,18 @@ class NDAgent(DAgent):
             )
         elif orchestrator in ("gpt4o", "gpt4o_mini"):
             return self._run_openai_orchestrator_loop(
-                orchestrator = orchestrator,
-                user_prompt  = user_prompt,
-                max_turns    = max_turns,
-                max_tokens   = max_tokens,
+                orchestrator     = orchestrator,
+                user_prompt      = user_prompt,
+                max_turns        = max_turns,
+                max_tokens       = max_tokens,
+                approve_callback = approve_callback,
             )
         elif orchestrator == "gemini":
             return self._run_gemini_orchestrator_loop(
-                user_prompt = user_prompt,
-                max_turns   = max_turns,
-                max_tokens  = max_tokens,
+                user_prompt      = user_prompt,
+                max_turns        = max_turns,
+                max_tokens       = max_tokens,
+                approve_callback = approve_callback,
             )
         else:
             raise ValueError(f"Unknown orchestrator: {orchestrator!r}. "

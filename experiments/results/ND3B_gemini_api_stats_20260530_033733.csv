@@ -1,0 +1,578 @@
+orchestrator,global_run,scenario,scene_label,turn,latency_s,input_tokens,output_tokens,cost_usd,text
+gemini,1,clear_room,door_open,1,3.671,6119,185,0.000514,
+gemini,1,clear_room,door_open,2,1.841,6329,31,0.000484,
+gemini,1,clear_room,door_open,3,1.741,6387,8,0.000481,
+gemini,1,clear_room,door_open,4,1.819,6422,12,0.000485,
+gemini,1,clear_room,door_open,5,1.536,6473,30,0.000494,
+gemini,1,clear_room,door_open,6,1.943,6529,12,0.000493,
+gemini,1,clear_room,door_open,7,1.802,6585,40,0.000506,
+gemini,1,clear_room,door_open,8,2.256,6660,12,0.000503,
+gemini,1,clear_room,door_open,9,1.433,6710,17,0.000508,
+gemini,1,clear_room,door_open,10,2.252,6754,31,0.000516,
+gemini,1,clear_room,door_open,11,2.047,6812,28,0.000519,
+gemini,1,clear_room,door_open,12,2.049,6881,13,0.00052,
+gemini,1,clear_room,door_open,13,1.428,6927,28,0.000528,
+gemini,1,clear_room,door_open,14,1.94,6996,13,0.000529,
+gemini,1,clear_room,door_open,15,1.452,7042,28,0.000537,
+gemini,1,clear_room,door_open,16,3.276,7111,13,0.000537,
+gemini,1,clear_room,door_open,17,1.712,7157,28,0.000545,
+gemini,1,clear_room,door_open,18,2.077,7225,48,0.000556,
+gemini,1,clear_room,door_open,19,1.945,7318,38,0.00056,
+gemini,1,clear_room,door_open,20,2.003,7422,12,0.00056,
+gemini,1,clear_room,door_open,21,1.948,7473,34,0.000571,
+gemini,1,clear_room,door_open,22,1.534,7537,16,0.00057,
+gemini,1,clear_room,door_open,23,1.851,7645,12,0.000577,
+gemini,1,clear_room,door_open,24,2.559,7836,145,0.000631,"Description: The room appears to be an office or workshop space with cubicle-like structures or partitions. There are no visible people or immediate hazards.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,1,clear_room,door_open,25,1.846,8026,38,0.000613,
+gemini,1,clear_room,door_open,26,1.901,8130,12,0.000613,
+gemini,1,clear_room,door_open,27,2.077,8181,34,0.000624,
+gemini,1,clear_room,door_open,28,1.945,8245,16,0.000623,
+gemini,1,clear_room,door_open,29,1.595,8353,12,0.00063,
+gemini,1,clear_room,door_open,30,2.255,8543,146,0.000685,"Description: The drone is now facing a different section of the room, still appearing to be an office or workshop. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,1,clear_room,door_open,31,2.253,8734,38,0.000666,
+gemini,1,clear_room,door_open,32,2.036,8838,12,0.000666,
+gemini,1,clear_room,door_open,33,1.944,8889,35,0.000677,
+gemini,1,clear_room,door_open,34,1.844,8955,16,0.000676,
+gemini,1,clear_room,door_open,35,1.606,9063,12,0.000683,
+gemini,1,clear_room,door_open,36,2.764,9254,148,0.000738,"Description: The drone is now at another corner of the room. The scene still shows an empty office or workshop environment. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,1,clear_room,door_open,37,2.355,9448,38,0.00072,
+gemini,1,clear_room,door_open,38,2.241,9552,12,0.00072,
+gemini,1,clear_room,door_open,39,3.789,9603,35,0.000731,
+gemini,1,clear_room,door_open,40,2.352,9669,16,0.00073,
+gemini,1,clear_room,door_open,41,1.717,9777,12,0.000737,
+gemini,1,clear_room,door_open,42,2.095,9968,130,0.000787,"Description: The drone has completed its patrol of the room. The scene continues to show an empty office or workshop. No people or immediate hazards are visible.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This could be a false positive or a person partially obscured.
+Proximity: No objects detected by YOLO. MediaPipe reports no person detected.
+Risk: CLEAR
+Pilot suggested action: RETURN_TO_BASE
+Confidence: 0.8
+"
+gemini,1,clear_room,door_open,43,2.102,10125,8,0.000762,
+gemini,1,clear_room,door_open,44,2.363,10197,33,0.000775,
+gemini,1,clear_room,door_open,45,2.97,10259,332,0.000869,"Overall room status: CLEAR
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or workshop space with cubicle-like structures or partitions. No visible people or immediate hazards. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The drone is now facing a different section of the room, still appearing to be an office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The drone is now at another corner of the room. The scene still shows an empty office or workshop environment. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The drone has completed its patrol of the room. The scene continues to show an empty office or workshop. No people or immediate hazards are visible. MediaPipe detected a person, but YOLO-World did not.
+
+Recommended actions for human operator:
+*   No immediate action required. The room appears clear of emergencies.
+*   Further investigation may be warranted regarding the consistent MediaPipe person detections without YOLO-World corroboration. This could indicate a false positive or a person partially obscured from the YOLO model's view."
+gemini,2,clear_room,door_open,1,2.455,6119,208,0.000521,
+gemini,2,clear_room,door_open,2,1.433,6369,30,0.000487,
+gemini,2,clear_room,door_open,3,2.153,6426,8,0.000484,
+gemini,2,clear_room,door_open,4,2.224,6461,12,0.000488,
+gemini,2,clear_room,door_open,5,1.844,6512,30,0.000497,
+gemini,2,clear_room,door_open,6,2.048,6569,12,0.000496,
+gemini,2,clear_room,door_open,7,1.992,6625,30,0.000506,
+gemini,2,clear_room,door_open,8,1.535,6682,12,0.000505,
+gemini,2,clear_room,door_open,9,2.456,6732,36,0.000516,
+gemini,2,clear_room,door_open,10,1.928,6801,17,0.000515,
+gemini,2,clear_room,door_open,11,2.068,6845,13,0.000517,
+gemini,2,clear_room,door_open,12,1.595,6891,30,0.000526,
+gemini,2,clear_room,door_open,13,1.799,6948,28,0.000529,
+gemini,2,clear_room,door_open,14,1.537,7017,13,0.00053,
+gemini,2,clear_room,door_open,15,1.724,7063,28,0.000538,
+gemini,2,clear_room,door_open,16,3.212,7131,48,0.000549,
+gemini,2,clear_room,door_open,17,1.846,7223,38,0.000553,
+gemini,2,clear_room,door_open,18,1.788,7327,12,0.000553,
+gemini,2,clear_room,door_open,19,1.844,7378,34,0.000564,
+gemini,2,clear_room,door_open,20,2.459,7443,16,0.000563,
+gemini,2,clear_room,door_open,21,2.208,7551,63,0.000585,"Description: The room appears empty and clear. No objects or persons are detected by YOLO.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+"
+gemini,2,clear_room,door_open,22,1.843,7789,48,0.000599,
+gemini,2,clear_room,door_open,23,1.946,7881,38,0.000602,
+gemini,2,clear_room,door_open,24,1.517,7985,12,0.000602,
+gemini,2,clear_room,door_open,25,1.744,8036,34,0.000613,
+gemini,2,clear_room,door_open,26,1.843,8101,16,0.000612,
+gemini,2,clear_room,door_open,27,2.939,8209,59,0.000633,"Description: The room remains clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+"
+gemini,2,clear_room,door_open,28,3.481,8445,49,0.000648,
+gemini,2,clear_room,door_open,29,4.199,8539,38,0.000652,
+gemini,2,clear_room,door_open,30,1.825,8643,12,0.000652,
+gemini,2,clear_room,door_open,31,2.223,8694,35,0.000663,
+gemini,2,clear_room,door_open,32,1.974,8761,16,0.000662,
+gemini,2,clear_room,door_open,33,2.108,8869,61,0.000683,"Description: The room continues to be clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+"
+gemini,2,clear_room,door_open,34,2.048,9107,49,0.000698,
+gemini,2,clear_room,door_open,35,1.539,9201,38,0.000701,
+gemini,2,clear_room,door_open,36,1.938,9305,12,0.000701,
+gemini,2,clear_room,door_open,37,2.355,9356,35,0.000712,
+gemini,2,clear_room,door_open,38,2.867,9423,16,0.000712,
+gemini,2,clear_room,door_open,39,2.516,9531,60,0.000733,"Description: The room is still clear. No objects or persons are detected.
+Sensor note: consistent
+Proximity: N/A
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 1.0
+"
+gemini,2,clear_room,door_open,40,3.53,9767,31,0.000742,
+gemini,2,clear_room,door_open,41,3.328,9826,8,0.000739,
+gemini,2,clear_room,door_open,42,2.475,9898,33,0.000752,
+gemini,2,clear_room,door_open,43,2.662,9961,166,0.000797,"Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty and clear. No objects or persons detected.
+- Waypoint 2 (0.5, -0.5, 1.0): Room remains clear. No objects or persons detected.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room continues to be clear. No objects or persons detected.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room is still clear. No objects or persons detected.
+
+Recommended actions for human operator:
+The room appears safe and clear based on the surveillance mission. No immediate action is required.
+"
+gemini,3,clear_room,door_open,1,2.66,6119,185,0.000514,
+gemini,3,clear_room,door_open,2,1.739,6329,31,0.000484,
+gemini,3,clear_room,door_open,3,2.049,6387,8,0.000481,
+gemini,3,clear_room,door_open,4,1.201,6422,12,0.000485,
+gemini,3,clear_room,door_open,5,3.104,6473,30,0.000494,
+gemini,3,clear_room,door_open,6,1.68,6529,12,0.000493,
+gemini,3,clear_room,door_open,7,1.407,6585,40,0.000506,
+gemini,3,clear_room,door_open,8,1.843,6660,12,0.000503,
+gemini,3,clear_room,door_open,9,1.942,6710,17,0.000508,
+gemini,3,clear_room,door_open,10,1.744,6754,13,0.00051,
+gemini,3,clear_room,door_open,11,2.073,6800,31,0.000519,
+gemini,3,clear_room,door_open,12,1.943,6858,28,0.000523,
+gemini,3,clear_room,door_open,13,1.843,6927,13,0.000523,
+gemini,3,clear_room,door_open,14,1.842,6973,28,0.000531,
+gemini,3,clear_room,door_open,15,3.482,7041,48,0.000542,
+gemini,3,clear_room,door_open,16,2.455,7134,0,0.000535,
+gemini,4,clear_room,door_open,1,2.254,6119,185,0.000514,
+gemini,4,clear_room,door_open,2,1.741,6329,31,0.000484,
+gemini,4,clear_room,door_open,3,1.636,6387,8,0.000481,
+gemini,4,clear_room,door_open,4,2.024,6422,12,0.000485,
+gemini,4,clear_room,door_open,5,2.867,6473,30,0.000494,
+gemini,4,clear_room,door_open,6,3.276,6529,12,0.000493,
+gemini,4,clear_room,door_open,7,1.696,6585,40,0.000506,
+gemini,4,clear_room,door_open,8,1.33,6660,12,0.000503,
+gemini,4,clear_room,door_open,9,2.354,6710,17,0.000508,
+gemini,4,clear_room,door_open,10,1.798,6754,31,0.000516,
+gemini,4,clear_room,door_open,11,1.377,6812,28,0.000519,
+gemini,4,clear_room,door_open,12,2.048,6881,13,0.00052,
+gemini,4,clear_room,door_open,13,3.28,6927,28,0.000528,
+gemini,4,clear_room,door_open,14,1.605,6996,13,0.000529,
+gemini,4,clear_room,door_open,15,3.407,7042,28,0.000537,
+gemini,4,clear_room,door_open,16,1.742,7111,13,0.000537,
+gemini,4,clear_room,door_open,17,3.261,7157,28,0.000545,
+gemini,4,clear_room,door_open,18,4.01,7225,48,0.000556,
+gemini,4,clear_room,door_open,19,2.047,7318,38,0.00056,
+gemini,4,clear_room,door_open,20,2.135,7422,12,0.00056,
+gemini,4,clear_room,door_open,21,2.762,7473,34,0.000571,
+gemini,4,clear_room,door_open,22,1.945,7537,16,0.00057,
+gemini,4,clear_room,door_open,23,2.406,7645,107,0.000605,"Description: The room appears empty, with no visible objects or people in the camera frame. The lighting is consistent throughout the visible area.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,4,clear_room,door_open,24,2.373,7931,48,0.000609,
+gemini,4,clear_room,door_open,25,1.313,8024,38,0.000613,
+gemini,4,clear_room,door_open,26,1.721,8128,12,0.000613,
+gemini,4,clear_room,door_open,27,3.277,8179,34,0.000624,
+gemini,4,clear_room,door_open,28,1.673,8243,16,0.000623,
+gemini,4,clear_room,door_open,29,2.282,8351,105,0.000658,"Description: The room remains empty, with no visible objects or people. The view shows more of the far wall and ceiling.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,4,clear_room,door_open,30,2.148,8635,48,0.000662,
+gemini,4,clear_room,door_open,31,2.046,8728,38,0.000666,
+gemini,4,clear_room,door_open,32,2.257,8832,12,0.000666,
+gemini,4,clear_room,door_open,33,1.941,8883,35,0.000677,
+gemini,4,clear_room,door_open,34,1.536,8949,16,0.000676,
+gemini,4,clear_room,door_open,35,2.315,9057,115,0.000714,"Description: The room still appears empty. The view is now focused on a different section of the room, showing more of the wall and what looks like a doorway or opening.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,4,clear_room,door_open,36,1.945,9351,49,0.000716,
+gemini,4,clear_room,door_open,37,2.15,9446,38,0.00072,
+gemini,4,clear_room,door_open,38,2.238,9551,12,0.00072,
+gemini,4,clear_room,door_open,39,3.07,9602,35,0.000731,
+gemini,4,clear_room,door_open,40,1.64,9668,16,0.00073,
+gemini,4,clear_room,door_open,41,1.918,9776,108,0.000766,"Description: The room appears empty from this vantage point. The camera shows a corner of the room with a wall and part of the ceiling.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. This is a discrepancy. Given the empty visual, I will trust the visual and YOLO-World.
+Proximity: No person or object detected.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.8
+"
+gemini,4,clear_room,door_open,42,2.352,10063,31,0.000764,
+gemini,4,clear_room,door_open,43,1.953,10121,8,0.000761,
+gemini,4,clear_room,door_open,44,1.525,10193,33,0.000774,
+gemini,4,clear_room,door_open,45,3.174,10255,257,0.000846,"Overall room status: CLEAR
+
+Findings from each waypoint:
+- Waypoint 1 (0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 2 (0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 3 (-0.5, -0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+- Waypoint 4 (-0.5, 0.5, 1.0): Room appears empty. MediaPipe detected a person, but YOLO-World did not. Visual assessment and YOLO-World indicate no person present.
+
+Recommended actions for human operator:
+- No immediate action required. The room appears clear of any emergencies or alerts.
+- Further investigation may be warranted if the MediaPipe discrepancies persist in future patrols, to rule out false negatives or sensor issues.
+"
+gemini,5,clear_room,door_open,1,2.353,6119,185,0.000514,
+gemini,5,clear_room,door_open,2,1.434,6329,31,0.000484,
+gemini,5,clear_room,door_open,3,2.048,6387,8,0.000481,
+gemini,5,clear_room,door_open,4,1.436,6422,12,0.000485,
+gemini,5,clear_room,door_open,5,1.817,6473,30,0.000494,
+gemini,5,clear_room,door_open,6,2.149,6529,12,0.000493,
+gemini,5,clear_room,door_open,7,2.101,6585,40,0.000506,
+gemini,5,clear_room,door_open,8,1.95,6660,12,0.000503,
+gemini,5,clear_room,door_open,9,1.944,6710,17,0.000508,
+gemini,5,clear_room,door_open,10,1.741,6754,31,0.000516,
+gemini,5,clear_room,door_open,11,2.047,6812,28,0.000519,
+gemini,5,clear_room,door_open,12,1.332,6881,13,0.00052,
+gemini,5,clear_room,door_open,13,2.247,6927,28,0.000528,
+gemini,5,clear_room,door_open,14,1.946,6996,13,0.000529,
+gemini,5,clear_room,door_open,15,1.326,7042,28,0.000537,
+gemini,5,clear_room,door_open,16,1.841,7111,13,0.000537,
+gemini,5,clear_room,door_open,17,1.958,7157,28,0.000545,
+gemini,5,clear_room,door_open,18,1.946,7225,48,0.000556,
+gemini,5,clear_room,door_open,19,1.328,7318,38,0.00056,
+gemini,5,clear_room,door_open,20,2.163,7422,12,0.00056,
+gemini,5,clear_room,door_open,21,2.048,7473,34,0.000571,
+gemini,5,clear_room,door_open,22,2.355,7537,16,0.00057,
+gemini,5,clear_room,door_open,23,1.898,7645,103,0.000604,"Description: The room appears to be an office or industrial space with cubicle-like structures or partitions. There are no immediate signs of distress or emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+"
+gemini,5,clear_room,door_open,24,1.639,7927,48,0.000609,
+gemini,5,clear_room,door_open,25,1.842,8020,38,0.000613,
+gemini,5,clear_room,door_open,26,2.85,8124,12,0.000613,
+gemini,5,clear_room,door_open,27,2.048,8175,34,0.000623,
+gemini,5,clear_room,door_open,28,1.741,8239,16,0.000623,
+gemini,5,clear_room,door_open,29,2.271,8347,99,0.000656,"Description: The drone is now facing a different section of the room, showing more of the interior structure. No visible signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+"
+gemini,5,clear_room,door_open,30,1.793,8623,48,0.000661,
+gemini,5,clear_room,door_open,31,2.049,8716,38,0.000665,
+gemini,5,clear_room,door_open,32,3.058,8820,12,0.000665,
+gemini,5,clear_room,door_open,33,1.946,8871,35,0.000676,
+gemini,5,clear_room,door_open,34,1.945,8937,16,0.000675,
+gemini,5,clear_room,door_open,35,2.219,9045,111,0.000712,"Description: The drone is now positioned in another corner of the room. The view shows more of the room's structure and what appears to be a table or counter. No signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+"
+gemini,5,clear_room,door_open,36,2.251,9333,49,0.000715,
+gemini,5,clear_room,door_open,37,2.048,9428,38,0.000718,
+gemini,5,clear_room,door_open,38,2.241,9533,12,0.000719,
+gemini,5,clear_room,door_open,39,2.867,9584,35,0.000729,
+gemini,5,clear_room,door_open,40,2.151,9650,16,0.000729,
+gemini,5,clear_room,door_open,41,2.407,9758,107,0.000764,"Description: The drone is now at the final patrol waypoint, completing the sweep of the room. The view shows a similar industrial or office setting with no visible signs of emergency.
+Sensor note: MediaPipe detected a person, but YOLO-World did not. The image does not clearly show a person.
+Proximity: No clear person or object detected with depth.
+Risk: CLEAR
+Pilot suggested action: CONTINUE_PATROL
+Confidence: 0.7
+"
+gemini,5,clear_room,door_open,42,1.945,10042,31,0.000762,
+gemini,5,clear_room,door_open,43,2.048,10100,8,0.00076,
+gemini,5,clear_room,door_open,44,2.145,10172,33,0.000773,
+gemini,5,clear_room,door_open,45,3.175,10234,317,0.000863,"Overall room status: CLEAR
+
+Findings from each waypoint:
+- **Waypoint 1 (0.5, 0.5, 1.0):** The room appears to be an office or industrial space with cubicle-like structures or partitions. No immediate signs of distress or emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 2 (0.5, -0.5, 1.0):** A different section of the room was visible, showing more of the interior structure. No visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 3 (-0.5, -0.5, 1.0):** Another corner of the room was surveyed, showing more of the room's structure and what appeared to be a table or counter. No signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+- **Waypoint 4 (-0.5, 0.5, 1.0):** The final patrol waypoint showed a similar industrial or office setting with no visible signs of emergency. MediaPipe detected a person, but YOLO-World did not, and the image did not clearly show a person.
+
+Recommended actions for human operator:
+The room appears clear of any immediate emergencies or alerts. No further action is required at this time.
+"
+gemini,6,alert_room,person_near,1,3.32,6119,96,0.000488,
+gemini,6,alert_room,person_near,2,1.945,6652,29,0.000508,
+gemini,6,alert_room,person_near,3,1.946,7119,8,0.000536,
+gemini,6,alert_room,person_near,4,2.329,7567,12,0.000571,
+gemini,6,alert_room,person_near,5,2.252,8031,29,0.000611,
+gemini,6,alert_room,person_near,6,4.096,8498,12,0.000641,
+gemini,6,alert_room,person_near,7,4.045,8967,12,0.000676,
+gemini,6,alert_room,person_near,8,3.999,9431,38,0.000719,
+gemini,6,alert_room,person_near,9,1.537,9916,12,0.000747,
+gemini,6,alert_room,person_near,10,1.841,10379,17,0.000784,
+gemini,6,alert_room,person_near,11,2.456,10836,13,0.000817,
+gemini,6,alert_room,person_near,12,2.782,11296,28,0.000856,
+gemini,6,alert_room,person_near,13,1.742,11779,13,0.000887,
+gemini,6,alert_room,person_near,14,1.948,12239,28,0.000926,
+gemini,6,alert_room,person_near,15,2.544,12721,34,0.000964,
+gemini,6,alert_room,person_near,16,3.19,13200,38,0.001001,
+gemini,6,alert_room,person_near,17,3.159,13718,12,0.001032,
+gemini,6,alert_room,person_near,18,1.744,14183,16,0.001069,
+gemini,6,alert_room,person_near,19,1.711,14722,12,0.001108,
+gemini,6,alert_room,person_near,20,2.252,15324,116,0.001184,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+"
+gemini,6,alert_room,person_near,21,1.946,15881,12,0.001195,
+gemini,6,alert_room,person_near,22,1.842,16346,16,0.001231,
+gemini,6,alert_room,person_near,23,2.416,16885,124,0.001304,"Description: The person is still standing with their arms raised, indicating a potential distress signal. The environment remains consistent with a workshop or storage area.
+Sensor note: Consistent. MediaPipe continues to detect a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.95
+"
+gemini,6,alert_room,person_near,24,2.356,17456,136,0.00135,"The mission is interrupted due to an EMERGENCY. The drone has detected a person in distress. The operator has been alerted.
+
+Final Room Safety Report:
+Overall room status: EMERGENCY
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m): A person is standing with their arms raised, indicating distress. MediaPipe detected a person at 0.24m with a hazard risk.
+Recommended actions for human operator: Immediate human intervention is required to assess the situation and provide assistance to the person in distress. The drone is currently hovering at the location of the detected emergency.
+"
+gemini,6,alert_room,person_near,25,2.252,18070,128,0.001394,"The mission is interrupted due to an EMERGENCY. The drone has detected a person in distress. The operator has been alerted.
+
+Final Room Safety Report:
+Overall room status: EMERGENCY
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m): A person is standing with their arms raised, indicating distress. MediaPipe detected a person at 0.24m with a hazard risk.
+Recommended actions for human operator: Immediate human intervention is required to assess the situation and provide assistance to the person in distress. The drone is currently on the ground after landing due to the emergency."
+gemini,7,alert_room,person_near,1,2.79,6119,177,0.000512,
+gemini,7,alert_room,person_near,2,2.124,6734,30,0.000514,
+gemini,7,alert_room,person_near,3,3.433,7203,8,0.000543,
+gemini,7,alert_room,person_near,4,3.411,7651,12,0.000577,
+gemini,7,alert_room,person_near,5,2.164,8115,30,0.000618,
+gemini,7,alert_room,person_near,6,2.544,8584,12,0.000647,
+gemini,7,alert_room,person_near,7,4.866,9053,12,0.000683,
+gemini,7,alert_room,person_near,8,2.356,9517,39,0.000725,
+gemini,7,alert_room,person_near,9,4.504,10004,12,0.000754,
+gemini,7,alert_room,person_near,10,2.253,10467,17,0.00079,
+gemini,7,alert_room,person_near,11,6.759,10924,13,0.000823,
+gemini,7,alert_room,person_near,12,4.418,11384,30,0.000863,
+gemini,7,alert_room,person_near,13,3.991,11854,28,0.000897,
+gemini,7,alert_room,person_near,14,1.687,12337,13,0.000929,
+gemini,7,alert_room,person_near,15,1.586,12797,28,0.000968,
+gemini,7,alert_room,person_near,16,3.176,13279,46,0.00101,
+gemini,7,alert_room,person_near,17,5.128,13781,38,0.001045,
+gemini,7,alert_room,person_near,18,3.064,14299,12,0.001076,
+gemini,7,alert_room,person_near,19,2.563,14764,33,0.001117,
+gemini,7,alert_room,person_near,20,6.658,15240,16,0.001148,
+gemini,7,alert_room,person_near,21,2.517,15779,12,0.001187,
+gemini,7,alert_room,person_near,22,2.049,16382,78,0.001252,"Description: The camera shows a person standing in the center of the frame, facing the drone, with their arms raised. The room appears to be a workshop or storage area with various items in the background.
+Sensor note: consistent
+Proximity: 0.24m
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8
+"
+gemini,8,alert_room,person_near,1,1.843,6119,96,0.000488,
+gemini,8,alert_room,person_near,2,2.561,6652,29,0.000508,
+gemini,8,alert_room,person_near,3,1.33,7119,8,0.000536,
+gemini,8,alert_room,person_near,4,1.919,7567,12,0.000571,
+gemini,8,alert_room,person_near,5,1.637,8031,29,0.000611,
+gemini,8,alert_room,person_near,6,1.599,8498,12,0.000641,
+gemini,8,alert_room,person_near,7,5.938,8967,12,0.000676,
+gemini,8,alert_room,person_near,8,4.296,9431,38,0.000719,
+gemini,8,alert_room,person_near,9,3.076,9916,12,0.000747,
+gemini,8,alert_room,person_near,10,3.175,10379,13,0.000782,
+gemini,8,alert_room,person_near,11,1.946,10839,17,0.000818,
+gemini,8,alert_room,person_near,12,1.635,11297,13,0.000851,
+gemini,8,alert_room,person_near,13,1.587,11757,28,0.00089,
+gemini,8,alert_room,person_near,14,3.072,12240,13,0.000922,
+gemini,8,alert_room,person_near,15,4.745,12700,28,0.000961,
+gemini,8,alert_room,person_near,16,2.516,13182,34,0.000999,
+gemini,8,alert_room,person_near,17,3.176,13661,38,0.001036,
+gemini,8,alert_room,person_near,18,2.97,14179,12,0.001067,
+gemini,8,alert_room,person_near,19,4.096,14644,16,0.001103,
+gemini,8,alert_room,person_near,20,1.997,15183,12,0.001142,
+gemini,8,alert_room,person_near,21,2.253,15788,103,0.001215,"Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+"
+gemini,8,alert_room,person_near,22,1.74,16332,12,0.001228,
+gemini,8,alert_room,person_near,23,1.638,16797,16,0.001265,
+gemini,8,alert_room,person_near,24,2.309,17336,137,0.001341,"Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+"
+gemini,8,alert_room,person_near,25,1.943,17924,44,0.001357,"The drone has detected an emergency. The person in the room has their arms raised, which could indicate distress. The drone will now land and report the emergency to the operator.
+"
+gemini,8,alert_room,person_near,26,3.604,18446,167,0.001434,"Overall room status: EMERGENCY
+
+Findings from waypoint 1 (0.5m, 0.5m, 1.0m):
+Description: The camera shows a person standing in the center of the room, facing the drone. The person's arms are raised, suggesting a possible distress signal or an attempt to get attention.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+
+Recommended actions for human operator:
+An emergency has been detected. A person in the room has their arms raised, indicating a possible distress signal. Immediate human intervention is required to assess the situation and provide assistance."
+gemini,9,alert_room,person_near,1,2.354,6119,177,0.000512,
+gemini,9,alert_room,person_near,2,1.64,6734,30,0.000514,
+gemini,9,alert_room,person_near,3,2.248,7203,8,0.000543,
+gemini,9,alert_room,person_near,4,2.035,7651,12,0.000577,
+gemini,9,alert_room,person_near,5,1.741,8115,30,0.000618,
+gemini,9,alert_room,person_near,6,2.454,8584,12,0.000647,
+gemini,9,alert_room,person_near,7,2.328,9053,12,0.000683,
+gemini,9,alert_room,person_near,8,1.637,9517,39,0.000725,
+gemini,9,alert_room,person_near,9,2.255,10004,12,0.000754,
+gemini,9,alert_room,person_near,10,2.07,10467,13,0.000789,
+gemini,9,alert_room,person_near,11,2.734,10927,17,0.000825,
+gemini,9,alert_room,person_near,12,1.842,11385,13,0.000858,
+gemini,9,alert_room,person_near,13,1.764,11845,30,0.000897,
+gemini,9,alert_room,person_near,14,2.659,12315,28,0.000932,
+gemini,9,alert_room,person_near,15,2.36,12798,13,0.000964,
+gemini,9,alert_room,person_near,16,3.169,13258,28,0.001003,
+gemini,9,alert_room,person_near,17,2.557,13740,46,0.001044,
+gemini,9,alert_room,person_near,18,3.177,14242,38,0.00108,
+gemini,9,alert_room,person_near,19,4.653,14761,12,0.001111,
+gemini,9,alert_room,person_near,20,2.644,15226,33,0.001152,
+gemini,9,alert_room,person_near,21,3.139,15702,16,0.001182,
+gemini,9,alert_room,person_near,22,3.337,16241,12,0.001222,
+gemini,9,alert_room,person_near,23,4.3,16846,107,0.001296,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, as if in a gesture of surrender or alarm. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: 0.24m
+Risk: EMERGENCY
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.9
+"
+gemini,10,alert_room,person_near,1,2.356,6119,96,0.000488,
+gemini,10,alert_room,person_near,2,1.945,6652,29,0.000508,
+gemini,10,alert_room,person_near,3,1.841,7119,8,0.000536,
+gemini,10,alert_room,person_near,4,2.425,7567,12,0.000571,
+gemini,10,alert_room,person_near,5,2.109,8031,29,0.000611,
+gemini,10,alert_room,person_near,6,2.974,8498,12,0.000641,
+gemini,10,alert_room,person_near,7,2.257,8967,12,0.000676,
+gemini,10,alert_room,person_near,8,2.868,9431,38,0.000719,
+gemini,10,alert_room,person_near,9,1.536,9916,12,0.000747,
+gemini,10,alert_room,person_near,10,1.638,10379,13,0.000782,
+gemini,10,alert_room,person_near,11,1.741,10839,17,0.000818,
+gemini,10,alert_room,person_near,12,1.636,11297,13,0.000851,
+gemini,10,alert_room,person_near,13,1.738,11757,28,0.00089,
+gemini,10,alert_room,person_near,14,2.48,12240,13,0.000922,
+gemini,10,alert_room,person_near,15,2.93,12700,28,0.000961,
+gemini,10,alert_room,person_near,16,2.703,13182,34,0.000999,
+gemini,10,alert_room,person_near,17,2.505,13661,38,0.001036,
+gemini,10,alert_room,person_near,18,2.704,14179,12,0.001067,
+gemini,10,alert_room,person_near,19,2.302,14644,16,0.001103,
+gemini,10,alert_room,person_near,20,1.753,15183,12,0.001142,
+gemini,10,alert_room,person_near,21,2.456,15786,120,0.00122,"Description: The camera shows a person standing in the center of the room, facing the drone. Their arms are raised, suggesting they might be stretching or signaling. The room appears to be a workshop or storage area with shelves and equipment in the background.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8"
+gemini,10,alert_room,person_near,22,3.068,16347,12,0.00123,
+gemini,10,alert_room,person_near,23,3.793,16812,16,0.001266,
+gemini,10,alert_room,person_near,24,3.04,17351,124,0.001339,"Description: The person is still standing in the same position with arms raised. The scene remains consistent with the previous observation.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: INVESTIGATE_CLOSER
+Confidence: 0.8"
+gemini,10,alert_room,person_near,25,3.413,17924,40,0.001356,
+gemini,10,alert_room,person_near,26,3.135,18444,12,0.001387,
+gemini,10,alert_room,person_near,27,3.64,18909,16,0.001423,
+gemini,10,alert_room,person_near,28,2.222,19448,131,0.001498,"Description: The person is still in the same position with arms raised. The drone is now closer, providing a clearer view. The person appears to be actively signaling or stretching.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.9"
+gemini,10,alert_room,person_near,29,2.046,20026,34,0.001512,
+gemini,10,alert_room,person_near,30,5.224,20505,38,0.001549,
+gemini,10,alert_room,person_near,31,1.931,21023,12,0.00158,
+gemini,10,alert_room,person_near,32,1.84,21488,16,0.001616,
+gemini,10,alert_room,person_near,33,4.583,22027,12,0.001656,
+gemini,10,alert_room,person_near,34,3.889,22630,128,0.001736,"Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8"
+gemini,10,alert_room,person_near,35,1.946,23205,34,0.001751,
+gemini,10,alert_room,person_near,36,3.888,23684,38,0.001788,
+gemini,10,alert_room,person_near,37,4.711,24202,12,0.001819,
+gemini,10,alert_room,person_near,38,3.891,24667,16,0.001855,
+gemini,10,alert_room,person_near,39,3.527,25206,12,0.001894,
+gemini,10,alert_room,person_near,40,3.891,25808,128,0.001974,"Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8"
+gemini,10,alert_room,person_near,41,1.947,26383,34,0.001989,
+gemini,10,alert_room,person_near,42,3.638,26862,38,0.002026,
+gemini,10,alert_room,person_near,43,4.299,27381,12,0.002057,
+gemini,10,alert_room,person_near,44,1.981,27846,16,0.002093,
+gemini,10,alert_room,person_near,45,3.951,28385,12,0.002132,
+gemini,10,alert_room,person_near,46,3.774,28990,128,0.002213,"Description: The camera shows the same person in the center of the room, still with arms raised. The background appears to be a cluttered workshop or storage area.
+Sensor note: Consistent. MediaPipe detected a person at 0.24m with a hazard risk.
+Proximity: The closest person is approximately 0.24m away.
+Risk: ALERT
+Pilot suggested action: ALERT_OPERATOR
+Confidence: 0.8"
+gemini,10,alert_room,person_near,47,6.656,29565,29,0.002226,
+gemini,10,alert_room,person_near,48,4.405,30033,8,0.002255,
+gemini,10,alert_room,person_near,49,3.888,30519,31,0.002298,
+gemini,10,alert_room,person_near,50,5.427,30991,338,0.002426,"Overall room status: ALERT
+
+Findings from each waypoint:
+*   **Waypoint 1 (0.5, 0.5, 1.0):** A person was detected standing in the center of the room with arms raised. MediaPipe indicated a ""hazard"" risk. The drone moved closer to investigate.
+*   **Waypoint 2 (0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 3 (-0.5, -0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+*   **Waypoint 4 (-0.5, 0.5, 1.0):** The same person was observed in the center of the room with arms raised. MediaPipe continued to indicate a ""hazard"" risk. The operator was alerted.
+
+Recommended actions for human operator:
+*   Investigate the person in the room to determine the nature of their actions and the ""hazard"" risk indicated by MediaPipe.
+*   Assess if the person requires assistance or if their presence poses any safety concerns.
+*   Consider if the drone's proximity to the person (0.24m) is appropriate or if further distance is needed for safety."
