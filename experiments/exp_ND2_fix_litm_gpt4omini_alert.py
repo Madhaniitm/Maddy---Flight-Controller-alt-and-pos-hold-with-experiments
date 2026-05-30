@@ -1,6 +1,6 @@
 """
 EXP-ND2-FIX: GPT-4o-mini × alert_room × 5 runs
-Lost-in-the-Middle corrections (Finding 9)
+Lost-in-the-Middle + Semantic Loop corrections (Findings 9 & 10)
 ============================================================
 Baseline failure (ND2, 20260528_224548):
   GPT-4o-mini entered an infinite analyze_scene(room_event) loop on alert_room.
@@ -8,7 +8,7 @@ Baseline failure (ND2, 20260528_224548):
   LLM turns take 2-3s) → model attends to fresh high-salience advisory each turn
   and ignores its own prior history ("Lost in the Middle", Liu et al. 2023).
 
-Three mitigations applied here — all from literature (see ND2 Finding 9):
+Six mitigations applied here — all from literature (see ND2 Findings 9 & 10):
 
   [M1] Advisory rate-limiting                (Liu et al. 2023; arxiv 2510.10276)
        Suppress advisory re-injection if fewer than MIN_ADVISORY_GAP_TURNS have
@@ -24,9 +24,26 @@ Three mitigations applied here — all from literature (see ND2 Finding 9):
        `final_text = turn_text` — preserves earlier report text when the model
        later emits an empty content alongside tool calls.
 
+  [M4] Loop detection + nudging               (Saha 2025; agentpatterns.tech)
+       Track analyze_scene and hover call counts. Once either crosses
+       SCENE_CALL_NUDGE_THRESHOLD, inject a strong "LOOP DETECTED — write
+       your report NOW" message in the mission state. Breaks the semantic loop
+       by naming the behaviour and redirecting to a concrete alternative action.
+
+  [M5] Turn budget warning                    (agentpatterns.tech; Maxim AI 2025)
+       At turn TURN_BUDGET_WARN_AT (default 40/50), inject a countdown:
+       "Only N turns remain — you MUST write your report in the next 2 turns."
+       Creates explicit deadline awareness; small models respond to countdowns.
+
+  [M6] Explicit quit condition in mission state  (arxiv 2510.16492 — Liu et al.)
+       Always include a fixed exit rule in the mission state:
+       "After ≥ N analyze_scene calls → STOP tools, write report immediately."
+       Gives the model a self-monitoring rule before the loop forms.
+
 Comparison:
   Original ND2:   patrol=0%, correct=100%, quality=0/5, words=0, scene_calls=17-23/run
-  Target (fixed): patrol>0%, correct>=80%, quality>0,   words>0, scene_calls<=10/run
+  M1-M3 only:     patrol=0%, correct=0%,   quality=0/5, words=0, scene_calls=10/run (semantic loop shifted)
+  Target (M1-M6): patrol>0%, correct>=80%, quality>0,   words>0, scene_calls<=6/run
 
 Run:
     export GLOG_minloglevel=3
@@ -68,9 +85,19 @@ ND_RESULTS.mkdir(exist_ok=True)
 
 # ── Mitigation parameters ─────────────────────────────────────────────────────
 
-MIN_ADVISORY_GAP_TURNS = 5   # [M1] minimum turns between advisory injections
-                              # Liu et al. 2023: recency bias dominates within 5 turns
-                              # → suppress re-injection to break the loop cycle
+MIN_ADVISORY_GAP_TURNS     = 5   # [M1] minimum turns between advisory injections
+                                  # Liu et al. 2023: recency bias dominates within 5 turns
+                                  # → suppress re-injection to break the loop cycle
+
+SCENE_CALL_NUDGE_THRESHOLD = 3   # [M4] loop nudge fires after this many analyze_scene calls
+                                  # Saha 2025: "You already tried this, try something different"
+
+HOVER_CALL_NUDGE_THRESHOLD = 3   # [M4] loop nudge fires after this many hover calls
+                                  # agentpatterns.tech: deduplication on repeated tool+args
+
+TURN_BUDGET_WARN_AT        = 40  # [M5] inject urgency countdown from this turn onward
+                                  # agentpatterns.tech: hard limits force exit
+                                  # Maxim AI 2025: deterministic stop rules
 
 ORCHESTRATOR = "gpt4o_mini"
 N_RUNS       = 5
@@ -98,62 +125,89 @@ BASELINE = {
 def _build_mission_state(turn: int,
                          tool_trace: list,
                          last_advisory_turn: int,
-                         advisory_count: int) -> str:
+                         advisory_count: int,
+                         max_turns: int = 50) -> str:
     """
     Build a structured mission-state summary for injection at the START of
     each turn's user message.
 
-    Rationale (Liu et al. 2023; arxiv 2603.11513):
-      Smaller models underweight middle-context information and overweight
-      the most recent tokens. By placing "already handled advisory at turn N"
-      in the PRIMACY position of the most recent user message, we exploit
-      the U-shaped attention curve to override recency bias from the advisory.
-
-    The summary is intentionally brief (< 80 tokens) to avoid adding noise.
+    Mitigations embedded here:
+      [M2] Primacy-position memory injection   (Liu et al. 2023; arxiv 2603.11513)
+      [M4] Loop detection + nudging            (Saha 2025; agentpatterns.tech)
+      [M5] Turn budget warning                 (agentpatterns.tech; Maxim AI 2025)
+      [M6] Explicit quit condition             (arxiv 2510.16492)
     """
-    # Last 4 tool calls
-    recent = tool_trace[-4:] if len(tool_trace) >= 4 else tool_trace
-    recent_tools = [t["name"] for t in recent] if recent else []
-    recent_str   = " → ".join(recent_tools) if recent_tools else "none yet"
+    # ── Counters from trace ────────────────────────────────────────────────────
+    scene_count = sum(1 for t in tool_trace if t["name"] == "analyze_scene")
+    hover_count = sum(1 for t in tool_trace if t["name"] == "hover")
+    turns_left  = max_turns - turn
 
-    # Last analyze_scene call
-    last_scene_turn = None
-    last_scene_ctx  = None
+    # Last 4 tool calls (recency context)
+    recent      = tool_trace[-4:] if len(tool_trace) >= 4 else tool_trace
+    recent_str  = " → ".join(t["name"] for t in recent) if recent else "none yet"
+
+    # Last analyze_scene call details
+    last_scene_turn, last_scene_ctx = None, None
     for t in reversed(tool_trace):
         if t["name"] == "analyze_scene":
             last_scene_turn = t["turn"]
             last_scene_ctx  = t["args"].get("context", "?")
             break
 
-    # Advisory history
+    # ── [M2] Advisory history (primacy injection) ──────────────────────────────
     if last_advisory_turn > 0:
         gap = turn - last_advisory_turn
         adv_line = (
             f"Advisory last injected: turn {last_advisory_turn} "
-            f"({gap} turn(s) ago, total injections: {advisory_count}). "
-            f"If scene is UNCHANGED — IGNORE any new advisory and continue your plan."
+            f"({gap} turn(s) ago, total: {advisory_count}). "
+            f"Scene UNCHANGED — IGNORE any new advisory, continue your plan."
         )
     else:
         adv_line = "No advisory injected yet."
 
-    # Scene history
+    # ── [M2] Scene history ─────────────────────────────────────────────────────
     if last_scene_turn:
         scene_line = (
-            f"Last analyze_scene: turn {last_scene_turn} "
-            f"(context='{last_scene_ctx}'). "
-            f"Do NOT call analyze_scene(room_event) again for the same scene."
+            f"analyze_scene called {scene_count}× total. "
+            f"Last: turn {last_scene_turn} (context='{last_scene_ctx}'). "
+            f"Do NOT call analyze_scene again from the same position."
         )
     else:
         scene_line = "analyze_scene not yet called this run."
 
+    # ── [M6] Explicit quit condition (always present) ──────────────────────────
+    quit_rule = (
+        f"EXIT RULE: Once analyze_scene has been called ≥ {SCENE_CALL_NUDGE_THRESHOLD} times, "
+        f"STOP all tool calls and write your final structured report immediately."
+    )
+
+    # ── [M4] Loop detection nudge (activates at threshold) ────────────────────
+    nudge_line = ""
+    if scene_count >= SCENE_CALL_NUDGE_THRESHOLD or hover_count >= HOVER_CALL_NUDGE_THRESHOLD:
+        nudge_line = (
+            f"\n⚠️  LOOP DETECTED: analyze_scene called {scene_count}× and "
+            f"hover called {hover_count}× this run. "
+            f"YOU HAVE MORE THAN ENOUGH DATA. "
+            f"Do NOT call analyze_scene or hover again. "
+            f"Write your final structured report RIGHT NOW, then call land()."
+        )
+
+    # ── [M5] Turn budget warning (activates near end) ─────────────────────────
+    budget_line = ""
+    if turn >= TURN_BUDGET_WARN_AT:
+        budget_line = (
+            f"\n⏰  TURN BUDGET: Only {turns_left} turns remaining. "
+            f"You MUST write your final report within the next 2 turns or the mission fails."
+        )
+
     return (
-        f"[MISSION STATE — Turn {turn}/{MIN_ADVISORY_GAP_TURNS * 10}]\n"
+        f"[MISSION STATE — Turn {turn}/{max_turns}]\n"
         f"Recent tools: {recent_str}\n"
         f"{scene_line}\n"
         f"{adv_line}\n"
-        f"ACTION REQUIRED: Continue your patrol plan from where you left off. "
-        f"Do NOT restart from step 1. Do NOT call analyze_scene(room_event) "
-        f"unless you have moved to a NEW position since the last analysis.\n"
+        f"{quit_rule}"
+        f"{nudge_line}"
+        f"{budget_line}\n"
         f"---"
     )
 
@@ -162,11 +216,14 @@ def _build_mission_state(turn: int,
 
 class FixedNDAgent(NDAgent):
     """
-    NDAgent with three Lost-in-the-Middle mitigations applied to the OpenAI loop.
+    NDAgent with six mitigations applied to the OpenAI loop (Findings 9 & 10).
 
-    [M1] Advisory rate-limiting   — suppress advisory if < MIN_ADVISORY_GAP_TURNS
-    [M2] Structured memory inject — mission state prepended every turn
-    [M3] final_text overwrite fix — `if turn_text: final_text = turn_text`
+    [M1] Advisory rate-limiting    — suppress advisory if gap < MIN_ADVISORY_GAP_TURNS
+    [M2] Structured memory inject  — mission state prepended every turn (primacy)
+    [M3] final_text overwrite fix  — `if turn_text: final_text = turn_text`
+    [M4] Loop detection + nudging  — ⚠️ LOOP DETECTED message after N repeated calls
+    [M5] Turn budget warning       — ⏰ countdown injected at turn TURN_BUDGET_WARN_AT
+    [M6] Explicit quit condition   — EXIT RULE always in mission state
     """
 
     def _run_openai_orchestrator_loop(self, orchestrator: str,
@@ -220,7 +277,7 @@ class FixedNDAgent(NDAgent):
             # Inject mission state at the START of this turn's user message block.
             # Position: immediately before the API call → primacy of recent context.
             state_msg = _build_mission_state(
-                turn, tool_trace, last_advisory_turn, advisory_count)
+                turn, tool_trace, last_advisory_turn, advisory_count, max_turns)
             messages.append({"role": "user", "content": state_msg})
 
             # ── [M1] Advisory rate-limiting ────────────────────────────────────
@@ -350,10 +407,13 @@ def main():
 
     print("=" * 65)
     print("EXP-ND2-FIX: GPT-4o-mini × alert_room × 5 runs")
-    print("Lost-in-the-Middle mitigations (Finding 9)")
-    print(f"  [M1] Advisory rate-limit  : gap >= {MIN_ADVISORY_GAP_TURNS} turns")
-    print(f"  [M2] Memory injection     : mission state prepended every turn")
-    print(f"  [M3] final_text bug fix   : preserve non-empty text across turns")
+    print("Lost-in-the-Middle + Semantic Loop mitigations (Findings 9 & 10)")
+    print(f"  [M1] Advisory rate-limit   : gap >= {MIN_ADVISORY_GAP_TURNS} turns")
+    print(f"  [M2] Memory injection      : mission state prepended every turn")
+    print(f"  [M3] final_text bug fix    : preserve non-empty text across turns")
+    print(f"  [M4] Loop detection nudge  : fire after analyze_scene >= {SCENE_CALL_NUDGE_THRESHOLD}x or hover >= {HOVER_CALL_NUDGE_THRESHOLD}x")
+    print(f"  [M5] Turn budget warning   : countdown injected from turn {TURN_BUDGET_WARN_AT}/50")
+    print(f"  [M6] Explicit quit rule    : EXIT RULE in every mission state")
     print()
     print("Baseline (original ND2):")
     print(f"  patrol={BASELINE['patrol_rate']*100:.0f}%  "
