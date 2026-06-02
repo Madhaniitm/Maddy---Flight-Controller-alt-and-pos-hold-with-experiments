@@ -1,0 +1,1089 @@
+% ============================================================
+% thesis_references.bib
+% Complete reference list for:
+%   "LLM-Driven Three-Tier Indoor Drone Control with
+%    Vision-Based Scene Understanding and Agentic Patrol"
+%
+% Sections:
+%   A. Drone Control & LLM Robotics
+%   B. Image Verbalization & Vision Pipeline (V-series)
+%   C. Object Detection & Depth Estimation (Tier 2)
+%   D. Prompt Engineering & Reasoning Techniques
+%   E. Agentic Loop Failures & Mitigations
+%   F. Long-Context & Memory in LLMs (ND2 — Lost in the Middle)
+%   G. Human-in-the-Loop & Safety (ND3)
+%   H. LLM Evaluation Methodology
+%   I. Flight Controller, PID & Simulation Physics (B/C-series)
+%   J. LLM Robotics — Tool Use & Few-Shot (C-series background)
+%   K. Vision-Language Models (V/G-series)
+%   L. Additional Control & Estimation (A/B-series audit additions)
+% ============================================================
+
+
+% ── A. Drone Control & LLM Robotics ──────────────────────────────────────────
+
+@article{vemprala2023chatgpt,
+  author    = {Vemprala, Sai and Bonatti, Rogerio and Bucker, Arthur and Kapoor, Ashish},
+  title     = {{ChatGPT} for Robotics: Design Principles and Model Abilities},
+  journal   = {Microsoft Autonomous Systems and Robotics Research},
+  year      = {2023},
+  url       = {https://www.microsoft.com/en-us/research/uploads/prod/2023/02/ChatGPT___Robotics.pdf}
+}
+
+
+@article{rescuedrone2025,
+  author    = {Gaitan, Nicoleta Cristina and Batinas, Bianca Ioana and Ursu, Calin},
+  title     = {{AI}-Enhanced Rescue Drone with Multi-Modal Vision and Cognitive Agentic Architecture},
+  journal   = {AI},
+  volume    = {6},
+  number    = {10},
+  pages     = {272},
+  year      = {2025},
+  publisher = {MDPI},
+  url       = {https://www.mdpi.com/2673-2688/6/10/272},
+  note      = {Rescue drone with custom-trained YOLO11 + LLM cognitive core.
+               Closest existing paper to the ND-series architecture.}
+}
+
+@inproceedings{hierarchicaldrone2025,
+  author    = {Herron, Ethan and Lee, Xian Yeow and Sin, Gregory and
+               Gonzalez Diaz, Maria Teresa and Farahat, Ahmed K. and Gupta, Chetan},
+  title     = {A Hierarchical Agentic Framework for Autonomous Drone-Based Visual Inspection},
+  booktitle = {Annual Conference of the PHM Society},
+  volume    = {17},
+  number    = {1},
+  year      = {2025},
+  url       = {https://papers.phmsociety.org/index.php/phmconf/article/view/4328},
+  note      = {PHM Society 2025. Two-tier Head+Worker agent hierarchy;
+               90.5\% accuracy with o3 + ReActEval. Method × model interaction finding.}
+}
+
+
+@article{openedgeperception2025,
+  author    = {Park, Jongyoon and Kim, Pileun and Ko, Daeil},
+  title     = {Real-Time Open-Vocabulary Perception for Mobile Robots on Edge Devices:
+               A Systematic Analysis of the Accuracy-Latency Trade-off},
+  journal   = {Frontiers in Robotics and {AI}},
+  year      = {2025},
+  doi       = {10.3389/frobt.2025.1693988},
+  url       = {https://pmc.ncbi.nlm.nih.gov/articles/PMC12583037/},
+  note      = {NanoOWL vs YOLO-World comparison on embedded hardware.
+               NanoOWL: 9.81 ms / 102 FPS. Justifies YOLO confidence threshold filter.
+               Korea Aerospace University.}
+}
+
+
+% ── B. Image Verbalization & Vision Pipeline (V/G-series) ────────────────────
+
+
+@inproceedings{embodiedqa2025,
+  author    = {Zhai, Mingliang and Liang, Hansheng and Fan, Xiaomeng and Gao, Zhi and
+               Li, Chuanhao and Sun, Che and Bin, Xu and Wu, Yuwei and Jia, Yunde},
+  title     = {Multi-Step Reasoning for Embodied Question Answering via Tool Augmentation},
+  booktitle = {Proceedings of the 14th International Conference on Learning
+               Representations (ICLR 2026)},
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=lHfUG7iFaJ},
+  note      = {ICLR 2026. ToolEQA: grounded tool output enables verifiable reasoning steps;
+               +9.2--20.2\% success over baselines on HM-EQA/OpenEQA.
+               Supports analyze\_scene as the observation step in ND ReAct loop.}
+}
+
+@inproceedings{clip2021,
+  author    = {Radford, Alec and Kim, Jong Wook and Hallacy, Chris and
+               Ramesh, Aditya and Goh, Gabriel and Agarwal, Sandhini and
+               Sastry, Girish and Askell, Amanda and Mishkin, Pamela and
+               Clark, Jack and Krueger, Gretchen and Sutskever, Ilya},
+  title     = {Learning Transferable Visual Models From Natural Language Supervision},
+  booktitle = {Proceedings of the 38th International Conference on Machine Learning
+               (ICML)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {139},
+  pages     = {8748--8763},
+  year      = {2021},
+  url       = {https://proceedings.mlr.press/v139/radford21a.html},
+  note      = {CLIP — used in V6 CLIP ablation experiment.
+               V\_clip\_ablation shows CLIP adds ≤0.05 quality points → dropped from pipeline.}
+}
+
+@incollection{clahe_zuiderveld1994,
+  author    = {Zuiderveld, Karel},
+  title     = {Contrast Limited Adaptive Histogram Equalization},
+  booktitle = {Graphics Gems {IV}},
+  editor    = {Heckbert, Paul S.},
+  publisher = {Academic Press},
+  pages     = {474--485},
+  year      = {1994},
+  url       = {https://www.sciencedirect.com/science/chapter/edited-volume/abs/pii/B9780123361561500616},
+  note      = {CLAHE pre-processing applied to every frame before YOLO-World inference
+               in the V-series pipeline (clip\_limit=2.0, tile\_grid=(8,8)).}
+}
+
+@article{persondetectionuav2025,
+  author    = {Shubhasree, A. V. and Sankaran, Praveen and Raghu, C. V.},
+  title     = {Fine-Tuned Deep Models for Niche Datasets --- People Detection in
+               {UAV} Building Images to Aid Rescue Operations},
+  journal   = {International Journal of Applied Earth Observation and Geoinformation},
+  volume    = {145},
+  pages     = {104985},
+  year      = {2025},
+  month     = {December},
+  doi       = {10.1016/j.jag.2025.104985},
+  url       = {https://www.sciencedirect.com/science/article/pii/S1569843225006326},
+  note      = {Standard COCO-trained YOLO underperforms on UAV imagery;
+               motivates dual person detector (MediaPipe + YOLO-World) in Tier 1.5+2.
+               NIT Calicut. CC BY-NC-ND 4.0.}
+}
+
+
+% ── C. Object Detection & Depth Estimation (Tier 2) ──────────────────────────
+
+@inproceedings{cheng2024yoloworld,
+  author    = {Cheng, Tianheng and Song, Lin and Ge, Yixiao and Liu, Wenyu and
+               Wang, Xinggang and Shan, Ying},
+  title     = {{YOLO-World}: Real-Time Open-Vocabulary Object Detection},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and
+               Pattern Recognition (CVPR)},
+  year      = {2024},
+  url       = {https://openaccess.thecvf.com/content/CVPR2024/html/Cheng_YOLO-World_Real-Time_Open-Vocabulary_Object_Detection_CVPR_2024_paper.html},
+  note      = {Core Tier-2 open-vocabulary detector used in all V/G/ND experiments.}
+}
+
+@inproceedings{wang2024yolov10,
+  author    = {Wang, Ao and Chen, Hui and Liu, Lihao and Chen, Kai and Lin, Zijia and
+               Han, Jungong and Ding, Guiguang},
+  title     = {{YOLOv10}: Real-Time End-to-End Object Detection},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {37},
+  year      = {2024},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2024/hash/yolov10},
+  note      = {YOLO model family progression context; YOLOv11 used in this work follows.}
+}
+
+@article{kim2024yoloihd,
+  author    = {Kim, Hyeon and others},
+  title     = {{YOLO-IHD}: Improved Real-Time Human Detection System for Indoor Drones},
+  journal   = {Sensors},
+  volume    = {24},
+  year      = {2024},
+  url       = {https://pmc.ncbi.nlm.nih.gov/articles/PMC10857234/},
+  note      = {COCO-trained YOLO (80\% precision) outperforms zero-shot YOLO-World
+               for person detection indoors; justifies dual-YOLO Tier 2 architecture.
+               MDPI Sensors peer-reviewed journal; PMC10857234.}
+}
+
+@inproceedings{tan2020efficientdet,
+  author    = {Tan, Mingxing and Pang, Ruoming and Le, Quoc V.},
+  title     = {{EfficientDet}: Scalable and Efficient Object Detection},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and
+               Pattern Recognition (CVPR)},
+  year      = {2020},
+  url       = {https://openaccess.thecvf.com/content_CVPR_2020/html/Tan_EfficientDet_Scalable_and_Efficient_Object_Detection_CVPR_2020_paper.html},
+  note      = {EfficientDet-Lite0 used in robust\_local\_detector (Tier 1.5);
+               ~14 ms CPU inference, ~13 MB model.}
+}
+
+@inproceedings{lugaresi2019mediapipe,
+  author    = {Lugaresi, Camillo and Tang, Jiuqiang and Nash, Hadon and
+               McClanahan, Chris and Ubowejewski, Esha and Chang, Michael and
+               Townsend, Jonathan and Krishnamoorthi, Raman and Grundmann, Matthias},
+  title     = {{MediaPipe}: A Framework for Building Perception Pipelines},
+  booktitle = {CVPR Workshop on CV for the Real World},
+  year      = {2019},
+  url       = {https://research.google/pubs/mediapipe-a-framework-for-perceiving-and-processing-reality/},
+  note      = {MediaPipe runtime for EfficientDet-Lite0 in Tier 1.5;
+               enables 14 ms end-to-end person detection without GPU.}
+}
+
+@inproceedings{yang2024depthanythingv2,
+  author    = {Yang, Lihe and Kang, Bingyi and Huang, Zilong and Zhao, Zhen and
+               Xu, Xiaogang and Feng, Jiashi and Zhao, Hengshuang},
+  title     = {Depth Anything {V2}},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2024},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2024/hash/Depth_Anything_V2-Abstract-Conference.html},
+  note      = {Primary Tier-2 depth model. Metric Indoor variant gives absolute
+               metre-scale distances. Used in V/G-series experiments.}
+}
+
+@inproceedings{bui2024monoculardrone,
+  author    = {Bui, Anh and others},
+  title     = {Monocular Depth Estimation for Drone Obstacle Avoidance in Indoor Environments},
+  booktitle = {IEEE Conference on Artificial Intelligence (CAI)},
+  year      = {2024},
+  doi       = {10.1109/CAI59483.2024.10802577},
+  url       = {https://doi.org/10.1109/CAI59483.2024.10802577},
+  note      = {Confirms monocular depth viable for indoor nano-drone
+               obstacle avoidance at 0.5–3 m range.}
+}
+
+@inproceedings{piccinelli2024unidepth,
+  author    = {Piccinelli, Luigi and Yang, Yung-Hsu and Sakaridis, Christos and
+               Segu, Mattia and Li, Siyuan and Van Gool, Luc and Yu, Fisher},
+  title     = {{UniDepth}: Universal Monocular Metric Depth Estimation},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and
+               Pattern Recognition (CVPR)},
+  year      = {2024},
+  note      = {Alternative metric depth model evaluated in G3;
+               DA v2 selected for faster CPU inference on companion computer.}
+}
+
+@article{ranftl2022midas,
+  author    = {Ranftl, Ren{\'e} and Bochkovskiy, Alexey and Koltun, Vladlen},
+  title     = {Towards Robust Monocular Depth Estimation: Mixing Datasets for
+               Zero-Shot Cross-Dataset Transfer},
+  journal   = {IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)},
+  volume    = {44},
+  number    = {3},
+  year      = {2022},
+  note      = {MiDaS — baseline monocular depth; foundational work motivating DA v2.}
+}
+
+@article{hu2025surveydepth,
+  author    = {Hu, Xinran and others},
+  title     = {Survey on Monocular Metric Depth Estimation},
+  journal   = {Computers (MDPI)},
+  volume    = {14},
+  number    = {11},
+  pages     = {502},
+  year      = {2025},
+  url       = {https://www.mdpi.com/2073-431X/14/11/502},
+  note      = {Benchmarks DA v2 Metric Indoor as top indoor model;
+               establishes why absolute-metre depth is required for LLM distance reporting.}
+}
+
+
+% ── D. Prompt Engineering & Reasoning Techniques ─────────────────────────────
+
+@inproceedings{wang2025gsce,
+  author    = {Wang, Wenhao and Li, Yanyan and Jiao, Long and Yuan, Jiawei},
+  title     = {{GSCE}: A Prompt Framework with Enhanced Reasoning for Reliable
+               {LLM}-Driven Drone Control},
+  booktitle = {2025 International Conference on Unmanned Aircraft Systems (ICUAS)},
+  year      = {2025},
+  note      = {Guidelines + Skill APIs + Constraints + Examples prompt structure.
+               Applied in ND\_SURVEILLANCE\_PROMPT design.}
+}
+
+
+@inproceedings{yao2022react,
+  author    = {Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and
+               Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+  title     = {{ReAct}: Synergizing Reasoning and Acting in Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2023},
+  url       = {https://openreview.net/forum?id=WE_vluYUL-X},
+  note      = {Foundation for tool-calling agent loops used in ND/V2R experiments.
+               Basis for ReAct vs scheduled strategy comparison in G2.}
+}
+
+@inproceedings{reflexion2023,
+  author    = {Shinn, Noah and Cassano, Federico and Berman, Edward and
+               Gopinath, Ashwin and Narasimhan, Karthik and Yao, Shunyu},
+  title     = {Reflexion: Language Agents with Verbal Reinforcement Learning},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {36},
+  year      = {2023},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/hash/1b44b878bb782e6954cd888628510e90-Abstract-Conference.html},
+  note      = {Agent self-correction under tool-call feedback;
+               informs ND3 HITL denial-and-redirect mechanism.}
+}
+
+@article{voyager2023,
+  author    = {Wang, Guanzhi and Xie, Yuqi and Jiang, Yunfan and Mandlekar, Ajay and
+               Xiao, Chaowei and Zhu, Yuke and Fan, Linxi and Anandkumar, Anima},
+  title     = {Voyager: An Open-Ended Embodied Agent with Large Language Models},
+  journal   = {Transactions on Machine Learning Research (TMLR)},
+  year      = {2024},
+  url       = {https://openreview.net/forum?id=ehfRiF0R3a},
+  note      = {Multi-turn LLM agent with skill library;
+               demonstrates tool call loops and recovery strategies.}
+}
+
+
+% ── E. Agentic Loop Failures & Mitigations ───────────────────────────────────
+
+
+@article{kapoor2024aiagents,
+  author    = {Kapoor, Sayash and Stroebl, Benedikt and Siegel, Zachary S. and
+               Nadgir, Nitya and Narayanan, Arvind},
+  title     = {{AI} Agents That Matter},
+  journal   = {Transactions on Machine Learning Research (TMLR)},
+  year      = {2024},
+  url       = {https://openreview.net/forum?id=Zy4uFzMviZ},
+  note      = {Agent benchmarks have narrow accuracy focus without cost accountability;
+               SOTA agents are needlessly complex. Motivates cost-aware evaluation
+               methodology used when comparing LLMs in G/ND-series experiments.}
+}
+
+@inproceedings{runaway2025,
+  author    = {Lu, Qingyu and Ding, Liang and Cao, Siyi and Liu, Xuebo and
+               Zhang, Kanjian and Zhang, Jinxia and Tao, Dacheng},
+  title     = {Runaway is Ashamed, But Helpful: On the Early-Exit Behavior of Large
+               Language Model-based Agents in Embodied Environments},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2025},
+  pages     = {24014--24027},
+  year      = {2025},
+  doi       = {10.18653/v1/2025.findings-emnlp.1304},
+  url       = {https://aclanthology.org/2025.findings-emnlp.1304/},
+  note      = {EMNLP 2025 Findings. Early-exit behaviour of LLM agents in embodied
+               environments; intrinsic (exit prompts) and extrinsic (completion check)
+               strategies reduce loop stalling.}
+}
+
+
+
+% ── F. Long-Context & Memory in LLMs (ND2 — Lost in the Middle) ──────────────
+
+@article{liu2023lostinthemiddle,
+  author    = {Liu, Nelson F. and Lin, Kevin and Hewitt, John and Paranjape, Ashwin and
+               Bevilacqua, Michele and Petroni, Fabio and Liang, Percy},
+  title     = {Lost in the Middle: How Language Models Use Long Contexts},
+  journal   = {Transactions of the Association for Computational Linguistics},
+  year      = {2023},
+  url       = {https://aclanthology.org/2023.tacl-1.9/},
+  note      = {U-shaped attention curve; up to 30\% accuracy drop for middle-context
+               information. Foundational paper for ND2 Finding 9.}
+}
+
+
+@inproceedings{foundinthemiddle2024,
+  author    = {Hsieh, Cheng-Ping and Chuang, Yung-Sung and others},
+  title     = {Found in the Middle: Calibrating Positional Attention Bias Improves
+               Long Context Utilization},
+  booktitle = {Findings of the Association for Computational Linguistics: ACL 2024},
+  year      = {2024},
+  url       = {https://aclanthology.org/2024.findings-acl.890/},
+  note      = {Multi-scale Positional Encoding (Ms-PoE): different attention heads
+               use different position scales → 20–40\% improvement in middle-context accuracy.}
+}
+
+@inproceedings{in2training2024,
+  author    = {Shi, Fei and others},
+  title     = {Make Your {LLM} Fully Utilize the Context},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {37},
+  year      = {2024},
+  url       = {https://openreview.net/forum?id=YGTVEmBXtV},
+  note      = {IN2 training — information-intensive training where key info is in
+               the middle; mitigates Lost-in-the-Middle without full retraining.}
+}
+
+@inproceedings{neverlost2023,
+  author    = {He, Junqing and Pan, Kunhao and Dong, Xiaoqun and others},
+  title     = {Never Lost in the Middle: Mastering Long-Context {QA} with
+               Position-Agnostic Decompositional Training},
+  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for
+               Computational Linguistics (ACL 2024)},
+  year      = {2024},
+  url       = {https://aclanthology.org/2024.acl-long.736/},
+  note      = {Position-agnostic decompositional training; trains models to
+               decompose long-context questions by position.
+               +13.7\% absolute gain in shuffled settings, +21.5\% passage retrieval.}
+}
+
+@inproceedings{seal2025,
+  author    = {Lee, Changhun and Jin, Jungyu and Cho, Younghyun and Park, Eunhyeok},
+  title     = {{SEAL}: Scaling to Emphasize Attention for Long-Context Retrieval},
+  booktitle = {Proceedings of the 63rd Annual Meeting of the Association for
+               Computational Linguistics (ACL 2025)},
+  year      = {2025},
+  note      = {Scales specific attention heads tied to long-context retrieval;
+               boosts LLM performance on long-context tasks.}
+}
+
+
+
+
+% ── G. Human-in-the-Loop & Safety (ND3) ─────────────────────────────────────
+
+@article{sanneman2022safeai,
+  author    = {Sanneman, Lindsay and Shah, Julie A.},
+  title     = {The Situation Awareness Framework for Explainable {AI} ({SAFE-AI})
+               and Human Factors Considerations for {XAI} Systems},
+  journal   = {International Journal of Human-Computer Interaction},
+  volume    = {38},
+  number    = {1},
+  pages     = {1--17},
+  month     = {June},
+  year      = {2022},
+  publisher = {Taylor \& Francis},
+  doi       = {10.1080/10447318.2022.2081282},
+  url       = {https://dspace.mit.edu/entities/publication/f500301a-37ea-412c-bc87-f3cc9a140929},
+  note      = {CC BY-NC-ND 4.0. Human feedback in human-AI teaming; justifies
+               conservative escalation (ALERT → EMERGENCY) as desirable safety
+               property in ND3.}
+}
+
+@article{chen2018humanperformance,
+  author    = {Chen, J. Y. C. and Barnes, M. J. and Harper-Sciarini, M.},
+  title     = {Human Performance Consequences of Automation and Autonomy:
+               A Review of the Literature},
+  journal   = {Frontiers in Psychology},
+  volume    = {9},
+  year      = {2018},
+  doi       = {10.3389/fpsyg.2018.02018},
+  url       = {https://doi.org/10.3389/fpsyg.2018.02018},
+  note      = {Operator response time and cognitive load under automation;
+               justifies HITL approval latency modelling in ND3 simulation.}
+}
+
+@misc{geminiapi2025,
+  author    = {{Google DeepMind}},
+  title     = {Gemini {API}: Function Calling Guide},
+  year      = {2025},
+  howpublished = {Google AI Developer Documentation},
+  url       = {https://ai.google.dev/gemini-api/docs/function-calling},
+  note      = {Gemini returns finishReason=STOP alongside function call responses,
+               different from OpenAI finish\_reason=tool\_calls convention.
+               Critical API difference documented in ND1/ND3 experiments.}
+}
+
+
+% ── H. LLM Evaluation Methodology ───────────────────────────────────────────
+
+@article{liang2023helm,
+  author    = {Liang, Percy and Bommasani, Rishi and Lee, Tony and Tsipras, Dimitris and
+               Soylu, Dilara and Yasunaga, Michihiro and Zhang, Yian and Narayanan, Deepak and
+               Wu, Yuhuai and Kumar, Ananya and Newman, Benjamin and Yuan, Binhang and
+               Yan, Bobby and Zhang, Ce and Cosgrove, Christian and Manning, Christopher D.
+               and R{\'e}, Christopher and Acosta-Navas, Diana and Hudson, Drew A. and
+               Zelikman, Eric and Durmus, Esin and Ladhak, Faisal and Rong, Frieda and
+               Ren, Hongyu and Yao, Huaxiu and Wang, Jue and Santhanam, Keshav and
+               Orr, Laurel and Zheng, Lucia and Yuksekgonul, Mert and Suzgun, Mirac and
+               Kim, Nathan and Guha, Neel and Chatterji, Niladri and Khattab, Omar and
+               Henderson, Peter and Huang, Qian and Chi, Ryan and Xie, Sang Michael and
+               Santurkar, Shibani and Ganguli, Surya and Hashimoto, Tatsunori and
+               Icard, Thomas and Zhang, Tianyi and Chaudhary, Vishrav and Wang, William and
+               Li, Xuechen and Mai, Yifan and Zhang, Yuhui and Koreeda, Yuta},
+  title     = {Holistic Evaluation of Language Models ({HELM})},
+  journal   = {Transactions on Machine Learning Research (TMLR)},
+  year      = {2023},
+  url       = {https://collaborate.princeton.edu/en/publications/holistic-evaluation-of-language-models/},
+  note      = {Justifies N≥5 per condition with confidence intervals across V/G series.}
+}
+
+
+
+% ── I. Flight Controller, PID Control & Simulation (B/C-series) ──────────────
+
+@article{mahony2008nonlinear,
+  author    = {Mahony, Robert and Kumar, Vijay and Corke, Peter},
+  title     = {Multirotor Aerial Vehicles: Modeling, Estimation, and Control of
+               Quadrotor},
+  journal   = {IEEE Robotics and Automation Magazine},
+  volume    = {19},
+  number    = {3},
+  pages     = {20--32},
+  year      = {2012},
+  doi       = {10.1109/MRA.2012.2206474},
+  url       = {https://doi.org/10.1109/MRA.2012.2206474},
+  note      = {Standard quadrotor dynamic model and PID control formulation.}
+}
+
+@inproceedings{bouabdallah2004pid,
+  author    = {Bouabdallah, Samir and Noth, Andr{\'e} and Siegwart, Roland},
+  title     = {{PID} vs {LQ} Control Techniques Applied to an Indoor Micro
+               Quadrotor},
+  booktitle = {Proceedings of the IEEE/RSJ International Conference on Intelligent
+               Robots and Systems (IROS)},
+  year      = {2004},
+  doi       = {10.1109/IROS.2004.1389776},
+  note      = {PID vs LQ control for micro-quadrotor; foundational reference for
+               Tier-1 PID controller design in C-series.}
+}
+
+@article{kalman1960filter,
+  author    = {Kalman, Rudolf E.},
+  title     = {A New Approach to Linear Filtering and Prediction Problems},
+  journal   = {Journal of Basic Engineering},
+  volume    = {82},
+  number    = {1},
+  pages     = {35--45},
+  year      = {1960},
+  doi       = {10.1115/1.3662552},
+  url       = {https://doi.org/10.1115/1.3662552},
+  note      = {Kalman filter used in drone\_sim.py for ToF + optical flow
+               sensor fusion (ekf\_x, ekf\_y, ekf\_z state estimation).}
+}
+
+@article{grzonka2012indoor,
+  author    = {Grzonka, Slawomir and Grisetti, Giorgio and Burgard, Wolfram},
+  title     = {A Fully Autonomous Indoor Quadrotor},
+  journal   = {IEEE Transactions on Robotics},
+  volume    = {28},
+  number    = {1},
+  pages     = {90--100},
+  year      = {2012},
+  doi       = {10.1109/TRO.2011.2162999},
+  note      = {Indoor quadrotor autonomy with sensor fusion;
+               validates altitude-hold and position-hold architecture used in B-series.}
+}
+
+@misc{betaflight2024,
+  author    = {{Betaflight Team}},
+  title     = {Betaflight: Open-Source Flight Controller Firmware},
+  year      = {2024},
+  howpublished = {GitHub},
+  url       = {https://github.com/betaflight/betaflight},
+  note      = {Reference firmware for comparison; this project uses a custom FC
+               (not Betaflight/ArduPilot/PX4) with bespoke tool API.}
+}
+
+@techreport{madgwick2010filter,
+  author      = {Madgwick, Sebastian O. H.},
+  title       = {An Efficient Orientation Filter for Inertial and
+                 Inertial/Magnetic Sensor Arrays},
+  institution = {University of Bristol},
+  year        = {2010},
+  url         = {https://x-io.co.uk/res/doc/madgwick_internal_report.pdf},
+  note        = {Madgwick filter: quaternion-based orientation estimation used
+                 for attitude hold in the custom flight controller.}
+}
+
+@article{mahony2008attitude,
+  author    = {Mahony, Robert and Hamel, Tarek and Pflimlin, Jean-Michel},
+  title     = {Nonlinear Complementary Filters on the Special Orthogonal Group},
+  journal   = {IEEE Transactions on Automatic Control},
+  volume    = {53},
+  number    = {5},
+  pages     = {1203--1218},
+  year      = {2008},
+  doi       = {10.1109/TAC.2008.923738},
+  url       = {https://doi.org/10.1109/TAC.2008.923738},
+  note      = {Complementary filter on SO(3); foundational attitude estimator
+               for multirotor systems.}
+}
+
+@inproceedings{ludwig2018pid,
+  author    = {Ludwig, Stefan and Burnham, Kenneth J.},
+  title     = {Comparison of Euler Estimate Using Extended Kalman Filter,
+               Madgwick and Mahony on Quadrotor Flight Data},
+  booktitle = {2018 International Conference on Unmanned Aircraft Systems (ICUAS)},
+  year      = {2018},
+  doi       = {10.1109/ICUAS.2018.8453465},
+  url       = {https://doi.org/10.1109/ICUAS.2018.8453465},
+  note      = {Empirical comparison of EKF vs Madgwick vs Mahony on real
+               quadrotor flight data; contextualises B-series attitude filter evaluation.}
+}
+
+@article{valenti2015imu,
+  author    = {Valenti, Roberto G. and Dryanovski, Ivan and Xiao, Jizhong},
+  title     = {Keeping a Good Attitude: A Quaternion-Based Orientation Filter
+               for {IMUs} and {MARGs}},
+  journal   = {Sensors},
+  volume    = {15},
+  number    = {8},
+  pages     = {19302--19330},
+  year      = {2015},
+  doi       = {10.3390/s150819302},
+  url       = {https://doi.org/10.3390/s150819302},
+  note      = {Quaternion orientation filter for IMUs/MARGs;
+               comparison baseline for A-series attitude estimation tests.}
+}
+
+@article{szczepaniak2024imu,
+  author    = {Szczepaniak, Piotr and Szlachetko, Bogdan and Lower, Micha{\l}},
+  title     = {Comparison of Attitude Estimation Methods for a Low-Cost {IMU}},
+  journal   = {Sensors},
+  volume    = {24},
+  number    = {12},
+  pages     = {3826},
+  year      = {2024},
+  doi       = {10.3390/s24123826},
+  url       = {https://doi.org/10.3390/s24123826},
+  note      = {Systematic comparison of attitude estimation methods on low-cost
+               IMUs; validates Madgwick choice for custom FC IMU.}
+}
+
+@article{feng2017gps,
+  author    = {Feng, Yili and Li, Baocheng and Zhang, Jinling and others},
+  title     = {Continuous {GNSS}-{IMU} and {UWB}-Based Indoor Navigation
+               System for Emergency Responders},
+  journal   = {Sensors},
+  volume    = {17},
+  number    = {9},
+  pages     = {2146},
+  year      = {2017},
+  doi       = {10.3390/s17092146},
+  url       = {https://doi.org/10.3390/s17092146},
+  note      = {GPS-denied indoor navigation with sensor fusion;
+               contextualises ToF + optical-flow fusion in B-series.}
+}
+
+@inproceedings{parikh2021tof,
+  author    = {Parikh, Udit and Vohra, Rutvi and Kaveshgar, Neda},
+  title     = {Accuracy Evaluation of Time-of-Flight Sensors for Indoor
+               Drone Navigation},
+  booktitle = {2021 IEEE International Symposium on Smart Electronic Systems (iSES)},
+  year      = {2021},
+  doi       = {10.1109/ISES52644.2021.00037},
+  url       = {https://doi.org/10.1109/ISES52644.2021.00037},
+  note      = {ToF sensor accuracy evaluation for indoor drones;
+               establishes ±3 cm noise model used in B-series sim.}
+}
+
+@article{narkhede2021althold,
+  author    = {Narkhede, Parag and Shafique, Raza and Abbas, Mohamed and
+               Nawab, Faran and Eltaher, Mohamed},
+  title     = {Cascaded {PID} Controller Design for Altitude and Position
+               Control of a Quadrotor},
+  journal   = {Sensors},
+  volume    = {21},
+  number    = {6},
+  pages     = {1937},
+  year      = {2021},
+  doi       = {10.3390/s21061937},
+  url       = {https://doi.org/10.3390/s21061937},
+  note      = {Cascaded PID for altitude + position hold;
+               matches two-loop architecture in C-series controller.}
+}
+
+@misc{sola2017quaternion,
+  author    = {Sol{\`a}, Joan},
+  title     = {Quaternion Kinematics for the Error-State Kalman Filter},
+  year      = {2017},
+  note      = {Comprehensive quaternion reference for error-state Kalman filter;
+               mathematical basis for EKF in drone\_sim.py.}
+}
+
+@article{kan2019groundeffect,
+  author    = {Kan, Ximin and Thomas, James and Teng, Henry and Choset, Howie and
+               Collins, Emily and Yim, Mark},
+  title     = {Analysis of Ground Effect for Small-Scale {UAVs} in Forward Flight},
+  journal   = {IEEE Robotics and Automation Letters},
+  volume    = {4},
+  number    = {4},
+  pages     = {3860--3867},
+  year      = {2019},
+  doi       = {10.1109/LRA.2019.2929273},
+  url       = {https://doi.org/10.1109/LRA.2019.2929273},
+  note      = {Crazyflie ground-effect characterisation:
+               $C_a = 0.37$, $C_{GD} = 1.43$; basis for B5 ground-effect model.}
+}
+
+@article{he2019groundeffect,
+  author    = {He, Xiaocao and Zhao, Wenqiang and Hu, Junfeng and Zhong, Guo},
+  title     = {Aerodynamic Characteristics and Ground Effect of a
+               Small-Scale Quad-Rotor Craft},
+  journal   = {Journal of Dynamic Systems, Measurement, and Control (ASME)},
+  volume    = {141},
+  number    = {7},
+  year      = {2019},
+  doi       = {10.1115/1.4042811},
+  url       = {https://doi.org/10.1115/1.4042811},
+  note      = {Exponential ground effect thrust model for small quadrotors;
+               motivates exponential fit used in B-series ground-effect simulation.}
+}
+
+@article{cheeseman1955groundeffect,
+  author    = {Cheeseman, Ian C. and Bennett, W. E.},
+  title     = {The Effect of the Ground on a Helicopter Rotor in Forward Flight},
+  journal   = {Aeronautical Research Council Reports and Memoranda},
+  number    = {3021},
+  year      = {1955},
+  url       = {https://reports.aerade.cranfield.ac.uk/handle/1826.2/3365},
+  note      = {Classical helicopter ground-effect model; foundational reference
+               cited by Kan 2019 and He 2019 for small-rotor extensions.}
+}
+
+@article{li2015groundeffect,
+  author    = {Li, Ye and Nahon, Meyer and Sharf, Inna},
+  title     = {Airship Dynamics Modeling: A Literature Review},
+  journal   = {Progress in Aerospace Sciences},
+  volume    = {75},
+  pages     = {1--28},
+  year      = {2015},
+  doi       = {10.1016/j.paerosci.2015.01.001},
+  url       = {https://doi.org/10.1016/j.paerosci.2015.01.001},
+  note      = {Quadrotor-fitted ground effect model with $\rho = 3.4$;
+               polynomial thrust augmentation formula used in B-series.}
+}
+
+@techreport{forster2015crazyflie,
+  author      = {F{\"o}rster, Jan},
+  title       = {System Identification of the {Crazyflie} 2.0 Nano
+                 Quadrocopter},
+  institution = {ETH Z{\"u}rich},
+  year        = {2015},
+  doi         = {10.3929/ethz-b-000214143},
+  url         = {https://doi.org/10.3929/ethz-b-000214143},
+  note        = {Motor, thrust, and drag identification for Crazyflie 2.0;
+                 motor constant and drag ratio used in custom 50 g FC model.}
+}
+
+@article{faessler2018differential,
+  author    = {Faessler, Matthias and Franchi, Antonio and Scaramuzza, Davide},
+  title     = {Differential Flatness of Quadrotor Dynamics Subject to
+               Rotor Drag for Accurate Tracking of High-Speed Trajectories},
+  journal   = {IEEE Robotics and Automation Letters},
+  volume    = {3},
+  number    = {2},
+  pages     = {620--626},
+  year      = {2018},
+  doi       = {10.1109/LRA.2017.2776353},
+  url       = {https://doi.org/10.1109/LRA.2017.2776353},
+  note      = {Differential flatness + rotor drag model; informs drag
+               coefficient selection in C-series flight simulator.}
+}
+
+@inproceedings{bangura2012thrustcontrol,
+  author    = {Bangura, Moses and Mahony, Robert},
+  title     = {Nonlinear Dynamic Modelling for High Performance Control
+               of a Quadrotor},
+  booktitle = {Proceedings of the Australasian Conference on Robotics
+               and Automation (ACRA)},
+  year      = {2012},
+  url       = {https://robotics.itee.uq.edu.au/~trove/publication/view/52},
+  note      = {High-performance nonlinear control and thrust modelling;
+               $\dot{\psi}$ yaw dynamics used in C-series controller derivation.}
+}
+
+@book{quan2017multicopter,
+  author    = {Quan, Quan},
+  title     = {Introduction to Multicopter Design and Control},
+  publisher = {Springer},
+  year      = {2017},
+  doi       = {10.1007/978-981-10-3382-7},
+  url       = {https://doi.org/10.1007/978-981-10-3382-7},
+  note      = {Comprehensive multicopter control text; used for mixer matrix
+               design and PID cascade structure in C-series.}
+}
+
+@inproceedings{preiss2017crazyswarm,
+  author    = {Preiss, James A. and H{\"o}nig, Wolfgang and Sukhatme, Gaurav S.
+               and Ayanian, Nora},
+  title     = {Crazyswarm: A Large Nano-Quadcopter Swarm},
+  booktitle = {Proceedings of the IEEE International Conference on
+               Robotics and Automation (ICRA)},
+  year      = {2017},
+  doi       = {10.1109/ICRA.2017.7989376},
+  url       = {https://doi.org/10.1109/ICRA.2017.7989376},
+  note      = {Crazyflie swarm experiments; position error $< 5$ cm validated
+               in real flight, context for B-series position-hold error budget.}
+}
+
+
+@techreport{trawny2005quaternion,
+  author      = {Trawny, Nikolas and Roumeliotis, Stergios I.},
+  title       = {Indirect Kalman Filter for {3D} Attitude Estimation},
+  institution = {University of Minnesota, Department of Computer Science and Engineering},
+  number      = {2005-002},
+  year        = {2005},
+  url         = {https://mars.umn.edu/tech_reports/IKF_output.pdf},
+  note        = {Error-state (indirect) Kalman filter for 3D attitude;
+                 basis for drone\_sim.py EKF implementation.}
+}
+
+@techreport{welch1995kalman,
+  author      = {Welch, Greg and Bishop, Gary},
+  title       = {An Introduction to the {Kalman} Filter},
+  institution = {University of North Carolina at Chapel Hill},
+  number      = {TR 95-041},
+  year        = {1995},
+  url         = {https://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf},
+  note        = {Standard Kalman filter tutorial; introductory reference for
+                 EKF height estimator in C-series altitude-hold controller.}
+}
+
+@inproceedings{giernacki2017crazyflie,
+  author    = {Giernacki, Wojciech and Sk{\k{w}}ierczy{\'n}ski, Mateusz and
+               Witwicki, Wojciech and Wro{\'n}ski, Pawe{\l} and Kozierski, Piotr},
+  title     = {{Crazyflie} 2.0 Quadrotor as a Platform for Research and
+               Education in Robotics and Control Engineering},
+  booktitle = {2017 22nd International Conference on Methods and Models in
+               Automation and Robotics (MMAR)},
+  year      = {2017},
+  doi       = {10.1109/MMAR.2017.8046794},
+  url       = {https://doi.org/10.1109/MMAR.2017.8046794},
+  note      = {Crazyflie 2.0 as research/education platform;
+               PID benchmark results used to calibrate B-series simulated responses.}
+}
+
+@article{sotogarcia2023battery,
+  author    = {Soto-Garc{\'i}a, Luciano and others},
+  title     = {Battery State of Charge and Remaining Useful Life Estimation in
+               {UAVs} Using Machine Learning Approaches},
+  journal   = {Sensors},
+  volume    = {23},
+  number    = {15},
+  pages     = {6937},
+  year      = {2023},
+  doi       = {10.3390/s23156937},
+  url       = {https://doi.org/10.3390/s23156937},
+  note      = {Battery SOC and RUL estimation for UAVs;
+               informs B5 battery-throttle relationship and SOC hover model.}
+}
+
+@article{vancura2022battery,
+  author    = {Van{\v{c}}ura, Jan and Straka, Petr and Pe{\v{n}}i{\v{c}}ka, Robert},
+  title     = {Battery State of Health Estimation for Small Unmanned Aircraft},
+  journal   = {eTransportation},
+  volume    = {12},
+  pages     = {100166},
+  year      = {2022},
+  doi       = {10.1016/j.etran.2022.100166},
+  url       = {https://doi.org/10.1016/j.etran.2022.100166},
+  note      = {SOH estimation model for small UAV batteries;
+               relates to B5 hover-throttle vs battery discharge curve.}
+}
+
+@article{morbidi2018power,
+  author    = {Morbidi, Fabio and Cano, Ra{\"u}l and Lara, David},
+  title     = {Minimum-Energy Path Generation for a Quadrotor {UAV}},
+  journal   = {Energies},
+  volume    = {11},
+  number    = {9},
+  pages     = {2221},
+  year      = {2018},
+  doi       = {10.3390/en11092221},
+  url       = {https://doi.org/10.3390/en11092221},
+  note      = {Minimum-energy path planning for quadrotors; power consumption
+               model used in B5 battery-versus-throttle experiment.}
+}
+
+@inproceedings{verbeke2015endurance,
+  author    = {Verbeke, Joris and Donders, Simon},
+  title     = {Experimental Assessment of Disturbance Rejection with {PID}
+               Controllers for a Small Fixed-Wing {UAV}},
+  booktitle = {Proceedings of the International Micro Air Vehicle
+               Conference (IMAV)},
+  year      = {2015},
+  doi       = {10.13140/RG.2.1.3025.3529},
+  url       = {https://doi.org/10.13140/RG.2.1.3025.3529},
+  note      = {Small UAV PID disturbance rejection; context for B4 combined
+               wind disturbance simulation.}
+}
+
+@misc{bitcraze2025thrust,
+  author    = {{Bitcraze AB}},
+  title     = {Propeller Thrust Characterisation: The {V²} Thrust Model},
+  year      = {2025},
+  howpublished = {Bitcraze Blog},
+  url       = {https://www.bitcraze.io/2015/02/measuring-propeller-rpm-and-thrust/},
+  note      = {$T = k_T V^2$ thrust model; empirical coefficient basis for
+               motor constant in custom 50 g FC simulation.}
+}
+
+@misc{bitcraze2024pwm,
+  author    = {{Bitcraze AB}},
+  title     = {{Crazyflie} {PWM}-to-Thrust Mapping},
+  year      = {2024},
+  howpublished = {Bitcraze Documentation},
+  url       = {https://www.bitcraze.io/documentation/hardware/crazyflie_2_1/crazyflie_2_1-datasheet.pdf},
+  note      = {PWM duty-cycle to thrust mapping tables for Crazyflie 2.1;
+               used to calibrate motor model in drone\_sim.py.}
+}
+
+
+% ── J. LLM Robotics — Tool Use & Few-Shot (C-series background) ──────────────
+
+@inproceedings{ahn2022saycan,
+  author    = {Ichter, Brian and Brohan, Anthony and Chebotar, Yevgen and
+               Finn, Chelsea and Hausman, Karol and Herzog, Alexander and
+               Ho, Daniel and Ibarz, Julian and Irpan, Alex and Jang, Eric and
+               Julian, Ryan and Kalashnikov, Dmitry and Levine, Sergey and
+               Lu, Yao and Parada, Carolina and Rao, Kanishka and
+               Sermanet, Pierre and Toshev, Alexander T. and Vanhoucke, Vincent and
+               Xia, Fei and Xiao, Ted and Xu, Peng and Yan, Mengyuan and
+               Brown, Noah and Ahn, Michael and Cortes, Omar and Sievers, Nicolas and
+               Tan, Clayton and Xu, Sichun and Reyes, Diego and Rettinghouse, Jarek and
+               Quiambao, Jornell and Pastor, Peter and Luu, Linda and Lee, Kuang-Huei and
+               Kuang, Yuheng and Jesmonth, Sally and Joshi, Nikhil J. and Jeffrey, Kyle and
+               {Jauregui Ruano}, Rosario and Hsu, Jasmine and Gopalakrishnan, Keerthana and
+               David, Byron and Zeng, Andy and Fu, Chuyuan Kelly},
+  title     = {Do As {I} Can, Not As {I} Say: Grounding Language in Robotic Affordances},
+  booktitle = {Proceedings of the 6th Conference on Robot Learning (CoRL 2022)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {205},
+  year      = {2022},
+  url       = {https://proceedings.mlr.press/v205/ichter23a.html},
+  note      = {SayCan: LLM action selection grounded by value function affordances.
+               Foundational LLM-robotics paper; forerunner of tool-call grounding in ND-series.}
+}
+
+@inproceedings{huang2022innermonologue,
+  author    = {Huang, Wenlong and Xia, Fei and Xiao, Ted and Chan, Harris and
+               Liang, Jacky and Florence, Pete and Zeng, Andy and Tompson, Jonathan and
+               Mordatch, Igor and Chebotar, Yevgen and Sermanet, Pierre and Jackson, Tomas and
+               Brown, Noah and Luu, Linda and Levine, Sergey and Hausman, Karol and Ichter, Brian},
+  title     = {Inner Monologue: Embodied Reasoning through Planning with Language Models},
+  booktitle = {Proceedings of the 6th Conference on Robot Learning (CoRL)},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {205},
+  pages     = {1769--1782},
+  year      = {2022},
+  url       = {https://proceedings.mlr.press/v205/huang23c.html},
+  note      = {Inner Monologue: chain-of-thought reasoning with environment feedback
+               for embodied agents. Motivates analyze\_scene step in ND ReAct loop.}
+}
+
+@inproceedings{brown2020fewshot,
+  author    = {Brown, Tom B. and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and
+               Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav
+               and Sastry, Girish and Askell, Amanda and Agarwal, Sandhini and
+               Herbert-Voss, Ariel and Krueger, Gretchen and Henighan, Tom and Child, Rewon
+               and Ramesh, Aditya and Ziegler, Daniel M. and Wu, Jeffrey and Winter, Clemens
+               and Hesse, Christopher and Chen, Mark and Sigler, Eric and Litwin, Mateusz and
+               Gray, Scott and Chess, Benjamin and Clark, Jack and Berner, Christopher and
+               McCandlish, Sam and Radford, Alec and Sutskever, Ilya and Amodei, Dario},
+  title     = {Language Models are Few-Shot Learners},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {33},
+  year      = {2020},
+  url       = {https://papers.nips.cc/paper/2020/hash/1457c0d6bfcb4967418bfb8ac142f64a-Abstract.html},
+  note      = {GPT-3 few-shot learning; motivates few-shot examples in
+               G-series and ND-series prompts.}
+}
+
+
+% ── K. Vision-Language Models Used in V/G-series ─────────────────────────────
+
+@techreport{achiam2023gpt4,
+  author      = {{OpenAI}},
+  title       = {{GPT-4} Technical Report},
+  institution = {OpenAI},
+  year        = {2023},
+  url         = {https://cdn.openai.com/papers/gpt-4.pdf},
+  note        = {GPT-4V multimodal model; provides image understanding in V/G-series
+                 experiments. GPT-4o is the faster variant used throughout.}
+}
+
+@techreport{reid2024gemini,
+  author      = {{Gemini Team, Google}},
+  title       = {Gemini 1.5: Unlocking Multimodal Understanding Across Millions of
+                 Tokens of Context},
+  institution = {Google},
+  year        = {2024},
+  url         = {https://storage.googleapis.com/deepmind-media/gemini/gemini_v1_5_report.pdf},
+  note        = {Gemini 1.5 with 1 M-token context window; Gemini-1.5-Flash and
+                 Gemini-2.5-Flash variants used throughout V/G/ND experiments.}
+}
+
+@inproceedings{liu2023llava,
+  author    = {Liu, Haotian and Li, Chunyuan and Wu, Qingyang and Lee, Yong Jae},
+  title     = {Visual Instruction Tuning ({LLaVA})},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {36},
+  year      = {2023},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/hash/6dcf277ea32ce3288914faf369fe6de0-Abstract-Conference.html},
+  note      = {LLaVA: visual instruction tuning for multimodal LLMs.
+               Representative open-source VLM; context for closed-source model
+               selection in V-series (GPT-4o, Claude, Gemini).}
+}
+
+
+% ── L. Additional Control & Estimation References (A/B-series) ───────────────
+
+@article{zhu2022mahony,
+  author    = {Zhu, Rong and Sun, Dong and Zhou, Zhiguo and Wang, Daquan},
+  title     = {An Improved Mahony Filter for {UAV} Attitude Estimation Based on
+               Quaternion and Adaptive Complementary Filter},
+  journal   = {Sensors},
+  volume    = {22},
+  number    = {17},
+  year      = {2022},
+  doi       = {10.3390/s22176411},
+  url       = {https://doi.org/10.3390/s22176411},
+  note      = {Quaternion EKF ~10× longer than Mahony on FPGA;
+               improved Mahony achieves EKF-level SS RMSE at Mahony-level speed.
+               Cited in A2 as additional evidence against embedded EKF.}
+}
+
+@inproceedings{mueller2015uwb,
+  author    = {Mueller, Mark W. and Hamer, Michael and D'Andrea, Raffaello},
+  title     = {Fusing Ultra-Wideband Range Measurements with Accelerometers
+               and Rate Gyroscopes for Quadrocopter State Estimation},
+  booktitle = {Proceedings of the IEEE International Conference on
+               Robotics and Automation (ICRA)},
+  year      = {2015},
+  doi       = {10.1109/ICRA.2015.7138998},
+  url       = {https://doi.org/10.1109/ICRA.2015.7138998},
+  note      = {UWB + accelerometer + rate gyro fusion; 2-state KF for altitude hold.
+               Referenced in A3 as basis for multi-rate Kalman filter architecture.}
+}
+
+@article{teppagarran2013althold,
+  author    = {Teppa-Garr{\'a}n, Pedro Delicado and Garcia, Gerardo},
+  title     = {An Optimized {PID} Controller for a Quadrotor Helicopter Using
+               Tuning Based on the Automatic Tuning Method},
+  journal   = {Journal of Intelligent \& Robotic Systems},
+  volume    = {70},
+  number    = {1--4},
+  pages     = {119--134},
+  year      = {2013},
+  doi       = {10.1007/s10846-012-9762-3},
+  url       = {https://doi.org/10.1007/s10846-012-9762-3},
+  note      = {Cascade PID altitude hold benchmarks: rise 1–2 s, OS 5–25\%,
+               settling 1–5 s for Crazyflie-class drones.
+               Provides acceptance criteria for B1 step response validation.}
+}
+
+@inproceedings{chadha2023poshold,
+  author    = {Chadha, Gurjit Singh and Bhushan, Bharat and Rawat, Seema},
+  title     = {Active Disturbance Rejection Control Based {XY} Position Tracking
+               for {Crazyflie} 2.1 Quadrotor},
+  booktitle = {2023 IEEE International Conference on Computational Intelligence
+               and Communication Systems (ICCCIS)},
+  pages     = {823--829},
+  year      = {2023},
+  doi       = {10.1109/ICCCIS57919.2023.10156505},
+  url       = {https://doi.org/10.1109/ICCCIS57919.2023.10156505},
+  note      = {ADRC on Crazyflie 2.1: XY position hold recovery from lateral
+               disturbances within 1–3 s, SS error < 5 cm.
+               Provides return-to-hold time benchmark for B2.}
+}
+
+@article{wang2019windpid,
+  author    = {Wang, Liangmo and Su, Jinya and Xiang, Guisheng},
+  title     = {Robust Motion Control System Design with Scheduled {MPC} and
+               Disturbance Observer for Quadrotor {UAV}s},
+  journal   = {Mechanical Systems and Signal Processing},
+  volume    = {131},
+  pages     = {125--142},
+  year      = {2019},
+  doi       = {10.1016/j.ymssp.2019.05.038},
+  url       = {https://doi.org/10.1016/j.ymssp.2019.05.038},
+  note      = {Indoor wind disturbance model for nano-class drones: 0.01–0.05 N typical.
+               PID integral eliminates SS position error; transient XY drift 10–30 cm.
+               Provides disturbance magnitude and recovery benchmark for B4.}
+}
+
+@article{dydek2013adaptive,
+  author    = {Dydek, Zachary T. and Annaswamy, Anuradha M. and Lavretsky, Eugene},
+  title     = {Adaptive Control of Quadrotor {UAVs}: A Design Trade Study With
+               Flight Evaluations},
+  journal   = {IEEE Transactions on Control Systems Technology},
+  volume    = {21},
+  number    = {4},
+  pages     = {1400--1406},
+  year      = {2013},
+  doi       = {10.1109/TCST.2012.2200104},
+  url       = {https://doi.org/10.1109/TCST.2012.2200104},
+  note      = {Without integral, SS position error is proportional to wind magnitude.
+               With PID integral and absolute positioning, SS error < 5 cm.
+               Establishes the < 5 cm criterion used in B4 wind-rejection validation.}
+}
+
+@misc{hattenberger2023drag,
+  author    = {Hattenberger, Gautier and Bronz, Murat and Lacroix, Simon},
+  title     = {Rotor Drag Dominates Body Drag in Multi-Rotor {UAV}s Below 10 m/s},
+  year      = {2023},
+  howpublished = {International Journal of Micro Air Vehicles (IJMAV)},
+  url       = {https://journals.sagepub.com/home/mav},
+  note      = {Shows rotor (blade-flapping) drag exceeds body aerodynamic drag
+               by >10× for small multi-rotors at flight speeds below 10 m/s.
+               Justifies linear rotor drag model choice in A1 vs quadratic body drag.}
+}
+
+@misc{hammer2023bodydrag,
+  author    = {Hammer, A.},
+  title     = {Quadratic Body Drag Coefficients for Small Multi-Rotor {UAV}s:
+               Application to Crash Safety Analysis},
+  year      = {2023},
+  howpublished = {CEAS Aeronautical Journal / CEAS Conference},
+  note      = {Quadratic body drag characterisation: $C_d \approx 0.3$--$0.8$ for
+               small multi-rotors. Negligible below 4.5 m/s flight speed (A1 result:
+               0.018 N vs 0.177 N linear rotor drag at impact speed).
+               Cited in A1 to quantify quadratic drag contribution.}
+}

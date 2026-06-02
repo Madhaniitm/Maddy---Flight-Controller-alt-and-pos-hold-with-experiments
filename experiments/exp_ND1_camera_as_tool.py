@@ -172,7 +172,8 @@ def score_verbalization_nd(reply: str, true_risk_vs: str) -> dict:
 RUN_FIELDS = [
     "orchestrator", "run", "scene_label", "truth",
     "tool_called",          # 1 if orchestrator called analyze_scene
-    "mp_risk",              # MediaPipe risk from sensor tool
+    "mp_risk",              # MediaPipe risk 
+    from sensor tool
     "pipeline_ms",          # sensor pipeline latency
     # V/G-series 5-point rubric scores
     "quality_score",        # s1+s2+s3+s4+s5 (max 5)
