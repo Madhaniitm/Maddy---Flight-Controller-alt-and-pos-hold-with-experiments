@@ -12,6 +12,7 @@
 % Data source: G1_runs_20260525_021111.csv  (latest run)
 
 clear; clc; close all;
+set(groot, 'DefaultAxesFontSize', 15);   % global baseline for all axes
 
 %% ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -79,7 +80,6 @@ hold on;
 yline(100,'--','Color',[0.55 0.55 0.55],'LineWidth',1.0,'HandleVisibility','off');
 
 % Annotate non-100 values
-% Need bar x positions — use XOffset from bar handles
 nBars  = 5;
 bWidth = 0.75;
 offs   = linspace(-(nBars-1)/2, (nBars-1)/2, nBars) * (bWidth/nBars);
@@ -98,25 +98,24 @@ for i = 1:size(annots,1)
     val = annots{i,3};
     lbl = annots{i,4};
     text(ci + offs(mi), val + 0.4, lbl, ...
-         'HorizontalAlignment','center','FontSize',8.5, ...
+         'HorizontalAlignment','center','FontSize',13, ...
          'Color',[0.75 0.10 0.10],'FontWeight','bold');
 end
 
 % Callout: Tier 2 blind spot
 text(2 + offs(1), 85.5, {'{\leftarrow} Blocked lens'; 'blind spot'}, ...
-     'FontSize',8.5,'Color',[0.75 0.10 0.10], ...
+     'FontSize',13,'Color',[0.75 0.10 0.10], ...
      'HorizontalAlignment','left');
 
-set(ax1,'XTick',1:4,'XTickLabel',condLabels,'FontSize',10);
+set(ax1,'XTick',1:4,'XTickLabel',condLabels,'FontSize',14);
 ylim([70 108]);
 ax1.YTick = 70:5:105;
 ax1.YTickLabel = {'70%','75%','80%','85%','90%','95%','100%','105%'};
-ylabel('Action Safety (%)','FontSize',11);
-% Title via annotation so it is pinned to the same centre-x as plot (b)
+ylabel('Action Safety (%)','FontSize',15);
 annotation('textbox', [LFT, BOT1+PHGT+0.005, WID, 0.055], ...
     'String', {'\bf(a)  Action Safety by System Condition'; ...
                'Tier 2 alone has a fatal blind spot (blocked lens) — LLMs eliminate it'}, ...
-    'FontSize',11, 'EdgeColor','none', ...
+    'FontSize',15, 'EdgeColor','none', ...
     'HorizontalAlignment','center', 'VerticalAlignment','bottom', ...
     'FitBoxToText','off');
 ax1.YGrid='on'; ax1.XGrid='off';
@@ -130,7 +129,7 @@ for k = 1:5
     hD(k) = patch(NaN,NaN,mc(k,:),'FaceAlpha',0.87,'EdgeColor','none','Parent',axLeg);
 end
 lgd = legend(axLeg, hD, modelNames, ...
-             'Orientation','horizontal','FontSize',9.5,'Box','off');
+             'Orientation','horizontal','FontSize',14,'Box','off');
 lgd.Units    = 'normalized';
 lgd.Position = [0.15  BOT2+PHGT+GAP*0.62  0.68  0.04];  % upper 2/3 of gap
 hold off;
@@ -168,7 +167,8 @@ clim([0 5]);
 cb = colorbar(ax2,'Location','manual');
 cb.Position      = [LFT+WID+0.015  BOT2  0.025  PHGT];
 cb.Label.String  = 'Dangerous cases (count)';
-cb.Label.FontSize = 9;
+cb.Label.FontSize = 13;
+cb.FontSize       = 13;
 cb.Ticks         = 0:5;
 cb.TickLabels    = {'0 (safe)','1','2','3','4','5'};
 % Restore ax2 to exact size (colorbar creation can still nudge it)
@@ -182,11 +182,11 @@ for i = 1:nR
         val = DangerMat(i,j);
         if val == 0
             clr = [0.15 0.50 0.20];   % dark green
-            fsz = 13;
+            fsz = 18;
             lbl = char(10003);        % Unicode ✓ — renders without LaTeX interpreter
         else
             clr = [1 1 1];            % white
-            fsz = 14;
+            fsz = 19;
             lbl = num2str(val);
         end
         text(ax2, j + 0.5, i + 0.5, lbl, ...
@@ -202,7 +202,7 @@ set(ax2, ...
     'YTick',                1.5:4.5, ...
     'YTickLabel',           {'Tier 1.5 Only','Tier 2 Only','Tier 3 Only','Full Pipeline'}, ...
     'YDir',                 'reverse', ...    % row 1 at top, row 4 at bottom
-    'FontSize',             10, ...
+    'FontSize',             14, ...
     'TickLength',           [0 0], ...
     'XLim',                 [0.5 nC+0.5], ...
     'YLim',                 [0.5 nR+0.5], ...
@@ -214,7 +214,7 @@ xtickangle(ax2, 30);
 annotation('textbox', [LFT, BOT2+PHGT+0.005, WID, 0.055], ...
     'String', {'\bf(b)  Dangerous Recommendations: Condition \times Scene'; ...
                '(truth = hazard,  action = PITCH\_FORWARD — aggregated across all models)'}, ...
-    'FontSize',11, 'EdgeColor','none', ...
+    'FontSize',15, 'EdgeColor','none', ...
     'HorizontalAlignment','center', 'VerticalAlignment','bottom', ...
     'FitBoxToText','off', 'Interpreter','tex');
 ax2.Box = 'off';
