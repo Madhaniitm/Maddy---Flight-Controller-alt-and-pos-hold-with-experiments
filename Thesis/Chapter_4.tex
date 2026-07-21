@@ -1,18 +1,4 @@
-% ============================================================
-% Chapter 4 — Agentic Vision-Guided Drone Patrol
-%
-% Figures required (place PDFs in Thesis/figures/ before compile):
-%   fig4_1_nd_architecture.pdf
-%   fig4_2_nd1_quality_cost.pdf
-%   fig4_3_nd2_patrol_heatmap.pdf
-%   fig4_4_nd2_litm_growth.pdf
-%   fig4_5_nd2_fix_comparison.pdf
-%   fig4_7_nd3b_results.pdf
-%   fig4_8_nd3c_progression.pdf
-%   fig4_9_production_tradeoff.pdf
-% ============================================================
-
-\chapter{Agentic Vision-Guided Drone Patrol: Closing the Perception--Action Loop}
+\chapter{AGENTIC VISION-GUIDED DRONE CONTROL}
 \label{chap:4th chap}
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -20,106 +6,228 @@
 \label{sec:ch4_intro}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Chapters~\ref{chap:2nd chap} and~\ref{chap:3rd chap} established two complementary capabilities in isolation: image verbalization (97.5\% action safety) and natural-language tool-call execution (100\% takeoff success, 72.8\% PID self-tuning RMSE reduction).
-This chapter combines them: \texttt{analyze\_scene} becomes a first-class tool call in the LLM's action namespace, closing the perception-action loop into a unified autonomous indoor patrol system.
-The \textbf{ND series} (Neural Drone: Natural-language Driven) proceeds in three stages:
+Chapters~\ref{chap:2nd chap} and~\ref{chap:3rd chap} established two complementary but separate capabilities. 
+Chapter~\ref{chap:2nd chap} demonstrated that large language models (LLMs) can verbalize a drone's camera feed translating raw image pixels into structured natural-language descriptions of scene hazards, object positions, and recommended pilot actions. The experiment ran across 800 trials with a best-case safety rate of 100\% and zero dangerous
+outputs~\cite{vemprala2023chatgpt}.  Chapter~\ref{chap:3rd chap} demonstrated that the same
+family of models can \emph{execute} high-level natural-language commands by issuing a sequence of typed tool calls to a drone flight controller, achieving precise altitude and position control without a human pilot in the loop~\cite{yao2022react}.
+
+However, both capabilities remained isolated.
+In Chapter~\ref{chap:2nd chap} the LLM produced suggestions and a human pilot decided whether to act on them.
+In Chapter~\ref{chap:3rd chap} the LLM acted, but a human operator still provided the visual situational awareness.  
+The natural next question is can a single LLM orchestrator both perceive by calling an image analysis tool and act by calling drone control tools within a unified, multi-turn agentic loop?
+If so, a quadrotor could conduct an indoor patrol mission from arm-up to final report without any human in the perception-action pipeline, while still accepting human oversight when safety is at stake.
+
+This chapter describes how to convert the image verbalization technique explained in chapter 2 as a tool that LLM can use along with the drone control tools. 
+So, it makes the Neural Drone: Natural-language Driven, which combine scene verbalization with tool-call execution into an integrated autonomous patrol system. 
+The experiments proceed in three stages:
 
 \begin{enumerate}
-  \item \textbf{ND1} validates that \texttt{analyze\_scene} is autonomously invoked with the same 100\% reliability observed in human-initiated verbalization sessions.
-  \item \textbf{ND2} extends to full multi-turn patrol, revealing a \emph{Lost in the Middle} (LITM) semantic loop failure~\cite{liu2023lostinthemiddle} and developing six targeted mitigations (M1--M6).
-  \item \textbf{ND3} introduces a human-in-the-loop (HITL) approval gate, discovers two critical API bugs, and shows that M1--M6 are necessary even when a HITL gate is present.
+  \item \textbf{Image verbalization as a tool} Validates that \texttt{analyze\_scene}  the image verbalization call from Chapter~\ref{chap:2nd chap} can function as a first-class tool call within the orchestrator's tool namespace, with the same 100\% invocation reliability observed in hand-authored verbalization sessions.
+
+  \item \textbf{Autonomous patrol} extends ND1 to full multi-turn patrol missions, revealing a critical failure mode: GPT-4o-mini enters an infinite semantic loop when the emergency monitor injects repeated hazard advisories, a manifestation of the 'Lost in the Middle' phenomenon~\cite{liu2023lostinthemiddle}.  
+  Six targeted mitigations (M1--M6) are developed and validated.
+
+  \item \textbf{Human in the loop patrol} introduces a human-in-the-loop (HITL) approval gate that intercepts every drone-control tool call for operator sign-off, converting the fully autonomous system into a supervised one.  
+  The M1--M6 mitigations are shown to be necessary even when a HITL gate is present.
 \end{enumerate}
 
-The architecture achieves patrol completion rates of 60--100\%, quality up to 4.60/5, and per-run costs from \$0.016 to \$1.91, providing a concrete cost-quality tradeoff map for deployment decisions.
-
+The unified architecture achieves patrol completion rates of 60--100\%, mission report quality up to 4.60/5, and per-run costs ranging from \$0.016 (GPT-4o-mini with mitigations) to \$1.91 (Claude), providing a concrete cost-quality tradeoff map for deployment decisions.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Proposed Approach: Unified Perception--Action Architecture}
+\section{Problem Statement}
+\label{sec:ch4_problem}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{The Perception--Action Integration Gap}
+\label{sec:ch4_problem_gap}
+
+Chapter~\ref{chap:2nd chap} treated image verbalization as a terminal operation.
+Given an image, the LLM returned a structured analysis, and the pipeline ended.  
+The output was textual and consumed by a human.  Chapter~\ref{chap:3rd chap} treated commands as
+inputs, a human operator supplied a natural-language objective, and the LLM translated it into a sequence of tool calls. 
+Neither chapter addressed the full autonomous loop in
+which the drone's own camera output feeds back into the LLM's decision at the next time step.
+
+Closing this loop requires \texttt{analyze\_scene} to become a callable tool, not merely an external service.
+When the LLM can both request a scene analysis and act on its result within the same reasoning turn, the system becomes capable of perception-contingent
+planning, for example, navigating to a waypoint, calling \texttt{analyze\_scene}, deciding whether to escalate or continue, and planning the next waypoint based on what was found.
+
+This capability was previously demonstrated in structured form by \citet{huang2022innermonologue}
+(Inner Monologue), where perception observations were injected into the LLM's reasoning context at each step.  
+The ND series adopts this pattern but moves from scripted injection to autonomous tool-call invocation, giving the orchestrator agency over when and where to look.
+
+\subsection{Why Human-in-the-Loop Oversight Matters}
+\label{sec:ch4_problem_hitl}
+
+Fully autonomous drone operation in indoor environments raises safety and accountability
+concerns that go beyond what a software guardrail can fully address.  
+The guardrail system introduced in Chapter~\ref{chap:3rd chap} enforced hard bounds on altitude and position but operated after the tool call was proposed.  
+For safety-critical operations particularly those involving persons detected in the scene, a human operator may need to review and approve each drone-control action before execution.
+
+\citet{sanneman2022safeai} formalise this requirement in the SAFE-AI framework, arguing that human feedback is necessary for maintaining situational awareness in human-AI teaming, especially when the AI system's internal reasoning is not directly observable.
+\citet{chen2018humanperformance} further show that operator response time and approval latency are tractable, skilled operators can evaluate and approve or deny an action within 1--3 seconds, well within the timescale of low-frequency LLM control loops operating at 0.1--0.4~Hz.
+
+The ND3 experiments therefore introduce a \texttt{approve\_callback} gate through which every tool call in the drone-control namespace (\texttt{DRONE\_CONTROL\_TOOLS}) is intercepted and presented to a simulated operator (auto-approver with safety bounds) before execution.
+\texttt{analyze\_scene} and sensor-read calls are exempt only actuator commands require approval.
+
+\subsection{Research Questions and Scope}
+\label{sec:ch4_problem_rq}
+
+The ND series addresses four research questions:
+
+\begin{description}
+  \item[RQ1] Can an LLM orchestrator autonomously invoke \texttt{analyze\_scene} as a tool call with the same reliability observed in human-initiated verbalization sessions?
+
+  \item[RQ2] Do multi-turn patrol missions with repeated emergency monitor advisories degrade orchestrator performance, and does the degradation follow the Lost-in-the-Middle failure mode predicted by \citet{liu2023lostinthemiddle}?
+
+  \item[RQ3] Can the M1--M6 semantic-loop mitigations developed for the standalone (no-HITL) setting also resolve loop failures when an operator approval gate is present?
+
+  \item[RQ4] How does the HITL gate affect per-run cost, mission quality, and safety in an agentic drone patrol system, and which orchestrator offers the best cost-quality tradeoff?
+\end{description}
+
+All experiments run in the same custom Python simulator used in Chapters~\ref{chap:2nd chap}
+and~\ref{chap:3rd chap}.  
+The drone model is a custom 50-gram quadrotor with a bespoke flight controller, no standard autopilot stack (PX4, ArduPilot) is involved.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Proposed Approach: Perception--Action Architecture}
 \label{sec:ch4_proposed}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\subsection{ND Series Architecture}
+\subsection{Agentic vision-Guidance Series Architecture}
 \label{sec:ch4_proposed_arch}
 
-The LLM orchestrator sits at the centre of a closed perception-action loop (Figure~\ref{fig:ch4_nd_architecture}).
-The tool namespace is partitioned into three groups:
+Figure~\ref{fig:ch4_nd_architecture} illustrates the ND series architecture.  
+The orchestrator LLM sits at the centre of a closed perception-action loop. 
+On each turn the model receives a mission state context (current position, turn count, previous tool
+results, emergency advisories) and produces either a set of tool calls or a final text report.
+The tool set is partitioned into three groups:
 
 \begin{enumerate}
-  \item \textbf{Perception tools} (no HITL approval required):
-    \texttt{analyze\_scene(image\_path)} --- invokes the full Chapter~\ref{chap:2nd chap} vision pipeline (MediaPipe EfficientDet-Lite0~\cite{lugaresi2019mediapipe}, YOLO-World~\cite{cheng2024yoloworld}, DepthAnything~v2~\cite{yang2024depthanythingv2}) and returns a structured JSON risk assessment (\texttt{CLEAR} / \texttt{ALERT} / \texttt{EMERGENCY}); \texttt{get\_sensor\_status()} for altitude, tilt, and battery.
+  \item \textbf{Perception tools}: \texttt{analyze\_scene(image\_path)} --- triggers the
+    full Chapter~\ref{chap:2nd chap} vision pipeline (MediaPipe EfficientDet Lite0~\cite{lugaresi2019mediapipe}, YOLO World~\cite{cheng2024yoloworld},
+    DepthAnything v2~\cite{yang2024depthanythingv2}) and returns a structured risk assessment; \texttt{get\_sensor\_status()} --- returns current altitude, tilt, and battery state.
+    Both run without HITL approval.
 
-  \item \textbf{Control tools} (HITL-gated in ND3, \texttt{DRONE\_CONTROL\_TOOLS}):
-    \texttt{arm\_motors}, \texttt{find\_hover\_throttle}, \texttt{enable\_altitude\_hold},
-    \texttt{set\_altitude\_target}, \texttt{navigate\_to\_waypoint}, \texttt{hover},
-    \texttt{land}, \texttt{land\_and\_disarm}.
+  \item \textbf{Control tools} (DRONE\_CONTROL\_TOOLS, for drone control): \texttt{arm\_motors}, \texttt{find\_hover\_throttle}, \texttt{enable\_altitude\_hold}, \texttt{set\_altitude\_target},
+  \texttt{navigate\_to\_waypoint}, \texttt{hover}, \texttt{land}, \texttt{land\_and\_disarm}.
 
-  \item \textbf{Reporting}: \texttt{final\_report} written in the model's last text turn.
-    Report content, word count, risk label, and mission adherence are evaluated as the primary quality metric (0--5 rubric).
+  \item \textbf{Reporting}: the model writes a natural-language \texttt{final\_report} in its last text turn.  Report content, word count, risk label, and adherence to mission objectives are evaluated as the primary quality metric.
 \end{enumerate}
 
-The architecture follows the ReAct pattern of~\citet{yao2022react}: reason (mission state context), act (tool call), observe (tool result), repeat.
-GSCE prompt engineering guidelines~\cite{wang2025gsce} structure the mission prompt in \emph{Guidelines}, \emph{Skill APIs}, \emph{Constraints}, \emph{Examples} order.
-
-A background emergency monitor (MediaPipe EfficientDet-Lite0, 1~Hz) fires hazard advisories independently of the LLM loop.
-In the \texttt{alert\_room} scenario it fires on every turn, producing the repeated injection that triggers LITM failure in \S\ref{sec:ch4_nd2_litm}.
+The architecture draws on the ReAct pattern of~\citet{yao2022react}, reason (mission state
+context), act (tool call), observe (tool result), then reason again.  
+GSCE prompt engineering guidelines~\cite{wang2025gsce} inform the mission prompt structure: Guidelines,
+Skill APIs, Constraints, and Examples are provided in that order.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.90\linewidth]{figures/fig4_1_nd_architecture.pdf}
-  \caption{ND series unified perception--action architecture. The LLM orchestrator calls
-    \texttt{analyze\_scene} for visual intelligence and drone-control tools for physical
-    actuation. In ND3, all control tools pass through a HITL approval gate before
-    execution. The background emergency monitor injects hazard advisories into the
-    next turn's context independently.}
+  \caption{ND series unified perception--action architecture.}
   \label{fig:ch4_nd_architecture}
 \end{figure}
+The LLM orchestrator calls \texttt{analyze\_scene} for visual intelligence and drone-control tools for physical actuation.  
+On enabling HITL gate, all control tools pass through a HITL approval gate before execution.
+A background emergency monitor injects hazard advisories into the next turn's context.
 
-\subsection{Human-in-the-Loop Gate (ND3 Only)}
+\subsection{Tool Namespace Extension: \texttt{analyze\_scene} as a Tool}
+\label{sec:ch4_proposed_tool}
+
+The key architectural change from previous chapter is, In the vision guided drone control experiment series the LLM decides when to call analyze\_scene and with which image snapshot. This mirrors the ToolEQA pattern of~\citet{embodiedqa2025}, where grounded tool outputs
+provide verifiable reasoning steps for embodied question answering.  
+Each \texttt{analyze\_scene} call returns a JSON object containing: MediaPipe-detected person
+confidence and estimated distance, YOLO-World top labels, DepthAnything v2 relative depth map statistics, and an overall risk label (\texttt{CLEAR} / \texttt{ALERT} / \texttt{EMERGENCY}).
+The orchestrator uses this structured output to decide the next action.
+
+\subsection{Emergency Monitor and Advisory Injection}
+\label{sec:ch4_proposed_monitor}
+
+A background thread polls the MediaPipe EfficientDet-Lite0 detector at 1~Hz, independently  of the LLM loop.  
+When a person is detected above a confidence threshold in the current scene, the monitor generates a hazard advisory string that is prepended to the next LLM
+turn's user message.  
+This simulates real-time sensor interrupts that may arrive at any point during a patrol mission.
+
+In Camera as a tool experiment the monitor is passive (no alert scenario) as we are justifying the image verbalization technique can be wrapped as a LLM tool.  In autonomous and HITL control the alert\_room scenario
+activates the monitor, which fires on every turn producing the repeated advisory injection that triggers the Lost-in-the-Middle failure mode in Section~\ref{sec:ch4_nd2_litm}.
+
+\subsection{Human-in-the-Loop Gate}
 \label{sec:ch4_proposed_hitl}
 
-The \texttt{approve\_callback} intercepts every \texttt{DRONE\_CONTROL\_TOOL} call before execution.
-It checks: (1) whether the tool is in the control namespace; (2) whether parameters fall within safety bounds ($\pm$2.5~m patrol zone, 0.5--2.0~m altitude, $\leq$3 hover calls per run, $\leq$2.0~m move step).
-Approved calls proceed with a simulated decision latency of $U[0.5, 2.0]$~s (mean 1.22~s, modelling realistic human response~\cite{chen2018humanperformance}); denied calls return an explanatory message injected into the tool result.
-Perception tools (\texttt{analyze\_scene}, \texttt{get\_sensor\_status}) are always exempt --- perception can occur without operator bottleneck.
-
+The \texttt{approve\_callback} function is passed to the orchestrator loop before runs.
+On each proposed tool call the gate:
+\begin{enumerate}
+  \item Checks whether the tool is in \texttt{DRONE\_CONTROL\_TOOLS}.
+  \item Checks whether the proposed parameters fall within safety bounds
+    ($\pm$2.5~m patrol zone, 0.5--2.0~m altitude, $\leq$3 hover calls, $\leq$2.0~m
+    move step).
+  \item Returns \texttt{APPROVED} with a 1.22~s mean simulated decision latency (uniform $U[0.5, 2.0]$~s, modelling realistic human response~\cite{chen2018humanperformance}) or \texttt{DENIED} with an explanatory message injected into the tool result.
+\end{enumerate}
+\texttt{analyze\_scene} and \texttt{get\_sensor\_status} are always exempt from the gate, so perception can occur without operator bottleneck.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Experimental Setup}
 \label{sec:ch4_setup}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\paragraph{Orchestrators.}
-Claude~3.5 Sonnet (\texttt{claude-3-5-sonnet-20241022}), GPT-4o (\texttt{gpt-4o-2024-11-20})~\cite{achiam2023gpt4}, GPT-4o-mini~\cite{achiam2023gpt4}, Gemini~2.5 Flash (\texttt{gemini-2.5-flash-preview-04-17})~\cite{reid2024gemini}.
-All at temperature $t=0.0$ (greedy decoding), consistent with the V8 finding in Chapter~\ref{chap:2nd chap}.
+\paragraph{Orchestrators.} Four commercial LLMs are evaluated throughout the ND series: Claude~3.5~Sonnet
+(\texttt{claude-3-5-sonnet-20241022}), GPT-4o (\texttt{gpt-4o-2024-11-20})~\cite{achiam2023gpt4},
+GPT-4o-mini (\texttt{gpt-4o mini})~\cite{achiam2023gpt4}, and Gemini~2.5~Flash
+(\texttt{gemini-2.5-flash-preview-04 17})~\cite{reid2024gemini}.
+All run at temperature~$t=0.0$ (greedy decoding), consistent with the temperature sweep finding in Chapter~\ref{chap:2nd chap}.
 
 \paragraph{Scenarios.}
-\texttt{clear\_room}: \texttt{door\_open\_run03\_real.jpg}, ground-truth \texttt{CLEAR}, no monitor activation.
-\texttt{alert\_room}: \texttt{person\_detected.jpg}, ground-truth \texttt{ALERT}, emergency monitor fires every turn.
+image verbalization as a tool uses eight images captured from esp32 s3 sense camera across different conditions same as the Chapter~\ref{chap:2nd chap} validation set.
+Autonomous control and HITL use two patrol scenarios:
+\begin{itemize}
+  \item \textbf{clear\_room}: scene image \texttt{door\_open\_run03\_real.jpg}, ground-truth label \texttt{CLEAR}.  
+  No emergency monitor activation.
+  \item \textbf{alert\_room}: scene image \texttt{person\_detected.jpg}, ground-truth label \texttt{ALERT}.  
+Emergency monitor fires on every LLM turn, injecting a hazard advisory.
+\end{itemize}
 
-\paragraph{Runs and cost.}
-5 runs per condition following HELM~\cite{liang2023helm}.
-ND1: \$2.83 total (160~trials); ND2: \$17.52 (40~trials); ND3/ND3B/ND3C combined: \$33.01.
+\paragraph{Runs and cost accounting.}
+Each condition is replicated five times ($N=5$) for reliability estimation following HELM~\cite{liang2023helm}.  
+API costs are tracked at the token level; all figures quoted are actual billed USD.  
+Image verbalization as a tool costed \$2.83 (160~trials).
+Autonomous drone control costed a total of \$17.52 (40~trials).
+Combined \$33.01 total across all models, sub-runs and re-runs.
 
 \paragraph{Metrics.}
-Patrol rate (fraction of runs completing all waypoints + final report); quality/5 (human-rated completeness, risk label accuracy, actionability); cost/run (billed USD); turns/run; flip rate (non-determinism at $t=0.0$, ND1 only).
+\begin{itemize}
+  \item \textbf{Patrol rate}: fraction of runs in which the drone completed all designated waypoints and produced a final report.
+  \item \textbf{Quality (0--5)}: human-rated report quality assessing completeness, risk label accuracy, and actionability.
+  \item \textbf{s3\_risk}: binary indicator (1 if risk label matches ground truth, else 0).
+  \item \textbf{Cost/run}: billed USD per completed or terminated run.
+  \item \textbf{Turns/run}: number of LLM API calls per run.
+  \item \textbf{Flip rate}: fraction of repeated runs that switch risk label (non-determinism measure, applicable only on image verbalisation tool).
+\end{itemize}
 
+\paragraph{Simulator and hardware.}
+The same custom Python simulator from Chapters~\ref{chap:2nd chap} and~\ref{chap:3rd chap}
+is used.  
+The four-tier control architecture, Tier~1 PID at 4~kHz, Tier~1.5 MediaPipe at
+60~Hz, Tier~2 YOLO+DepthAnything at 4~Hz, Tier~3 LLM at 0.1--0.4~Hz remains unchanged.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{ND1: Camera-as-Tool Validation}
+\section{Camera-as-Tool Validation}
 \label{sec:ch4_nd1}
 % ─────────────────────────────────────────────────────────────────────────────
 
-ND1 tests whether the LLM will autonomously call \texttt{analyze\_scene} when listed alongside drone-control tools.
-The concern is that a model focused on \emph{acting} may treat the perception tool as optional and skip it.
-Design: 4 orchestrators $\times$ 8 static scenes $\times$ 5 runs = 160 trials.
-Each run: arm $\to$ navigate $\to$ \texttt{analyze\_scene} $\to$ land $\to$ write report.
+\subsection{Objective and Design}
+\label{sec:ch4_nd1_design}
+
+Camera as a tool asks the simplest possible question: when \texttt{analyze\_scene} is listed in the
+orchestrator's tool namespace alongside the drone-control tools, will the model actually call
+it?  
+The concern is that a model focused on acting (moving, hovering, landing) may treat the perception tool as optional and skip it, yielding physically correct flight but semantically empty patrol.
+
+The experiment fixes 8 images (4 clear, 4 alert) captured, asks each of the 4 orchestrators to complete a single-scene patrol (arm, navigate, analyse, land, report), and repeats each image--orchestrator combination 5 times.
+
+\subsection{Results}
+\label{sec:ch4_nd1_results}
 
 \begin{table}[ht]
-  \caption{ND1 results (160 trials, 8 scenes, 4 orchestrators, 5 runs each). All four
-    orchestrators achieve 100\% \texttt{analyze\_scene} invocation without any explicit
-    instruction to call it. GPT-4o-mini leads on quality; Gemini leads on cost
-    (146$\times$ cheaper than Claude). Claude's 3.00/5 quality reflects report verbosity
-    exceeding the 150-word evaluation ceiling, consistent with G-series findings.}
+  \caption{Image verbalization as tool results}
   \label{tab:ch4_nd1}
   \centering
   \small
@@ -135,33 +243,66 @@ Each run: arm $\to$ navigate $\to$ \texttt{analyze\_scene} $\to$ land $\to$ writ
   \end{tabular}
 \end{table}
 
-Registering \texttt{analyze\_scene} in the tool namespace is sufficient for 100\% autonomous invocation --- consistent with the SayCan affordance model~\cite{ahn2022saycan} where available tools become action candidates selected on task relevance.
-Claude's 55.2\% flip rate at $t=0.0$ confirms floating-point non-reproducibility across API calls~\cite{achiam2023gpt4}; GPT-4o-mini's 12.5\% is the most stable.
+All orchestrators achieved 100\% \texttt{analyze\_scene} invocation rate. 
+GPT-4o-mini leads on quality whereas Gemini leads on cost efficiency (146$\times$ cheaper than Claude).  Claude's lower quality reflects report verbosity exceeding the 150-word evaluation ceiling.
+Table~\ref{tab:ch4_nd1} summarises the results.
+Three findings stand out:
+
+\paragraph{Finding 1 --- 100\% tool invocation rate.}
+All four orchestrators called \texttt{analyze\_scene} on every single trial.  
+No model skipped or deferred the perception step.  This answers RQ1 affirmatively: registering
+\texttt{analyze\_scene} in the tool namespace is sufficient to make perception a natural part of the model's action plan, without any explicit instruction to ``call the scene analysis tool.''  
+This is consistent with the SayCan affordance model of~\citet{ahn2022saycan}, where available tools become action candidates that the model selects based on task-relevance.
+
+\paragraph{Finding 2 --- Quality-cost tension across models.}
+GPT-4o-mini achieves the highest report quality (4.42/5) at \$0.00158/run, roughly
+10~cents per hundred runs. 
+Gemini 2.5 Flash matches quality at 4.40/5 but costs only \$0.00043/run (146$\times$ cheaper than Claude at \$0.04425/run).  
+GPT-4o sits in the mid-quality, mid-cost tier.
+Claude scores 3.00/5 despite the highest cost, because its verbose reports (over-explained reasoning chains exceeding 150~words) dilute the structured risk assessment and the quality rubric rewards.  
+This verbosity failure for Claude was also observed in the G-series experiments of Chapter~\ref{chap:2nd chap}.
+
+\paragraph{Finding 3 --- Flip rate reveals non-determinism at $t=0.0$.}
+Even with greedy decoding ($t=0.0$), Claude produces different risk labels across repeated runs on identical inputs (55.2\% flip rate). 
+This confirms the temperature sweep finding that Claude's sampling mechanism does not guarantee full determinism at zero temperature, possibly due to
+floating-point non-reproducibility across API calls~\cite{achiam2023gpt4}.
+GPT-4o-mini's 12.5\% flip rate is the most stable, consistent with its deterministic clear/alert behaviour observed subsequently in upcoming experiments as well.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.80\linewidth]{figures/fig4_2_nd1_quality_cost.pdf}
-  \caption{ND1 quality vs.\ cost per run (bubble size proportional to flip rate).
-    GPT-4o-mini: best quality-cost ratio. Gemini: lowest cost overall. All four
-    orchestrators achieved 100\% \texttt{analyze\_scene} invocation.}
+  \caption{Image verbalization as a tool quality vs.\ cost per run.}
   \label{fig:ch4_nd1_qc}
 \end{figure}
 
+\subsection{Summary}
+\label{sec:ch4_nd1_summary}
+
+ND1 validates \texttt{analyze\_scene} as a first-class agentic tool (RQ1: \textbf{yes}).
+The simplest single-scene missions reveal a clear ordering: GPT-4o-mini and Gemini best balance quality and cost, Claude is the weakest single-scene performer despite its capability as an NL-command executor in Chapter~\ref{chap:3rd chap}. 
+With the per-scene baseline established, ND2 extends to full multi-turn patrol.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{ND2: Multi-Turn Agentic Patrol}
+\section{Multi-Turn Agentic Patrol}
 \label{sec:ch4_nd2}
 % ─────────────────────────────────────────────────────────────────────────────
 
-ND2 scales to full patrol missions: disarm $\to$ arm $\to$ climb to 1.0~m $\to$ navigate three waypoints with \texttt{analyze\_scene} at each $\to$ write consolidated report $\to$ land.
-A 1~Hz background monitor fires throughout the \texttt{alert\_room} scenario.
-Parameters: $\max\_turns=50$, $t=0.0$, 4 orchestrators $\times$ 2 scenarios $\times$ 5 runs = 40 trials, total \$17.52.
+\subsection{Objective and Mission Design}
+\label{sec:ch4_nd2_design}
+
+Agentic patrol scales from single-scene snapshots to complete patrol missions.
+Each run begins with the drone disarmed on the ground and ends with the drone landed and a final security report written.
+The mission involves arming, altitude hold activation, climbing to 1.0~m, navigating a three-waypoint route, calling \texttt{analyze\_scene} at each waypoint, and
+producing a consolidated room-status report.
+A 1~Hz background emergency monitor fires throughout the alert\_room scenario.
+
+Parameters: $\max\_turns = 50$, $t = 0.0$, 4 orchestrators $\times$ 2 scenarios $\times$ 5 runs $= 40$~trials, total cost \$17.52.
+
+\subsection{Per-Orchestrator Results}
+\label{sec:ch4_nd2_results}
 
 \begin{table}[ht]
-  \caption{ND2 multi-turn patrol results (40 trials). GPT-4o alert\_room 40\% patrol
-    reflects deliberate hazard-abort behaviour (correct safety doctrine: abort on confirmed
-    hazard, write emergency report, request RTH). GPT-4o-mini alert\_room 0\% is a
-    deterministic LITM semantic loop.}
+  \caption{Multi-turn patrol results.}
   \label{tab:ch4_nd2}
   \centering
   \small
@@ -170,262 +311,332 @@ Parameters: $\max\_turns=50$, $t=0.0$, 4 orchestrators $\times$ 2 scenarios $\ti
     Orchestrator & Scenario & Patrol\% & Correct\% & Cost/Run \\
     \midrule
     \multirow{2}{*}{Claude 3.5 Sonnet}
-      & clear\_room & 0\%            & 60\%           & --- \\
-      & alert\_room & 100\%          & 100\%          & --- \\
+      & clear\_room & 0\%   & 60\%  & --- \\
+      & alert\_room & 100\% & 100\% & --- \\
     \midrule
     \multirow{2}{*}{GPT-4o}
       & clear\_room & \textbf{100\%} & \textbf{100\%} & --- \\
-      & alert\_room & 40\%           & 80\%           & --- \\
+      & alert\_room & 40\%  & 80\%  & --- \\
     \midrule
     \multirow{2}{*}{GPT-4o-mini}
       & clear\_room & \textbf{100\%} & \textbf{100\%} & \$0.024 \\
-      & alert\_room & 0\%            & 100\%          & \$0.615 \\
+      & alert\_room & 0\%   & 100\% & \$0.615 \\
     \midrule
     \multirow{2}{*}{Gemini 2.5 Flash}
-      & clear\_room & 60\%           & 60\%           & \textbf{\$0.024} \\
-      & alert\_room & 40\%           & 100\%          & \textbf{\$0.024} \\
+      & clear\_room & 60\%  & 60\%  & \textbf{\$0.024} \\
+      & alert\_room & 40\%  & 100\% & \textbf{\$0.024} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Three behavioural patterns are evident.
-(1) \textbf{GPT-4o} completes clear\_room at 100\%, and prioritises emergency escalation in alert\_room (abort on hazard detection = correct safety doctrine).
-(2) \textbf{Claude} fails clear\_room completely (0\% patrol): it enters a reasoning loop, repeatedly re-querying conditions without forward progress, and exhausts the 50-turn budget --- hazard signal in alert\_room provides the decision point that terminates the loop.
-(3) \textbf{Gemini} is cheapest (\$0.024/run across both scenarios) with partial success rates, suitable for cost-sensitive bulk patrol.
+``Patrol\%'' is the fraction of runs completing all waypoints plus a final report. 
+GPT-4o-mini's alert\_room LITM failure and Gemini's clear\_room variability are the main failure modes observed.
+Table~\ref{tab:ch4_nd2} reveals three behavioural patterns.
+.
+\paragraph{Finding 1 --- GPT-4o delivers the best overall balance.}
+GPT-4o completes the clear\_room patrol with 100\% rate and correct risk labelling.
+In alert\_room, 40\% of runs halt after detecting the person hazard (runs completed in 3--5 turns, writing an emergency report and requesting return-to-home without completing all waypoints).  
+This is correct safety doctrine, abort patrol on confirmed hazard, escalate immediately.  
+The remaining 60\% complete the patrol and then report.  
+GPT-4o's combined behaviour (maximise mission when safe, escalate when not) makes it the most
+balanced orchestrator for patrol-plus-safety objectives.
+
+\paragraph{Finding 2 --- Claude loops in clear\_room.}
+Despite its strong NL-command performance in Chapter~\ref{chap:3rd chap}, Claude fails clear\_room completely (0\% patrol), it enters a reasoning loop, repeatedly re-querying conditions without making forward progress, and exhausts its turn budget.  Alert\_room succeeds (100\%) because the hazard signal provides a clear decision point that terminates
+the loop.  
+This decision-signal dependence is not predicted by single-scene results and illustrates how multi-turn mission complexity changes model behaviour.
+
+\paragraph{Finding 3 --- Gemini is cheapest but variable.}
+Gemini 2.5 Flash completes 60\% of clear\_room patrols and 40\% of alert\_room patrols, both at \$0.024/run --- the lowest cost across all conditions.  
+The variability likely reflects probabilistic mission termination decisions; some runs write the report early and land, others overrun.  
+Gemini's alert\_room 40\% patrol rate also includes hazard-abort behaviour (correct) in the remaining 60\%.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.80\linewidth]{figures/fig4_3_nd2_patrol_heatmap.pdf}
-  \caption{ND2 patrol completion rates by orchestrator and scenario (green = 100\%,
-    red = 0\%). GPT-4o is the only model completing both scenarios. The stark clear/alert
-    split for GPT-4o-mini is the LITM failure.}
+  \caption{Patrol completion rates by orchestrator and scenario.}
   \label{fig:ch4_nd2_heatmap}
 \end{figure}
 
-% ------------------------------------------------------------------
 \subsection{Lost in the Middle: GPT-4o-mini Alert\_room Failure}
 \label{sec:ch4_nd2_litm}
-% ------------------------------------------------------------------
 
-GPT-4o-mini achieves 0\% alert\_room patrol despite correct risk identification (100\% correct\%).
-The failure mode is a deterministic semantic infinite loop.
+GPT-4o-mini achieves 100\% clear\_room patrol but fails alert\_room completely (0\% patrol, 0\% report written) despite 100\% correct risk identification.  The failure mode is a semantic infinite loop.
 
-The emergency monitor fires every turn, injecting an advisory (e.g., \texttt{[EMERGENCY MONITOR] Person detected. Take evasive action.}).
-On each turn the model processes the advisory, decides to hover, receives the advisory again, and hovers again.
-The mission never progresses past the hovering phase.
+\paragraph{Mechanism.}
+The emergency monitor fires every turn, injecting an advisory such as ``\texttt{[EMERGENCY MONITOR] Person detected. Take evasive action.}''  
+On each turn the model processes the advisory, determines it should hover to assess the situation, hovers, receives the advisory again on the next turn, and hovers again.  
+The mission never progresses beyond the hovering phase.
 
-This is a direct instance of the Lost in the Middle phenomenon~\cite{liu2023lostinthemiddle}: as context fills with repeated tool-call results and advisories ($\approx$8,700 tokens appended per turn), the model's effective attention to the original mission exit condition --- ``complete the patrol, write a report, land'' --- degrades.
-\citet{liu2023lostinthemiddle} show a U-shaped attention curve where information placed in the middle of a long context receives up to 30\% less attention.
+This is a direct instance of the ''Lost in the Middle'' phenomenon documented by~\citet{liu2023lostinthemiddle}.
+As the context window fills with repeated tool-call
+results and emergency advisories (each turn appending $\approx$8,700~tokens), the model's effective attention to the original mission objective ``complete the patrol, write a report, land'' degrades.  \citet{liu2023lostinthemiddle} show a U-shaped attention curve where information placed in the middle of a long context receives up to 30\% less attention than information at the start or end.  
+With repeated injections growing the context each turn, the mission exit condition is progressively buried. 
+
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.80\linewidth]{figures/fig4_4_nd2_litm_growth.pdf}
-  \caption{Context token growth across turns for GPT-4o-mini alert\_room (ND2, no fixes).
-    Turn~1: 12,871 tokens. Turn~50: 440,057 tokens (34.2$\times$ growth). Mission exit
-    condition buried in the growing context. All 5 runs: identical deterministic loop.}
+  \caption{Context token growth across turns for GPT-4o-mini alert\_room (without fixes). \citet{liu2023lostinthemiddle}.}
   \label{fig:ch4_nd2_litm}
 \end{figure}
 
-Total 5-run cost: \$3.075 for zero patrol completions.
+Figure~\ref{fig:ch4_nd2_litm} shows the 34.2$\times$ context growth from turn~1 (12,871~tokens) to turn~50 (440,057~tokens).
+The mission objective (written at turn~1) is in the middle of this growing context, receiving degraded attention per call.
+The total 5-run cost is \$3.075 --- entirely
+wasted, producing zero patrol completions.  
+The LITM failure is a structural property, all 5 alert\_room runs produce identical sequences (same tokens, same loop pattern), confirming the outcome is deterministic given greedy decoding.
 
-% ------------------------------------------------------------------
-\subsection{M1--M6 Semantic Loop Mitigations}
+\subsection{M1--M6 Mitigations}
 \label{sec:ch4_nd2_mitigations}
-% ------------------------------------------------------------------
 
-Six targeted mitigations are developed and validated together on the GPT-4o-mini alert\_room failure.
+Six targeted mitigations are developed and applied to the GPT-4o-mini alert\_room failure.
+Table~\ref{tab:ch4_nd2_mitigations} summarizes the mitigations; their combined effect completely reverses the failure.
 
 \begin{table}[ht]
-  \caption{M1--M6 semantic loop mitigations: mechanism and theoretical basis.}
+  \caption{M1--M6 semantic loop mitigations}
   \label{tab:ch4_nd2_mitigations}
   \centering
   \small
   \renewcommand{\arraystretch}{1.25}
-  \begin{tabular}{cll}
+  \begin{tabular}{cllp{4.2cm}}
     \toprule
-    \# & Name & Mechanism \\
+    \# & Name & Parameter & Mechanism \\
     \midrule
-    M1 & Advisory rate-limit & Suppress re-injection if $<$5 turns since last advisory; reduces context noise \\
-    M2 & Structured memory injection & Prepend \texttt{\_build\_mission\_state()} to every user message at primacy position \\
-    M3 & \texttt{final\_text} overwrite fix & Guard clause prevents non-empty report text being overwritten by later turns \\
-    M4 & Loop detection + nudge & Inject ``LOOP DETECTED --- write report NOW'' once \texttt{analyze\_scene} called $\geq$3$\times$ \\
-    M5 & Turn budget warning & Inject ``Only $N$ turns remaining'' once turn $\geq$40; creates deadline urgency \\
-    M6 & Explicit quit condition & EXIT RULE at primacy: $\geq$3$\times$ \texttt{analyze\_scene} $\Rightarrow$ STOP tools, write report, land \\
+    M1 & Advisory rate-limit & \texttt{MIN\_ADVISORY\_GAP\_TURNS = 5}
+       & Suppress re-injection if fewer than 5 turns since last advisory;
+         reduces context noise~\cite{liu2023lostinthemiddle} \\
+    M2 & Structured memory injection & Every turn, primacy position
+       & Prepend \texttt{\_build\_mission\_state()} to user message;
+         U-shaped attention curve~\cite{liu2023lostinthemiddle} \\
+    M3 & \texttt{final\_text} overwrite fix & Guard clause
+       & Prevent non-empty report text being overwritten by later tool turns \\
+    M4 & Loop detection + nudge & \texttt{SCENE\_CALL\_NUDGE\_THRESHOLD = 3}
+       & Inject \emph{``LOOP DETECTED --- write report NOW''} once
+         \texttt{analyze\_scene} is called $\geq$3$\times$~\cite{runaway2025} \\
+    M5 & Turn budget warning & \texttt{TURN\_BUDGET\_WARN\_AT = 40}
+       & Inject \emph{``Only N turns remaining''} once turn $\geq$40;
+         creates deadline urgency \\
+    M6 & Explicit quit condition & Always present in mission state
+       & EXIT RULE at primacy: \emph{``analyze\_scene $\geq$3$\times$ $\rightarrow$
+         STOP tools, write report, land''}~\cite{yao2022react} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-M1--M2 target the U-shaped attention curve~\cite{liu2023lostinthemiddle, foundinthemiddle2024}: placing the exit condition at the \emph{start} of every turn ensures maximum attention regardless of context length.
-M4+M6 provide an explicit, self-applicable exit condition --- addressing the gap that~\citet{runaway2025} identify in embodied LLM agents lacking intrinsic termination criteria.
+The theoretical basis for M1--M2 is the primacy effect of the U-shaped attention curve~\cite{liu2023lostinthemiddle,foundinthemiddle2024}.
+Placing the exit condition at the start (primacy position) of every turn's user message ensures it receives maximum attention regardless of context length.  
+M4 and M6 together give the model an explicit, self-applicable exit condition that it can trigger autonomously addressing the core gap that \citet{runaway2025} identify in embodied LLM agents lacking intrinsic termination criteria.
 
 \begin{table}[ht]
-  \caption{M1--M6 fix results on GPT-4o-mini alert\_room (ND2, 5 runs). Complete failure
-    ($0\%$ patrol, \$0.615/run) transforms into full success ($100\%$, \$0.027/run).
-    96\% cost reduction; context growth from 34.2$\times$ to 1.4$\times$.}
+  \caption{M1--M6 fix results on GPT-4o-mini alert\_room (5 runs).}
   \label{tab:ch4_nd2_fix}
   \centering
   \small
   \begin{tabular}{lcc}
     \toprule
-    Metric & Before (ND2) & After (M1--M6) \\
+    Metric & Before (ND2, no fix) & After (M1--M6 applied) \\
     \midrule
-    Patrol rate    & 0\%          & \textbf{100\%} \\
-    Quality/5      & 0.0          & \textbf{4.0} \\
-    Words written  & 0            & \textbf{$\sim$130} \\
-    Turns/run      & 50 (max)     & \textbf{$<$15} \\
-    Cost/run       & \$0.615      & \textbf{\$0.027} \\
-    Context growth & 34.2$\times$ & \textbf{1.4$\times$} \\
-    5-run total    & \$3.075      & \textbf{\$0.135} \\
+    Patrol rate     & 0\%      & \textbf{100\%} \\
+    Quality/5       & 0.0      & \textbf{4.0}   \\
+    Words written   & 0        & \textbf{$\sim$130} \\
+    Turns/run       & 50 (max) & \textbf{$<$15} \\
+    Cost/run        & \$0.615  & \textbf{\$0.027} \\
+    Context growth  & 34.2$\times$ & \textbf{1.4$\times$} \\
+    5-run total     & \$3.075  & \textbf{\$0.135} \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+Table~\ref{tab:ch4_nd2_fix} shows the before/after Mitigation comparison. The 
+patrol rate increases from 0\% to 100\%; quality increases from 0 to 4.0/5; the cost per run falls from \$0.615 to \$0.027 (96\% reduction).  
+The context growth drops from 34.2$\times$ to 1.4$\times$ because
+M1 suppresses advisory re-injection and M2 replaces multi-thousand-token tool-result dumps with compact structured state summaries ($\approx$240~tokens/turn).
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.85\linewidth]{figures/fig4_5_nd2_fix_comparison.pdf}
-  \caption{M1--M6 effect on GPT-4o-mini alert\_room. Left: patrol rate, quality, and
-    relative cost. Right: per-turn context size before and after mitigations.}
+  \caption{M1--M6 mitigation effect on GPT-4o-mini alert\_room (ND2).}
   \label{fig:ch4_nd2_fix}
 \end{figure}
 
+\subsection{ND2 Summary}
+\label{sec:ch4_nd2_summary}
+
+Left panel shows the patrol rate, quality, and relative cost (normalised to pre-fix baseline).
+Right panel shows the  per-turn context size before and after mitigations.
+
+This experiment answers RQ2 (\textbf{yes}: repeated advisory injection produces LITM-class context
+degradation) and provides the M1--M6 framework as a validated mitigation.  
+GPT-4o emerges as the most balanced orchestrator for adversarial patrol scenarios.  
+GPT-4o-mini is fully capable in benign conditions but requires loop mitigations for alert scenarios. 
+Gemini is the cost-efficient tier for bulk patrol.  Claude shows an unexpected failure in clear-room
+reasoning, suggesting its success in Chapter~\ref{chap:3rd chap} depends on the clarity of
+the initial command rather than multi-turn reasoning endurance.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{ND3: Human-in-the-Loop Integration}
+\section{Human-in-the-Loop Integration}
 \label{sec:ch4_nd3}
 % ─────────────────────────────────────────────────────────────────────────────
 
-ND3 adds the \texttt{approve\_callback} gate described in \S\ref{sec:ch4_proposed_hitl}.
-The mission prompt is identical to ND2 (no HITL-specific language), testing whether the model adapts through denial feedback alone.
-4 orchestrators $\times$ 2 scenarios $\times$ 5 runs = 40 initial trials.
+\subsection{HITL Gate Design and Motivation}
+\label{sec:ch4_nd3_design}
 
-% ------------------------------------------------------------------
+This experiment introduces the \texttt{approve\_callback} described in Section~\ref{sec:ch4_proposed_hitl}.
+The HITL gate tests whether agentic orchestrators that successfully operated autonomously in the previous experiment remain coherent and cost-efficient when every actuator command requires human sign-off.  
+The gate also tests whether the approval mechanism provides sufficient loop-breaking force to replace the M1--M6 mitigations, an important question for practitioners who may prefer operator intervention over prompt engineering.
+
+this experiment uses the same mission design as multi -turn mission, 4 orchestrators $\times$ 2 scenarios $\times$ 5 runs $= 40$ initial trials.  
+The mission prompt is also identical} to multi turn autonomy (no
+HITL-specific language added).
+Testing whether the model adapts to the approval gate
+through the denial feedback alone.
+
 \subsection{Bug Discovery and Fixes}
 \label{sec:ch4_nd3_bugs}
-% ------------------------------------------------------------------
 
-ND3 exposed two software bugs that invalidated portions of the initial results; both were fixed before re-running.
+HITL exposed two software bugs in the orchestrator loop, invalidating portions of the initial results.  Both were fixed before re-running.
 
 \paragraph{Bug A --- Gemini \texttt{finishReason="STOP"} break condition (Critical).}
-The loop broke when \texttt{finish\_reason $\in$ \{STOP, MAX\_TOKENS, \ldots\}} \emph{or} no function calls were present.
-The Google Gemini API returns \texttt{finishReason="STOP"} alongside function calls as its normal function-call completion signal --- unlike OpenAI (\texttt{finish\_reason="tool\_calls"}) and Claude (\texttt{stop\_reason="end\_turn"} only on text turns)~\cite{geminiapi2025}.
-The \texttt{or} conjunction caused the loop to break after one turn even when tool calls were present: 0 drone commands, 0 approvals, and 0 cost across all 10 Gemini runs.
+The original code broke the agentic loop when \texttt{finish\_reason $\in$ \{STOP, MAX\_TOKENS,
+SAFETY, \ldots\}} or there were no function calls.  The Google Gemini API returns \texttt{finishReason="STOP"} alongside function calls as its normal function-call completion signal unlike OpenAI (\texttt{finish\_reason="tool\_calls"}) and Claude (\texttt{stop\_reason="end\_turn"} only on text
+turns)~\cite{geminiapi2025}.  
+The \texttt{or} conjunction caused the loop to break after a single turn even when tool calls were present, yielding 0 drone commands, 0 approvals, and
+0 cost across all 10 Gemini runs.
 
-\textbf{Fix:} break only on \{MAX\_TOKENS, SAFETY, RECITATION, OTHER\} or when no function calls are present; \texttt{STOP} with function calls = continue.
+\textbf{Fix:} separate the conditions break only if there are no function calls OR if \texttt{finish\_reason $\in$ \{MAX\_TOKENS, SAFETY, RECITATION, OTHER\}}; \texttt{STOP} with function calls present is normal Gemini behaviour, continue.
 
-\paragraph{Bug B --- Silent error swallow (Minor).}
-An Azure 500 InternalServerError during GPT-4o-mini runs caused the inner retry loop to \texttt{break} silently, leaving \texttt{error\_msg=""} and making outage runs appear as zero-data completions.
+\paragraph{Bug B --- Inner API error silently swallowed (Minor).}
+An Azure 500 InternalServerError during GPT-4o-mini runs caused the inner retry loop to \texttt{break} silently, leaving \texttt{error\_msg = ""} in the run record.  
+This made API-outage runs appear as successful zero-data completions.
 
-\textbf{Fix:} replace \texttt{break} with \texttt{raise} so exceptions propagate to the run-level handler.
+\textbf{Fix:} replace \texttt{break} with \texttt{raise} so exceptions propagate to the
+run-level handler and are correctly recorded.
 
-These bugs illustrate the importance of API-level testing in multi-model orchestration: provider conventions for finish reasons differ in subtle but consequential ways.
+These bugs illustrate the importance of API-level testing when building multi-model orchestration systems provider conventions for finish reasons differ in subtle but consequential ways.
 
-% ------------------------------------------------------------------
-\subsection{ND3B: Bug-Fixed Results}
+\subsection{Bug-Fixed Results}
 \label{sec:ch4_nd3b}
-% ------------------------------------------------------------------
 
-Claude and GPT-4o results from the original ND3 were unaffected by either bug and remain valid.
-Gemini was re-run (Bug~A fix, 10~runs) and GPT-4o-mini was re-run (Bug~B fix, 10~runs) as ND3B.
+After applying Bugs A and B fixes, three sub-experiments were run: Gemini re-run,
+(10~runs), GPT-4o-mini re-run with Bug~B fix, (10~runs).  
+Claude and GPT-4o results from the original ND3 were not affected by either bug and remain valid.
 
 \begin{table}[ht]
-  \caption{ND3 consolidated bug-fixed results (all orchestrators, both scenarios).
-    GPT-4o alert\_room 20\% patrol is deliberate hazard-abort behaviour ($\dagger$).
-    GPT-4o-mini alert\_room 0\% is the LITM loop, resolved in ND3C ($\ddagger$).
-    Gemini costs are 70$\times$ cheaper than Claude per run.}
+  \caption{Consolidated bug-fixed results (all orchestrators, both scenarios).}
   \label{tab:ch4_nd3b}
   \centering
   \small
-  \begin{tabular}{llccccc}
+  \begin{tabular}{llcccccc}
     \toprule
-    Orchestrator & Scenario & Patrol\% & Quality/5 & Cost/Run & Approvals & Denials \\
+    Orchestrator & Scenario & Patrol\% & Quality/5 & Cost/Run & Turns & Approvals & Denials \\
     \midrule
     \multirow{2}{*}{Claude 3.5 Sonnet}
-      & clear\_room & 60\%   & 3.60 & \$1.69  & 14.8 & 0 \\
-      & alert\_room & 80\%   & 2.80 & \$2.13  & 14.4 & 0 \\
+      & clear\_room & 60\%   & 3.60 & \$1.69 & 49.2 & 14.8 & 0 \\
+      & alert\_room & 80\%   & 2.80 & \$2.13 & 39.4 & 14.4 & 0 \\
     \midrule
     \multirow{2}{*}{GPT-4o}
-      & clear\_room & \textbf{100\%} & \textbf{4.00} & \$0.28 & 7.0  & 0 \\
-      & alert\_room & 20\%$^\dagger$  & \textbf{4.20} & \$0.37 & 3.0  & 0 \\
+      & clear\_room & \textbf{100\%} & \textbf{4.00} & \$0.28 & 11.0 & 7.0 & 0 \\
+      & alert\_room & 20\%$^\dagger$ & \textbf{4.20} & \$0.37 & 8.8  & 3.0 & 0 \\
     \midrule
     \multirow{2}{*}{Gemini 2.5 Flash (ND3B)}
-      & clear\_room & 80\%   & 3.00 & \$0.023 & 10.6 & 0 \\
-      & alert\_room & 60\%   & 4.00 & \$0.031 & 9.6  & 0 \\
+      & clear\_room & 80\%   & 3.00 & \$0.023 & 38.8 & 10.6 & 0 \\
+      & alert\_room & 60\%   & 4.00 & \$0.031 & 29.2 & 9.6  & 0 \\
     \midrule
     \multirow{2}{*}{GPT-4o-mini (ND3B)}
-      & clear\_room & \textbf{100\%} & \textbf{4.00} & \$0.065 & 12.0 & 0 \\
-      & alert\_room & 0\%$^\ddagger$ & 0.00 & \$1.70 & 13.0 & 10 \\
+      & clear\_room & \textbf{100\%} & \textbf{4.00} & \$0.065 & 31.0 & 12.0 & 0 \\
+      & alert\_room & 0\%$^\ddagger$ & 0.00 & \$1.70 & 50.0 & 13.0 & 10 \\
     \bottomrule
-    \multicolumn{7}{l}{\footnotesize $\dagger$ Hazard-abort: model correctly prioritised safety escalation over patrol completion.} \\
-    \multicolumn{7}{l}{\footnotesize $\ddagger$ LITM semantic loop; resolved in ND3C.}
+    \multicolumn{8}{l}{\footnotesize $\dagger$ Hazard-abort behaviour: model correctly
+      prioritised emergency escalation over patrol completion.} \\
+    \multicolumn{8}{l}{\footnotesize $\ddagger$ LITM semantic loop; resolved in ND3C
+      (Table~\ref{tab:ch4_nd3c}).}
   \end{tabular}
 \end{table}
 
-GPT-4o delivers quality 4.0--4.2 at \$0.28--\$0.37/run in the fewest turns (8.8--11.0~turns), making it the most efficient full-patrol orchestrator.
-Claude is HITL-compliant (100\% approval rate, 0 denials) but 7$\times$ more expensive than GPT-4o for lower quality.
-Gemini operates at \$0.023--\$0.031/run --- 70$\times$ cheaper than Claude --- suitable for high-frequency autonomous patrol at scale.
+
+    GPT-4o alert\_room patrol 20\% reflects deliberate hazard-abort behaviour (correct
+    safety doctrine).  GPT-4o-mini alert\_room 0\% is the LITM semantic loop;
+    this is resolved in ND3C.  Gemini costs are 70$\times$ cheaper than Claude per run.
+    
+\paragraph{Finding 1 --- GPT-4o best quality, lowest cost among valid models.}
+GPT-4o delivers quality~4.0 (clear\_room) and 4.2 (alert\_room) at \$0.28--\$0.37/run.
+Clear\_room 100\% patrol is achieved in 11~turns on average the most efficient full-patrol mission across all orchestrators in HITL.
+The 20\% alert\_room patrol rate reflects GPT-4o's hazard-abort priority, 4 of 5 runs write an emergency report and request RTH immediately upon detecting the person, without completing all waypoints.
+This is correct real-world drone safety doctrine, supported by the SAFE-AI framework~\cite{sanneman2022safeai}.
+
+\paragraph{Finding 2 --- Claude HITL-compliant but verbose and expensive.}
+Claude received 100\% approval on all proposed commands (146/146, 0 denials) across both
+scenarios, confirming it generates only safety-compliant tool calls.  
+However, at \$1.69 and \$2.13 per run respectively and 39--49~turns per run, Claude is 7$\times$ more expensive than GPT-4o for comparable or lower quality. The 60\% clear\_room patrol rate reflects two runs where Claude saturated the 50-turn budget in a thorough sequential analysis without writing the final report a mild LITM effect at high turn counts.
+
+\paragraph{Finding 3 --- Gemini 70$\times$ cheaper than Claude with near-comparable quality.}
+At \$0.023--\$0.031/run and 70--80\% patrol rates, Gemini 2.5 Flash delivers cost-per-mission economics suitable for high-frequency autonomous patrol at scale.
+One run (clear\_room run~3) produced an anomaly: Gemini restarted the entire startup sequence after observing an intermediate altitude reading ($0.781$~m $<$ 1.0~m target), treating convergence-in-progress as a startup failure.  
+This probabilistic fixation on an intermediate sensor value caused the run to complete only one waypoint.  The other 9 runs operated normally.
+
+Gemini also exhibited risk over-escalation: in clear\_room, 2/5~runs reported \texttt{ALERT}/\texttt{EMERGENCY} for a room that MediaPipe scored as \texttt{CLEAR}.
+In alert\_room, 3/5~runs reported \texttt{EMERGENCY} for a \texttt{ALERT} ground truth.
+Risk calibration via few-shot prompt examples is a viable mitigation for future work.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.85\linewidth]{figures/fig4_7_nd3b_results.pdf}
-  \caption{ND3 consolidated results (bug-fixed). Left: patrol rate by orchestrator and
-    scenario. Right: quality/5 vs.\ cost/run. GPT-4o defines the quality frontier;
-    Gemini defines the cost frontier.}
+  \caption{ND3 consolidated results.  }
   \label{fig:ch4_nd3b_results}
 \end{figure}
 
-% ------------------------------------------------------------------
-\subsection{LITM Persists Under HITL: ND3B-mini}
+Left: patrol rate by orchestrator and scenario.  Right: quality/5 vs.\ cost/run.  
+GPT-4o quality-cost frontier; Gemini cost-efficiency frontier.  
+GPT-4o-mini alert\_room excluded pending ND3C fix.
+
+\subsection{LITM Persists Under HITL: GPT-4o-mini Analysis}
 \label{sec:ch4_nd3_mini}
-% ------------------------------------------------------------------
 
-A critical finding of ND3B is that the HITL approval gate, while correctly denying excessive hovering, is \emph{insufficient to break the semantic loop} on its own.
+A critical finding of GPT-4o-min is that the HITL approval gate, while correctly denying excessive hovering, is insufficient to break the semantic loop on its own.
 
-The gate denied \texttt{hover} on every 4th+ call with the message ``\textit{excessive hovering --- mission requires forward progress}.''
-The model responded by substituting \texttt{navigate\_to\_waypoint} --- then immediately proposing \texttt{hover} again.
-The resulting hover$\to$DENY$\to$navigate$\to$hover cycle ran until turn~50 on all 5 runs, consuming \$1.70/run (\$8.50 for 5 runs) with 0 patrol completions.
-Context grew 34.2$\times$, matching the standalone ND2 LITM trajectory exactly.
+In GPT-4o-mini alert\_room , the approval gate denied \texttt{hover} on every 4th+ call with the message ``\textit{excessive hovering --- mission requires forward progress}''. 
+The model responded by substituting \texttt{navigate\_to\_waypoint}, then immediately proposing \texttt{hover} again.
+The resulting deterministic hover$\rightarrow$DENY$\rightarrow$navigate$\rightarrow$hover cycle ran until turn~50 on all 5 runs, consuming \$1.70/run (\$8.50 for 5 runs) with 0 patrol completions.
 
-The HITL gate redirected the loop's immediate action but provided no \emph{exit condition} the model could act on autonomously.
-This extends the findings of~\citet{reflexion2023}: a correction signal (``stop hovering'') changes the immediate behaviour but not the underlying policy unless the model has an internal rule mapping ``denied $n$ times $\Rightarrow$ change strategy''.
+Context grew 34.2$\times$ (12,871~tokens at turn~1 to 440,057~tokens at turn~50), matching the standalone multi-turn LITM trajectory exactly.
+The HITL gate redirected the loop's immediate action but provided no exit condition the model could act on autonomously answering RQ3 provisionally, operator denial alone is not sufficient.
+Semantic loop mitigations are necessary even when a HITL gate is present.
+
+This result extends the findings of~\citet{reflexion2023} on verbal reinforcement learning: a correction signal (``stop hovering'') changes the immediate behaviour but not the
+underlying policy unless the model has an internal rule mapping ``denied $n$ times $\rightarrow$ change strategy''.  
 M4 and M6 provide exactly that rule.
 
-% ------------------------------------------------------------------
-\subsection{ND3C: M1--M6 + HITL --- Final Fix}
+\subsection{M1--M6 + HITL --- Fix}
 \label{sec:ch4_nd3c}
-% ------------------------------------------------------------------
 
-ND3C applies all six mitigations (Table~\ref{tab:ch4_nd2_mitigations}) to the GPT-4o-mini alert\_room HITL scenario.
-One adaptation: M4 tracks \texttt{hover\_count} as the primary loop detector, and the nudge explicitly references the operator denial pattern.
-M6's EXIT RULE triggers on \texttt{hover $\geq$3$\times$} in addition to \texttt{analyze\_scene $\geq$3$\times$}.
+This experiment applies all six mitigations (Table~\ref{tab:ch4_nd2_mitigations}) to the GPT-4o-mini alert\_room HITL scenario.  
+One HITL-specific adaptation: M4 tracks \texttt{hover\_count} as the primary loop detector (rather than \texttt{analyze\_scene\_count} used in multi-turn), and the nudge message explicitly references the operator denial pattern: \textit{``You have been hovering repeatedly.
+The operator has denied hover.
+Write your final report NOW, then call land().''}  M6's EXIT RULE likewise triggers on \texttt{hover $\geq 3\times$} in addition to \texttt{analyze\_scene $\geq 3\times$}.
 
 \begin{table}[ht]
-  \caption{ND3C results: M1--M6 + HITL applied to GPT-4o-mini alert\_room (5 runs).
-    All five runs complete the full patrol and write a report. Zero hover denials ---
-    the model self-terminates before the loop forms. Quality 4.60/5 exceeds the ND2
-    fix quality (4.0/5): HITL approval provides implicit validation the model leverages
-    in report writing.}
+  \caption{M1--M6 + HITL applied to GPT-4o-mini alert\_room (5 runs)}
   \label{tab:ch4_nd3c}
   \centering
   \small
-  \begin{tabular}{ccccc}
+  \begin{tabular}{ccccccc}
     \toprule
-    Run & Patrol & Quality/5 & Turns & Cost \\
+    Run & Patrol & Quality/5 & Turns & Cost & Approvals & Denials \\
     \midrule
-    1 & \checkmark & 3 & 8  & \$0.0148 \\
-    2 & \checkmark & 5 & 9  & \$0.0165 \\
-    3 & \checkmark & 5 & 8  & \$0.0148 \\
-    4 & \checkmark & 5 & 9  & \$0.0165 \\
-    5 & \checkmark & 5 & 9  & \$0.0165 \\
+    1 & \checkmark & 3 & 8  & \$0.0148 & 3 & 0 \\
+    2 & \checkmark & 5 & 9  & \$0.0165 & 2 & 0 \\
+    3 & \checkmark & 5 & 8  & \$0.0148 & 3 & 0 \\
+    4 & \checkmark & 5 & 9  & \$0.0165 & 3 & 0 \\
+    5 & \checkmark & 5 & 9  & \$0.0165 & 3 & 0 \\
     \midrule
-    \textbf{Mean} & \textbf{100\%} & \textbf{4.60} & \textbf{8.6} & \textbf{\$0.016} \\
+    \textbf{Mean} & \textbf{100\%} & \textbf{4.60} & \textbf{8.6} & \textbf{\$0.0158} & \textbf{2.8} & \textbf{0} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[ht]
-  \caption{ND3C before/after comparison: GPT-4o-mini alert\_room. M1--M6 achieve
-    99\% cost reduction and restore 100\% patrol rate. Context growth drops from
-    34.2$\times$ to 1.45$\times$ --- an 8.6$\times$ reduction in per-run token volume.}
+  \caption{Before/after mitigation comparison: GPT-4o-mini alert\_room.}
   \label{tab:ch4_nd3c_compare}
   \centering
   \small
@@ -433,37 +644,65 @@ M6's EXIT RULE triggers on \texttt{hover $\geq$3$\times$} in addition to \texttt
     \toprule
     Metric & ND3B (no fixes) & ND3C (M1--M6+HITL) & Change \\
     \midrule
-    Patrol rate      & 0\%          & \textbf{100\%}   & $+100$~pp \\
-    Quality/5        & 0.00         & \textbf{4.60}    & $+4.60$ \\
-    Words written    & 0            & \textbf{128}     & $+128$ \\
-    Turns/run        & 50~(max)     & \textbf{8.6}     & $-83\%$ \\
-    Cost/run         & \$1.70       & \textbf{\$0.016} & $-99\%$ \\
+    Patrol rate      & 0\%      & \textbf{100\%}   & $+100$~pp \\
+    Quality/5        & 0.00     & \textbf{4.60}    & $+4.60$ \\
+    Words written    & 0        & \textbf{128}     & $+128$ \\
+    Turns/run        & 50~(max) & \textbf{8.6}     & $-83\%$ \\
+    Cost/run         & \$1.70   & \textbf{\$0.016} & $-99\%$ \\
     Context growth   & 34.2$\times$ & \textbf{1.45$\times$} & $-96\%$ \\
-    Hover denials    & 10           & \textbf{0}       & $-100\%$ \\
-    5-run total      & \$8.50       & \textbf{\$0.079} & $-99.1\%$ \\
+    Hover denials/run & 10      & \textbf{0}       & $-100\%$ \\
+    5-run total      & \$8.50   & \textbf{\$0.079} & $-99.1\%$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+All five runs complete the full patrol and write a report.   
+Quality 4.60/5 exceeds the multi-turn fix quality (4.0/5), showing that HITL approval acts as a secondary quality assurance layer.
+M1--M6 achieve a 99\% cost reduction and restore 100\% patrol rate.  
+Context growth drops from 34.2$\times$ to 1.45$\times$ an 8.6$\times$ reduction in per-run token volume.
+Tables~\ref{tab:ch4_nd3c} and~\ref{tab:ch4_nd3c_compare} present the ND3C results.
+The M1--M6 package eliminates all hover denials: the model self-terminates after 3~hover calls, writes the report, and lands in 8--9~turns.  
+The loop never forms, the HITL gate has nothing to reject.
+This provides the final answer to RQ3: \textbf{yes}, M1--M6 resolve semantic loop failures in HITL contexts, and the HITL gate combined with M1--M6 yields
+higher quality (4.60/5) than M1--M6 alone in multi-turn (4.0/5), because operator-approved actions carry implicit validation that the model uses to anchor its report.
+
+The three-stage progression (broken $\rightarrow$ loop $\rightarrow$ fixed) is illustrated in Figure~\ref{fig:ch4_nd3c_prog} and mirrors the multi-turn progression exactly.
+the figure showa before mitigation original experiment faces Azure outage results in 0 turns.
+After the api fixes the LITM loop ran 50 turns costed \$1.70).
+After applying mitigations(M1--M6) to the HITL loop ran only 8.6 turns and costed just \$0.016.
+Each stage required one targeted intervention, Bug~B fix, then M1--M6 mitigations.
+
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.85\linewidth]{figures/fig4_8_nd3c_progression.pdf}
-  \caption{Three-stage progression for GPT-4o-mini alert\_room: ND3 original (Azure outage,
-    0 turns) $\to$ ND3B (LITM loop, 50 turns, \$1.70) $\to$ ND3C (M1--M6+HITL, 8.6 turns,
-    \$0.016).}
+  \caption{Three-stage progression for GPT-4o-mini alert\_room.}
   \label{fig:ch4_nd3c_prog}
 \end{figure}
 
-% ------------------------------------------------------------------
+\subsection{Emergency Monitor Behaviour Under HITL}
+\label{sec:ch4_nd3_monitor}
+
+The background emergency monitor fired reliably in all alert\_room runs, confirming independent detection of the person hazard regardless of LLM loop state.  
+The HITL gate and monitor operate concurrently, a human denial of a drone command and an emergency
+advisory can both be visible in the same turn's context. The three valid orchestrators responded to this combined signal differently:
+
+\begin{itemize}
+  \item \textbf{GPT-4o}: immediately wrote an emergency report and requested RTH in 4/5 alert\_room runs within 3--5 turns, before completing all waypoints.  Literature supports this as optimal when human safety is at risk~\cite{sanneman2022safeai}.
+
+  \item \textbf{Gemini}: wrote an emergency report and landed in 3/5 runs.
+  Completed the patrol before reporting in the remaining 2/5.  
+  Gemini 2.5 Flash exhibits over-escalation (ALERT $\rightarrow$ EMERGENCY) in risk labels, suggesting systematic conservatism in hazard assessment.
+
+  \item \textbf{Claude}: continued the patrol incorporating the advisory into the report narrative rather than aborting,  the most task-focused but least safety-escalating response.
+\end{itemize}
+
+This variation reflects meaningful differences in how each model weights task completion vs.\ safety escalation under combined HITL and emergency signals a finding with direct implications for deployment configuration~\cite{kapoor2024aiagents}.
+
 \subsection{HITL Operator Statistics}
 \label{sec:ch4_nd3_hitl_stats}
-% ------------------------------------------------------------------
 
 \begin{table}[ht]
-  \caption{ND3 HITL operator statistics (combined ND3 + ND3B valid runs). Three of four
-    orchestrators generated 100\% safety-compliant tool calls with zero denials ---
-    internalising conservative navigation without any HITL-aware prompt instruction.
-    Only GPT-4o-mini alert\_room triggered denials (hover loop); ND3C eliminates them.}
+  \caption{ND3 HITL operator statistics.}
   \label{tab:ch4_nd3_hitl}
   \centering
   \small
@@ -471,76 +710,107 @@ M6's EXIT RULE triggers on \texttt{hover $\geq$3$\times$} in addition to \texttt
     \toprule
     Orchestrator & Approvals & Denials & Approval Rate & Mean Response (s) \\
     \midrule
-    Claude 3.5 Sonnet                       & 146 & 0  & \textbf{100\%} & 1.22 \\
-    GPT-4o                                  & 50  & 0  & \textbf{100\%} & 1.22 \\
-    Gemini 2.5 Flash                        & 101 & 0  & \textbf{100\%} & 1.26 \\
-    GPT-4o-mini (ND3B, alert\_room)         & 65  & 50 & 57.7\%         & 1.25 \\
-    GPT-4o-mini (ND3C, M1--M6 applied)     & 14  & 0  & \textbf{100\%} & 1.36 \\
+    Claude 3.5 Sonnet & 146 & 0  & 100\% & 1.22 \\
+    GPT-4o            & 50  & 0  & 100\% & 1.22 \\
+    Gemini 2.5 Flash  & 101 & 0  & 100\% & 1.26 \\
+    GPT-4o-mini (ND3B, alert\_room) & 65 & 50 & 57.7\% & 1.25 \\
+    GPT-4o-mini (ND3C, M1--M6)     & 14 & 0  & \textbf{100\%} & 1.36 \\
     \bottomrule
   \end{tabular}
 \end{table}
+Three of four orchestrators  without a single denial.
+Only GPT-4o-mini alert\_room triggered denials (hover loop). Mean operator response time (simulated) is 1.22--1.26~s per decision.
+Table~\ref{tab:ch4_nd3_hitl} shows that three of four orchestrators never triggered a single approval denial. 
+Claude, GPT-4o, and Gemini all generated tool calls that stayed within safety bounds (\textpm 2.5~m patrol zone, 0.5--2.0~m altitude, $\leq$3~hover calls, $\leq$2.0~m move step) without any explicit HITL-aware instruction in the prompt.
+This suggests these models internalise conservative navigation strategies sufficient to satisfy a realistic safety envelope.
 
-Simulated mean operator response of 1.22--1.36~s adds $\approx$12~s over a 10-approval mission --- negligible on indoor surveillance timescales (missions ran 24--200~s wall time).
-The three valid orchestrators responded to combined HITL + emergency signals differently: GPT-4o immediately wrote an emergency report and requested RTH in 4/5 alert\_room runs (correct safety doctrine~\cite{sanneman2022safeai}); Gemini wrote an emergency report in 3/5 runs; Claude continued the patrol incorporating the advisory into the report narrative.
+The simulated mean operator response time of 1.22--1.36~s per decision adds approximately 12~s of latency over a 10-approval mission negligible on indoor surveillance timescales (missions ran 24--200~s wall time).  
+For real deployments, UI-based approval (button tap)
+would further reduce this latency~\cite{chen2018humanperformance}.
 
+\subsection{Summary}
+\label{sec:ch4_nd3_summary}
+
+HITL drone control answers RQ3 (\textbf{yes, M1--M6 are necessary even with HITL; operator denial alone
+cannot break a semantic loop}) and RQ4 (\textbf{GPT-4o best quality at reasonable cost; Gemini best cost; Claude HITL-compliant but expensive}).
+The HITL approval gate acts as an additional quality assurance mechanism when combined with M1--M6, raising GPT-4o-mini quality from 4.0 (ND2 fix) to 4.60 (ND3C).
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Hardware Validation --- ND Series Live Patrol (ND-HW)}
+\section{Hardware Validation --- ND Series Live Drone Patrol (ND-HW)}
 \label{sec:ch4_ndhw}
 % ─────────────────────────────────────────────────────────────────────────────
 
-% ===================================================================
-% PLACEHOLDER: ND-HW live drone patrol
-% Script: exp_ND_HW_patrol.py
-% ===================================================================
-
-\textbf{[ND-HW live-flight results to be inserted once \texttt{exp\_ND\_HW\_patrol.py}
-data are available.]}
-
-ND-HW will replicate the ND3 clear\_room patrol on the physical drone (custom 50~g quadrotor, ESP32-S3-Sense camera) with GPT-4o orchestrator and HITL gate via a mobile-phone operator interface.
-
-\paragraph{Success criteria.}
-Patrol completion rate $\geq$80\%; risk label accuracy $\geq$80\%; HITL approval latency $<$5~s per decision; no safety-bound violation across 5 runs.
+\textit{This section is reserved for hardware validation results from a live drone patrol
+experiment using the custom quadrotor platform described in Chapter~\ref{chap:3rd chap}
+(Section~\ref{sec:ch3_b1hw}).  The experiment (\texttt{exp\_ND\_HW\_patrol.py}) will
+replicate the ND3 clear\_room patrol scenario on the physical drone with the GPT-4o
+orchestrator and the HITL gate operating via a mobile phone operator interface.
+Results (patrol completion, HITL approval latency, risk label accuracy, cost) will be
+reported here once data are available.}
 
 \paragraph{Expected differences from simulation.}
-Camera latency ($\approx$100~ms capture-to-USB pipeline) adds to \texttt{analyze\_scene} response time; MediaPipe false-positive rate on a live camera stream will differ from the static test images used in ND1--ND3; physical waypoint tracking errors (expected $\pm$5--10~cm based on B2 disturbance rejection in Chapter~\ref{chap:3rd chap}) will produce slightly different telemetry fed back to the LLM.
+Real-world ND-HW will introduce factors not present in simulation: (1) camera latency
+($\approx$100~ms Raspberry Pi capture-to-USB pipeline) adds to \texttt{analyze\_scene}
+response time; (2) MediaPipe false-positive rate on a real camera stream will differ from
+the static test images used in ND1--ND3; (3) physical waypoint tracking errors
+(expected: $\pm$5--10~cm based on B2 disturbance rejection results in
+Chapter~\ref{chap:3rd chap}) will produce slightly different sensor telemetry fed back to
+the LLM.
 
+\paragraph{Success criteria.}
+The live patrol will be considered successful if: patrol completion rate $\geq$80\%,
+risk label accuracy $\geq$80\%, HITL approval latency $<$5~s per decision, and no
+safety-bound violation occurs across a 5-run series.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Chapter Summary}
 \label{sec:ch4_summary}
 % ─────────────────────────────────────────────────────────────────────────────
 
+This chapter presented the vision guided drone command series of experiments, which closes the perception-action loop by combining the Chapter~\ref{chap:2nd chap} image verbalization capability with the Chapter~\ref{chap:3rd chap} tool-call execution framework into a unified agentic patrol system.
+
+\paragraph{Key findings.}
+
 \begin{enumerate}
-  \item \textbf{Camera-as-tool is viable (ND1).} All four orchestrators call \texttt{analyze\_scene} at 100\% invocation rate without explicit instruction. GPT-4o-mini: 4.42/5 at \$0.00158/run; Gemini: \$0.00043/run (146$\times$ cheaper than Claude).
+  \item \textbf{Camera-as-tool is viable.}  All four LLM orchestrators call \texttt{analyze\_scene} autonomously at 100\% invocation rate.  
+  GPT-4o-mini leads on quality (4.42/5); Gemini leads on cost (\$0.00043/run, 146$\times$ cheaper than Claude).
 
-  \item \textbf{LITM is a real failure mode in agentic patrol (ND2).} Repeated advisory injection causes a deterministic semantic loop; 34.2$\times$ context growth; 0 completions in 5 runs costing \$3.075. Confirms the U-shaped attention degradation of~\citet{liu2023lostinthemiddle} in an agentic drone control setting.
+  \item \textbf{LITM is a real failure mode in agentic patrol.}  
+  Repeated emergency monitor advisories cause GPT-4o-mini to enter a deterministic semantic loop in alert\_room scenarios, consuming 34.2$\times$ context growth and failing to write a single patrol report across 5 runs.  
+  This confirms the U-shaped attention degradation of~\citet{liu2023lostinthemiddle} in an agentic drone control setting.
 
-  \item \textbf{M1--M6 resolve LITM (ND2 fix + ND3C).} 0\%~$\to$~100\% patrol; \$0.615~$\to$~\$0.027/run in ND2; \$1.70~$\to$~\$0.016/run in ND3C. Context growth drops from 34.2$\times$ to 1.45$\times$.
+  \item \textbf{M1--M6 mitigations resolve LITM .}  The six-mitigation package transforms 0\% patrol / \$0.615 per run into 100\% patrol / \$0.027 per run in ND2, and 0\% / \$1.70 into 100\% / \$0.016 in the ND3C HITL context.  
+  Context growth drops from 34.2$\times$ t 1.45$\times$.
 
-  \item \textbf{HITL alone cannot break semantic loops (ND3B).} Operator denial redirects but does not terminate the loop. M4+M6 provide the necessary internal exit condition.
+  \item \textbf{HITL alone cannot break semantic loops.}  The approval gate correctly identifies excessive hovering and denies it, but denial redirects rather than terminates the loop.  
+  M4+M6 are necessary to give the model an internal exit condition.
 
-  \item \textbf{M1--M6 + HITL achieves highest quality (ND3C).} 4.60/5 --- operator-approved actions provide implicit validation the model leverages in report writing.
+  \item \textbf{HITL + M1--M6 achieves highest quality.}  GPT-4o-mini with all fixes and the HITL gate achieves 4.60/5 quality the highest across all vision guided drone control series experiments.  Operator-approved actions provide implicit validation that the model leverages in report writing.
 
-  \item \textbf{Two API bugs discovered (ND3).} Gemini \texttt{finishReason="STOP"} break condition and silent error swallow; both fixed, restoring Gemini from 1-turn to full multi-waypoint missions.
+  \item \textbf{Two API bugs discovered (ND3).}  The Gemini \texttt{finishReason="STOP"} break condition and the OpenAI/Gemini silent error swallow were found and fixed, restoring Gemini from 1-turn (0 commands) to full multi-waypoint missions.
 \end{enumerate}
 
+\paragraph{Production configuration.}
+
 \begin{table}[ht]
-  \caption{ND series recommended production configuration based on cost-quality tradeoffs.}
+  \caption{ND series recommended production configuration based on cost-quality tradeoffs.
+  Three deployment profiles: quality-maximising (GPT-4o), cost-efficient (Gemini), and budget HITL (GPT-4o-mini + M1--M6).}
   \label{tab:ch4_production}
   \centering
   \small
   \renewcommand{\arraystretch}{1.2}
-  \begin{tabular}{p{2.8cm}p{2.5cm}p{1.4cm}p{1.4cm}p{4.5cm}}
+  \begin{tabular}{p{2.8cm}p{2.5cm}p{1.6cm}p{1.6cm}p{4.5cm}}
     \toprule
     Profile & Orchestrator & Quality/5 & Cost/Run & Notes \\
     \midrule
     Quality-maximising & GPT-4o & 4.10 & \$0.32 &
       Best report quality; correct hazard-abort safety doctrine \\
     Cost-efficient & Gemini 2.5 Flash & 3.50 & \$0.027 &
-      70$\times$ cheaper than Claude; bulk patrol; \texttt{finishReason} bug must be patched \\
+      70$\times$ cheaper than Claude; suitable for bulk patrol;
+      finishReason bug must be patched \\
     Budget HITL & GPT-4o-mini + M1--M6 & 4.60 & \$0.016 &
-      Highest quality in HITL setting; lowest cost; M1--M6 required for alert scenarios \\
+      Highest quality in HITL setting; lowest cost; M1--M6 required for
+      alert scenarios \\
     \midrule
     Not recommended & Claude 3.5 Sonnet & 3.20 & \$1.91 &
       HITL-compliant but 7$\times$ more expensive than GPT-4o for lower quality \\
@@ -551,11 +821,16 @@ Camera latency ($\approx$100~ms capture-to-USB pipeline) adds to \texttt{analyze
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.80\linewidth]{figures/fig4_9_production_tradeoff.pdf}
-  \caption{ND series production tradeoff: quality/5 vs.\ cost/run. The Pareto frontier
-    runs from Gemini (cheapest) through GPT-4o-mini+M1--M6 (high quality, low cost) to
-    GPT-4o (highest quality, moderate cost). Claude lies off the frontier.}
+  \caption{ND series production tradeoff: quality/5 vs.\ cost/run.  The quality-cost
+    Pareto frontier runs from Gemini 2.5 Flash (bottom-right, cheapest) through
+    GPT-4o-mini+M1--M6 (high quality, low cost) to GPT-4o (highest quality, moderate cost).
+    Claude lies off the frontier (high cost, lower quality).}
   \label{fig:ch4_production_tradeoff}
 \end{figure}
 
-The ND series establishes that the three-tier architecture (PID $\to$ vision $\to$ LLM orchestrator) operates correctly in simulation across a range of orchestrators, failure modes, and HITL configurations.
-Chapter~\ref{chap:5th chap} synthesises findings across Chapters~\ref{chap:2nd chap}--\ref{chap:4th chap}, discusses limitations, and proposes future work including adaptive HITL threshold calibration, multi-room patrol graph extension, and on-device LLM deployment for latency-critical applications.
+\paragraph{Connection to Chapter~\ref{chap:5th chap}.}
+The vison guided drone control series establishes that the three-tier architecture (PID $\rightarrow$ vision $\rightarrow$ LLM orchestrator) operates correctly in simulation across a range of orchestrators, failure
+modes, and HITL configurations.  
+The next chapter synthesises the findings across
+Chapters~\ref{chap:2nd chap}--\ref{chap:4th chap}, discusses limitations (simulation fidelity, single-indoor-scenario scope, absence of real-time closed-loop telemetry during LLM reasoning), and proposes future work directions including adaptive HITL threshold calibration, multi-room patrol graph extension, and on-device LLM deployment for
+latency-critical applications.

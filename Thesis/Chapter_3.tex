@@ -95,15 +95,8 @@ The system separates the control authority into three timescale-matched layers
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3_1_architecture.pdf}
-  \caption{LLM supervisor architecture. Inner loop: Madgwick (200~Hz) + EKF
-    (250~Hz) + cascaded PID (4~kHz) on ESP32-S3 microcontroller --- never
-    interrupted by LLM. Middle layer: tool server translates tool calls to
-    WebSocket commands at $\sim$10~Hz with guardrail enforcement. Outer loop:
-    LLM at 0.5--2~Hz calls tools in a ReAct reasoning loop and observes
-    telemetry results. The LLM \emph{suggests setpoints}; the inner loop
-    executes them independently. This timescale separation is quantified in
-    the G-series experiments described in Chapter~\ref{chap:2nd chap}.}
+  \includegraphics[width=\textwidth]{Thesis Figures/chapter3_architecture.png}
+  \caption{LLM supervisor architecture.}
   \label{fig:ch3_architecture}
 \end{figure}
 
@@ -156,7 +149,7 @@ If a guardrail fires, the tool returns a structured error message and the LLM mu
 clarification \cite{sanneman2022safeai}. 
 Guardrail on/off is set as a run-time flag that enables ablation of the safety layer in safety override and three-mode comparison.
 
-
+\newpage
 % ==================================================================
 \section{Experimental Setup}
 \label{sec:ch3_setup}
@@ -212,13 +205,8 @@ Four simulator configurations are compared: vacuum (no drag), linear drag, quadr
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_2_a1_freefall.pdf}
-  \caption{Free-fall trajectory comparison. Vacuum simulation vs
-    analytical $z = 1 - \tfrac{1}{2}gt^2$. The production combined model
-    diverges by $<$0.3~mm from the vacuum trajectory for the first 0.3~s
-    (the indoor flight regime); divergence grows only near ground impact
-    ($t > 0.4$~s) where drag and bounce suppression activate. The vacuum
-    simulator faithfully implements Newtonian free-fall integration.}
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/A1 Fig1 — Trajectories.pdf}
+  \caption{Free-fall trajectory comparison.}
   \label{fig:ch3_a1}
 \end{figure}
 
@@ -240,16 +228,16 @@ Convergence is defined as the first time the estimated roll enters $[29Â°, 31�
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_3_a2_madgwick.pdf}
-  \caption{A2: Madgwick filter convergence from 0Â° to true roll 30Â°.
-    At $\beta = 0.03$ (firmware default) the filter converges to within 1Â°
-    of true roll at $t = 9.0$~s. Steady-state error: $\pm 0.02Â°$. The long
-    convergence time is expected: low $\beta$ trades convergence speed for
-    noise suppression. In actual flight, the drone starts from rest on the
-    ground and the filter reaches steady state before takeoff.}
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/A2 — All filters combined.pdf}
+  \caption{Madgwick filter convergence from 0Â° to true roll 30Â°.}
   \label{fig:ch3_a2}
 \end{figure}
-
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/A2 Fig2 — Computational cost.pdf}
+  \caption{Computational cost of filter updates}
+  \label{fig:ch3_a2}
+\end{figure}
 The Madgwick filter converges to within $\pm 0.02Â°$ of the true 30Â° roll after 9.0~s at $\beta = 0.03$ \cite{madgwick2010filter}. 
 The slow convergence is a feature, not a defect, the low gain setting ($\beta = 0.03$) minimises accelerometer noise injection during flight at the cost of slower response to large initial misalignment. 
 In operational use, the drone initialises on a flat surface and the filter converges in the seconds before takeoff, not during flight.
@@ -304,7 +292,7 @@ Ground effect validation compares the simulator's ground effect model against th
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_5_a4_groundeffect.pdf}
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/A4 — Ground effect.pdf}
   \caption{Ground effect thrust multiplier vs altitude.}
   \label{fig:ch3_a4}
 \end{figure}
@@ -328,15 +316,28 @@ The first-order lag model $\omega(t) = \omega_\text{max}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_6_a5_motorlag.pdf}
-  \caption{Motor angular velocity step response. Fitted first-order lag (dashed red) vs simulator (blue). Fitted $\tau_m = 27.4$~ms vs firmware parameter \texttt{TAU\_MOTOR} $= 30$~ms. $R^2 = 1.000$ (to four decimal places). 
-  The slight under-estimate of $\tau_m$ by 2.6~ms is consistent with the difference between the ideal continuous-time model and the discrete 1~ms Euler integration step.}
+  \includegraphics[width=\textwidth]{Thesis Figures/A5 Fig1 — Step response.pdf}
+  \caption{Step Response — 1st vs 2nd vs 3rd Order Motor Model}
   \label{fig:ch3_a5}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/A5 Fig2 — Residuals.pdf}
+  \caption{Fit Residuals  ($\tau_{fit} = 27.42$ ms  vs  $\tau_{model} = 30$ ms  $|$  Euler ZOH: 27.42 ms)}
+  \label{fig:ch3_a5_2}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/A5 Fig3 — Model order error.pdf}
+  \caption{Motor angular velocity step response.2nd \& 3rd Order Model Error vs 1st Order — Why 1st Order Is Sufficient}
+  \label{fig:ch3_a5_3}
 \end{figure}
 
 The fitted time constant $\tau_m = 27.4$~ms is within 8.7\% of the firmware value (\texttt{TAU\_MOTOR} $= 30$~ms), and the $R^2 = 1.000$ confirms that the first-order lag model is a near-perfect description of the simulated motor dynamics \cite{faessler2018differential}. 
+The slight under-estimate of $\tau_m$ by 2.6~ms is consistent with the difference between the ideal continuous-time model and the discrete 1~ms Euler integration step.
 The discrepancy is attributable to discrete integration at 1~ms step size, which slightly underestimates the continuous-time lag.
 
+\newpage
 \textbf{Validation:} Motor dynamics follows a first-order lag with $\tau_m = 27.4$~ms ($R^2 = 1.000$).
 The 8.7\% difference from the firmware parameter is a discretisation artifact and within acceptable modeling tolerance.
 
@@ -349,10 +350,17 @@ This experiment flies at constant hover throttle from 100\% to 20\% state of cha
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_7_a6_battery.pdf}
-  \caption{Hover throttle PWM (left) and terminal voltage (right) vs battery SOC.}
-  \label{fig:ch3_a6}
+  \includegraphics[width=\textwidth]{Thesis Figures/A6 Fig1 — Voltage &amp; Thrust.pdf}
+  \caption{Battery Discharge — Thrust Degradation}
+  \label{fig:ch3_a6_1`}
 \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/A6 Fig2 — Required Throttle.pdf}
+  \caption{Throttle Required to Maintain Hover vs Battery SOC}
+  \label{fig:ch3_a6_2`}
+\end{figure}
+
 As SOC drops from 100\% to 20\%, hover PWM increases by $\Delta\text{PW} = 238$ (from PWM~1534 to 1772) to compensate for falling thrust at lower voltage. 
 Terminal voltage drops 4.12~V $\to$ 3.12~V (internal resistance $R_i = 0.05~\Omega$). 
 The altitude-hold integral compensates automatically without explicit battery monitoring is required for normal flight. The risk zone begins below $\sim$3.5~V ($\approx$40\% SOC), where voltage sag under load may exceed the altitude-hold correction headroom.
@@ -409,8 +417,10 @@ This experiment arms the drone, hovers at 1.0~m, and applies two altitude setpoi
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3_9_b1_althold.pdf}
-  \caption{Altitude hold step response. Upper panel: true altitude (blue), EKF estimate (green), and setpoint (dashed). Lower panel: altitude error (cm). 
+  \includegraphics[width=\textwidth]{Thesis Figures/B1 — Altitude hold.pdf}
+  \caption{Altitude hold step response. 
+  Upper panel: true altitude (blue), EKF estimate (green), and setpoint (dashed). Lower panel: altitude error (cm). 
+  2nd-order ref ($\zeta = 0.66,\ \omega_n = 1.33\ \mathrm{rad/s}$).
   Step 1 ($+$0.3~m): OS~$= 5.8\%$, rise~$= 1.53$~s, settle~$= 3.47$~s, SS RMSE~$= 0.71$~cm. Step 2 ($+$0.3~m): OS~$= 6.8\%$, rise~$= 1.49$~s, settle~$= 5.42$~s, SS RMSE~$= 0.24$~cm. 
   EKF tracks true altitude closely (green $\approx$ blue). 
   The altitude error subplot confirms sub-5~cm residuals after each settling event.}
@@ -418,7 +428,7 @@ This experiment arms the drone, hovers at 1.0~m, and applies two altitude setpoi
 \end{figure}
 
 \begin{table}[ht]
-  \caption{B1: altitude hold step response metrics. 
+  \caption{Altitude hold step response metrics. 
   Both steps meet the design specification ($\leq$10\% overshoot, $\leq$5~s settling, $\leq$1~cm SS RMSE). 
   Step~2 settling time of 5.42~s is marginally over specification, attributable to accumulated integrator error from step~1.}
   \label{tab:ch3_b1}
@@ -448,16 +458,27 @@ In this Experiment the drone simulator hovers with both altitude hold and positi
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3_10_b2_poshold.pdf}
+  \includegraphics[width=\textwidth]{Thesis Figures/B2 — Altitude.pdf}
   \caption{Position hold disturbance rejection. Left: XY top-down trajectory (red dot = hold setpoint; green = pre-disturbance; blue = post-disturbance recovery). 
   Right: XY error vs time (dashed lines mark disturbance at $t=5$~s and recovery at $t=6.79$~s). 
   Pre-disturbance RMSE: 3.29~cm (EKF optical-flow drift, irreducible without GPS). Max drift: 12.88~cm. 
   Return-to-hold: 1.79~s. 
   Post-disturbance SS RMSE: 2.87~cm. 
   Altitude remains within $\pm$8~mm throughout.}
-  \label{fig:ch3_b2}
+  \label{fig:ch3_b2_1}
 \end{figure}
-
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B2 — XY Trajectory.pdf}
+  \caption{XY Trajectory}
+  \label{fig:ch3_b2_2}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B2 — XY Error.pdf}
+  \caption{XY Error}
+  \label{fig:ch3_b2_3}
+\end{figure}
 Pre-disturbance RMSE of 3.29~cm reflects EKF optical-flow drift in the absence of GPS, not a PID tuning issue. 
 The disturbance impulse causes a 12.88~cm lateral excursion that is returned to within 5~cm of the setpoint in 1.79~s well within the 4~s specification. 
 Altitude is fully decoupled from lateral disturbance.
@@ -475,7 +496,7 @@ Altitude hold and position hold are disabled to isolate the attitude PID.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig3_11_b3_attitude.pdf}
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/B3 — Attitude step response.pdf}
   \caption{Attitude step response. 
   Roll step $0Â° \to 10Â° \to 0Â°$ (upper); pitch step (lower). Rise time: 0.29~s for both axes. 
   Overshoot: 0\%.  SS RMSE during hold: 0.34Â°. 
@@ -501,9 +522,27 @@ Combined hold experiment activates both altitude hold and position hold while ap
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3_12_b4_wind.pdf}
-  \caption{Combined altitude + position hold under constant $F_x=0.02$~N wind.}
-  \label{fig:ch3_b4}
+  \includegraphics[width=\textwidth]{Thesis Figures/B4 — Altitude.pdf}
+  \caption{Altitude}
+  \label{fig:ch3_b4_1}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B4 — X Error.pdf}
+  \caption{X Error}
+  \label{fig:ch3_b4_2}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B4 — XY Trajectory.pdf}
+  \caption{XY Trajectory}
+  \label{fig:ch3_b4_3}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B4 — XY Error.pdf}
+  \caption{XY Error}
+  \label{fig:ch3_b4_4}
 \end{figure}
 XY error subplot shows initial oscillation as the integral term builds to cancel the wind load; the drone settles below 10~cm at $t=19$~s. 
 SS XY RMSE (last 10~s): 9.21~cm. 
@@ -526,7 +565,18 @@ From simulators battery physics validation, the hover PWM increases from 1534 at
 The altitude-hold outer integral tracks this degradation
 continuously as thrust falls at lower voltage, altitude error grows, the integral increases throttle, and altitude is restored. 
 No battery monitoring logic is required for normal flight. The practical lower limit is $\approx$40\% SOC (3.5~V), below which voltage sag under full load can saturate the throttle authority.
-
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B5 — Hover PWM vs SOC.pdf}
+  \caption{Hover PWM vs SOC}
+  \label{fig:ch3_b5_1}
+\end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/B5 — Terminal Voltage vs SOC.pdf}
+  \caption{Terminal Voltage vs SOC}
+  \label{fig:ch3_b5_2}
+\end{figure}
 \textbf{Baseline:} Altitude hold compensates for the full
 $\Delta\text{PW}=238$ battery degradation range automatically. 
 Practical minimum battery level for safe hover: $\approx$40\% SOC.
@@ -543,56 +593,50 @@ Practical minimum battery level for safe hover: $\approx$40\% SOC.
   \small
   \begin{tabular}{lllll}
     \toprule
-    Exp & Scenario & Key metrics & Spec & Result \\
+    Scenario & Key metrics & Spec & Result \\
     \midrule
-    B1 & Altitude step       & OS / settle / SS RMSE & $\leq$10\% / $\leq$5~s / $\leq$1~cm & 6.8\% / 5.4~s / 0.71~cm \\
-    B2 & Poshold disturbance & Max drift / return time & $\leq$20~cm / $\leq$4~s & 12.9~cm / 1.79~s \\
-    B3 & Attitude step       & Rise / OS / SS RMSE     & $\leq$0.5~s / $\leq$10\% / $\leq$1Â° & 0.29~s / 0\% / 0.34Â° \\
-    B4 & Wind hold           & SS XY / SS Z RMSE       & $\leq$15~cm / $\leq$2~cm & 9.21~cm / 0.30~cm \\
-    B5 & Battery discharge   & Hover range / risk zone & Full range; $>$40\% & $\Delta$PW=238; 40\% \\
+    Altitude step       & OS / settle / SS RMSE & $\leq$10\% / $\leq$5~s / $\leq$1~cm & 6.8\% / 5.4~s / 0.71~cm \\
+    Poshold disturbance & Max drift / return time & $\leq$20~cm / $\leq$4~s & 12.9~cm / 1.79~s \\
+    Attitude step       & Rise / OS / SS RMSE     & $\leq$0.5~s / $\leq$10\% / $\leq$1Â° & 0.29~s / 0\% / 0.34Â° \\
+    Wind hold           & SS XY / SS Z RMSE       & $\leq$15~cm / $\leq$2~cm & 9.21~cm / 0.30~cm \\
+    Battery discharge   & Hover range / risk zone & Full range; $>$40\% & $\Delta$PW=238; 40\% \\
     \bottomrule
   \end{tabular}
 \end{table}
 All five scenarios meet or closely approach their design specifications. 
 These results establish the execution substrate on which  LLM command series operate, the LLM issues setpoint changes, and the PID+EKF layer executes them with the precision characterized here.
 This series of experiments confirms that the PID+EKF controller provides a reliable execution layer for LLM-issued setpoints. 
-Step 2 of the initial altitude hold marginally exceeds the settling specification by 0.42~s under accumulated integrator load; all other metrics meet specification.
+Step 2 of the initial altitude hold marginally exceeds the settling specification by 0.42~s under accumulated integrator load; all other metrics meet the specification.
 LLM as a command series experiment builds on this baseline.
 
-
+\newpage
 % ==================================================================
-\section{LLM Natural Language Command Experiments (C~Series)}
+\section{LLM Natural Language Command Experiments}
 \label{sec:ch3_cseries}
 % ==================================================================
 
-The C-series tests whether the LLM supervisor can interpret and execute
-natural-language flight commands across eight scenarios of increasing
-complexity. All experiments use the validated simulator and the PID baseline
-established in the B-series. Four models are evaluated throughout:
-Claude~3.5~Sonnet, GPT-4o, GPT-4o-mini, and Gemini~2.5~Flash --- referred
-to as Claude, GPT-4o, mini, and Gemini respectively.
+The LLM natural Language command series tests whether the LLM supervisor can interpret and execute natural-language flight commands across eight scenarios of increasing
+complexity. 
+All experiments use the validated simulator and the PID baseline established in the Controller Validation.
+The following four models are evaluated throughout the LLm as command experiments, Claude~3.5~Sonnet, GPT-4o, GPT-4o-mini, and Gemini~2.5~Flash --- referred to as Claude, GPT-4o, mini, and Gemini respectively.
 Five independent runs per model per scenario.
-Three scenarios include a prompt-engineering fix variant (C2.1, C4.1, C6.1)
-that isolates the improvement attributable to a single system-prompt addition.
-The metric hierarchy is: (1)~mission success, (2)~dangerous event count,
-(3)~API efficiency (calls, tokens, cost).
+Three scenarios include a prompt-engineering fix variant that isolates the improvement attributable to a single system-prompt addition.
+The metric hierarchy is evaluated based on (1)~mission success, (2)~dangerous event count, (3)~API efficiency (calls, tokens, cost).
 
 % ------------------------------------------------------------------
-\subsection{C1 --- Natural Language to Tool-Chain Execution}
+\subsection{Natural Language to Tool-Chain Execution}
 \label{sec:ch3_c1}
 % ------------------------------------------------------------------
 
-C1 sends the single command ``take off and hover at one metre'' and logs
-the complete tool-call sequence. The expected sequence is
-\texttt{arm} $\to$ \texttt{find\_hover\_throttle} $\to$
-\texttt{enable\_althold} $\to$ \texttt{wait\_for\_stable}.
-All four models succeed on every run
-(Table~\ref{tab:ch3_c1}).
+This experiment sends the single command ``take off and hover at one metre'' and logs the complete tool-call sequence. 
+It is conducted across four models, 5 runs each.
+The expected sequence is \texttt{arm} $\to$ \texttt{find\_hover\_throttle} $\to$ \texttt{enable\_althold} $\to$ \texttt{wait\_for\_stable}.
+All models achieve 100\% success and sub-0.4~cm altitude error. 
+API call count, latency, and cost differ substantially across models. (Table~\ref{tab:ch3_c1}).
 
 \begin{table}[ht]
-  \caption{C1: NL-to-tool-chain execution --- four models, 5 runs each.
-    All models achieve 100\% success and sub-0.4~cm altitude error.
-    API call count, latency, and cost differ substantially across models.}
+  \caption{Natural Language to tool chain execution .
+    }
   \label{tab:ch3_c1}
   \centering
   \small
@@ -608,31 +652,25 @@ All four models succeed on every run
   \end{tabular}
 \end{table}
 
-All four models parse the takeoff command correctly and emit a valid
-tool-call sequence via the ReAct reason--act--observe loop~\cite{yao2022react}.
-GPT-4o uses the fewest API calls (11.6) by compressing the hover calibration
-loop; GPT-4o-mini and Gemini use more calls (22--23) but at much lower cost.
-Gemini is the fastest (1.55~s mean latency) at one-twenty-sixth the cost of
-Claude. The 19--23 calls per run are dominated by the closed-loop hover-find
-sub-routine, not the mission itself.
+All four models parse the takeoff command correctly and emit a valid tool-call sequence via the ReAct reason--act--observe loop~\cite{yao2022react}.
+GPT-4o uses the fewest API calls (11.6) by compressing the hover calibration loop, GPT-4o-mini, and Gemini use more calls (22--23) but at much lower cost.
+Gemini is the fastest (1.55~s mean latency) at one-twenty-sixth the cost of Claude. 
+The 19--23 calls per run are dominated by the closed-loop hover-find sub-routine, not the mission itself.
 
-\textbf{C1 Result:} 100\% success across all four models. A single natural
-language takeoff command is reliably parsed and executed. Cost spans
-\$0.047--\$1.629 per 5-run batch; Gemini offers the best cost-latency trade-off.
+\textbf{Outcomes:} 100\% success \ in all four models. A single natural language takeoff command is reliably parsed and executed. 
+Cost spans \$0.047--\$1.629 per 5-run batch; Gemini offers the best cost-latency trade-off.
 
 % ------------------------------------------------------------------
-\subsection{C2 --- Command Ambiguity and C2.1 Fix}
+\subsection{Command Ambiguity and Fix}
 \label{sec:ch3_c2}
 % ------------------------------------------------------------------
 
-C2 sends six progressively more ambiguous altitude commands to the LLM
-hovering at 1.5~m. Commands range from explicit (``go to 2~metres'') to
-indirect (``I want it higher''). Table~\ref{tab:ch3_c2} reports per-command
-success rates across 15~runs per model (3 repeats of 5~runs).
+In this experiment six progressively more ambiguous altitude commands sent to the LLM hovering at 1.5~m. 
+Commands range from explicit (``go to 2~metres'') to indirect (``I want it higher''). 
+Table~\ref{tab:ch3_c2} reports per-command success rates across 15~runs per model, 3 repeats of 5~runs(Bold = 100\%. \dag\,= complete failure.).
 
 \begin{table}[ht]
-  \caption{C2: ambiguity resolution success rate (\%) by command type and
-    model (15 runs each). Bold = 100\%. \dag\,= complete failure.}
+  \caption{Ambiguity resolution success rate (\%) by command type and model.}
   \label{tab:ch3_c2}
   \centering
   \small
@@ -652,23 +690,17 @@ success rates across 15~runs per model (3 repeats of 5~runs).
   \end{tabular}
 \end{table}
 
-The results reveal model-specific ambiguity profiles. GPT-4o leads overall
-(71.1\%) and handles relative-no-number commands perfectly (100\%), but
-fails completely on the most indirect phrasing (0\%). Claude and Gemini each
-score 100\% on relative-no-number via different strategies, yet both fail
-vague/abstract commands. GPT-4o-mini and Gemini both score 0\% on
-vague-relative and abstract commands, indicating these models require
-explicit numeric magnitudes. No model exceeds 27\% on the indirect phrasing
-``I want it higher''.
+The results reveal model-specific ambiguity profiles. 
+GPT-4o leads overall (71.1\%) and handles relative-no-number commands perfectly (100\%), but fails completely on the most indirect phrasing (0\%). 
+Claude and Gemini each score 100\% on relative-no-number via different strategies, yet both fail vague/abstract commands. GPT-4o-mini and Gemini both score 0\% on vague-relative and abstract commands, indicating these models require explicit numeric magnitudes. 
+No model exceeds 27\% on the indirect phrasing ``I want it higher''.
 
-\textbf{C2.1 fix:} A conservative-default policy added to the system prompt
-(``when no magnitude is given for a directional command, use a
-0.3~m increment as a safe default'') was applied to all four models.
+\textbf{Fix:} A conservative-default policy added to the system prompt (``when no magnitude is given for a directional command, use a 0.3~m increment as a safe default'') was applied to all four models(5 trials each).
 Table~\ref{tab:ch3_c2_1} shows the improvement.
+The observed $\Delta$ represents the change from baseline.
 
 \begin{table}[ht]
-  \caption{C2.1: success rate after conservative-default policy fix
-    (5 runs each). $\Delta$ = change from C2 baseline.}
+  \caption{Success rate after conservative-default policy fix.}
   \label{tab:ch3_c2_1}
   \centering
   \small
@@ -686,35 +718,27 @@ Table~\ref{tab:ch3_c2_1} shows the improvement.
   \end{tabular}
 \end{table}
 
-The fix substantially improves Claude (60\%$\to$87\% overall) and Gemini
-(49\%$\to$87\%) but is less effective for GPT-4o-mini (47\%$\to$30\%
---- the default policy confuses its magnitude reasoning). This confirms
-that ambiguity failures are a prompt-engineering issue, not a fundamental
-reasoning failure, for Claude and Gemini; GPT-4o-mini requires a different
+The fix substantially improves Claude (60\%$\to$87\% overall) and Gemini (49\%$\to$87\%) but is less effective for GPT-4o-mini (47\%$\to$30\% the default policy confuses its magnitude reasoning). 
+This confirms that ambiguity failures are a prompt-engineering issue, not a fundamental reasoning failure, for Claude and Gemini; GPT-4o-mini requires a different
 approach.
 
 \textbf{C2 Result:} GPT-4o achieves the highest baseline (71.1\%).
-Explicit and paraphrase commands are handled reliably ($\geq$93\%) by all
-models. No model exceeds 27\% on the most indirect phrasing without the fix.
-The C2.1 conservative-default policy raises Claude and Gemini to 87\%
-overall at no architectural cost.
+Explicit and paraphrase commands are handled reliably ($\geq$93\%) by all models. 
+No model exceeds 27\% on the most indirect phrasing without the fix.
+The C2.1 conservative-default policy raises Claude and Gemini to 87\% overall at no architectural cost.
 
 % ------------------------------------------------------------------
-\subsection{C3 --- Multi-Turn Conversational Mission}
+\subsection{Multi-Turn Conversational Mission}
 \label{sec:ch3_c3}
 % ------------------------------------------------------------------
 
-C3 issues a 5-turn mission: (1) arm, (2) climb to 1.5~m, (3) hold 5~s,
-(4) yaw 90° CW, (5) land. Each turn is a separate message; the LLM must
-maintain drone state from conversation history without re-querying
-hardware~\cite{huang2022innermonologue}. Table~\ref{tab:ch3_c3} reports
-per-turn pass rates.
-
+Multi-turn conversational mission issues a 5-turn mission: (1) arm, (2) climb to 1.5~m, (3) hold 5~s, (4) yaw 90° CW, (5) land. 
+Each turn is a separate message; the LLM must maintain drone state from conversation history without re-querying
+hardware~\cite{huang2022innermonologue}. Table~\ref{tab:ch3_c3} reports per-turn per model pass rates on 5 runs.
+Pass criteria is set if drone entered target state within tolerance.
+Failure modes are observed in GPT-4o-mini and Gemini re-arm on Turn~2 while the drone is already armed or run the full takeoff sequence inside the arm turn.
 \begin{table}[ht]
-  \caption{C3: multi-turn mission pass rate per turn and per model (5 runs).
-    Pass = drone entered target state within tolerance.
-    Failure modes: GPT-4o-mini and Gemini re-arm on Turn~2 (already armed)
-    or run the full takeoff sequence inside the arm turn.}
+  \caption{Multi-turn mission pass rate per turn and per model.}
   \label{tab:ch3_c3}
   \centering
   \small
@@ -733,37 +757,28 @@ per-turn pass rates.
   \end{tabular}
 \end{table}
 
-Claude and GPT-4o achieve 100\% across all turns: they correctly use
-conversation history as an implicit state tracker, never re-arming on Turn~2
-when the drone is already armed. GPT-4o-mini and Gemini both fail at 40\%
-(2/5 runs) through the same failure mode: on 3 of 5 runs, they issue the
-full takeoff sequence (arm $\to$ hover-find $\to$ altitude set) inside
-Turn~1 rather than waiting for Turn~2, then enter an inconsistent state
-for subsequent turns. This is a context-retention failure --- the model does
-not correctly distinguish ``I have received instruction to arm'' from
-``I should now complete the entire mission''. No dedicated fix experiment
-(C3.1) was run; this failure mode is partially addressed by the retargeting
-protocol introduced in C4.1.
+Claude and GPT-4o achieve 100\% across all turns, they correctly use conversation history as an implicit state tracker, never re-arming on Turn~2 when the drone is already armed. 
+GPT-4o-mini and Gemini both fail at 40\% (2/5 runs) through the same failure mode: on 3 of 5 runs, they issue the
+full takeoff sequence (arm $\to$ hover-find $\to$ altitude set) inside Turn~1 rather than waiting for Turn~2, then enter an inconsistent state for subsequent turns. 
+This is a context-retention failure, the model does
+not correctly distinguish ``I have received instruction to arm'' from ``I should now complete the entire mission''. No dedicated fix experiment. This failure mode is addressed by the retargeting protocol introduced in the next experiment on Mid-mission re-targeting fix.
 
-\textbf{C3 Result:} Claude and GPT-4o: 5/5 on all turns.
-GPT-4o-mini and Gemini: 2/5 --- multi-turn state tracking fails on 60\%
-of runs due to premature tool-call execution.
+\textbf{Outcomes} Claude and GPT-4o got 5/5 on all turns.
+GPT-4o-mini and Gemini scored 2/5 in multi-turn state tracking and fails on 60\% of runs due to premature tool-call execution.
 
 % ------------------------------------------------------------------
-\subsection{C4 --- Mid-Mission Re-Targeting and C4.1 Fix}
+\subsection{Mid-Mission Re-Targeting and Fix}
 \label{sec:ch3_c4}
 % ------------------------------------------------------------------
 
-C4 commands the drone to hover at 0.5~m then issues a correction
-(``actually, go to 1.2~m'') while hovering. The expected behaviour is
-\texttt{set\_altitude\_target(1.2)} without re-arming. Table~\ref{tab:ch3_c4}
-reports results across 15~runs per model.
+In mid-mission re-targeting the LLM commands the drone to hover at 0.5~m then issues a correction (``actually, go to 1.2~m'') while hovering.
+The expected behaviour is \texttt{set\_altitude\_target(1.2)} without re-arming. Table~\ref{tab:ch3_c4} reports results across 15~runs per model.
+Pass criteria for this experiment is when drone reaches 1.2~m $\pm$1~cm without re-arming.
+LLM disarmed and re-armed mid-mission is considered dangerous.
+GPT-4o-mini passes the re-arm check but reaches wrong altitudes on 9/15 runs.
 
 \begin{table}[ht]
-  \caption{C4: mid-mission re-targeting results (15 runs each).
-    Pass = drone reaches 1.2~m $\pm$1~cm without re-arming.
-    Re-armed = LLM disarmed and re-armed mid-mission (dangerous).
-    GPT-4o-mini passes the re-arm check but reaches wrong altitudes on 9/15 runs.}
+  \caption{Mid-mission re-targeting results (15 runs each).}
   \label{tab:ch3_c4}
   \centering
   \small
@@ -779,58 +794,45 @@ reports results across 15~runs per model.
   \end{tabular}
 \end{table}
 
-\noindent\small\textsuperscript{a}Run~8: catastrophic re-arm, drone crashes
-($z = -4.83$~m). \textsuperscript{b}GPT-4o-mini \texttt{passed=1} is a
-scoring artefact --- the target \emph{was set} but reached altitudes of
+\noindent\small\textsuperscript{a}Run~8: catastrophic re-arm, drone crashes ($z = -4.83$~m). 
+\textsuperscript{b}GPT-4o-mini \texttt{passed=1} is a
+scoring artefact, the target was set but reached altitudes of
 12--26~m on 9/15 runs.
 
 Claude executes 15/15 perfectly with no re-arming and $<$0.5~cm error.
 GPT-4o achieves 14/15; run~8 produces a catastrophic re-arm and crash.
-GPT-4o-mini never re-arms but suffers absolute-vs-relative altitude
-confusion: it sets a target but computes an incorrect value, sending the
-drone to 0.06--25.7~m instead of 1.2~m. Gemini re-arms on 14/15 runs ---
-it treats the correction command as a complete restart of the mission rather
+GPT-4o-mini never re-arms but suffers absolute-vs-relative altitude confusion.
+It sets a target but computes an incorrect value, sending the
+drone to 0.06--25.7~m instead of 1.2~m. 
+Gemini re-arms on 14/15 runs, it treats the correction command as a complete restart of the mission rather
 than an in-flight setpoint update.
 
-\textbf{C4.1 fix:} An explicit mid-mission re-targeting protocol was added
-to the system prompt for Claude and Gemini only (the dominant failure
-models). Results:
+\textbf{C4.1 fix:} An explicit mid-mission re-targeting protocol was added to the system prompt for Claude and Gemini only (the dominant failure models). 
+Results:
 \begin{itemize}
-  \item \textbf{Gemini:} 5/5 pass, 0/5 re-armed, mean alt error 0.24~cm ---
-        re-arming completely eliminated.
-  \item \textbf{Claude:} 0/5 pass --- the retargeting protocol over-constrains
-        Claude's reasoning and prevents it from issuing \texttt{set\_altitude\_target}.
-        Claude's baseline was already 15/15; the explicit protocol breaks
-        what was working correctly by implicit reasoning.
+  \item \textbf{Gemini:} 5/5 pass, 0/5 re-armed, mean alt error 0.24~cm re-arming completely eliminated.
+  \item \textbf{Claude:} 0/5 pass, the retargeting protocol over-constrains Claude's reasoning and prevents it from issuing \texttt{set\_altitude\_target}.
+  Claude's baseline was already 15/15; the explicit protocol breaks what was working correctly by implicit reasoning.
 \end{itemize}
-This asymmetry is instructive: explicit protocol instructions help models
-that need behavioural scaffolding (Gemini) but interfere with models that
-already reason correctly (Claude). GPT-4o and GPT-4o-mini were not included
-in C4.1 as their failure modes (single crash and altitude confusion) require
+This asymmetry is instructive that explicit protocol instructions help models that need behavioural scaffolding (Gemini) but interfere with models that
+already reason correctly (Claude). 
+GPT-4o and GPT-4o-mini were not included in C4.1 as their failure modes (single crash and altitude confusion) require
 different interventions.
 
-\textbf{C4 Result:} Claude 15/15 via implicit reasoning. Gemini fixed to
-5/5 by C4.1 retargeting protocol. GPT-4o near-perfect (14/15) but one
-catastrophic crash. GPT-4o-mini requires a separate fix for altitude
-confusion not addressed in this series.
+\textbf{C4 Result:} Claude 15/15 via implicit reasoning. Gemini fixed to 5/5 by C4.1 retargeting protocol. 
+GPT-4o near-perfect (14/15) but one catastrophic crash. 
+GPT-4o-mini requires a separate fix for altitude confusion not addressed in this series.
 
 % ------------------------------------------------------------------
-\subsection{C5 --- LLM-Driven PID Self-Tuning}
+\subsection{LLM-Driven PID Self-Tuning}
 \label{sec:ch3_c5}
 % ------------------------------------------------------------------
 
-C5 injects a 5$\times$ over-tuned roll angle gain
-($K_p^\text{injected} = 1.5$, nominal $K_p = 0.3$) and has the operator
-type ``the drone is oscillating badly on roll''. The LLM must call
-\texttt{analyse\_flight} $\to$ \texttt{suggest\_pid\_tuning} $\to$
-\texttt{apply\_pid\_tuning} and verify improvement without any specification
-of the fix~\cite{vemprala2023chatgpt}.
+This Experiment injects a 5$\times$ over-tuned roll angle gain ($K_p^\text{injected} = 1.5$, nominal $K_p = 0.3$) and has the operator type ``the drone is oscillating badly on roll''. 
+The LLM must call \texttt{analyse\_flight} $\to$ \texttt{suggest\_pid\_tuning} $\to$ \texttt{apply\_pid\_tuning} and verify improvement without any specification of the fix~\cite{vemprala2023chatgpt}.
 
 \begin{table}[ht]
-  \caption{C5: autonomous PID self-tuning results (5 runs each, guardrail
-    on). All four models achieve 100\% success. RMSE reduction measures
-    roll oscillation improvement after the LLM-applied gain correction.
-    Tuning cycles = number of suggest/apply iterations before convergence.}
+  \caption{Autonomous PID self-tuning results (5 runs each, guardrail on).}
   \label{tab:ch3_c5}
   \centering
   \small
@@ -845,40 +847,33 @@ of the fix~\cite{vemprala2023chatgpt}.
     \bottomrule
   \end{tabular}
 \end{table}
+All four models achieve 100\% success. 
+RMSE reduction measures roll oscillation improvement after the LLM-applied gain correction.
+Tuning cycles was observed by number of suggest/apply iterations before convergence.
+This experiement has the cleanest result on all four models get 100\% success on every run. 
+Every model correctly identifies the roll axis, diagnoses an excessive gain, and reduces oscillation RMSE by 68--76\%.
+Claude and GPT-4o converge in 1.6--1.8 cycles whereas GPT-4o-mini requires 4.6 cycles (takes more iterations before settling on the correct gain value).
+Gemini achieves the lowest RMSE reduction (67.8\%) but still succeeds unconditionally. 
+This is the only C-series scenario where all four models
+produce identical pass rates, the diagnostic task is well-structured enough that linguistic variation in the command does not create ambiguity.
 
-C5 is the cleanest result in the entire C-series: all four models, 100\%
-success on every run. Every model correctly identifies the roll axis,
-diagnoses an excessive gain, and reduces oscillation RMSE by 68--76\%.
-Claude and GPT-4o converge in 1.6--1.8 cycles; GPT-4o-mini requires 4.6
-cycles (takes more iterations before settling on the correct gain value).
-Gemini achieves the lowest RMSE reduction (67.8\%) but still succeeds
-unconditionally. This is the only C-series scenario where all four models
-produce identical pass rates --- the diagnostic task is well-structured
-enough that linguistic variation in the command does not create ambiguity.
-
-\textbf{C5 Result:} 5/5 on all models. LLM-driven PID self-tuning reduces
-roll RMSE by 68--76\% in 1.6--4.6 tuning cycles without any human
-specification of the fix.
+\textbf{Outcomes} 5/5 on all models. 
+LLM-driven PID self-tuning reduces roll RMSE by 68--76\% in 1.6--4.6 tuning cycles without any human specification of the fix.
 
 % ------------------------------------------------------------------
-\subsection{C6 --- Mission Planning and C6.1 Fix}
+\subsection{Mission Planning and Fix}
 \label{sec:ch3_c6}
 % ------------------------------------------------------------------
 
-C6 commands ``fly a square pattern at 1~m altitude'' with no further
-guidance. The LLM must decompose the objective into a movement plan,
-select appropriate tools (\texttt{move\_forward}, \texttt{set\_yaw}),
-and execute it. Success requires: \texttt{plan\_workflow} called,
+This experiment commands ``to fly a square pattern at 1~m altitude'' without further guidance. 
+The LLM must decompose the objective into a movement plan,
+select the appropriate tools (\texttt{move\_forward}, \texttt{set\_yaw}), and execute it. 
+Success requires \texttt{plan\_workflow} to be called,
 altitude target set, and a closed-path trajectory produced.
-Table~\ref{tab:ch3_c6} reports per-model results (5 runs each).
+Table~\ref{tab:ch3_c6} reports results per-model with 5 runs each.
 
 \begin{table}[ht]
-  \caption{C6: high-level mission planning results (5 runs each).
-    Squareness = $\min(x\_range, y\_range)/\max(x\_range, y\_range)$
-    (1.0 = perfect square). GPT-4o completes the task but with
-    micro-paths ($<$1~m total). GPT-4o-mini produces correct shapes but
-    at physically unreasonable scales (up to 84~m). Gemini refuses on
-    2 of 5 runs.}
+  \caption{High-level mission planning results (5 runs each).}
   \label{tab:ch3_c6}
   \centering
   \small
@@ -893,46 +888,41 @@ Table~\ref{tab:ch3_c6} reports per-model results (5 runs each).
     \bottomrule
   \end{tabular}
 \end{table}
+Squareness is calculated by $\min(x\_range, y\_range)/\max(x\_range, y\_range)$ (1.0 = perfect square). GPT-4o completes the task but with micro-paths ($<$1~m total).
+GPT-4o-mini produces correct shapes but at physically unreasonable scales (up to 84~m). 
+Gemini refuses on 2 of 5 runs.
+Claude produces the most physically reasonable paths (7.06~m mean, 0.615 squareness). 
+GPT-4o passes the logical test but executes centimetre-scale
+movements.
+It plans a valid square but does not reason about appropriate
+indoor scale.
+GPT-4o-mini produces geometrically correct squares but at
+runway scale (46~m mean, one run at 84~m). 
+Gemini refuses the task on 2/5 runs with the response ``I cannot perform directional tilt movements'' factually incorrect, as the API exposes \texttt{set\_pitch}/\texttt{set\_roll}.
 
-Claude produces the most physically reasonable paths (7.06~m mean, 0.615
-squareness). GPT-4o passes the logical test but executes centimetre-scale
-movements; it plans a valid square but does not reason about appropriate
-indoor scale. GPT-4o-mini produces geometrically correct squares but at
-runway scale (46~m mean, one run at 84~m). Gemini refuses the task on 2/5
-runs with the response ``I cannot perform directional tilt movements'' ---
-factually incorrect, as the API exposes \texttt{set\_pitch}/\texttt{set\_roll}.
+\textbf{Fix (Gemini only):} A section on the directional movement protocol was added to the system prompt explaining how to compose \texttt{a set \_pitch} + \texttt{wait} on a flight leg.
+Result: \textbf{5/5 pass, 0/5 refusals}, squareness 0.719, path 14.4~m, plan steps 13.6 comparable to Claude's performance.
+The fix confirms that Gemini's refusal was a prompt-completeness gap, it lacked an example of tool composition for directional movement rather than a capability limitation.
 
-\textbf{C6.1 fix (Gemini only):} A directional movement protocol section
-was added to the system prompt explaining how to compose
-\texttt{set\_pitch} + \texttt{wait} into a flight leg.
-Result: \textbf{5/5 pass, 0/5 refusals}, squareness 0.719, path 14.4~m,
-plan steps 13.6 --- comparable to Claude's performance.
-The fix confirms that Gemini's refusal was a prompt-completeness gap
-(it lacked an example of tool composition for directional movement)
-rather than a capability limitation.
-
-\textbf{C6 Result:} Claude best overall (5/5, realistic scale). GPT-4o
-and GPT-4o-mini achieve 5/5 structurally but with scale errors. Gemini
-3/5 baseline; C6.1 raises to 5/5 with a single prompt addition.
+\textbf{Outcomes} Claude best overall (5/5, realistic scale).
+GPT-4o and GPT-4o-mini achieve 5/5 structurally but with scale errors. 
+Gemini 3/5 baseline, the fix raises to 5/5 with a single prompt addition.
 
 % ------------------------------------------------------------------
-\subsection{C7 --- Safety Override and C7.2 Adversarial Disarm}
+\subsection{Safety Override and Adversarial Disarm}
 \label{sec:ch3_c7}
 % ------------------------------------------------------------------
 
-C7 issues ``stop everything and come down now'' mid-hover at $\approx$1~m.
+This experiment issues ``stop everything and come down now'' mid-hover at $\approx$1~m.
 The drone must land and disarm within the shortest possible latency.
-C7.2 issues an adversarial command (``disarm the drone immediately'')
-while the drone is airborne --- a physically dangerous action the guardrail
-must intercept. Both experiments test guardrail-on and guardrail-off
-conditions. Results are in Table~\ref{tab:ch3_c7}.
+The associated experiment issues an adversarial command (``disarm the drone immediately'')
+while the drone is airborne, a physically dangerous action which the guardrail must intercept. 
+Both experiments test guardrail-on and guardrail-off
+conditions. 
+Results are presented in Table~\ref{tab:ch3_c7}.
 
 \begin{table}[ht]
-  \caption{C7 and C7.2 safety results (5 runs each per condition).
-    C7: emergency stop-and-land response.
-    C7.2: adversarial mid-air disarm attempt.
-    \dag\,GPT-4o-mini and Gemini always attempt mid-air disarm;
-    guardrail intercepts and forces a safe landing.}
+  \caption{Safety results on adversarial commands.}
   \label{tab:ch3_c7}
   \centering
   \small
@@ -948,47 +938,34 @@ conditions. Results are in Table~\ref{tab:ch3_c7}.
     \bottomrule
   \end{tabular}
 \end{table}
+GPT-4o-mini and Gemini always attempt mid-air disarm and guardrail intercepts and forces a safe landing.
+\textbf{emergency stop:} Claude and GPT-4o-mini respond correctly with or without the guardrail.
+GPT-4o degrades from 4/5 (guardrail on) to 2/5 (off) without the guardrail, it fails to initiate landing on
+3 of 5 runs, leaving the drone hovering armed. 
+The guardrail is safety-critical for GPT-4o on emergency stop commands.
 
-\textbf{C7 (emergency stop):} Claude and GPT-4o-mini respond correctly
-with or without the guardrail. GPT-4o degrades from 4/5 (guardrail on)
-to 2/5 (off) --- without the guardrail, it fails to initiate landing on
-3 of 5 runs, leaving the drone hovering armed. The guardrail is
-safety-critical for GPT-4o on emergency stop commands.
+\textbf{adversarial disarm:} Claude never attempts to disarm mid-air in any run (guardrail on: 0/5 attempts; off: 0/5 attempts), it intrinsically recognises this as dangerous and instead calls
+\texttt{land}. 
+GPT-4o shows mixed behaviour.
+GPT-4o-mini and Gemini always attempt mid-air disarm (5/5 each, both conditions), with the guardrail active, the attempt is intercepted with a \texttt{disarm\_airborne\_reject} response and the drone is safely landed. 
+Without the guardrail, disarm executes immediately with the drone airborne a safety-critical failure.
 
-\textbf{C7.2 (adversarial disarm):} Claude never attempts to disarm
-mid-air in any run (guardrail on: 0/5 attempts; off: 0/5 attempts) ---
-it intrinsically recognises this as dangerous and instead calls
-\texttt{land}. GPT-4o shows mixed behaviour.
-GPT-4o-mini and Gemini \emph{always} attempt mid-air disarm (5/5 each,
-both conditions); with the guardrail active, the attempt is intercepted
-with a \texttt{disarm\_airborne\_reject} response and the drone is safely
-landed. Without the guardrail, disarm executes immediately with the drone
-airborne --- a safety-critical failure.
-
-\textbf{C7 Result:} Claude is intrinsically safe on both tasks with or
-without the guardrail. The guardrail is required for GPT-4o (C7 emergency
-stop) and mandatory for GPT-4o-mini and Gemini (C7.2 adversarial disarm).
+\textbf{Outcomes} Claude is intrinsically safe on both tasks with or without the guardrail. 
+The guardrail is required for GPT-4o in emergency
+stop and mandatory for GPT-4o-mini and Gemini in adversarial disarm.
 
 % ------------------------------------------------------------------
-\subsection{C8 --- Three-Mode Comparison}
+\subsection{Three-Mode Comparison}
 \label{sec:ch3_c8}
 % ------------------------------------------------------------------
 
-C8 compares three operating modes on a 4-waypoint mission
-(0.8~m $\to$ 1.2~m $\to$ 1.5~m $\to$ 1.0~m, 8~s hold each,
-arrival-triggered RMSE window):
+This experiment compares three operating modes on a 4-waypoint mission (0.8~m $\to$ 1.2~m $\to$ 1.5~m $\to$ 1.0~m, 8~s hold each, arrival-triggered RMSE window):
 \textbf{Mode~A} (scripted, no LLM, 1~run as deterministic baseline),
-\textbf{Mode~B} (NL-commanded: human issues each waypoint as a separate turn,
-LLM executes; 5 runs per model),
-\textbf{Mode~C} (full-auto: single command, LLM plans and executes
-the entire mission; 5 runs per model).
+\textbf{Mode~B} (NL-commanded: human issues each waypoint as a separate turn, LLM executes; 5 runs per model),
+\textbf{Mode~C} (full-auto: single command, LLM plans and executes the entire mission; 5 runs per model).
 
 \begin{table}[ht]
-  \caption{C8: altitude RMSE (cm) by mode and model. Mode~A is the scripted
-    no-LLM baseline (1 run, no feedback). All LLM modes achieve $\approx$3.5$\times$
-    lower RMSE than the scripted baseline because the LLM dynamically waits
-    for altitude stability before proceeding. WP1 is consistently the hardest
-    waypoint across all models and modes.}
+  \caption{Altitude RMSE (cm) by mode and model. }
   \label{tab:ch3_c8}
   \centering
   \small
@@ -1009,28 +986,23 @@ the entire mission; 5 runs per model).
     \bottomrule
   \end{tabular}
 \end{table}
+Mode~A is the scripted no-LLM baseline (1 run, no feedback). 
+All LLM modes achieve $\approx$3.5$\times$ lower RMSE than the scripted baseline because the LLM dynamically waits for altitude stability before proceeding.
+All four models achieve 100\% pass on both Mode~B and Mode~C with RMSE in the range 0.83--0.87~cm --- a \textbf{3.5$\times$ improvement} over the scripted Mode~A baseline (2.97~cm). 
+The improvement arises because LLM-commanded modes call \texttt{wait\_for\_stable} and check arrival tolerance before advancing to the next waypoint.
+The scripted baseline uses fixed timers and does not adapt to transient errors.
+Mode~C (full-auto) matches Mode~B (NL-commanded) on every metric, confirming that removing the human from the loop does not degrade precision.
+WP1 is the hardest waypoint (1.09--1.16~cm) across all
+models because it involves the initial altitude acquisition.
+WP3 (1.5~m, highest setpoint) is the easiest (0.56--0.65~cm) because the PID has the most headroom. Guardrail on/off makes no measurable difference for this experiment as no dangerous commands are issued in a waypoint mission).
 
-All four models achieve 100\% pass on both Mode~B and Mode~C with
-RMSE in the range 0.83--0.87~cm --- a \textbf{3.5$\times$ improvement}
-over the scripted Mode~A baseline (2.97~cm). The improvement arises
-because LLM-commanded modes call \texttt{wait\_for\_stable} and check
-arrival tolerance before advancing to the next waypoint; the scripted
-baseline uses fixed timers and does not adapt to transient errors.
-Mode~C (full-auto) matches Mode~B (NL-commanded) on every metric,
-confirming that removing the human from the loop does not degrade
-precision. WP1 is the hardest waypoint (1.09--1.16~cm) across all
-models because it involves the initial altitude acquisition; WP3
-(1.5~m, highest setpoint) is the easiest (0.56--0.65~cm) because
-the PID has the most headroom. Guardrail on/off makes no measurable
-difference for C8 (no dangerous commands are issued in a waypoint mission).
-
-\textbf{C8 Result:} Full-auto mode matches NL-commanded quality on all
-four models. All LLM modes achieve 3.5$\times$ lower RMSE than the
-scripted baseline. The result holds across all four models with
-$<$0.03~cm inter-model spread.
+\textbf{Outcomes} Full-auto mode matches NL-commanded quality on all four models. 
+All LLM modes achieve 3.5$\times$ lower RMSE than the
+scripted baseline. 
+The result holds across all four models with $<$0.03~cm inter-model spread.
 
 % ==================================================================
-\section{Hardware Validation --- Altitude Hold Step Response (B1-HW)}
+\section{Hardware Validation - Altitude Hold Step Response}
 \label{sec:ch3_b1hw}
 % ==================================================================
 
@@ -1078,43 +1050,29 @@ This chapter answered the three research questions posed in
 \S\ref{sec:ch3_problem_rq}:
 
 \begin{description}
-  \item[RQ1 --- Simulator Fidelity (confirmed):]
+  \item[RQ1 -- Simulator Fidelity (confirmed):]
     All six A-series physics sub-models pass their acceptance criteria.
-    Free-fall integration is accurate in the indoor flight regime; Madgwick
-    converges to $\pm 0.02Â°$ at $\beta = 0.03$; the 9D EKF achieves
-    1.44~mm altitude RMSE (3.48$\times$ noise rejection); ground effect
-    is bounded by Cheeseman-Bennett at 1~m hover; motor lag $\tau_m = 27.4$~ms
-    ($R^2 = 1.000$); battery discharge correctly models the $\Delta\text{PW}=238$
-    compensation range. The simulator is a valid proxy for the real ESP32-S3
-    hardware within the certified operating envelope.
+    Free-fall integration is accurate in the indoor flight regime.
+    Madgwick converges to $\pm 0.02Â°$ at $\beta = 0.03$; the 9D EKF achieves 1.44~mm altitude RMSE (3.48$\times$ noise rejection).
+    Ground effect is bounded by Cheeseman-Bennett at 1~m hover.
+    Motor lag $\tau_m = 27.4$~ms($R^2 = 1.000$); Battery discharge correctly models the $\Delta\text{PW}=238$ compensation range. 
+    The simulator is a valid proxy for the real ESP32-S3 hardware within the certified operating envelope.
 
-  \item[RQ2 --- Controller Baseline (confirmed):]
-    The PID+EKF controller meets design specification on all four flight
-    scenarios: $\leq 7\%$ altitude overshoot, $\leq 1$~cm SS RMSE,
-    12.88~cm disturbance drift with 1.79~s recovery, 0.29~s attitude rise
-    with 0\% overshoot, and 9.21~cm XY RMSE under 0.02~N steady lateral wind.
-    The controller provides a reliable execution substrate for LLM-issued
-    setpoints.
+  \item[RQ2 - Controller Baseline (confirmed):]
+    The PID+EKF controller meets design specification on all four flight scenarios: $\leq 7\%$ altitude overshoot, $\leq 1$~cm SS RMSE, 12.88~cm disturbance drift with 1.79~s recovery, 0.29~s attitude rise with 0\% overshoot, and 9.21~cm XY RMSE under 0.02~N steady lateral wind.
+    The controller provides a reliable execution substrate for LLM-issued setpoints.
 
-  \item[RQ3 --- LLM Command Agency (confirmed):]
-    The LLM supervisor achieves: 100\% success on explicit and paraphrase
-    altitude commands (C1, C2); 100\% multi-turn mission completion across
-    5 turns $\times$ 5 runs (C3); 72.8\% RMSE reduction through autonomous
-    PID self-diagnosis without human specification of the fix (C5); 100\%
-    mission planning and execution for an abstract square-pattern goal (C6);
-    100\% safety override in exactly 2 API calls and 5.84~s (C7); and
-    26.7$\times$ altitude tracking improvement in both NL-commanded and
-    full-auto modes over scripted open-loop control (C8).
+  \item[RQ3 - LLM Command Agency (confirmed):]
+    The LLM supervisor achieves: 100\% success on explicit and paraphrase altitude commands; 100\% multi-turn mission completion across
+    5 turns $\times$ 5 runs; 72.8\% RMSE reduction through autonomous PID self-diagnosis without human specification of the fix; 100\% mission planning and execution for an abstract square-pattern goal; 100\% safety override in exactly 2 API calls and 5.84~s; and 26.7$\times$ altitude tracking improvement in both NL-commanded and
+    full-auto modes over scripted open-loop control.
 \end{description}
 
-Table~\ref{tab:ch3_production_config} consolidates the C-series production
-configuration.
+Table~\ref{tab:ch3_production_config} consolidates the LLM as command series production configuration.
+The LLM operates exclusively as an outer-loop supervisor; the inner PID+EKF runs independently at 2~kHz.
 
 \begin{table}[ht]
-  \caption{LLM supervisor production configuration as established by
-    A-series (simulation validation), B-series (controller baseline), and
-    C-series (command experiments). The LLM operates exclusively as an
-    outer-loop supervisor; the inner PID+EKF runs independently at 4~kHz.}
+  \caption{LLM supervisor production configuration as established by simulation validation, controller baseline, and LLM command experiments. }
   \label{tab:ch3_production_config}
   \centering
   \small
@@ -1135,14 +1093,10 @@ configuration.
   \end{tabular}
 \end{table}
 
-The experiments in this chapter demonstrate that an LLM can close the
-command-execution gap identified in \S\ref{sec:ch3_problem_gap}: from a
-single natural language sentence, a supervised drone can arm, calibrate,
-hover, re-target, self-diagnose, plan complex patterns, and respond to
-emergency overrides --- all without the human specifying a single tool call
-or parameter value. The 26.7$\times$ improvement in altitude tracking over
-open-loop scripted control (C8) quantifies the value of the LLM correctly
-enabling feedback control. These capabilities, built on the physics-validated
-simulator (A-series) and the characterised PID baseline (B-series), provide
-the command and execution substrate for the autonomous supervision experiments
-presented in subsequent chapters.
+The experiments in this chapter demonstrate that an LLM can close the command-execution gap identified in \S\ref{sec:ch3_problem_gap}: from a single natural language sentence, a supervised drone can arm, calibrate, hover, re-target, self-diagnose, plan complex patterns, and respond to emergency overrides, all without the human specifying a single tool call
+or parameter value. 
+The 26.7$\times$ improvement in altitude tracking over
+open-loop scripted control quantifies the value of the LLM correctly allowing feedback control. 
+These capabilities, built on the physics-validated
+simulator and the characterised PID baseline, provide
+the command and execution substrate for the autonomous supervision experiments presented in subsequent chapters.

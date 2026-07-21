@@ -104,12 +104,12 @@ float B_gyro = 0.14;      //Gyro LP filter parameter
 float B_mag = 1.0;        //Magnetometer LP filter parameter
 
 //IMU calibration parameters - calibrate IMU using calculate_IMU_error() in the void setup() to get these values, then comment out calculate_IMU_error()
-float AccErrorX = 0.0870;
-float AccErrorY = -0.0070;
-float AccErrorZ = -0.0586;
-float GyroErrorX = 1.1473;
-float GyroErrorY = 1.4808;
-float GyroErrorZ = 0.2825;
+float AccErrorX = 0.0213;
+float AccErrorY = 0.0170;
+float AccErrorZ = -0.0754;
+float GyroErrorX = -1.7223;
+float GyroErrorY = 2.2360;
+float GyroErrorZ = 0.4426;
 
 //Controller parameters
 float i_limit = 20.0;     //Integrator saturation level

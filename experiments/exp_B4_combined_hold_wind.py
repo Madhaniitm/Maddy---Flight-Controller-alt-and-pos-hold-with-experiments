@@ -74,7 +74,7 @@ from drone_sim import PhysicsLoop, DroneState, lw_hover_thr, MASS, lw_pidX_kp, l
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 OUT_CSV = os.path.join(os.path.dirname(__file__), "results", "B4_combined_hold_wind.csv")
-OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B4_combined_hold_wind.png")
+OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B4_combined_hold_wind_thesis.png")
 
 SIM_HZ   = 200
 dt       = 1.0 / SIM_HZ
@@ -292,105 +292,97 @@ x_peak   = max(x_err_v)
 t_peak_x = t_v[x_err_v.index(x_peak)]
 t_arr    = np.array(t_v)
 
-# ── 2×2 layout ───────────────────────────────────────────────────────────────
-fig, axes = plt.subplots(2, 2, figsize=(13, 8))
-ax_traj, ax_zerr, ax_xy, ax_xerr = axes[0,0], axes[0,1], axes[1,0], axes[1,1]
+plt.rcParams.update({'font.size': 30, 'axes.titlesize': 35, 'axes.labelsize': 35})
 
-# ── Panel 1 (top-left): XY trajectory — 3-phase color coded, setpoint-centred ─
-# Plot relative displacement from setpoint so the origin is always (0, 0).
-# Absolute drone position accumulates drift during climb/hover and can be
-# arbitrarily negative or positive — relative coords make the axes readable.
-# Orange: t=0 → t_peak_xy  (wind push, error growing)
-# Blue:   t_peak_xy → 10s  (integral correcting, oscillatory return)
-# Green:  t>10s            (steady state — tight cluster at origin)
 T_SS_START = 10.0
-def rel(r): return (r[1] - true_hold_x, r[2] - true_hold_y)   # relative to setpoint
+def rel(r): return (r[1] - true_hold_x, r[2] - true_hold_y)
+push_xy  = [rel(r) for r in rows if r[0] <= t_peak_xy]
+trans_xy = [rel(r) for r in rows if t_peak_xy < r[0] <= T_SS_START]
+true_ss  = [rel(r) for r in rows if r[0] > T_SS_START]
+theta    = np.linspace(0, 2 * np.pi, 200)
 
-push_xy   = [rel(r) for r in rows if r[0] <= t_peak_xy]
-trans_xy  = [rel(r) for r in rows if t_peak_xy < r[0] <= T_SS_START]
-true_ss   = [rel(r) for r in rows if r[0] > T_SS_START]
-
-if push_xy:
-    ax_traj.plot(*zip(*push_xy), color="orange", lw=1.8, label="Wind push (drift)")
-if trans_xy:
-    ax_traj.plot(*zip(*trans_xy), color="blue", lw=1.2, alpha=0.7,
-                 label="Integral correcting (return)")
-if true_ss:
-    ax_traj.plot(*zip(*true_ss), color="green", lw=1.2, alpha=0.8,
-                 label=f"Steady state (SS RMSE={ss_xy_rmse:.2f}cm)")
-
-# Setpoint at origin (0, 0) after relative shift
-ax_traj.scatter([0], [0], color="red", s=100, zorder=5, label="Setpoint")
-
-# 5cm SS acceptance circle [Ref 4] — matches the <5cm Dydek benchmark
-theta = np.linspace(0, 2 * np.pi, 200)
-ax_traj.plot(0.05 * np.cos(theta), 0.05 * np.sin(theta),
-             color="green", lw=1.5, ls="--", alpha=0.8,
-             label="5cm SS acceptance boundary [Ref 4]")
-ax_traj.set_xlabel("ΔX from setpoint (m)")
-ax_traj.set_ylabel("ΔY from setpoint (m)")
-ax_traj.set_title("XY Trajectory (relative to setpoint)")
-ax_traj.legend(fontsize=8)
-ax_traj.grid(True, alpha=0.3)
-ax_traj.set_aspect("equal")
-
-# ── Panel 2 (top-right): Actual Z altitude + ±2cm band (like B2) ─────────────
-# z_margin in metres — max_z_err is in cm so divide by 100
-z_margin = max(max_z_err / 100 * 1.5, 0.025)
-ax_zerr.plot(t_v, z_abs, color="purple", lw=1.5, label="Altitude (m)")
-ax_zerr.axhspan(0.98, 1.02, color="green", alpha=0.15,
-                label="±2cm acceptance band [Ref 3]")
-ax_zerr.axhline(1.0, color="green", lw=0.8, ls=":", alpha=0.6)
-ax_zerr.axhline(1.0 + ss_z_rmse / 100, color="red", ls="--",
-                label=f"SS RMSE={ss_z_rmse:.2f}cm")
-ax_zerr.set_ylim([1.0 - z_margin, 1.0 + z_margin])
-ax_zerr.set_xlabel("Time (s)")
-ax_zerr.set_ylabel("Altitude (m)")
-ax_zerr.set_title("Altitude during Wind\nLit. SS altitude error <2cm [Ref 3]")
-ax_zerr.legend(fontsize=8)
-ax_zerr.grid(True, alpha=0.3)
-
-# ── Panel 3 (bottom-left): XY error — y-axis to 50, P-only at 40cm ──────────
-ax_xy.plot(t_v, xy_v, color="orange", lw=1.5, label="XY error (cm)")
-ax_xy.axhline(ss_xy_rmse, color="red", ls="--",
-              label=f"SS RMSE={ss_xy_rmse:.2f}cm (PID with integral)")
-ax_xy.axhline(5.0,  color="green",  ls="--", alpha=0.8,
-              label="5cm SS benchmark (with integral) [Ref 4]")
-ax_xy.axhline(ss_p_only_cm, color="purple", ls=":",
-              label=f"P-only SS ≈{ss_p_only_cm:.0f}cm (no integral) [Ref 1]")
-ax_xy.set_ylim([0, 50])
-ax_xy.set_xlabel("Time (s)")
-ax_xy.set_ylabel("XY error (cm)")
-ax_xy.set_title(f"XY Error under Wind (Fx={WIND_FX}N)\n"
-                f"Lit. SS <5cm with integral [Ref 4] vs P-only ≈{ss_p_only_cm:.0f}cm [Ref 1]")
-ax_xy.legend(fontsize=8)
-ax_xy.grid(True, alpha=0.3)
-
-# ── Panel 4 (bottom-right): X-axis error + decay envelope ────────────────────
-# Integral time constant: τ_int = Kp/Ki  [Mahony 2012, Ref 1]
-# Outer Ki=0.30 (default), inner Ki=0 (single-integrator cascade): τ = 4.0s
-TAU_INT = lw_pidX_kp / B4_KI_POS   # = 4.0 s
+TAU_INT = lw_pidX_kp / B4_KI_POS
 x_decay = np.where(t_arr >= t_peak_x,
                    x_peak * np.exp(-(t_arr - t_peak_x) / TAU_INT),
                    np.nan)
-ax_xerr.plot(t_v, x_err_v, color="blue", lw=1.5, label="X error (cm)")
-ax_xerr.plot(t_v, x_decay, color="gray", lw=1.2, ls=":",
-             label=f"Integral decay ref (τ={TAU_INT}s) [Ref 2]")
+
+OUT_PNG_TRAJ  = OUT_PNG.replace("_thesis.png", "_thesis_traj.png")
+OUT_PNG_ALT   = OUT_PNG.replace("_thesis.png", "_thesis_alt.png")
+OUT_PNG_XYERR = OUT_PNG.replace("_thesis.png", "_thesis_xyerr.png")
+OUT_PNG_XERR  = OUT_PNG.replace("_thesis.png", "_thesis_xerr.png")
+
+# ── Figure 1: XY Trajectory ───────────────────────────────────────────────────
+fig1, ax_traj = plt.subplots(figsize=(18, 24))
+fig1.subplots_adjust(left=0.12, right=0.97, top=0.93, bottom=0.33)
+if push_xy:
+    ax_traj.plot(*zip(*push_xy),  color="orange", lw=2.0, label="Wind push (drift)")
+if trans_xy:
+    ax_traj.plot(*zip(*trans_xy), color="blue",   lw=1.8, alpha=0.7, label="Integral correcting (return)")
+if true_ss:
+    ax_traj.plot(*zip(*true_ss),  color="green",  lw=1.8, alpha=0.8, label=f"Steady state (SS RMSE={ss_xy_rmse:.2f} cm)")
+ax_traj.scatter([0], [0], color="red", s=120, zorder=5, label="Setpoint")
+ax_traj.plot(0.05*np.cos(theta), 0.05*np.sin(theta),
+             color="green", lw=1.5, ls="--", alpha=0.8, label="5 cm SS acceptance boundary [Ref 4]")
+ax_traj.set_xlabel("ΔX from setpoint (m)")
+ax_traj.set_ylabel("ΔY from setpoint (m)")
+ax_traj.set_title("XY Trajectory (relative to setpoint)")
+ax_traj.legend(loc='upper center', bbox_to_anchor=(0.5, -0.32), ncol=1, fontsize=30, framealpha=0.95)
+ax_traj.grid(True, alpha=0.3)
+ax_traj.set_aspect("equal")
+fig1.savefig(OUT_PNG_TRAJ, dpi=150)
+plt.close(fig1)
+print(f"[B4] Traj plot saved: {OUT_PNG_TRAJ}")
+
+# ── Figure 2: Altitude during Wind ───────────────────────────────────────────
+z_margin = max(max_z_err / 100 * 1.5, 0.025)
+fig2, ax_zerr = plt.subplots(figsize=(14, 18))
+fig2.subplots_adjust(left=0.13, right=0.97, top=0.92, bottom=0.22)
+ax_zerr.plot(t_v, z_abs, color="purple", lw=2.0, label="Altitude (m)")
+ax_zerr.axhspan(0.98, 1.02, color="green", alpha=0.15, label="±2 cm acceptance band [Ref 3]")
+ax_zerr.axhline(1.0, color="green", lw=0.8, ls=":", alpha=0.6)
+ax_zerr.axhline(1.0 + ss_z_rmse / 100, color="red", ls="--", label=f"SS RMSE={ss_z_rmse:.2f} cm")
+ax_zerr.set_ylim([1.0 - z_margin, 1.0 + z_margin])
+ax_zerr.set_xlabel("Time (s)")
+ax_zerr.set_ylabel("Altitude (m)")
+ax_zerr.set_title("Altitude during Wind\nLit. SS altitude error <2 cm [Ref 3]")
+ax_zerr.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=1, fontsize=30, framealpha=0.95)
+ax_zerr.grid(True, alpha=0.3)
+fig2.savefig(OUT_PNG_ALT, dpi=150)
+plt.close(fig2)
+print(f"[B4] Alt plot saved: {OUT_PNG_ALT}")
+
+# ── Figure 3: XY Error over time ─────────────────────────────────────────────
+fig3, ax_xy = plt.subplots(figsize=(14, 20))
+fig3.subplots_adjust(left=0.13, right=0.97, top=0.92, bottom=0.27)
+ax_xy.plot(t_v, xy_v, color="orange", lw=2.0, label="XY error (cm)")
+ax_xy.axhline(ss_xy_rmse, color="red", ls="--", label=f"SS RMSE={ss_xy_rmse:.2f} cm (PID with integral)")
+ax_xy.axhline(5.0, color="green", ls="--", alpha=0.8, label="5 cm SS benchmark (with integral) [Ref 4]")
+ax_xy.axhline(ss_p_only_cm, color="purple", ls=":", label=f"P-only SS ≈{ss_p_only_cm:.0f} cm (no integral) [Ref 1]")
+ax_xy.set_ylim([0, 50])
+ax_xy.set_xlabel("Time (s)")
+ax_xy.set_ylabel("XY error (cm)")
+ax_xy.set_title(f"XY Error under Wind (Fx={WIND_FX} N)\n"
+                f"Lit. SS <5 cm with integral [Ref 4] vs P-only ≈{ss_p_only_cm:.0f} cm [Ref 1]")
+ax_xy.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=1, fontsize=30, framealpha=0.95)
+ax_xy.grid(True, alpha=0.3)
+fig3.savefig(OUT_PNG_XYERR, dpi=150)
+plt.close(fig3)
+print(f"[B4] XY err plot saved: {OUT_PNG_XYERR}")
+
+# ── Figure 4: X-axis Error + Decay Envelope ──────────────────────────────────
+fig4, ax_xerr = plt.subplots(figsize=(14, 18))
+fig4.subplots_adjust(left=0.13, right=0.97, top=0.92, bottom=0.22)
+ax_xerr.plot(t_v, x_err_v, color="blue", lw=2.0, label="X error (cm)")
+ax_xerr.plot(t_v, x_decay, color="gray", lw=1.5, ls=":", label=f"Integral decay ref (τ={TAU_INT} s) [Ref 2]")
 ax_xerr.axhline(0, color="black", lw=0.8)
-ax_xerr.axhline(ss_xy_rmse, color="red", ls="--", lw=1,
-                label=f"SS RMSE={ss_xy_rmse:.2f}cm")
+ax_xerr.axhline(ss_xy_rmse, color="red", ls="--", lw=1, label=f"SS RMSE={ss_xy_rmse:.2f} cm")
 ax_xerr.set_xlabel("Time (s)")
 ax_xerr.set_ylabel("X error (cm)")
-ax_xerr.set_title(f"X-axis Error (outer integral corrects wind)\n"
-                  f"Decay τ=Kp/Ki={TAU_INT:.1f}s [Ref 1]; single-integral cascade; transient 10–30cm [Ref 2]")
-ax_xerr.legend(fontsize=8)
+ax_xerr.set_title(f"X-axis Error — Outer Integral Corrects Wind\n"
+                  f"Decay τ = Kp/Ki = {TAU_INT:.1f} s [Ref 1];  transient 10–30 cm [Ref 2]")
+ax_xerr.legend(loc='upper center', bbox_to_anchor=(0.5, -0.08), ncol=1, fontsize=30, framealpha=0.95)
 ax_xerr.grid(True, alpha=0.3)
-
-fig.suptitle(f"EXP-B4: Combined Alt+Pos Hold — Steady Wind Fx={WIND_FX}N\n"
-             f"XY SS-RMSE={ss_xy_rmse:.2f}cm  Z SS-RMSE={ss_z_rmse:.2f}cm",
-             fontsize=11)
-plt.tight_layout()
-plt.savefig(OUT_PNG, dpi=150)
-plt.close()
-print(f"[B4] Plot saved: {OUT_PNG}")
+fig4.savefig(OUT_PNG_XERR, dpi=150)
+plt.close(fig4)
+print(f"[B4] X err plot saved: {OUT_PNG_XERR}")
 print(f"\n[B4] RESULT: Under {WIND_FX}N steady wind — XY SS-RMSE={ss_xy_rmse:.2f}cm, Z SS-RMSE={ss_z_rmse:.2f}cm")

@@ -82,7 +82,7 @@ from drone_sim import (
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 OUT_CSV = os.path.join(os.path.dirname(__file__), "results", "B5_hover_soc.csv")
-OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B5_hover_soc.png")
+OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B5_hover_soc_thesis.png")
 
 SIM_HZ = 200
 dt     = 1.0 / SIM_HZ
@@ -226,58 +226,58 @@ pwm_v  = [r[2] for r in rows]
 thr_v  = [r[1] * 100 for r in rows]   # %
 vt_v   = [r[3] for r in rows]
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-fig.suptitle("EXP-B5: Hover Throttle vs Battery SOC  —  "
-             "Fixed throttle causes progressive altitude loss as battery drains [Ref 2, 3]",
-             fontsize=10, fontweight="bold")
+plt.rcParams.update({'font.size': 25, 'axes.titlesize': 25, 'axes.labelsize': 25})
 
-# A6 analytical prediction: required throttle = thr_100 * (V_term_100 / V_term_soc)
-# This is the A6 curve from the required-throttle subplot, plotted here as comparison [Ref 1, 2]
-thr_100      = rows[0][1]         # hover throttle fraction at 100% SOC
-vt_100       = rows[0][3]         # V_term at 100% SOC
-a6_thr_v     = [thr_100 * (vt_100 / r[3]) * 1000 + 1000 for r in rows]  # as PWM
+thr_100  = rows[0][1]
+vt_100   = rows[0][3]
+a6_thr_v = [thr_100 * (vt_100 / r[3]) * 1000 + 1000 for r in rows]
 
-ax1.plot(soc_v, pwm_v, color="blue", linewidth=2, marker="o", markersize=6,
+OUT_PNG_PWM   = OUT_PNG.replace("_thesis.png", "_thesis_pwm.png")
+OUT_PNG_VTERM = OUT_PNG.replace("_thesis.png", "_thesis_vterm.png")
+
+# ── Figure 1: Required Hover PWM vs SOC ──────────────────────────────────────
+fig1, ax1 = plt.subplots(figsize=(14, 18))
+fig1.subplots_adjust(left=0.14, right=0.97, top=0.92, bottom=0.28)
+ax1.plot(soc_v, pwm_v, color="blue", linewidth=2, marker="o", markersize=8,
          label="Analytical hover PWM (this exp)")
-ax1.plot(soc_v, a6_thr_v, color="orange", linewidth=1.5, linestyle="--", marker="^",
-         markersize=5, label="A6 model prediction (V² scaling) [Ref 1, 2]")
+ax1.plot(soc_v, a6_thr_v, color="orange", linewidth=2, linestyle="--", marker="^",
+         markersize=7, label="A6 model prediction (V² scaling) [Ref 1, 2]")
+for soc, pwm_pred_s, pwm_found, z, vz in sim_results:
+    ax1.scatter([soc], [pwm_found], color="red", s=100, zorder=5,
+                label="Sim hover-find" if soc == sim_results[0][0] else "")
+    delta = pwm_found - pwm_pred_s
+    ax1.annotate(f"Sim: {pwm_found} (ΔPW={delta:+d})", xy=(soc, pwm_found),
+                 xytext=(soc + 5, pwm_found + 5), fontsize=22,
+                 arrowprops=dict(arrowstyle="->"))
+delta_pwm = pwm_v[-1] - pwm_v[0]
+ax1.annotate(f"ΔPW={delta_pwm} over SOC range",
+             xy=(50, (pwm_v[0] + pwm_v[-1]) / 2),
+             fontsize=22, color="darkblue")
 ax1.set_xlabel("Battery SOC (%)")
 ax1.set_ylabel("Hover throttle (PWM)")
 ax1.set_title("Required Hover PWM vs SOC")
 ax1.invert_xaxis()
-ax1.legend(fontsize=8)
 ax1.grid(True, alpha=0.3)
+ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=1, fontsize=25, framealpha=0.95)
+fig1.savefig(OUT_PNG_PWM, dpi=150)
+plt.close(fig1)
+print(f"[B5] PWM plot saved: {OUT_PNG_PWM}")
 
-# Annotate sim validation points (hover-find result vs analytical prediction)
-for soc, pwm_pred_s, pwm_found, z, vz in sim_results:
-    ax1.scatter([soc], [pwm_found], color="red", s=80, zorder=5,
-                label="Sim hover-find" if soc == sim_results[0][0] else "")
-    delta = pwm_found - pwm_pred_s
-    ax1.annotate(f"Sim: {pwm_found} (ΔPW={delta:+d})", xy=(soc, pwm_found),
-                 xytext=(soc + 5, pwm_found + 5), fontsize=8,
-                 arrowprops=dict(arrowstyle="->"))
-
-# PWM change across SOC range
-delta_pwm = pwm_v[-1] - pwm_v[0]
-ax1.annotate(f"ΔPW={delta_pwm} over SOC range",
-             xy=(50, (pwm_v[0] + pwm_v[-1]) / 2),
-             fontsize=9, color="darkblue")
-
-ax2.plot(soc_v, vt_v, color="orange", linewidth=2, marker="s", markersize=6,
+# ── Figure 2: Terminal Voltage vs SOC ────────────────────────────────────────
+fig2, ax2 = plt.subplots(figsize=(14, 18))
+fig2.subplots_adjust(left=0.14, right=0.97, top=0.92, bottom=0.22)
+ax2.plot(soc_v, vt_v, color="orange", linewidth=2, marker="s", markersize=8,
          label="V_term at hover current")
+ax2.axhline(BAT_V_EMPTY, color="red", linestyle="--", label=f"V_empty={BAT_V_EMPTY} V")
 ax2.set_xlabel("Battery SOC (%)")
 ax2.set_ylabel("Terminal voltage V_term (V)")
 ax2.set_title("Terminal Voltage vs SOC at Hover Current [Ref 1]")
-fig.subplots_adjust(top=0.88)
 ax2.invert_xaxis()
-ax2.axhline(BAT_V_EMPTY, color="red", linestyle="--", label=f"V_empty={BAT_V_EMPTY}V")
-ax2.legend(fontsize=8)
 ax2.grid(True, alpha=0.3)
-
-plt.tight_layout(rect=[0, 0, 1, 0.88])
-plt.savefig(OUT_PNG, dpi=150)
-plt.close()
-print(f"[B5] Plot saved: {OUT_PNG}")
+ax2.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=1, fontsize=25, framealpha=0.95)
+fig2.savefig(OUT_PNG_VTERM, dpi=150)
+plt.close(fig2)
+print(f"[B5] Vterm plot saved: {OUT_PNG_VTERM}")
 
 pwm_100 = next(r[2] for r in rows if r[0] == 100)
 pwm_40  = next(r[2] for r in rows if r[0] == 40)

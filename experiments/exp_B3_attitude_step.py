@@ -70,7 +70,7 @@ from drone_sim import PhysicsLoop, DroneState, lw_hover_thr, maxRoll, maxPitch
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 OUT_CSV = os.path.join(os.path.dirname(__file__), "results", "B3_attitude_step.csv")
-OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B3_attitude_step.png")
+OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B3_attitude_step_thesis.png")
 
 SIM_HZ = 200
 dt     = 1.0 / SIM_HZ
@@ -248,7 +248,8 @@ pitch_ref = np.where(t_arr < t_pitch_step, 0.0,
                      PITCH_SP * (1.0 - np.exp(-(t_arr - t_pitch_step) / tau_att_p)),
                      PITCH_SP * np.exp(-(t_arr - t_pitch_return) / tau_att_p)))
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
+plt.rcParams.update({'font.size': 25, 'axes.titlesize': 25, 'axes.labelsize': 25})
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 9), sharex=True)
 
 roll_sp_v = [ROLL_SP if t_roll_step <= t < t_roll_return else 0.0 for t in t_v]
 ax1.plot(t_v, r_v, color="blue", linewidth=1.5, label="Roll (measured)")
@@ -258,13 +259,13 @@ ax1.plot(t_v, roll_ref, color="gray", linewidth=1.2, linestyle=":", alpha=0.8,
 ax1.axvline(t_roll_step,   color="gray", linestyle=":", linewidth=1)
 ax1.axvline(t_roll_return, color="gray", linestyle=":", linewidth=1)
 ax1.annotate(f"Overshoot={mr['overshoot_pct']:.1f}%\nRise={mr['rise_time_s']}s\nSettle={mr['settling_time_s']}s",
-             xy=(t_roll_step + 0.2, mr.get('peak_deg', ROLL_SP)),
-             fontsize=8, color="blue",
+             xy=(t_roll_step + 0.8, mr.get('peak_deg', ROLL_SP) + 2.0),
+             fontsize=16, color="blue",
              bbox=dict(boxstyle="round,pad=0.2", facecolor="lightyellow", alpha=0.8))
 ax1.set_ylabel("Roll angle (°)")
 ax1.set_title("EXP-B3: Attitude Step Response — Roll and Pitch\n"
               "Literature benchmark: rise 0.1–0.5s, overshoot <10%, settle <0.5s [Ref 4]")
-ax1.legend(fontsize=8)
+ax1.legend(fontsize=16)
 ax1.grid(True, alpha=0.3)
 ax1.set_ylim([-5, 18])
 
@@ -276,12 +277,12 @@ ax2.plot(t_v, pitch_ref, color="gray", linewidth=1.2, linestyle=":", alpha=0.8,
 ax2.axvline(t_pitch_step,   color="gray", linestyle=":", linewidth=1)
 ax2.axvline(t_pitch_return, color="gray", linestyle=":", linewidth=1)
 ax2.annotate(f"Overshoot={mp['overshoot_pct']:.1f}%\nRise={mp['rise_time_s']}s\nSettle={mp['settling_time_s']}s",
-             xy=(t_pitch_step + 0.2, mp.get('peak_deg', PITCH_SP)),
-             fontsize=8, color="orange",
+             xy=(t_pitch_step + 0.8, mp.get('peak_deg', PITCH_SP) + 2.0),
+             fontsize=16, color="orange",
              bbox=dict(boxstyle="round,pad=0.2", facecolor="lightyellow", alpha=0.8))
 ax2.set_ylabel("Pitch angle (°)")
 ax2.set_xlabel("Time (s)")
-ax2.legend(fontsize=8)
+ax2.legend(fontsize=16)
 ax2.grid(True, alpha=0.3)
 ax2.set_ylim([-5, 18])
 

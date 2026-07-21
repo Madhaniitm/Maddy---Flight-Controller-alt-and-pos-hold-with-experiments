@@ -84,7 +84,7 @@ from drone_sim import (
 
 os.makedirs(os.path.join(os.path.dirname(__file__), "results"), exist_ok=True)
 OUT_CSV = os.path.join(os.path.dirname(__file__), "results", "B1_althold_step.csv")
-OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B1_althold_step.png")
+OUT_PNG = os.path.join(os.path.dirname(__file__), "results", "B1_althold_step_thesis.png")
 
 SIM_HZ = 200
 dt     = 1.0 / SIM_HZ
@@ -294,7 +294,8 @@ def z2_ref_full(t_arr, t1, t2, sp0, sp1, sp2, zeta, wn):
 
 z_ref2 = z2_ref_full(t_arr, t_step1, t_step2, SP0, SP1, SP2, zeta, wn)
 
-fig,(ax1,ax2) = plt.subplots(2,1,figsize=(11,7),sharex=True)
+plt.rcParams.update({'font.size': 25, 'axes.titlesize': 25, 'axes.labelsize': 25})
+fig,(ax1,ax2) = plt.subplots(2,1,figsize=(14,9),sharex=True)
 ax1.plot(t_v,z_v, color="blue",  lw=1.5, label="True altitude (sim)")
 ax1.plot(t_v,ze_v,color="green", lw=1.5, label="EKF estimate", alpha=0.8)
 ax1.step(t_v,zs_v,color="red",  lw=1.5, ls="--", label="Setpoint", where="post")
@@ -306,18 +307,18 @@ for sp,m in [(SP1,m1),(SP2,m2)]:
     ax1.axhspan(sp-sp*0.015, sp+sp*0.015, alpha=0.1, color="green")
     if m:
         ax1.annotate(f"OS={m['overshoot_pct']}%\nRise={m['rise_time_s']}s\nSettle={m['settling_time_s']}s\nSS={m['ss_rmse_cm']}cm",
-                     xy=(t_step1+0.3 if sp==SP1 else t_step2+0.3, sp-0.05),
-                     fontsize=8, bbox=dict(boxstyle="round,pad=0.2",facecolor="lightyellow",alpha=0.9))
+                     xy=(t_step1+0.3 if sp==SP1 else t_step2+3.0, sp+0.08 if sp==SP1 else sp-0.28),
+                     fontsize=16, bbox=dict(boxstyle="round,pad=0.2",facecolor="lightyellow",alpha=0.9))
 ax1.set_ylabel("Altitude (m)")
 ax1.set_title(f"EXP-B1: Altitude Hold Step Response  (hold=1.0m → 1.3m → 1.6m)\n"
               f"Literature benchmark: rise 1–2s, overshoot ≤10%, SS <2cm [Ref 2, 4]")
-ax1.legend(fontsize=9); ax1.grid(True,alpha=0.3)
+ax1.legend(fontsize=16); ax1.grid(True,alpha=0.3)
 
 err_v=[abs(ze-zs)*100 for ze,zs in zip(ze_v,zs_v)]
 ax2.plot(t_v,err_v,color="purple",lw=1,label="|EKF error| (cm)")
 ax2.axhline(5.0,color="red",ls="--",lw=1,label="5cm band")
 ax2.set_ylabel("Altitude error (cm)"); ax2.set_xlabel("Time (s)")
-ax2.legend(fontsize=8); ax2.grid(True,alpha=0.3)
+ax2.legend(fontsize=16); ax2.grid(True,alpha=0.3)
 
 plt.tight_layout(); plt.savefig(OUT_PNG,dpi=150); plt.close()
 print(f"[B1] Plot: {OUT_PNG}")

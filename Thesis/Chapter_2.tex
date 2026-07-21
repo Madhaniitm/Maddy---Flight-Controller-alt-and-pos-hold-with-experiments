@@ -6,20 +6,31 @@
 \label{sec:ch2_intro}
 % ==================================================================
 
-A drone operating in an unstructured indoor environment must continuously interpret its surroundings and decide the next manoeuvre.
-Rule-based systems that threshold sensor values cannot make context-sensitive distinctions: identical depth readings from a nearby wall and a nearby person demand completely different responses.
-Large language models (LLMs), trained on billions of grounded descriptions, possess exactly this contextual reasoning capability~\cite{vemprala2023chatgpt}.
+A drone operating in an unstructured indoor environment must continuously interpret its surroundings and decide the next manoeuvre. 
+This decision requires understanding not just what the camera
+sees, but what it means in the context of the flight.
+Identical depth sensor readings from a nearby wall and a nearby person may demand completely different pilot actions. 
+Rule-based systems that threshold sensor values cannot make this distinction. 
+Human language, on the contrary, is inherently context-sensitive. Large language models (LLMs), trained in billions of words of grounded description, possess exactly this kind of contextual reasoning capability \cite{vemprala2023chatgpt}.
 
-The practical obstacle is the camera. The onboard camera in this work is an ESP32-S3-Sense module streaming JPEG frames at 320$\times$240~pixels ($\approx$9.7~KB per frame) --- far below the resolution at which LLM vision has been benchmarked~\cite{achiam2023gpt4, reid2024gemini, liu2023llava}.
+The practical obstacle is the camera. A small, weight-constrained indoor drone cannot carry a high-resolution sensor; the onboard camera in this work is an ESP32-S3-Sense module streaming JPEG frames at \textbf{320$\times$240~pixels} (approximately 10~KB per frame). 
+Such frames are suitable for compressed transmission over the companion computer link but are far below the image resolution at which LLM vision has been benchmarked \cite{achiam2023gpt4,
+reid2024gemini, liu2023llava}.
+\newpage
 Three questions motivate this chapter:
 \begin{enumerate}
-  \item Can an LLM produce a safe pilot action recommendation from a 320$\times$240 JPEG at only 85--102 image tokens per call?
-  \item What prompt structure, token budget, and context history minimise dangerous recommendations at minimum cost?
-  \item Does a layered four-tier architecture outperform any single component alone?
+  \item Can an LLM produce a meaningful scene description and a pilot
+        action suggestion from a 320$\times$240 JPEG that costs only 85--102 input tokens for the image itself?
+  \item What prompt structure, token budget, and context history minimise the risk of a dangerous recommendation?
+  \item Does a layered architecture, combining a millisecond-scale local emergency detector, a sub-second structural vision layer, and the LLM cognitive layer, provide higher action safety than any single component alone?
 \end{enumerate}
 
-A systematic validation series (V-series, \S\ref{sec:ch2_validation}) optimises LLM call parameters through controlled single-variable experiments.
-The integration series (G-series, \S\ref{sec:ch2_gseries}) assembles all components and proves that the proposed layered architecture achieves \textbf{97.5\% action safety} across 157~trials, with Gemini and GPT-4o-mini reaching \textbf{100\%}.
+This chapter answers all three. 
+A systematic validation series (\ref{sec:ch2_validation}) optimises the LLM call parameters such as prompt technique, output token budget, scene context history, and sampling temperature using controlled single-variable experiments on the eight canonical drone
+scenes captured from real ESP32-S3-Sense camera frames.
+The integration series (\ref{sec:ch2_gseries}) then assembles all components and proves that the proposed layered architecture achieves \textbf{97.5\%~action safety} across 157~trials, with two models reaching 100\%. 
+A hardware validation placeholder (\ref{sec:ch2_h5}) outlines the
+live-flight experiment that closes the simulation-to-hardware gap.
 
 
 % ==================================================================
@@ -27,85 +38,167 @@ The integration series (G-series, \S\ref{sec:ch2_gseries}) assembles all compone
 \label{sec:ch2_problem}
 % ==================================================================
 
-\subsection{The Low-Resolution Challenge}
+\subsection{The Visual-Semantic Gap in Low-Resolution Drone Imagery}
+\label{sec:ch2_problem_gap}
 
-The 320$\times$240 image accounts for only 85--102 tokens per API call --- less than 15\% of a typical prompt cost.
-However, this resolution introduces three failure modes that rule-based systems cannot handle:
-(1)~\textbf{feature ambiguity}: a featureless grey wall and an empty grey doorway are visually indistinguishable at sub-VGA resolution;
-(2)~\textbf{context loss}: at 320$\times$240, a person at 3~m occupies $\sim$20~pixels --- standard person detectors trained on higher-resolution images fail at UAV perspectives~\cite{persondetectionuav2025, kim2024yoloihd};
-(3)~\textbf{blocked-sensor blindness}: a covered lens produces zero detections, which a threshold engine incorrectly interprets as ``safe to advance''.
+Indoor drone cameras face a fundamental constraint, the companion computer budget (weight, power, cost) limits the sensor to low-cost modules whose native output is a compressed JPEG at VGA or below. The ESP32-S3-Sense camera used in this work outputs \textbf{320$\times$240~pixels at approximately 9.7~KB per JPEG frame} (measured across five frames per scene.
+Token counts are per-frame costs for the vision LLM input, GPT-4o and GPT-4o-mini in low-detail mode (fixed 85 tokens), Claude (Sonnet) by the formula $(w \times h)/750$, Gemini uses per-character billing rather than token counts, making direct comparison approximate; Table~\ref{tab:ch2_image_spec}. 
+This resolution is sufficient for human navigation in controlled environments but introduces three failure modes for
+automated reasoning:
 
-Prior LLM-equipped drone systems either operate offline, assume high-bandwidth video, or bypass the image entirely by relying on structured state descriptions~\cite{ahn2022saycan, huang2022innermonologue}.
-Recent systems that incorporate on-board cameras (e.g.,~\cite{rescuedrone2025, hierarchicaldrone2025}) operate on higher-resolution feeds without the strict 10~KB frame-size constraint of a nano-drone.
+\begin{enumerate}
+  \item \textbf{Feature ambiguity.} At 320$\times$240, a featureless grey wall filling the frame and an empty grey doorway can be visually indistinguishable. 
+  Standard object detectors report ``no objects detected'' for both; only spatial reasoning over texture gradients or depth cues can separate them.
+  \item \textbf{Context loss.} A person at 3~m occupies $\sim$20~pixels of vertical extent; a person at 0.3~m occupies $\sim$170~pixels. 
+  A fixed-threshold person detector trained on standard resolution images will fail to fire at one extreme or the other, \cite{persondetectionuav2025}.
+  \item \textbf{Blocked-sensor blindness.} If the lens is partially covered (dust, hand, water), a standard detection pipeline interprets zero detections as ``clear path'' and commands forward motion directly into the obstruction.
+\end{enumerate}
+
+\begin{table}[ht]
+  \caption{Image payload specification: }
+  \label{tab:ch2_image_spec}
+  \centering
+  \small
+  \begin{tabular}{ll}
+    \toprule
+    Property & Value \\
+    \midrule
+    Sensor module & ESP32-S3-Sense \\
+    Resolution & 320$\times$240~pixels \\
+    Format & JPEG (compressed) \\
+    Mean file size & 9.7~KB (range: 7.1--12.4~KB) \\
+    Mean pixel count & 76,800 \\
+    \midrule
+    Image token cost --- GPT-4o / GPT-4o-mini & 85~tokens (low-detail, fixed) \\
+    Image token cost --- Claude (Sonnet) & $\approx$102~tokens ($(320 \times 240)/750$) \\
+    Image token cost --- Gemini & $\approx$flat (pixel-area billing) \\
+    \midrule
+    Full prompt input tokens (with YOLO metadata) & 575--1,008 per call \\
+    Image fraction of total input cost & $\sim$9--15\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+As Table~\ref{tab:ch2_image_spec} shows, the 320$\times$240 image itself accounts for only 85--102 tokens which is less than 15\% of a typical API call.
+The dominant cost is the text prompt (system instruction, scene context history, sensor metadata). 
+This means that the vision payload is not the cost bottleneck; the system is open to the per-call budgeting and cost optimisation demonstrated in the integration series experiments.
+
+\subsection{Sensor-Only Approaches and Their Limits}
+\label{sec:ch2_problem_sensors}
+
+Existing approaches to indoor drone safety combine depth sensors, IMUs, and rule-based thresholds. 
+Time-of-Flight (ToF) sensors report a scalar distance that is identical whether the obstacle is a wall, a person, or a box.
+YOLO(You Only Look Once)-based detectors trained on standard COCO datasets achieve $>$80\% precision on person detection at typical resolutions but degrade significantly on UAV-perspective imagery \cite{persondetectionuav2025,kim2024yoloihd}. 
+Rule engines that map detection categories to actions inherit every false positive and false negative from the detector layer with no mechanism for contextual recovery. 
+Critically, no rule-based system can detect that its own sensor has
+failed, hand covering the lens scenarios produces zero detections, and a threshold engine concludes ``safe to advance''.
+
+Language model-equipped drone systems that do not address the low-resolution problem either operate offline, assume high-bandwidth video, or bypass the image entirely by relying on structured state descriptions \cite{ahn2022saycan, huang2022innermonologue}. 
+Recent systems that do incorporate on-board cameras (e.g., \cite{rescuedrone2025, hierarchicaldrone2025}) operate on higher
+resolution feeds without the strict 10~KB frame-size constraint of a
+weight-limited nano-drone. 
 This chapter directly targets the low-resolution, token-budget-constrained regime.
-
-\subsection{Research Questions}
+\newpage
+\subsection{Research Questions and Scope}
 \label{sec:ch2_problem_rq}
 
+Given the constraints above, the contribution of this chapter is scoped as follows:
+
 \begin{description}
-  \item[RQ1 --- Feasibility:] Can an LLM produce correct pilot action recommendations from 320$\times$240 frames even when image quality prevents unambiguous visual identification of the hazard?
-  \item[RQ2 --- Optimisation:] What prompt technique, output token budget, and context history minimise dangerous recommendations within a practical API cost envelope?
-  \item[RQ3 --- Architecture:] Does the layered four-tier architecture outperform any single tier alone, and does hybrid MediaPipe triggering improve hazard-detection timing?
+  \item[RQ1 - Feasibility:] Can an off-the-shelf multimodal LLM produce a correct pilot action recommendation from a 320$\times$240 JPEG with a tructured text prompt, even when image quality prevents unambiguous visual identification of the hazard?
+  \item[RQ2 - Optimisation:] What prompt technique, output token budget, and scene context history minimise dangerous recommendations while remaining within a practical API cost envelope?
+  \item[RQ3 - Architecture:] Does a layered hierarchy: local emergency detector, structural vision layer and a LLM cognitive layer outperform any single layer alone and does real-time emergency interruption improve hazard-detection timing without increasing cost?
 \end{description}
 
 
 % ==================================================================
-\section{Proposed Approach: Image Verbalization with Layered Vision}
+\section{Image Verbalization with Layered Vision}
 \label{sec:ch2_proposed}
 % ==================================================================
 
-\subsection{Core Idea}
+\subsection{Core Idea: Augmenting the Image with Structured Metadata}
+\label{sec:ch2_proposed_idea}
 
-A low-resolution image \emph{alone} may be insufficient for reliable classification, but an image \emph{paired with structured sensor metadata} --- object class, bounding box, depth estimate, and a proximity flag --- provides enough grounding for the LLM to reason safely.
-This enrichment process is called \emph{image verbalization}: a camera frame is converted into a structured natural-language description by combining visual LLM analysis with metadata from fast local detectors.
-The verbalizer returns a risk label (\texttt{safe} / \texttt{caution} / \texttt{hazard}) and a pilot action (\texttt{PITCH\_FORWARD} / \texttt{HOVER} / \texttt{LAND/STOP}).
+The central insight is that a low-resolution image alone may be insufficient for reliable classification, but an image paired with structured sensor metadata like object class, bounding box, depth estimate, and a proximity warning flag provides enough grounding for an LLM to reason safely. 
+The image contributes global scene context (lighting, texture
+fill, apparent distance, room layout) and the metadata contributes local precise measurements that the LLM uses to cross-check its visual analysis.
 
-\subsection{Four-Tier Architecture}
+This enrichment process is called an image verbalization in the context of this thesis. 
+A camera frame is converted into a structured natural-language description by combining visual analysis (the LLM looking at the JPEG) with metadata extracted by fast local detectors (YOLO-World, DepthAnything~v2, MediaPipe EfficientDet-Lite0). 
+The verbalizer then produces a risk label (\texttt{safe}, \texttt{caution}, or \texttt{hazard}) and a pilot action suggestions such as (\texttt{PITCH\_FORWARD}, \texttt{HOVER}, or \texttt{LAND/STOP}).
+
+\subsection{Four-Tier Layered Architecture}
 \label{sec:ch2_proposed_tiers}
 
-A single LLM call cannot serve as the drone's only safety layer: at 2,333--7,218~ms per call, the LLM operates at 0.1--0.4~Hz.
-The proposed architecture separates perception and control into four tiers, each at the highest frequency its computational cost permits (Figure~\ref{fig:ch2_concept}):
+A single LLM call cannot serve as the efficient scene description layer, at 2,333--7,218~ms per call, the LLM operates at 0.1--0.4~Hz while a drone moving at 0.5~m/s travels 12--36~cm between calls. 
+There is a high probability that scheduled LLM triggers might miss to capture emergency scenes between schedules.
+Emergency events require faster detection. 
+The proposed architecture separates perception and control
+into four levels, each operating at the highest frequency its computational cost permits (Figure~\ref{fig:ch2_concept}):
 
 \begin{description}
-  \item[Tier~1 --- PID Firmware (4~kHz):]
-    Attitude, altitude, and position hold on the ESP32-S3. Never queried by or dependent on the LLM.
-  \item[Tier~1.5 --- MediaPipe Emergency Detector ($\sim$60~Hz):]
-    EfficientDet-Lite0~\cite{tan2020efficientdet, lugaresi2019mediapipe} performs three binary checks (person detection conf~$>$~0.30, wall-fill texture, brightness gate) in $\sim$16~ms with zero API cost. Any positive check fires an immediate LLM call, bypassing the scheduled polling interval.
-  \item[Tier~2 --- YOLO-World + DepthAnything~v2 ($\sim$4~Hz):]
-    Open-vocabulary structural detection across 17 indoor hazard classes~\cite{cheng2024yoloworld} and absolute metric depth in metres~\cite{yang2024depthanythingv2}, at $\sim$275~ms. Produces the sensor metadata string for every LLM call.
+  \item[Tier~1 - PID Firmware (2~kHz):]
+    The flight controller's PID loop maintains attitude, altitude, and position hold. 
+    It receives set-points from the higher tiers and executes at 2,000~Hz with sub-millisecond latency. 
+    The LLM never queries this tier or waits for an API response.
+    \newpage
+  \item[Tier~1.5 - MediaPipe Emergency Detector ($\sim$60~Hz):]
+    MediaPipe EfficientDet-Lite0 \cite{tan2020efficientdet, lugaresi2019mediapipe} runs on every camera frame in $\sim$16~ms with no API cost. 
+    It performs three binary checks like person detection (conf $>$ 0.30), wall-fill texture check (gradient standard deviation $<$ 30), and brightness gate (mean luminance $<$ 40). 
+    Any positive check fires a real-time interrupt that triggers an immediate LLM call, bypassing the scheduled polling interval.
+    This tier handles emergencies between scheduled cognitive-tier updates.
+  \item[Tier~2 - YOLO-World + DepthAnything~v2 ($\sim$4~Hz):]
+    YOLO-World \cite{cheng2024yoloworld} provides open-vocabulary structural detection across 17 indoor hazard classes (walls, doors, furniture, persons). 
+    DepthAnything~v2 Metric~Indoor \cite{yang2024depthanythingv2}
+    provides absolute metric depth estimates in metres. Together they produce the sensor metadata string that accompanies every LLM call, run at $\sim$275~ms per frame. 
+    A texture-based proximity flag is appended when the detected depth is inconsistent with the wall-fill visual signature, guarding against the DepthAnything~v2 known failure mode on featureless surfaces.
+    Primary purpose of this tier is to pass structured metadata to the LLM.
   \item[Tier~3 --- LLM Cognitive Reasoner (0.1--0.4~Hz):]
-    Gemini 2.5~Flash in production~\cite{reid2024gemini}. Receives JPEG + metadata + 2-frame history; returns structured JSON with \texttt{scene\_description}, \texttt{risk\_level}, \texttt{reasoning}, and \texttt{recommended\_action}. The LLM \emph{suggests}; the operator accepts or overrides before any command reaches Tier~1.
+    The LLM receives the current JPEG frame plus a structured text prompt containing the sensor metadata and the two most recent prior frame descriptions (short context history). 
+    It produces a structured JSON response containing scene description, proximity, risk level, reasoning, and recommended action. 
+    The LLM will describe the scene and suggest the recommended action to the human operator. 
+    The human operator can accept or override every recommendation.
 \end{description}
 
+This architecture ensures that no API response is on the critical latency path for basic attitude control (Tier~1), emergency event trigger (Tier~1.5), or structural metadata provider (Tier~2). 
+The LLM contributes contextual reasoning at the cognitive timescale without blocking the faster layers.
+
+% -------------------------------------------------------------------
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig2_2_verbalization_concept.pdf}
-  \caption{Image verbalization concept. A 320$\times$240 JPEG frame ($\approx$9.7~KB) is
-    enriched with YOLO-World structural detections and DepthAnything~v2 metric depth by
-    Tier~2 ($\sim$275~ms), and MediaPipe person/brightness/texture checks by Tier~1.5
-    ($\sim$16~ms, every frame). Both form a structured prompt to the Tier~3 LLM.
-    CLIP was evaluated in V6 and removed after finding it added no discriminative signal
-    on 320$\times$240 frames (\S\ref{sec:ch2_v6}).}
+  \includegraphics[width=\textwidth]{Thesis Figures/Chapter 2 Architecture.png}
+  \caption{Image verbalization architecture.}
   \label{fig:ch2_concept}
 \end{figure}
+% --------
 
-
+\newpage
 % ==================================================================
 \section{Experimental Setup}
 \label{sec:ch2_setup}
 % ==================================================================
 
-\subsection{Reference Scenes and Hardware}
+\subsection{Reference Image Scenes}
+\label{sec:ch2_setup_scenes}
 
-All V-series and G-series experiments use the eight canonical scenes in Table~\ref{tab:ch2_scenes}, captured from the ESP32-S3-Sense at 320$\times$240 with five independent repetitions each (40~frames per scene, 320~total).
-The scene set covers three risk categories in a 3:4:1 hazard:caution:safe ratio, with deliberate adversarial cases targeting known failure modes of UAV-perspective detection~\cite{persondetectionuav2025, kim2024yoloihd}.
-Pre-processing applies CLAHE contrast enhancement~\cite{clahe_zuiderveld1994} (\texttt{clip\_limit}=2.0, \texttt{tile\_grid}=(8,8)) before all downstream inference.
-YOLO-World and DepthAnything~v2 Metric~Indoor run on CPU without hardware acceleration.
+All validation series and integration series experiments use the same eight canonical scenes captured from the ESP32-S3-Sense camera in the same indoor environment (laboratory with tables, shelving, chairs, and controlled lighting).
+All scenes captured at 320$\times$240 from ESP32-S3-Sense.
+Each scene was photographed in five independent repetitions (different times of the day, slight variation in viewpoint) to generate 40~frames per scene (320 total in all 8~scenes). 
+Figure~\ref{fig:ch2_scene_grid} shows one representative
+frame per scene; Table~\ref{tab:ch2_scenes} gives the ground-truth label and the rationale for this label.
+
+% -------------------------------------------------------------------
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{Thesis Figures/fig2_1_scene_grid.pdf}
+  \caption{Eight canonical reference scenes used in all validation series and integration series
+    experiments. (a). Camera Lens blocked. (b). Cluttered obstacles. (c). Laptop on a table. (d). Person near. (e). Lights dimmed. (f). Opened Door. (g). Wall at 25 cm. (h). Person far.}
+  \label{fig:ch2_scene_grid}
+\end{figure}
+% -------------------------------------------------------------------
 
 \begin{table}[ht]
-  \caption{Eight canonical scenes used in all V- and G-series experiments.
-    Ground-truth labels assigned by the human experimenter: \texttt{hazard}
-    $\to$ HOVER/STOP; \texttt{caution} $\to$ HOVER; \texttt{safe} $\to$ PITCH\_FORWARD.}
+  \caption{Eight canonical scenes: ground-truth label, sensor signature, and principal challenge for the vision pipeline.}
   \label{tab:ch2_scenes}
   \centering
   \small
@@ -113,393 +206,412 @@ YOLO-World and DepthAnything~v2 Metric~Indoor run on CPU without hardware accele
     \toprule
     Scene & Truth & Sensor signature & Principal challenge \\
     \midrule
-    \texttt{person\_near}  & hazard  & Person conf $>$0.4, depth $<$0.5~m & Priority escalation \\
-    \texttt{wall\_close}   & hazard  & DA~v2 may report 2.09~m (error)     & Depth sensor error \\
-    \texttt{blocked\_lens} & hazard  & Zero YOLO detections; low brightness & Rule engines return ``safe'' \\
-    \texttt{person\_far}   & caution & Person conf $\approx$0.3, depth $>$2~m & Over-caution risk \\
-    \texttt{dim\_light}    & caution & Low mean luminance ($\approx$40--80)  & Ambiguous classification \\
-    \texttt{cluttered}     & caution & Many objects, no dominant hazard     & Over-classification \\
-    \texttt{object\_table} & caution & Table obstructing lower frame        & Partial blockage \\
-    \texttt{door\_open}    & safe    & Low object density; open passage     & Unnecessary hovering \\
+    \texttt{person\_near}  & hazard  & Person conf $>$ 0.4, depth $<$ 0.5~m & Correct label; priority escalation \\
+    \texttt{wall\_close}   & hazard  & DA~v2 may report 2.09~m (wrong)        & Depth sensor error; visual fill test \\
+    \texttt{blocked\_lens} & hazard  & Zero YOLO detections; low brightness   & Rule-based engines return ``safe'' \\
+    \texttt{person\_far}   & caution & Person conf $\approx$ 0.3, depth $>$ 2~m & Over-caution expected; must be safe \\
+    \texttt{dim\_light}    & caution & Low mean luminance ($\approx$40--80)   & Ambiguous: models often say hazard \\
+    \texttt{cluttered}     & caution & Many YOLO objects; no single dominant  & Models over-classify as hazard \\
+    \texttt{object\_table} & caution & Table/laptop obstructing lower portion & Partial blockage at flight altitude \\
+    \texttt{door\_open}    & safe    & Low object density; open passage ahead & Must not HOVER unnecessarily \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\subsection{LLM Models and Evaluation Protocol}
+\newpage
+The scene set covers the three risk categories (\texttt{hazard},
+\texttt{caution}, \texttt{safe}) in a 3:4:1 ratio, with deliberate inclusion of adversarial cases: \texttt{blocked\_lens} tests sensor-failure detection; \texttt{wall\_close} tests depth-sensor disagreement with visual evidence; \texttt{person\_far} tests resistance to over-caution; \texttt{door\_open} tests resistance to unnecessary hovering.
 
-Four commercial multimodal LLMs are evaluated (Table~\ref{tab:ch2_models}).
-The primary metric is \textbf{action safety} (was the recommended pilot action safe given ground truth?); a dangerous case requires truth~=~hazard \emph{and} action~=~\texttt{PITCH\_FORWARD}.
-Label accuracy is secondary.
-Evaluation follows the HELM methodology~\cite{liang2023helm, kapoor2024aiagents} with five independent runs per condition.
+\subsection{Hardware and Software Configuration}
+\label{sec:ch2_setup_hw}
+
+The camera frames were captured from the ESP32-S3-Sense fixed as a payload on a 50 gram custom indoor drone, streaming server over a local Wi-Fi link to the companion computer.
+The Pre-processing applies CLAHE contrast enhancement \cite{clahe_zuiderveld1994} (\texttt{clip\_limit} = 2.0, \texttt{tile\_grid} = (8,8)) before all downstream inferences.
+Mediapipe runs on GPU for better latency.
+YOLO-World and DepthAnything~v2~Metric~Indoor run on CPU without
+hardware acceleration. 
+All LLM API calls use the models' multimodal endpoints.
+The experiment parameters for each run of the validation series are given in the corresponding subsection; the shared baseline between all experiments is five independent runs per scene per condition unless otherwise stated \cite{liang2023helm}.
 
 \begin{table}[ht]
-  \caption{LLM models evaluated. Costs and latency from G5 experiment.
-    GPT-4o and GPT-4o-mini use OpenAI's multimodal vision endpoint~\cite{achiam2023gpt4};
-    Gemini 2.5-Flash uses Google's multimodal API~\cite{reid2024gemini}.}
+  \caption{LLM models evaluated across validation series and integration series experiments.
+  Costs are measured (not listed prices) from the experiment CSV files.
+  Latency reported as mean across all successful calls per model}
   \label{tab:ch2_models}
   \centering
   \small
-  \begin{tabular}{lrr}
+  \begin{tabular}{lllrr}
     \toprule
-    Model & Mean latency (G5) & Est.\ cost/call (G5) \\
+    Model & Tier & API & Mean latency & Est.\ cost/call \\
     \midrule
-    Claude (Sonnet)           & 7,777~ms           & \$0.010 \\
-    GPT-4o                    & $\sim$2,910~ms     & \$0.008 \\
-    GPT-4o-mini               & 4,196~ms           & \$0.001 \\
-    \textbf{Gemini 2.5-Flash} & \textbf{2,554~ms}  & \textbf{\$0.0002} \\
+    Claude (Sonnet)   & 3 & Anthropic & 7,777~ms & \$0.010 \\
+    GPT-4o            & 3 & OpenAI    & $\sim$2,910~ms & \$0.008 \\
+    GPT-4o-mini       & 3 & OpenAI    & 4,196~ms & \$0.001 \\
+    \textbf{Gemini} (2.5-Flash)  & 3 & Google  & \textbf{2,554~ms} & \textbf{\$0.0002} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 
 % ==================================================================
-\section{Validation Experiments (V Series)}
+\section{Validation Experiments: LLM Verbalization Parameters}
 \label{sec:ch2_validation}
 % ==================================================================
 
-Before integrating all tiers, three LLM call parameters are optimised through controlled single-variable experiments.
-The V-series isolates each parameter while holding all others fixed; each experiment uses 8 scenes at 5 independent runs per condition~\cite{liang2023helm}.
-The metric hierarchy is: (1)~action safety, (2)~dangerous case count, (3)~label accuracy, (4)~verbalization quality (0--5 rubric)~\cite{kapoor2024aiagents, liang2023helm}.
+Before integrating all tiers into a single pipeline, three LLM call parameters are optimised through controlled single-variable experiments. 
+The validation series isolates each parameter while keeping all other parameters fixed. 
+Each experiment uses the same eight canonical scenes in five runs per condition. 
+The metric hierarchy is: (1) action safety (was the pilot action recommended safe given ground truth?), (2) dangerous case count (truth~= ~ hazard and action~= ~ PITCH \_FORWARD), (3) label precision (did the LLM assign the correct risk category?) and
+(4) verbalization quality (0--5 rubric that assesses completeness, grounding and actionability). 
+Action safety and dangerous case count are the primary safety metrics; label accuracy is secondary for LLMs.
 
 % ------------------------------------------------------------------
-\subsection{V1 --- Baseline Model Comparison}
+\subsection{Baseline Model Comparison}
 \label{sec:ch2_v1}
 % ------------------------------------------------------------------
 
-V1 establishes baseline performance across all four models using a combined prompt (YOLO-World + MediaPipe + CLIP metadata).
-160~trials (4~models $\times$ 8~scenes $\times$ 5~runs).
+This experiment establishes baseline performance across all four models using a combined prompt that includes YOLO-World metadata, MediaPipe metadata, and CLIP scene labels. 
+All models receive identical inputs (same JPEG + same metadata).
+Table~\ref{tab:ch2_v1} reports per-model baseline results across 160~trials (4~models $\times$ 8~scenes $\times$ 5~runs).
 
 \begin{table}[ht]
-  \caption{V1 baseline: all four models achieve 100\% action safety from 320$\times$240
-    frames. GPT-4o leads on quality and label accuracy; Gemini on latency.}
+  \caption{Baseline model comparison.}
   \label{tab:ch2_v1}
-  \centering
-  \small
-  \begin{tabular}{lrrrr}
-    \toprule
-    Model & LblAcc & Quality/5 & Mean latency & Dangerous \\
-    \midrule
-    Claude       & 62.5\% & 3.9 & 9,069~ms          & 0 \\
-    GPT-4o       & \textbf{70.0\%} & \textbf{4.4} & 3,078~ms & 0 \\
-    GPT-4o-mini  & 57.5\% & 4.0 & 4,836~ms          & 0 \\
-    Gemini       & 62.5\% & 4.1 & \textbf{2,468~ms} & 0 \\
-    All combined & 63.1\% & 4.1 & 4,863~ms          & \textbf{0} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-All four models produce zero dangerous recommendations, validating the core feasibility hypothesis (RQ1): a multimodal LLM \emph{can} produce safe pilot action suggestions from a 320$\times$240 drone camera image.
-
-% ------------------------------------------------------------------
-\subsection{V2 --- Prompt Technique}
-\label{sec:ch2_v2}
-% ------------------------------------------------------------------
-
-Five techniques compared across 790~valid trials (4~models, 4--5~techniques, 8~scenes, 5~runs).
-
-\begin{table}[ht]
-  \caption{V2 prompt technique comparison (all models combined, 790--794 valid trials).
-    DescAcc: scene content correctly described; RsnRisk (LblAcc): risk label matches
-    ground truth; RsnAct: pilot action present and consistent with stated risk.
-    Structured JSON achieves the highest RsnRisk and zero dangerous cases.
-    CoT-300's truncation at 300 tokens severely suppresses RsnRisk (19.2\%) and
-    RsnAct (33.3\%); doubling the budget to 600 tokens (CoT-600) recovers RsnAct to
-    91.1\% and RsnRisk to 46.8\%.  Few-shot-3 produces 5 dangerous recommendations
-    (all Gemini on \texttt{wall\_close}); CoT-600 produces 2 (gpt4o-mini,
-    \texttt{person\_near}).}
-  \label{tab:ch2_v2_technique}
   \centering
   \small
   \begin{tabular}{lrrrrrr}
     \toprule
-    Technique & $N$ & DescAcc & RsnRisk & RsnAct & ActSafe & Danger \\
+    Model & $N$ & LblAcc & ActSafe & Quality/5 & Mean latency & Dangerous \\
     \midrule
-    Zero-shot                      & 159 & 100\%            & 42.1\%          & 77.4\%          & \textbf{100\%} & \textbf{0} \\
-    Few-shot-3                     & 158 & 100\%            & 51.9\%          & 83.5\%          & 96.8\%         & 5 \\
-    CoT-300 (67\% truncated)       & 156 & 100\%            & 19.2\%          & 33.3\%          & \textbf{100\%} & \textbf{0} \\
-    CoT-600                        & 158 & 100\%            & 46.8\%          & 91.1\%          & 98.7\%         & 2 \\
-    \textbf{Structured JSON}       & 159 & \textbf{100\%}   & \textbf{56.6\%} & \textbf{89.9\%} & \textbf{100\%} & \textbf{0} \\
-    \bottomrule
+    Claude       & 40 & 62.5\% & 100\% & 3.9 & 9,069~ms & 0 \\
+    GPT-4o       & 40 & \textbf{70.0\%} & 100\% & \textbf{4.4} & 3,078~ms & 0 \\
+    GPT-4o-mini  & 40 & 57.5\% & 100\% & 4.0 & 4,836~ms & 0 \\
+    Gemini       & 40 & 62.5\% & 100\% & 4.1 & \textbf{2,468~ms} & 0 \\
+    \midrule
   \end{tabular}
 \end{table}
 
-The structured JSON schema enforces separate \texttt{risk\_level} and \texttt{recommended\_action} fields, making contradictory outputs immediately detectable as parse errors --- the schema architecturally prevents a model that internally assesses a hazard from recommending \texttt{PITCH\_FORWARD}.
-
-\textbf{Decision V2:} Structured JSON adopted for all subsequent experiments.
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2_3_v2_prompt_techniques.pdf}
-  \caption{V2: label accuracy (\%, with 95\% Wilson CI, left) and dangerous case count
-    per technique (right). Structured JSON: highest label accuracy, zero dangerous cases.
-    Data from Table~\ref{tab:ch2_v2_technique}.}
-  \label{fig:ch2_v2_techniques}
-\end{figure}
-
+The baseline runs confirms that all four models can reason safely about 320$\times$240 frames and produce zero dangerous recommendations under the combined prompt. 
+GPT-4o achieves the highest label accuracy (70.0\%) and
+verbalization quality (4.4/5); Gemini achieves the lowest latency (2,468~ms).
+The fact that all models achieve 100\% action safety at baseline validates the core feasibility hypothesis (RQ1): a multimodal LLM can produce safe pilot action suggestions from a 320$\times$240 drone camera image.
 % ------------------------------------------------------------------
-\subsection{V6 --- Output Token Budget}
+\subsection{Output Token Budget}
 \label{sec:ch2_v6}
 % ------------------------------------------------------------------
-
-Four token budgets tested across 640~trials per level, with a parallel no-CLIP ablation (640 additional trials).
+The output token budget (\texttt{max\_tokens}) determines how many words the LLM can use for its scene description and pilot action. 
+Too few tokens truncate the response before the conclusion whereas too many will waste API cost with no quality gain.
+Four budgets are tested: 64, 128, 256, and 512~tokens, across 640~trials per condition.
+From baseline experiments we observed CLIP was defining every scene as a cluttered object as the image quality is not enough for distinguishing the scenes.
+So, a parallel no-CLIP run (640~additional trials) is conducted to verify the contribution of CLIP.
 
 \begin{table}[ht]
-  \caption{V6 token budget: quality saturates at 256~tokens ($\Delta Q = 0.01$ from 256
-    to 512). CLIP ablation finds $\Delta Q \leq 0.05$ at all levels --- CLIP-ViT provides
-    no discriminative signal at 320$\times$240. In one configuration (Gemini at 128~tokens),
-    removing CLIP \emph{improves} quality by $+$0.40/5 because the random CLIP label
-    consumed reasoning capacity within the constrained budget.}
+  \caption{Token budget.}
   \label{tab:ch2_v6}
   \centering
   \small
-  \begin{tabular}{rrrr}
+  \begin{tabular}{rrrrrr}
     \toprule
-    \texttt{max\_tokens} & Quality/5 & LblAcc & Latency \\
+    \texttt{max\_tokens} & Quality/5 & LblAcc & Avg words & Truncated\textsuperscript{a} & Latency \\
     \midrule
-    64           & 3.27 & 36.7\% & 3,142~ms \\
-    128          & 4.15 & \textbf{58.8\%} & 3,649~ms \\
-    \textbf{256} & \textbf{4.48} & 57.3\% & 4,228~ms \\
-    512          & 4.49 & 57.7\% & 4,294~ms \\
+    64              & 3.27 & 36.7\% & 48.4 & 74.7\%  & 3,142~ms \\
+    128             & 4.15 & \textbf{58.8\%} & 76.5 & 88.8\%\textsuperscript{a} & 3,649~ms \\
+    \textbf{256}    & \textbf{4.48} & 57.3\% & \textbf{92.0} & 96.8\%\textsuperscript{a} & 4,228~ms \\
+    512             & 4.49 & 57.7\% & 92.5 & 92.9\%\textsuperscript{a} & 4,294~ms \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\textbf{Decision V6:} \texttt{max\_tokens=256}; CLIP permanently removed.
+Quality score is measured in the scale of 0--5, label accuracy and verbalisation length from maximum tokens are observed and tabulated in Table \ref{tab:ch2_v6}.
+Quality improves sharply from 64 to 128~tokens (+0.88/5, driven by the model first being able to include the pilot action line without truncation), moderately from 128 to 256 (+0.33/5, Claude and Gemini completing their metadata-rich descriptions), and negligibly from 256 to 512 ($\Delta Q = 0.01$, Table~\ref{tab:ch2_v6}). 
+The CLIP ablation finds a maximum quality difference
+of $\Delta Q = 0.05$ between CLIP and no-CLIP conditions within experimental noise with an identical plateau at 256~tokens. 
+In one configuration (Gemini at 128~tokens), removing CLIP \emph{improves} quality by $+$0.40/5 because the
+random CLIP label consumed reasoning capacity within the constrained budget.
+CLIP scores fall within $\pm$0.013 of the 0.200 uniform baseline across all scene categories on 320$\times$240 frames: CLIP-ViT provides no scene-discriminative signal at this resolution.
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2_4_v6_token_budget.pdf}
-  \caption{V6: quality (/5, left) and label accuracy (\%, right) vs \texttt{max\_tokens}
-    per model. Solid lines: with CLIP. Dashed lines: without CLIP. Conditions are
-    statistically indistinguishable ($\Delta Q \leq 0.05$ at all levels).
-    Data from Table~\ref{tab:ch2_v6}.}
-  \label{fig:ch2_v6}
-\end{figure}
+\textbf{Validation:} Maximum token range of 250-300 is adopted as the production token budget. 
+CLIP is permanently removed from the pipeline.
 
+.
 % ------------------------------------------------------------------
-\subsection{V7 --- Scene Context History}
-\label{sec:ch2_v7}
-% ------------------------------------------------------------------
-
-A stateless LLM call treats each frame independently.
-V7 tests three history modes across 300~trials (3~modes $\times$ 4~models $\times$ 5~sequences $\times$ 5~frames).
-
-\begin{table}[ht]
-  \caption{V7 context history: short history ($+$38 input tokens, approximately one
-    sentence of overhead) improves overall risk accuracy by 16.2~pp over stateless
-    at negligible extra cost. All modes achieve 100\% action safety and zero dangerous cases.}
-  \label{tab:ch2_v7_summary}
-  \centering
-  \small
-  \begin{tabular}{lrrrr}
-    \toprule
-    Mode & RiskAcc & ChgDetect & Danger & Extra input tokens \\
-    \midrule
-    Stateless              & 43.0\% & 65.0\% & 0 & --- \\
-    \textbf{Short (2 fr.)} & \textbf{59.2\%} & \textbf{67.5\%} & 0 & $+$38 \\
-    Full (all fr.)         & 50.5\% & 56.4\% & 0 & $+$59 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\begin{table}[ht]
-  \caption{V7 per-model risk accuracy (\%) by history mode. GPT-4o-mini stateless: 4\%
-    (near chance on a 3-class problem), making short history the robust production choice
-    against model variability. Three of four models achieve peak accuracy under short history.}
-  \label{tab:ch2_v7_models}
-  \centering
-  \small
-  \begin{tabular}{lrrr}
-    \toprule
-    Model & Stateless & Short & Full \\
-    \midrule
-    GPT-4o       & \textbf{88.0\%} & 76.0\% & 60.0\% \\
-    Gemini       & 44.0\% & \textbf{68.0\%} & 60.0\% \\
-    Claude       & 36.0\% & \textbf{43.5\%} & 37.5\% \\
-    GPT-4o-mini  &  4.0\% & \textbf{48.0\%} & 44.0\% \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-The system exhibits an architecturally desirable asymmetry: hazard \emph{onset} is detected 100\% of the time; hazard \emph{clearance} only 26.7\%.
-Models over-linger in HOVER rather than prematurely resuming forward flight --- the correct conservative failure mode for a drone safety copilot.
-
-\textbf{Decision V7:} 2-frame short context history adopted.
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2_5_v7_history_modes.pdf}
-  \caption{V7: risk accuracy (\%) and change detection rate (\%) per model per history mode.
-    GPT-4o-mini stateless (4\%) demonstrates that stateless operation is model-fragile.
-    All modes achieve 100\% action safety. Data from Tables~\ref{tab:ch2_v7_summary}
-    and~\ref{tab:ch2_v7_models}.}
-  \label{fig:ch2_v7}
-\end{figure}
-
-% ------------------------------------------------------------------
-\subsection{V8 --- Sampling Temperature}
+\subsection{Sampling Temperature}
 \label{sec:ch2_v8}
 % ------------------------------------------------------------------
 
-Temperature controls LLM output randomness.
-For a drone safety classifier, the same image of a wall filling the frame should always yield the same pilot action: determinism is a design requirement.
-V8 sweeps temperatures $[0.0,\,0.2,\,0.5,\,0.8,\,1.0]$ across 800~trials (5~temperatures $\times$ 4~models $\times$ 8~scenes $\times$ 5~runs; \$2.51 total).
-The $t=0.2$ convention~\cite{yao2022react} was established for iterative ReAct agents where sampling diversity aids multi-step reasoning; single-pass classification has no equivalent justification.
+Temperature controls LLM output randomness. 
+For a drone safety classifier, the same image of a wall filling the frame should always yield the same pilot action.
+Determinism is a design requirement, not a preference.
+This experiment sweeps temperatures $[0.0,\,0.2,\,0.5,\,0.8,\,1.0]$ across \textbf{800~trials}
+(5~temperatures $\times$ 4~models $\times$ 8~scenes $\times$ 5~runs; \$2.51 total) on the full YOLO-World + DepthAnything~v2 + MediaPipe pipeline.
+Flip rate is measured by fraction of repeated identical-input runs that switch the risk label. 
+Dangerous trials are the trials where truth=hazard and action=PITCH\_FORWARD.
+Table~\ref{tab:ch2_v8_summary} reports the five-temperature comparison.
+The $t=0.2$ convention \cite{yao2022react} was established for iterative ReAct agents where sampling diversity aids multi-step reasoning; single-pass classification has no equivalent justification for non-determinism.
 
 \begin{table}[ht]
-  \caption{V8 temperature sweep (all models combined, 800 trials). $t=0.0$ is best on
-    every metric where a difference exists. Dangerous cases appear only at $t \geq 0.5$
-    (all GPT-4o-mini on \texttt{wall\_close}: higher randomness occasionally reads a
-    featureless wall as clear space).}
+  \caption{Temperature sweep.}
   \label{tab:ch2_v8_summary}
   \centering
   \small
-  \begin{tabular}{ccccc}
+  \begin{tabular}{ccccccc}
     \toprule
-    Temp & RiskAcc & ActSafe & Danger & FlipRate \\
+    Temp & RiskAcc & ActSafe & Danger & DescAcc & RsnAct & FlipRate \\
     \midrule
-    \textbf{0.0} & \textbf{61.3\%} & \textbf{100\%} & \textbf{0} & \textbf{14.1\%} \\
-    0.2          & 59.4\%          & 100\%          & 0          & 21.9\% \\
-    0.5          & 51.6\%          & 98.7\%         & 2          & 30.7\% \\
-    0.8          & 58.1\%          & 98.8\%         & 2          & 20.3\% \\
-    1.0          & 56.6\%          & 99.4\%         & 1          & 32.8\% \\
+    \textbf{0.0} & \textbf{61.3\%} & \textbf{100\%} & \textbf{0} & \textbf{100\%} & \textbf{100\%} & \textbf{14.1\%} \\
+    0.2          & 59.4\%          & 100\%          & 0          & 98.8\%         & 97.5\%         & 21.9\% \\
+    0.5          & 51.6\%          & 98.7\%         & 2          & 98.1\%         & 98.1\%         & 30.7\% \\
+    0.8          & 58.1\%          & 98.8\%         & 2          & 98.8\%         & 95.6\%         & 20.3\% \\
+    1.0          & 56.6\%          & 99.4\%         & 1          & 97.5\%         & 99.4\%         & 32.8\% \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Two findings merit emphasis.
-First, \textbf{reasoning quality is temperature-invariant}: reasoning-risk alignment holds at $\approx$94\% regardless of temperature --- degradation above $t=0.5$ is a \emph{consistency} failure, not a reasoning failure.
-Second, \textbf{Gemini is temperature-stable}: its classification behaviour barely changes from $t=0.0$ to $t=1.0$, with a flip rate of 0\% at $t=0.0$, reinforcing its suitability as the production model.
-The prior $t=0.2$ convention~\cite{yao2022react} is overturned for single-pass safety classification.
+\textbf{Temperature 0.0 is best on every metric where a difference exists.} 
+It achieves the highest risk accuracy (61.3\%), perfect action safety (0 dangerous cases), perfect description accuracy (100\%), perfect reasoning-action alignment (100\% RsnAct), and the lowest label flip rate (14.1\%). 
+Action safety degrades at $t \geq 0.5$: two dangerous cases appear at $t=0.5$ and one at $t=1.0$ all from GPT-4o-mini on the \textsc{wall\_close} scene, where higher sampling randomness occasionally causes the model to read the featureless blank wall as a clear empty space and recommend PITCH\_FORWARD.
 
-\textbf{Decision V8:} $t=0.0$ adopted. V-series complete: structured JSON, \texttt{max\_tokens=256}, 2-frame short history, $t=0.0$.
+Two findings merit emphasis. 
+First, \textbf{reasoning quality is temperature-invariant}: reasoning-risk alignment holds at $\approx$94\% regardless of temperature, confirming that models perceive scenes correctly
+even when they classify inconsistently at high temperatures. 
+The degradation above $t=0.5$ is a \emph{consistency} failure, not a reasoning failure.
+Second, \textbf{Gemini is temperature-stable}, its classification behaviour barely changes from $t=0.0$ to $t=1.0$ (45--50\% risk accuracy throughout), with a flip rate of 0\% at $t=0.0$. 
+This reinforces its suitability as the production model.
+The prior $t=0.2$ convention \cite{yao2022react} is overturned for this single-pass classification use case.
+
+\textbf{Validation:} Temperature $t=0.0$ is adopted as the production default.
+
+
+% ------------------------------------------------------------------
+\subsection{Prompt Technique}
+\label{sec:ch2_v2}
+% ------------------------------------------------------------------
+
+Four prompt techniques are compared: zero-shot (no examples), few-shot-3 (three labelled examples), chain-of-thought at 300~tokens (CoT-300) and a structured JSON format that enforces a fixed output schema.
+Maximum token of 300 set for all the techniques as per the previous validation findings.
+It is noted that CoT-300 results are truncated because of token budget and models couldn't come to conclusion on pilot action.
+So, one more technique framed called chain-of-thought at 600~tokens (CoT-600) by doubling the token budget.
+These 5 techniques are validated for all 4 LLM models, 4 Models, 40 trials for each model and technique correspond to 800 valid trials. 
+Label accuracy (LblAcc) measures how accurately the LLm can classify the scenes.
+Description accuracy (DescAcc) is a reasoning measure exhibit how accurate the LLM reasoning on the scenes.
+Reasoning-risk alignment (RsnRisk) measures the coherence between the LLM reason and the LLM identified risk.
+Reason-action alignment (RsnAct) shows the alignment between the LLM reason and the LLM suggested action.
+Action safety (ActSafe) describes how safe the LLM suggested ction with respect to the scene.
+Danger counts the number of trials where truth = hazard \emph{and} action = PITCH\_FORWARD. 
+All these metrics are presented in Table \ref{tab:ch2_v2_technique}
+It is observed that, the structured format architecturally prevents the most dangerous failure mode: a model that internally assesses a scene as hazard cannot output \texttt{PITCH\_FORWARD}, because the schema checks \texttt{risk\_level} and \texttt{recommended\_action} as separate fields. 
+A contradictory pair is immediately detectable as a parse error.
+
+The experiment runs 800~valid trials across 4~models, 4-5~techniques, 8~scenes, 5~runs; results are shown in
+Table~\ref{tab:ch2_v2_technique} and individual model trials are shown in Figure~\ref{fig:ch2_v2_techniques}.
+
+\begin{table}[ht]
+  \caption{Prompt technique comparison.
+    }
+  \label{tab:ch2_v2_technique}
+  \centering
+  \small
+  \begin{tabular}{lrrrrrrr}
+    \toprule
+    Technique & $N$ & LblAcc\% & DescAcc\% & RsnRisk\% & RsnAct\% & ActSafe\% & Danger \\
+    \midrule
+    Zero-shot       & 160 & 41.9 & 99.4 & 95.6 & 76.9 & 100 & 0 \\
+    Few-shot-3      & 160 & 51.2 & 98.8 & 94.4 & 82.5 & 96.9  & 5 \\
+    CoT-300         & 160 & 18.8 & 97.5 & 97.5 & 32.5 & 100 & 0 \\
+    CoT-600         & 160 & 46.8 & 98.8 & 98.8 & 90.0 & 98.8 & 0 \\
+    Structured JSON & 160 & 56.2 & 99.4 & 99.4 & 89.4 & 100 & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{Thesis Figures/V2_fig_1.pdf}
+\vspace{10pt}
+  \caption{Prompt technique comparison.}
+
+  \label{fig:ch2_v2_techniques}
+\end{figure}
+
+CoT-300 has 67\% truncation rate (reasoning fills the budget before the conclusion is written), has near-zero accuracy due to token truncation. 
+It achieves 100\% Action Safety (ActSafe) by silence. 67\% of trials are truncated before the action line is reached, producing no recommendation rather than a correct one.
+CoT-600 rerun reduces truncation to 2.5\% resolves the accuracy issue but doubles API latency and cost as shown in Figure \ref{fig:ch2_v2_latency}. 
+GPT-4o model is an exception as its output tokens are same in both CoT-300 and CoT-600.
+The GPT-4o model handles tokens gracefully and can reason in 220 tokens so cost is not increased but still latency is higher than other techniques.
+GPT-4o-mini model cost difference seems no change not because CoT-300 and CoT-600 has same tokens, but mini model's cost is very less that 300 tokens doesn't add much to the cost analysis. 
+Truncation affects GPT-4o-mini as well in CoT-300 and does fixed by CoT-600 with the cost of latency as shown in Figure \ref{fig:ch2_v2_latency}.
+The structured JSON format achieves the highest label accuracy (56.6\%) and zero dangerous cases in 160~trials, making it the dominant technique on both primary metrics. 
+Reason-action alignment is guaranteed architecturally by the
+schema: all 160 structured responses have \texttt{risk\_level} and
+\texttt{recommended\_action} in separate parsed fields, making contradiction immediately detectable. 
+Few-shot-3 produces five dangerous cases, all from a Gemini run on \texttt{wall\_close} where the few-shot examples biased the model toward a ``safe corridor'' interpretation.
+\vspace{10pt}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth,height=0.4\textheight,keepaspectratio]{Thesis Figures/V2 — fig_2 Cost and Latency Analysis.pdf}
+\vspace{10pt}
+  \caption{Model Cost and Latency Analysis.}
+  \label{fig:ch2_v2_latency}
+\end{figure}
+
+\textbf{Validation:} Structured JSON prompt is adopted for all subsequent experiments. 
+This validates that a low-resolution image can be reliably classified with zero dangerous cases when the output format enforces schema consistency.
+
+% ------------------------------------------------------------------
+
+\subsection{Scene Context History}
+\label{sec:ch2_v7}
+% ------------------------------------------------------------------
+
+A stateless LLM call, receiving only the current frame treats each frame independently. Providing a short description of the last two frames (``short history'') or all prior frames in a session (``full history'') as additional prompt context allows the model to detect scene changes and maintain temporal consistency. 
+V7 tests three history modes across 300~trials, 3~modes $\times$ 4~models $\times$ 5~sequences $\times$ 5~frames.
+Risk accuracy (RiskAcc) is whether the LLM correctly labeled a scene as safe, caution, or hazard. 
+Change detection rate (ChgDetect) is whether it recognised a scene transition between frames. 
+Input token overhead is the extra prompt length from including prior frame descriptions.
+These are measured across all models in around 300 trials and are presented in Table \ref{tab:ch2_v7_summary}.
+
+\begin{table}[ht]
+  \caption{Scene context history.}
+  \label{tab:ch2_v7_summary}
+  \centering
+  \small
+  \begin{tabular}{lrrrrrc}
+    \toprule
+    Mode & RiskAcc & ChgDetect & ActSafe & Danger & Extra input tok. & Cost/call \\
+    \midrule
+    Stateless      & 43.0\% & 65.0\% & \textbf{100\%} & \textbf{0} & --- & \$0.00245 \\
+    \textbf{Short (2 frames)} & \textbf{59.2\%} & \textbf{67.5\%} & \textbf{100\%} & \textbf{0} & $+$38 & \textbf{\$0.00244} \\
+    Full (all frames) & 50.5\% & 56.4\% & \textbf{100\%} & \textbf{0} & $+$59 & \$0.00244 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.92\textwidth]{figures/fig2_11_v8_temperature.pdf}
-  \caption{V8: risk accuracy (left) and flip rate (right) vs temperature per model.
-    Gemini (purple) is perfectly stable at $t=0.0$ (0\% flip rate). GPT-4o-mini peaks
-    at $t=0.0$ (77.5\% accuracy) but reaches 46.9\% flip rate at $t=0.5$.
-    Data from Table~\ref{tab:ch2_v8_summary}.}
-  \label{fig:ch2_v8_sweep}
+  \includegraphics[width=\textwidth]{Thesis Figures/V7 — fig_3 Context History Mode Comparison.pdf}
+  \caption{Context history analysis on each model.
+  Data from Tables~\ref{tab:ch2_v7_summary} and~\ref{tab:ch2_v7_models}.}
+  \label{fig:ch2_v7}
 \end{figure}
 
+Short history (2 frames) achieves the highest risk accuracy for three of four models at negligible token overhead.
+The GPT-4o-mini stateless result (4\%), nearly random on a 3-class problem demonstrates that stateless operation is model-fragile in smaller models. All modes achieve 100\% action safety and 100\% description accuracy (Figure \ref{fig:ch2_v7}).
+
+In combined analysis, short history improves overall risk accuracy by +16.2~percentage points over stateless (43.0\%~$\to$~59.2\%) at the cost of 38~additional input tokens approximately one sentence of overhead. 
+Full history underperforms because the two identical ``safe'' frames at sequence start dilute the transition signal when
+a hazard enters the scene. 
+All three history modes achieve 100\% action safety
+and zero dangerous recommendations, confirming that the safety property of the structured prompt is robust to history mode.
+
+The system exhibits an architecturally desirable asymmetry: hazard \emph{onset} is detected 100\% of the time by all models; hazard \emph{clearance} (person departing) is detected in only 26.7\% of cases. 
+Models continue to assess the complex indoor lab environment as caution or hazard even after the person leaves.
+This is the correct conservative failure mode for a drone safety copilot.
+The system over-lingers in HOVER rather than prematurely resuming forward flight.
+
+\textbf{Validation:} Short history (two frames) is adopted as the production context mode.
+This completes the validation series LLM parameter optimisation: structured JSON prompt, \texttt{max\_tokens=256}, 2-frame short context history, and temperature $t=0.0$.
 
 % ==================================================================
-\section{Integration Experiments (G Series)}
+\section{Proof of the Layered Architecture}
 \label{sec:ch2_gseries}
 % ==================================================================
 
-With LLM call parameters established, the G-series experiments build and evaluate the full layered pipeline.
-G4 proves the timescale separation is physically necessary; G1 proves each tier is irreplaceable; G2 proves hybrid triggering closes the scheduling gap; G5 measures full-pipeline safety at production settings.
+With LLM call parameters established, the integration series experiments build and evaluate the full layered pipeline. 
+Each experiment contributes one piece of architectural evidence, four-tier timescale justification proves the timescale separation is real and necessary; Tier isolation proves each tier makes an irreplaceable contribution; Hybrid trigger proves
+the hybrid trigger improves hazard timing; and Full pipeline run proves the integrated system achieves high action safety at a practical cost.
 
 % ------------------------------------------------------------------
-\subsection{G4 --- Four-Tier Timescale Justification}
+\subsection{Four-Tier Timescale Justification}
 \label{sec:ch2_g4}
 % ------------------------------------------------------------------
 
-G4 measures all tier latencies empirically across 5~runs and 160~LLM calls.
+The claim that four tiers are necessary requires that adjacent tiers differ sufficiently in latency that they cannot collapse into each other. 
+This experiment measures all tier latencies empirically on the same hardware across five independent runs and 160~LLM calls.
+The mean latency and relevant frequency for each tier is shown in Table \ref{tab:ch2_g4}.
 
 \begin{table}[ht]
-  \caption{G4 measured latency per tier (mean, 5 runs on the same companion laptop).
-    Four tiers span four orders of magnitude. Running Tier~3 at Tier~2 frequency
-    (3--4~Hz) would cost \$20--\$1,000/minute with no safety benefit --- the LLM
-    cannot physically process a frame faster than its 2--7~s latency allows.
-    Scheduled cognitive-tier polling is the only viable operational model.}
+  \caption{Latency per tier. }
   \label{tab:ch2_g4}
   \centering
   \small
-  \begin{tabular}{llrrl}
+  \begin{tabular}{llrrrl}
     \toprule
     Tier & Component & Mean latency & Freq.\ (approx.) & API cost \\
     \midrule
-    1   & PID controller               & 0.001~ms  & 4,000~Hz    & None \\
-    1.5 & MediaPipe EfficientDet-Lite0 & 16.2~ms   & $\sim$60~Hz & None \\
-    2   & YOLO-World + DA~v2           & 274.5~ms  & $\sim$4~Hz  & None \\
-    3   & Gemini                       & 2,333~ms  & $\sim$0.4~Hz & Per call \\
-    3   & GPT-4o                       & 2,627~ms  & $\sim$0.4~Hz & Per call \\
-    3   & GPT-4o-mini                  & 4,333~ms  & $\sim$0.2~Hz & Per call \\
-    3   & Claude (Sonnet)              & 7,218~ms  & $\sim$0.1~Hz & Per call \\
+    1   & PID controller                & \textbf{0.5~ms}    & 2,000~Hz & None \\
+    1.5 & MediaPipe EfficientDet-Lite0  & \textbf{16.2~ms}          & $\sim$60~Hz & None \\
+    2   & YOLO-World + DA~v2            & \textbf{274.5~ms}       & $\sim$4~Hz  & None \\
+    3   & Gemini                        & \textbf{2,333~ms}   & $\sim$0.4~Hz & Per call \\
+    3   & GPT-4o                        & \textbf{2,627~ms} & $\sim$0.4~Hz & Per call \\
+    3   & GPT-4o-mini                   & \textbf{4,333~ms}   & $\sim$0.2~Hz & Per call \\
+    3   & Claude (Sonnet)               & \textbf{7,218~ms}  & $\sim$0.1~Hz & Per call \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig2_6_g4_latency_cascade.pdf}
-  \caption{G4: four-tier timescale cascade ($\log_{10}$ scale). The separation spans four
-    orders of magnitude from PID (0.001~ms) to the slowest LLM (7,218~ms for Claude).
-    Key ratios: MediaPipe/PID $= \times$16,200; YOLO/MediaPipe $= \times$16.9;
-    Gemini/YOLO $= \times$8.5; Claude/YOLO $= \times$26.3.
-    Data from Table~\ref{tab:ch2_g4}.}
+  \includegraphics[width=\textwidth]{Thesis Figures/G4 — fig_4 Latency Analysis.pdf}
+  \caption{Latency Analysis}
   \label{fig:ch2_g4}
 \end{figure}
 
+Four tiers span four orders of magnitude, PID operates at 32 times the rate of MediaPipe, which operates at 16 times the rate of YOLO-World, which operates at 8-26 times the rate of each LLM (Figure \ref{fig:ch2_g4} (b)).
+Collapsing any two adjacent tiers would either introduce API latency on a safety-critical layer or impose prohibitive cost on a high-frequency layer.
+The four-tier architecture is cost-justified as running Tier~3 at Tier~2's frequency (3--4~Hz instead of 0.1--0.4~Hz) would increase Gemini API cost by $\sim$10$\times$ per minute and Claude API cost by $\sim$100$\times$, with no safety benefit, since the LLM cannot physically process a frame faster than its 2--7~second request-response time.
+For each model, 40 API calls were made under identical conditions and the 95\% confidence interval was computed as $\bar{x} \pm 1.96 \cdot \frac{\sigma}{\sqrt{n}}$, where $\sigma$ is the sample standard deviation and $n = 40$. Non-overlapping confidence intervals between Claude and Gemini confirm that the observed 3.1$\times$ latency difference is statistically significant and not attributable to sampling variability (Figure \ref{fig:ch2_g4} (b)).
+This clarifies making scheduled cognitive-tier is the viable operational solution and implies timescale separation between each is a hard physical constraint, not a design choice.
+
 % ------------------------------------------------------------------
-\subsection{G1 --- Tier Isolation: Irreplaceable Contributions}
+\subsection{Tier Isolation: Irreplaceable Contributions}
 \label{sec:ch2_g1}
 % ------------------------------------------------------------------
 
-G1 tests four isolated conditions to determine whether any tier can be removed without degrading action safety.
-8~scenes $\times$ 5~runs per condition.
-
-\begin{table}[ht]
-  \caption{G1 tier isolation: action safety per condition (40 trials per row).
-    Tier~2-alone dangerous cases are exclusively \texttt{blocked\_lens} (YOLO sees zero
-    objects; rule engine returns ``safe'').  All LLM conditions produce zero dangerous
-    cases on \texttt{blocked\_lens} --- LLMs recognise darkness and occlusion directly
-    from image pixels.}
-  \label{tab:ch2_g1}
-  \centering
-  \small
-  \begin{tabular}{llrrl}
-    \toprule
-    Condition & Model & ActSafe & Dangerous & Key failure \\
-    \midrule
-    Tier~1.5 only  & Rule-based  & \textbf{100\%} & 0 & Nuance only \\
-    Tier~2 only    & Rule-based  & 87.5\%         & 5 & \texttt{blocked\_lens} \\
-    Tier~3 only    & GPT-4o      & \textbf{100\%} & 0 & --- \\
-    Tier~3 only    & Gemini      & \textbf{100\%} & 0 & --- \\
-    Tier~3 only    & Claude      & \textbf{100\%} & 0 & --- \\
-    Tier~3 only    & GPT-4o-mini & 87.5\%         & 5 & \texttt{wall\_close} w/o depth \\
-    Full pipeline  & Gemini      & \textbf{100\%} & 0 & --- \\
-    Full pipeline  & GPT-4o      & 95.0\%         & 2 & DA~v2 depth anchor \\
-    Full pipeline  & Claude      & 97.4\%         & 1 & DA~v2 depth anchor \\
-    Full pipeline  & GPT-4o-mini & 97.5\%         & 1 & \texttt{wall\_close} depth \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-Three findings establish irreplaceability:
-\begin{enumerate}
-  \item \textbf{Tier~1.5 is irreplaceable for latency.} MediaPipe achieves 100\% action safety at 15~ms with zero API cost.
-  \item \textbf{Tier~2 is irreplaceable for metric depth.} GPT-4o-mini without depth metadata produces 5/5 dangerous recommendations on \texttt{wall\_close}; with depth metadata, this drops to 1/5~\cite{persondetectionuav2025}.
-  \item \textbf{Tier~3 is irreplaceable for sensor-failure detection.} All LLMs produce zero dangerous cases on \texttt{blocked\_lens}; Tier~2-alone produces 5/5 dangerous.
-\end{enumerate}
+This experiment tests four isolated conditions, Tier~1.5 alone (rule-based MediaPipe), Tier~2 alone (rule-based YOLO + DepthAnything~v2), Tier~3 alone (LLM with image, no metadata), and the full combined pipeline in order to determine whether any tier can be removed without degrading action safety. 
+The experiment runs 8~scenes $\times$ 5~runs per condition.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig2_7_g1_tier_isolation.pdf}
-  \caption{G1: dangerous case heatmap (rows = 8 scenes, columns = conditions). White cells
-    = 0 dangerous. \texttt{Blocked\_lens} danger exclusive to Tier~2-alone. \texttt{Wall\_close}
-    danger appears only in the full pipeline due to DA~v2 reporting 2.09~m for a wall at 20~cm.
-    Gemini (full pipeline) is the only model with zero dangerous cases in every condition.}
+  \includegraphics[width=\textwidth]{Thesis Figures/G1 — fig_5 Tier Comparison.pdf}
+  \caption{Tier isolation.}
   \label{fig:ch2_g1}
 \end{figure}
 
+The action safety is calculated for each condition (40~trials per condition).
+The dangerous cases provided by 'Tier~2-alone' condition are exclusively for \texttt{blocked\_lens} frames.
+YOLO sees zero objects in a covered frame and the rule engine returns ``safe''. 
+Whereas all LLM conditions produce zero dangerous cases on \texttt{blocked\_lens} because LLMs recognise occluded or dark frames directly from image pixels (Figure \ref{fig:ch2_g1}). 
+The full-pipeline dangerous cases trace to DepthAnything~v2 reporting 2.09~m for a wall at 20~cm.
+This is because the depth is estimated by a monocular camera with DepthAnything~v2 and LLMs trust it as ground truth.
+Adding a ToF sensor to measure scalar distance and keeping it as ground truth for LLM can potentially fix this problem.
+Gemini (full pipeline) is the only model with zero dangerous cases in every condition.
+    
+Three findings establish irreplaceability:
+
+\begin{enumerate}
+  \item \textbf{Tier~1.5 is irreplaceable for latency.} MediaPipe achieves 100\% action safety at 15~ms with zero API cost, providing the only real-time emergency layer that cannot block on a network call.
+  \item \textbf{Tier~2 is irreplaceable for providing metadata and metric depth to LLM.} GPT-4o-mini without depth metadata produces 5/5 dangerous recommendations on \texttt{wall\_close} (cannot distinguish a featureless grey wall at 20~cm from clear space at 320$\times$240) with depth metadata, this drops to 1/5. 
+  Tier~2 provides the quantitative grounding that weak visual models need. 
+  \item \textbf{Tier~3 is irreplaceable for semantic description and sensor-failure detection.} All four LLMs produce zero dangerous recommendations on \texttt{blocked\_lens} in every condition because they recognise darkness and occlusion directly from image pixels.
+  Tier~2-alone produces 5/5 dangerous actions on this scene. 
+  No rule-based system can detect that its own sensor has been compromised.
+  Also LLMs are needed to verbalise the scene more than just obstacle or feature detection, as cognitive intelligence is the prime focus here than rule based navigation.
+\end{enumerate}
+
 % ------------------------------------------------------------------
-\subsection{G2 --- Hybrid Trigger: Closing the Scheduling Gap}
+\subsection{Hybrid Trigger: Closing the Scheduling Gap}
 \label{sec:ch2_g2}
 % ------------------------------------------------------------------
 
-A fixed-schedule LLM poll detects a hazard only at the next scheduled tick --- potentially frames after the event.
-G2 compares scheduled-only vs.\ hybrid (MediaPipe fires an immediate LLM call on person detection) across 40~sequences.
+A fixed-schedule LLM poll (e.g., once every 2--3~seconds) detects a person entering the flight path only at the next schedule potentially 500~ms or more after the event. 
+A hybrid strategy fires an additional LLM call immediately when MediaPipe detects an emergency, bridging the interval between scheduled calls. 
+This experiment compares scheduled-only versus hybrid in 40~sequences. 
+The experiment is framed as an LLM schedule every 5 frames, and an emergency frame is introduced at frame~3. 
+This is done across 40 different sequences and verified when the LLM detects the emergency frame (by frame~3 or frame~6) as shown in Figure \ref{fig:ch2_g2} (a).
 
 \begin{table}[ht]
-  \caption{G2 trigger strategy: both strategies achieve 100\% hazard catch rate; the
-    difference is \emph{timing}. Hybrid detects at the exact frame of entry (0 frames
-    late) vs.\ 3 frames late for scheduled-only.
-    Cost premium for hybrid: $+$\$0.00012/hazard event (Gemini).}
+  \caption{Trigger strategy: hazard detection timing, LLM call count per
+    sequence, and cost.}
   \label{tab:ch2_g2}
   \centering
   \small
@@ -507,159 +619,285 @@ G2 compares scheduled-only vs.\ hybrid (MediaPipe fires an immediate LLM call on
     \toprule
     Strategy & Model & Catch rate & Frames late & LLM calls/seq & Cost/seq \\
     \midrule
-    Scheduled       & Claude      & 100\% & 3.0 & 2 & \$0.01265 \\
-    Scheduled       & Gemini      & 100\% & 3.0 & 2 & \$0.00024 \\
+    Scheduled & Claude       & 100\% & 3.0 & 2 & \$0.01265 \\
+    Scheduled & GPT-4o       & 100\% & 3.0 & 2 & \$0.01050 \\
+    Scheduled & GPT-4o-mini  & 100\% & 3.0 & 2 & \$0.00119 \\
+    Scheduled & Gemini       & 100\% & 3.0 & 2 & \$0.00024 \\
+    \midrule
     \textbf{Hybrid} & Claude      & \textbf{100\%} & \textbf{0.0} & 3 & \$0.01800 \\
+    \textbf{Hybrid} & GPT-4o      & \textbf{100\%} & \textbf{0.0} & 3 & \$0.01571 \\
+    \textbf{Hybrid} & GPT-4o-mini & \textbf{100\%} & \textbf{0.0} & 3 & \$0.00180 \\
     \textbf{Hybrid} & Gemini      & \textbf{100\%} & \textbf{0.0} & 3 & \textbf{\$0.00036} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-At 0.5~m/s indoor cruise speed, 3~frames correspond to $\sim$5~cm of additional approach travel.
-In run~02, YOLO-World misclassified a kneeling person as a structural wall (conf~0.25); MediaPipe correctly identified the person at conf~0.391 and triggered the LLM at frame~3.
-Gemini's response explicitly noted: \emph{``my visual analysis confirms they are much closer than the YOLO detection suggested''} --- demonstrating active sensor disagreement resolution.
-MediaPipe must serve as the interrupt source, not YOLO-World.
-
-\textbf{Hybrid triggering with MediaPipe as the interrupt source adopted for all subsequent G-series experiments.}
-
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/fig2_8_g2_trigger_timeline.pdf}
-  \caption{G2: detection timeline for a 10-frame sequence (person enters at frame~3).
-    Scheduled: detected at frame~6 (3 frames late). Hybrid: detected at frame~3 (entry frame).
-    Data from Table~\ref{tab:ch2_g2}.}
+  \includegraphics[width=0.9\textwidth]{Thesis Figures/G2 — fig_6 Detection Strategy Analysis.pdf}
+  \caption{Trigger strategy: Scheduled Vs Hybrid.}
   \label{fig:ch2_g2}
 \end{figure}
 
+Both strategies achieve 100\% hazard catch rate, the critical difference is when the hazard is caught. 
+The scheduled strategy always detects 3~frames late (one LLM polling interval).
+The hybrid strategy detects at the exact entry frame as shown in Table \ref{tab:ch2_g2} and in Figure \ref{fig:ch2_g2} (b). 
+An indoor drone cruising at the speed of 0.5~m / s, 3~frames correspond to ~$\sim$5~cm of additional approach travel. 
+This will be catastrophic in real time as the camera stream at 30 frames per second and LLM schedule can vary from 3-10 seconds depends on the model.
+In run~02, YOLO-World misclassified the kneeling person as a structural wall with confidence~0.25, so MediaPipe must serve as the trigger source, not YOLO-World. 
+MediaPipe EfficientDet-Lite0 correctly identified the person at confidence~0.391 and triggered the LLM at frame~3. 
+Gemini's response is explicitly noted: \emph{``my visual analysis confirms they are much closer than the YOLO detection suggested''} this is demonstrating active sensor disagreement resolution at Tier~3. 
+This proves cognitive tier has atmost dominance in making decision and the lower tiers are purely for providing metadata to the cognitive tier.
+The hybrid strategy adds one extra LLM call per hazard event at a cost of +\$0.00012/event (Gemini) approximately one-hundredth of a cent. The MediaPipe trigger itself carries zero API cost (Figure \ref{fig:ch2_g2} (c)).
+\textbf{Hybrid triggering with MediaPipe as the interrupt source is adopted for all subsequent experiments.}
+
 % ------------------------------------------------------------------
-\subsection{G5 --- Full Pipeline: Action Safety and Production Cost}
+\subsection{Full Pipeline: Action Safety and Production Cost}
 \label{sec:ch2_g5}
 % ------------------------------------------------------------------
 
-The full four-tier pipeline (structured JSON, \texttt{max\_tokens=256}, 2-frame history, no CLIP, $t=0.0$, hybrid trigger) evaluated across 157~valid trials (3~API errors excluded).
+The full four-tier pipeline with structured JSON, token budget as 300, 2-frame short history, no CLIP, hybrid trigger is evaluated on all eight scenes acrossn157~valid trials, 3~API errors excluded from the planned 160~trials.
+Label accuracy is the secondary metric; it penalizes conservative over-caution like labeling as hazard on a caution scene and genuine failure equally.
+Action safety is the primary metric; its over-caution always produces HOVER, so it is not counted as a failure.
+\textsuperscript{a}GPT-4o mean inflated by one timeout-and-retry; typical production latency $\approx$2,600~ms (Table \ref{tab:ch2_g5_models}).
 
 \begin{table}[ht]
-  \caption{G5 full pipeline per-model results (157 trials). GPT-4o-mini and Gemini reach
-    100\% action safety. GPT-4o's dangerous cases (8.0\%) all come from \texttt{wall\_close}:
-    DepthAnything~v2 reports 2.09~m for a wall at 20~cm, and GPT-4o anchors its visual
-    assessment to this incorrect reading rather than the texture-fill evidence.
-    \textsuperscript{a}GPT-4o mean latency inflated by one timeout-and-retry.}
+  \caption{G5 full pipeline per-model results (157~evaluated trials).}
   \label{tab:ch2_g5_models}
   \centering
   \small
-  \begin{tabular}{lrrrr}
+  \begin{tabular}{lrrrrr}
     \toprule
-    Model & $N$ & Label Acc & Action Safety & Dangerous \\
+    Model & $N$ & Label Acc & Action Safety & Dangerous (\%) & Latency \\
     \midrule
-    Claude              & 37  & 54.0\% & 97.0\%         & 0\% \\
-    GPT-4o              & 40  & 52.0\% & 92.5\%         & 8.0\% \\
-    \textbf{GPT-4o-mini}& 40  & \textbf{80.0\%} & \textbf{100\%} & \textbf{0\%} \\
-    \textbf{Gemini}     & 40  & 50.0\% & \textbf{100\%} & \textbf{0\%} \\
+    Claude           & 37 & 54.0\% & 97.0\%         & 0\%   & 7,777~ms \\
+    GPT-4o           & 40 & 52.0\% & 92.5\%         & 8.0\% & $\sim$2,910~ms\textsuperscript{a} \\
+    \textbf{GPT-4o-mini} & 40 & \textbf{80.0\%} & \textbf{100\%} & \textbf{0\%} & 4,196~ms \\
+    \textbf{Gemini}  & 40 & 50.0\% & \textbf{100\%} & \textbf{0\%} & \textbf{2,554~ms} \\
     \midrule
-    \textbf{Overall}    & \textbf{157} & \textbf{59.2\%} & \textbf{97.5\%} & 1.9\% \\
+    \textbf{Overall} & \textbf{157} & \textbf{59.2\%} & \textbf{97.5\%} & \textbf{1.9\%} & --- \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[ht]
-  \caption{G5 reasoning quality per model. All four models achieve 100\% reason-action
-    alignment (RAA): no model states a hazard classification and recommends PITCH\_FORWARD.
-    GPT-4o's three dangerous cases follow the logically valid chain: wrong perception
-    $\to$ correct reasoning from that wrong input $\to$ correct action for the wrong
-    assessment. The failure is visual perception, not internal reasoning.}
-  \label{tab:ch2_g5_reasoning}
+  \caption{Per-scene action safety (all models combined, 157~trials).}
+  \label{tab:ch2_g5_scenes}
   \centering
   \small
-  \begin{tabular}{lrrrr}
+  \begin{tabular}{llrrrl}
     \toprule
-    Model & Desc Acc & Rsn-Risk & Rsn-Act & Act Safe \\
+    Scene & Truth & Label Acc & Action Safety & Dangerous & Dominant pattern \\
     \midrule
-    Claude          & 75.7\% & 94.4\%         & \textbf{100\%} & \textbf{100\%} \\
-    GPT-4o          & 87.5\% & \textbf{100\%} & \textbf{100\%} & 92.5\% \\
-    GPT-4o-mini     & 92.5\% & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} \\
-    \textbf{Gemini} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} \\
+    \texttt{person\_near}  & hazard  & 95\% & \textbf{100\%} & 0\% & Near-perfect detection \\
+    \texttt{blocked\_lens} & hazard  & 75\% & 95\%           & 0\% & 25\% label as caution $\to$ HOVER \\
+    \textbf{wall\_close}   & hazard  & 80\% & \textbf{85\%}  & 15\% & GPT-4o DA~v2 depth anchor \\
+    \texttt{door\_open}    & safe    & 75\% & \textbf{100\%} & 0\% & 25\% over-cautious $\to$ HOVER \\
+    \texttt{dim\_light}    & caution & 50\% & \textbf{100\%} & 0\% & 50\% label hazard $\to$ HOVER \\
+    \texttt{object\_table} & caution & 50\% & \textbf{100\%} & 0\% & LLM sees laptop as path-blocking \\
+    \texttt{cluttered}     & caution & 35\% & \textbf{100\%} & 0\% & Mostly hazard $\to$ HOVER \\
+    \texttt{person\_far}   & caution & 11\% & \textbf{100\%} & 0\% & 89\% say hazard $\to$ HOVER \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The dominant non-ideal behaviour is conservative over-caution: 26\% of trials assign a hazard/caution label to a safer scene, producing an unnecessary HOVER.
-This is the architecturally desirable failure mode for a safety copilot: the drone is inconvenienced but never advances into an obstacle.
-Only 3/157 (1.9\%) are genuinely dangerous, all from GPT-4o on \texttt{wall\_close}.
-A sensor-reliability metadata flag reduced dangerous cases by 70\% between G5 run~1 and run~2 (10~$\to$~3), confirming the LLM can override erroneous hardware readings when given explicit reliability information.
-
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/fig2_9_g5_scene_heatmap.pdf}
-  \caption{G5: action safety heatmap (rows = 8 scenes, columns = 4 models).
-    Only \texttt{wall\_close}/GPT-4o is non-white (3/5 dangerous, 60\%).
-    All other 31 cells are 100\% safe. Gemini and GPT-4o-mini form entirely white columns.
-    Data from Tables~\ref{tab:ch2_g5_models} and~\ref{tab:ch2_g5_reasoning}.}
+  \includegraphics[width=\textwidth]{Thesis Figures/G5 — fig_7 Real Vision Pipeline Analysis.pdf}
+  \caption{Full pipeline analysis}
   \label{fig:ch2_g5_heatmap}
 \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2_10_g5_label_vs_safety.pdf}
-  \caption{G5: label accuracy vs action safety per model. Over-caution errors produce
-    HOVER (safe), not dangerous advances. GPT-4o's 3 dangerous cases are the only genuine
-    failures. Action safety is the correct primary metric for a drone safety system.
-    Data from Table~\ref{tab:ch2_g5_models}.}
-  \label{fig:ch2_g5_label_safety}
-\end{figure}
+In the combined model results, seven of eight scenes achieve 100\% action safety. Over-caution (hazard label on a caution or safe scene) always produces HOVER, which is the safe conservative action. 
+Only \texttt{wall\_close} produces genuinely dangerous recommendations, exclusively from GPT-4o anchoring to DepthAnything~v2's error 2.09~m depth reading (Table \ref{tab:ch2_g5_reasoning}).
+This is model behavior observed on GPT 4o that rely on DepthAnything~v2's metadata even after analysing the image.
 
-\textbf{Production model: Gemini 2.5-Flash}~\cite{reid2024gemini} --- 100\% action safety, 2,554~ms latency, \$0.17/hour at 0.4~Hz continuous operation (52$\times$ cheaper than Claude per hour at the same rate).
+In the Label accuracy vs.\ action safety per model. Label accuracy penalises over-caution.
+GPT-4o-mini labels correctly 80\% of the time yet achieves 100\% action safety because its errors are conservative HOVERs, not dangerous advances. 
+GPT-4o has 52\% label accuracy and 92.5\% action safety because 3 of its errors are genuinely dangerous (PITCH\_FORWARD on \texttt{wall\_close}). 
+Action safety is the correct primary metric for a drone safety system (Figure \ref{fig:ch2_g5_heatmap} (a)).
+
+The full pipeline achieves \textbf{97.5\% overall action safety}.
+Gemini and GPT-4o-mini achieve \textbf{100\%}. 
+The dominant non-ideal behaviour is conservative over-caution: 41/157~trials (26\%) assign a hazard or caution label to a scene whose ground truth is caution or safe, resulting in an
+unnecessary HOVER. 
+This is the architecturally desirable failure mode for a
+drone safety system as the pilot may be inconvenienced, but the drone never advances into an obstacle.
+Only 3/157~trials (1.9\%) produce truly dangerous recommendations. 
+All three come from GPT-4o on \texttt{wall\_close}: DepthAnything~v2 reports 2.09~m for a wall at 20~cm, and GPT-4o anchors its visual assessment to this incorrect reading rather than the texture-fill evidence (Table \ref{tab:ch2_g5_models}).
+
+A sensor-reliability metadata flag (``depth reading inconsistent with visual wall-fill signature'') reduced dangerous cases by 79\% between run~1 and run~2 (14~$\to$~3), confirming that the LLM can override erroneous hardware readings when given
+explicit reliability information.
+It is important to note that even after the sensor metadata flag, GPT-4o still grounded to sensor data errors 3/5 times.
+This strongly emphasizes the GPT-4o model behavior of grounding to a reliable number as ground truth even after a prompt fix.
+It is also important to note that Gemini was 100\% error free before and after the sensor metadata flag.
+The Gemini response before the fix across the \texttt{wall\_close} frame runs (\emph{The image shows a uniformly light gray surface, likely a wall, filling the entire frame, and there are no discernible features or objects... Visually, the wall appears to be very close, filling the entire field of view. The depth\_m of 2.09m seems inconsistent with the visual evidence... Risk: hazard. Action: HOVER}) explicitly exhibits the robustness of the model on metadata error.
+Gemini clearly relies on its own inference from the image rather than the metadata of the lower tier (Figure \ref{fig:ch2_g5_heatmap} (c)).
+
+The action safety heatmap after sensor fix shows trials of 8~scenes; across 4~models for 5 runs.
+Where green is 100\% safe, yellow is cautious case and red is $\geq$3 dangerous.
+Only the \texttt{wall\_close} of the GPT-4o cell is red (3/5 dangerous, 60\%).
+All other 31 cells are 100\% safe. 
+Gemini and GPT-4o-mini produce zero dangerous recommendations in all scenes (Figure \ref{fig:ch2_g5_heatmap} (b)).
+The Action safety before and after fix is clearly increased and is 100\% in 3/4 models, proving the sensor metadata flag must be to let the LLM dominate the tiers and debate the metadata rather than accepting them as is (Figure \ref{fig:ch2_g5_heatmap} (d)).
+
+\subsubsection{Reasoning Quality Assessment}
+\label{sec:ch2_g5_reasoning}
+
+Four-dimensional reasoning analysis (description accuracy, reasoning-risk alignment, reason-action alignment, action safety) reveals that the cognitive chain is internally sound at every stage.
+DA = description accuracy; RRA =reasoning-risk alignment (does the description justify the stated risk?); RAA = reason-action alignment (does the action match the model's own stated risk?); AS = action safety. 
+All four models achieve 100\% RAA: no model internally contradicts its own risk classification. 
+GPT-4o's three dangerous cases result from wrong visual perception (``blank wall in the distance'') $\to$ correct inference from wrong input (``safe'') $\to$ correct action for that wrong assessment (``PITCH\_FORWARD'').
+
+\begin{table}[ht]
+  \caption{Reasoning quality per model.}
+  \label{tab:ch2_g5_reasoning}
+  \centering
+  \small
+  \begin{tabular}{lrrrrc}
+    \toprule
+    Model & Desc Acc (DA) & Rsn-Risk (RRA) & Rsn-Act (RAA) & Act Safe (AS) & $N$ \\
+    \midrule
+    Claude       & 75.7\% & 94.4\%         & \textbf{100\%} & \textbf{100\%} & 37 \\
+    GPT-4o       & 87.5\% & \textbf{100\%} & \textbf{100\%} & 92.5\%         & 40 \\
+    GPT-4o-mini  & 92.5\% & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & 40 \\
+    \textbf{Gemini} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & \textbf{100\%} & 40 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+All four LLMs achieve \textbf{100\% reason-action alignment} (Table~\ref{tab:ch2_g5_reasoning}). 
+No model states a hazard classification and recommends PITCH\_FORWARD.
+The three GPT-4o dangerous cases follow the logically valid chain: wrong perception $\to$ correct reasoning from that wrong perception $\to$ internally consistent but dangerous action. 
+The reasoning chain is sound; the failure is an input perception error. 
+Gemini achieves 100\% on all four reasoning dimensions simultaneously, producing perfect squares on a radar chart of the reasoning quality axes. 
+Cost/call derived from per-sequence cost $\div$ 2~scheduled calls. 
+Cost/hour approximated at 0.4~Hz scheduled LLM rate.
+
+\subsubsection{Production Model Selection and Cost}
+\label{sec:ch2_g5_cost}
+
+\begin{table}[ht]
+  \caption{Production model selection: cost, latency, and safety across integration experiment series.}
+  \label{tab:ch2_model_select}
+  \centering
+  \small
+  \begin{tabular}{lrrrrrr}
+    \toprule
+    Model & Latency & Cost/call & Cost/hour & G5 ActSafe & G1 danger & Decision \\
+    \midrule
+    \textbf{Gemini} & \textbf{2,554~ms} & \textbf{\$0.00012} & \textbf{\$0.17} & \textbf{100\%} & \textbf{0/40} & \textbf{\checkmark~Production} \\
+    GPT-4o-mini   & 4,196~ms & \$0.00060 & \$0.86  & \textbf{100\%} & 1/40 & \checkmark~Backup \\
+    GPT-4o        & 2,910~ms & \$0.00525 & \$7.60  & 92.5\%         & 2/40 & --- \\
+    Claude        & 7,777~ms & \$0.00633 & \$9.12  & 97.0\%         & 1/40 & $\times$~(latency, cost) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Gemini is recommended as the production deployment model.
+It achieves zero dangerous recommendations in every integration series conditions and has the lowest pipeline latency (2,554~ms end-to-end), and is the most cost effective model at approximately \$0.17/hour for continuous drone operation at 0.4~Hz. 
+Claude is excluded from production on latency grounds (7,777~ms end-to-end, $3\times$ slower than Gemini) with no safety advantage.
 
 
 % ==================================================================
-\section{Hardware Validation --- Live Flight (H5)}
+\section{Hardware Validation --- Live Flight Verbalization (H5)}
 \label{sec:ch2_h5}
 % ==================================================================
 
 % ===================================================================
 % PLACEHOLDER: H5 live flight verbalization
 % Script: exp_H5_live_flight_verbalization.py
+% File: H5_observations_[DATE].md when available.
+%
+% Experiment design:
+%   1. Real drone (custom 50 g FC, ESP32-S3-Sense camera) in a controlled
+%      indoor lab environment
+%   2. Full four-tier pipeline running live: Tier 1.5 (MediaPipe, every frame),
+%      Tier 2 (YOLO-World + DA v2, every ~275 ms), Tier 3 (Gemini, hybrid trigger)
+%   3. Drone flies a fixed indoor waypoint path; four hazard events injected:
+%         - Person steps into path (person_near scenario)
+%         - Drone approaches wall (wall_close scenario)
+%         - Lens partially blocked (blocked_lens scenario)
+%         - Dim lighting area traversal (dim_light scenario)
+%   4. Metrics: hazard detection latency (ms from event to pilot suggestion),
+%      action safety (is the suggestion correct?), pilot acceptance rate,
+%      end-to-end Wi-Fi + pipeline latency, total cost per flight-minute
+%
+% Tables to add:
+%   Table 2.H5: event × metric table (detect latency, LLM latency, correct?,
+%               pilot accepted?)
+%   Table 2.H5b: live cost per flight-minute vs. simulation estimate
+%
+% Figure to add:
+%   Figure 2.H5: timeline schematic — frame capture → Wi-Fi → pipeline →
+%                LLM suggestion → pilot approval → FC command
+%                Annotate measured latencies at each stage
+%
+% Target paragraph skeleton:
+%   "H5 validates the four-tier pipeline on a live custom 50 g indoor drone
+%    (ESP32-S3-Sense camera, ~9.7 KB JPEG at 320×240). Across [N] injected
+%    hazard events, the pipeline detected [X]% of hazards within [Y] ms of
+%    event onset (Tier 1.5 interrupt: [Z] ms; Tier 3 Gemini: [W] ms from
+%    interrupt). Pilot acceptance rate was [A]% — operators accepted [A]%
+%    of Gemini's suggestions without override. Live end-to-end cost was
+%    $[B]/flight-minute, consistent with the G2 simulation estimate of
+%    $[C]/flight-minute. The pipeline introduces no measurable flight
+%    instability: Tier 1 PID loop maintains attitude at 4 kHz throughout,
+%    independent of the Tier 3 API call latency."
 % ===================================================================
 
-The G-series experiments demonstrate the four-tier pipeline on pre-captured frames and simulated flight sequences.
-H5 closes the simulation-to-hardware gap by running the complete pipeline on a live custom indoor drone (50~g airframe, custom flight controller, ESP32-S3-Sense camera).
-The central validation is that Tier~1 PID operates at 4,000~Hz throughout, independent of Tier~3 API call latency.
-
-\textbf{[H5 live-flight results, Table~2.H5, and Figure~2.H5 to be inserted once
-\texttt{H5\_observations\_[DATE].md} is available from \texttt{exp\_H5\_live\_flight\_verbalization.py}.]}
-
-H5 metrics: hazard detection latency, action safety, pilot acceptance rate, end-to-end pipeline latency, cost per flight-minute across four injected hazard events (\texttt{person\_near}, \texttt{wall\_close}, \texttt{blocked\_lens}, \texttt{dim\_light}).
-
+The Integration experiments demonstrate the four-tier pipeline in a controlled laboratory setting using pre-captured frames and simulated flight sequences.
+H5 closes the simulation-to-hardware gap by running the complete pipeline on a live custom indoor drone (50~g airframe with custom flight controller and ESP32-S3-Sense camera). 
+The central validation is that the pipeline imposes no latency on Tier~1 PID execution, the flight controller operates at 2,000~Hz on the micro-controller regardless of whether a Gemini API call is in progress on the companion computer. 
+Frame capture, Wi-Fi transmission, Tier~2 inference, and Tier~3 API calls all occur asynchronously on the companion laptop.
+The Tier~1 PID loop receives set-points from the human operator (via the flight controller API), not from the LLM.
 
 % ==================================================================
 \section{Chapter Summary}
 \label{sec:ch2_summary}
 % ==================================================================
 
-The three research questions are answered affirmatively.
-Table~\ref{tab:ch2_production_config} consolidates the production configuration, each parameter established by a specific experiment.
+This chapter presented and validated an image verbalization system for low-resolution drone cameras operating under strict token and cost constraints.
+The three research questions posed in \S\ref{sec:ch2_problem_rq} are answered:
+
+\begin{description}
+  \item[RQ1 - Feasibility (confirmed):]
+    All four multimodal LLMs produce safe pilot action suggestions from 320$\times$240 JPEG frames (85--102 image tokens per call) with zero dangerous recommendations in the baseline and rest optimised
+    configurations. 
+    The 320$\times$240 image accounts for $\leq$15\% of total
+    API cost per call; the dominant cost is the structured metadata prompt.
+  \item[RQ2 - Optimisation (confirmed):]
+    Four parameters are established by controlled single-variable experiments, structured JSON prompt (\S\ref{sec:ch2_v2}), \texttt{max\_tokens=256} (\S\ref{sec:ch2_v6}), 2-frame short context history (\S\ref{sec:ch2_v7}), and temperature $t=0.0$ (\S\ref{sec:ch2_v8}).
+    CLIP is removed ($\Delta Q \leq 0.05$). Together, these settings achieve 100\% reason-action alignment and perfect description accuracy (100\%) across all validated conditions. The $t=0.2$ convention for ReAct agents is overturned, single-pass safety classification benefits from determinism, not diversity.
+  \item[RQ3 --- Architecture (confirmed):]
+    The tier isolation experiments of the tier demonstrate that each tier makes an irreplaceable contribution, Tier~1.5 for the real-time emergency response (15~ms, no API), Tier~2 for the metric depth grounding of weaker visual models, Tier~3 for the detection of sensor-failure that rule-based engines cannot provide. 
+    Scheduled vs hybrid trigger experiments demonstrate that hybrid MediaPipe-triggered LLM calls eliminate detection latency at a cost of +\$0.00012 per hazard event (Gemini). The full pipeline demonstrated 97.5\% overall action
+    safety with Gemini and GPT-4o-mini reaching 100\%.
+\end{description}
 
 \begin{table}[ht]
-  \caption{Production image verbalization configuration established in this chapter.}
+  \caption{Production image verbalization configuration: each parameter
+    established by a specific V-series or G-series experiment.}
   \label{tab:ch2_production_config}
   \centering
   \small
   \begin{tabular}{llll}
     \toprule
-    Parameter & Value & Key result & Source \\
+    Parameter & Value & Justification  \\
     \midrule
-    Prompt technique  & Structured JSON  & 56.6\% LblAcc; 0 dangerous; 100\% RAA & V2 \\
-    Token budget      & \texttt{max\_tokens=256} & $\Delta Q=0.01$ from 256 to 512 & V6 \\
-    CLIP              & Removed          & $\Delta Q \leq 0.05$ at 320$\times$240 & V6 \\
-    Context history   & Short (2 frames) & $+$16.2~pp RiskAcc; bounded cost & V7 \\
-    Temperature       & $t=0.0$          & 100\% ActSafe; 14.1\% flip rate (lowest) & V8 \\
-    Tier architecture & Four-tier        & 4 orders of magnitude timescale separation & G4 \\
-    Trigger strategy  & Hybrid (sched.\ + MediaPipe) & 0 frames late; $+$\$0.00012/event & G2 \\
-    Production model  & Gemini 2.5-Flash & 100\% ActSafe; \$0.17/hour & G5 \\
+    Prompt technique & Structured JSON & 56.6\% LblAcc; 0 dangerous; 100\% RAA  \\
+    Token budget & \texttt{max\_tokens=256} & Quality plateau; $\Delta Q=0.01$ at 512 \\
+    CLIP & Removed & $\Delta Q \leq 0.05$; random on 320$\times$240 \\
+    Context history & Short (2 frames) & $+$16.2~pp RiskAcc; bounded cost\\
+    Temperature & $t=0.0$ & 100\% ActSafe; 14.1\% flip rate; lowest instability\\
+    Tier architecture & Four-tier & 4 orders of magnitude timescale separation\\
+    Trigger strategy & Hybrid (sched. + MediaPipe) & 0~frames late; $+$\$0.00012/event\\
+    Production model & Gemini (2.5-Flash) & 100\% ActSafe; 2,554~ms; \$0.17/hour \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The integrated pipeline achieves \textbf{97.5\% overall action safety} (Gemini and GPT-4o-mini: \textbf{100\%}) with a conservative dominant error mode: 26\% of trials produce an unnecessary HOVER (over-caution), never a dangerous advance.
-All four models achieve \textbf{100\% reason-action alignment}: the LLM cognitive layer is internally sound; the sole dangerous-case source is visual perception ambiguity at 320$\times$240 when depth sensor hardware produces incorrect readings.
-At Gemini production rate (0.4~Hz scheduled), continuous drone operation costs approximately \textbf{\$0.17/hour} in API calls.
-The production configuration and safety evidence from this chapter form the perceptual substrate for the agentic patrol system in Chapter~\ref{chap:3rd chap}.
+The integrated pipeline achieves \textbf{97.5\% action safety} (Gemini and GPT-4o-mini: \textbf{100\%}) with a conservative dominant error mode: 26\% of trials produce an unnecessary HOVER (over-caution), never a dangerous advance.
+All four models achieve \textbf{100\% reason-action alignment}: the LLM cognitive layer is internally sound; the sole failure source is visual perception ambiguity at 320$\times$240 when depth sensor hardware produces incorrect readings. 
+At Gemini production rate (0.4~Hz scheduled), continuous drone operation costs approximately \textbf{\$0.17/hour} in API calls, within the budget of a research or operational deployment. 
+The production configuration and safety evidence from this chapter form the perceptual substrate for the agentic patrol and flight control system presented in the subsequent chapters.
